@@ -1,14 +1,26 @@
 import { NextResponse } from "next/server";
 import { createRazorpayOrder } from "@/lib/razorpay";
 import { createServiceClient } from "@/lib/supabase/server";
-import type { Database } from "@/types/database";
-
-type ProductType =
-  Database["public"]["Tables"]["orders"]["Row"]["product_type"];
+import { mapSourceToEntryPath, PRODUCT_SLUGS } from "@/lib/constants/commerce";
+import { upsertCustomer } from "@/lib/services/customer";
+import { getOrCreateLeadForCheckout, linkLeadToOrder } from "@/lib/services/lead";
+import { saveBirthDetails } from "@/lib/services/birth-details";
+import {
+  createOrderOnPaymentInitiation,
+  createOrderItems,
+} from "@/lib/services/order";
+import {
+  attachRazorpayOrderToPayment,
+  createPaymentAttempt,
+} from "@/lib/services/payment";
+import { logEvent } from "@/lib/services/event";
+import { EVENT_GROUP } from "@/lib/constants/commerce";
+import { getProductBySlug } from "@/lib/services/product";
+import type { Json } from "@/types/database";
 
 interface CreateOrderBody {
-  productType: ProductType;
-  productName: string;
+  productSlug?: string;
+  addOnSlugs?: string[];
   amountPaise: number;
   customer: {
     fullName: string;
@@ -17,8 +29,6 @@ interface CreateOrderBody {
     dob?: string;
     tob?: string;
     pob?: string;
-    problemSummary?: string;
-    preferredSlotNote?: string;
   };
   attribution: {
     sourceFunnel?: string;
@@ -27,7 +37,7 @@ interface CreateOrderBody {
     utmMedium?: string;
     utmCampaign?: string;
     referrer?: string;
-    leadId?: string;
+    sessionId?: string;
     kundliSubmissionId?: string;
   };
 }
@@ -35,76 +45,173 @@ interface CreateOrderBody {
 export async function POST(request: Request) {
   try {
     const body: CreateOrderBody = await request.json();
-    const { productType, productName, amountPaise, customer, attribution } =
-      body;
+    const {
+      amountPaise,
+      customer,
+      attribution,
+      addOnSlugs = [],
+    } = body;
 
-    if (!productType || !amountPaise || !customer?.phone || !customer?.fullName) {
+    const productSlug = body.productSlug ?? PRODUCT_SLUGS.PAID_KUNDLI;
+
+    if (!amountPaise || !customer?.phone || !customer?.fullName) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
       );
     }
 
-    // 1. Create Razorpay order
+    const supabase = createServiceClient();
+
+    const mainProduct = await getProductBySlug(supabase, productSlug);
+    if (!mainProduct) {
+      return NextResponse.json({ error: "Unknown product" }, { status: 400 });
+    }
+
+    const subtotal = Number(mainProduct.price);
+    const items: {
+      itemType: "main" | "addon";
+      productSlug: string;
+      title: string;
+      unitPricePaise: number;
+    }[] = [
+      {
+        itemType: "main",
+        productSlug: mainProduct.slug,
+        title: mainProduct.name,
+        unitPricePaise: subtotal,
+      },
+    ];
+
+    let addonTotal = 0;
+    for (const slug of addOnSlugs) {
+      const addon = await getProductBySlug(supabase, slug);
+      if (!addon || addon.type !== "addon") continue;
+      addonTotal += Number(addon.price);
+      items.push({
+        itemType: "addon",
+        productSlug: addon.slug,
+        title: addon.name,
+        unitPricePaise: Number(addon.price),
+      });
+    }
+
+    const expectedTotal = subtotal + addonTotal;
+    if (expectedTotal !== amountPaise) {
+      return NextResponse.json(
+        { error: "Amount mismatch", expected: expectedTotal, got: amountPaise },
+        { status: 400 }
+      );
+    }
+
+    const entryPath = mapSourceToEntryPath(attribution.sourceFunnel);
+    const utmJson: Json = {
+      utm_source: attribution.utmSource ?? null,
+      utm_medium: attribution.utmMedium ?? null,
+      utm_campaign: attribution.utmCampaign ?? null,
+    };
+
+    const cust = await upsertCustomer(supabase, {
+      fullName: customer.fullName,
+      phone: customer.phone,
+      email: customer.email,
+      source: attribution.sourcePage ?? "checkout",
+      utmSource: attribution.utmSource,
+      utmMedium: attribution.utmMedium,
+      utmCampaign: attribution.utmCampaign,
+    });
+
+    const lead = await getOrCreateLeadForCheckout(supabase, {
+      customerId: cust.id,
+      entryPath,
+      sourcePage: attribution.sourcePage ?? "/checkout/kundli",
+      sessionId: attribution.sessionId,
+      referrer: attribution.referrer,
+      utmJson,
+      productSlug,
+    });
+
+    const birth = await saveBirthDetails(supabase, {
+      customerId: cust.id,
+      leadId: lead.id,
+      fullName: customer.fullName,
+      dateOfBirth: customer.dob ?? null,
+      timeOfBirth: customer.tob ?? null,
+      birthPlace: customer.pob ?? null,
+    });
+
+    const order = await createOrderOnPaymentInitiation(supabase, {
+      customerId: cust.id,
+      leadId: lead.id,
+      birthDetailsId: birth.id,
+      productSlug,
+      entryPath,
+      source: attribution.sourcePage ?? undefined,
+      subtotalPaise: subtotal,
+      addonPaise: addonTotal,
+    });
+
+    await createOrderItems(supabase, order.id, items);
+
+    const payment = await createPaymentAttempt(supabase, {
+      orderId: order.id,
+      amountPaise,
+    });
+
     const razorpayOrder = await createRazorpayOrder({
       amount: amountPaise,
-      receipt: `vg_${Date.now()}`,
+      receipt: order.order_number.replace(/[^a-zA-Z0-9_]/g, "_").slice(0, 40),
       notes: {
-        product: productType,
+        order_id: order.id,
+        product: productSlug,
         phone: customer.phone,
       },
     });
 
-    // 2. Create order record in DB
-    const supabase = createServiceClient();
-    const { data: order, error } = await supabase
-      .from("orders")
-      .insert({
-        product_type: productType,
-        product_name: productName,
+    await attachRazorpayOrderToPayment(supabase, {
+      paymentId: payment.id,
+      providerOrderId: razorpayOrder.id,
+      orderId: order.id,
+    });
+
+    await linkLeadToOrder(supabase, lead.id, order.id);
+
+    await logEvent(supabase, {
+      eventName: "payment_initiated",
+      eventGroup: EVENT_GROUP.COMMERCE,
+      customerId: cust.id,
+      leadId: lead.id,
+      orderId: order.id,
+      sessionId: attribution.sessionId ?? null,
+      sourcePage: attribution.sourcePage ?? null,
+      pagePath: "/checkout/kundli",
+      entryPath,
+      utmSource: attribution.utmSource ?? null,
+      utmMedium: attribution.utmMedium ?? null,
+      utmCampaign: attribution.utmCampaign ?? null,
+      referrer: attribution.referrer ?? null,
+      metadataJson: {
+        product_slug: productSlug,
         amount_paise: amountPaise,
-        full_name: customer.fullName,
-        phone: customer.phone,
-        email: customer.email ?? null,
-        dob: customer.dob ?? null,
-        tob: customer.tob ?? null,
-        pob: customer.pob ?? null,
-        problem_summary: customer.problemSummary ?? null,
-        preferred_slot_note: customer.preferredSlotNote ?? null,
         razorpay_order_id: razorpayOrder.id,
-        payment_status: "initiated",
-        order_status: "pending",
-        lead_id: attribution.leadId ?? null,
-        kundli_submission_id: attribution.kundliSubmissionId ?? null,
-        source_funnel: attribution.sourceFunnel ?? null,
-        source_page: attribution.sourcePage ?? null,
-        utm_source: attribution.utmSource ?? null,
-        utm_medium: attribution.utmMedium ?? null,
-        utm_campaign: attribution.utmCampaign ?? null,
-        referrer: attribution.referrer ?? null,
-      })
-      .select()
-      .single();
+      },
+    });
 
-    if (error) throw error;
-
-    // 3. Capture abandoned checkout entry
-    await supabase.from("abandoned_checkouts").insert({
-      order_id: order.id,
-      product_type: productType,
-      full_name: customer.fullName,
-      phone: customer.phone,
-      email: customer.email ?? null,
-      source_funnel: attribution.sourceFunnel ?? null,
-      source_page: attribution.sourcePage ?? null,
-      utm_source: attribution.utmSource ?? null,
-      utm_medium: attribution.utmMedium ?? null,
-      utm_campaign: attribution.utmCampaign ?? null,
+    await logEvent(supabase, {
+      eventName: "order_created",
+      eventGroup: EVENT_GROUP.COMMERCE,
+      customerId: cust.id,
+      leadId: lead.id,
+      orderId: order.id,
+      sessionId: attribution.sessionId ?? null,
+      entryPath,
+      metadataJson: { order_number: order.order_number },
     });
 
     return NextResponse.json({
       razorpayOrderId: razorpayOrder.id,
       orderDbId: order.id,
+      paymentId: payment.id,
       amountPaise,
       currency: "INR",
     });

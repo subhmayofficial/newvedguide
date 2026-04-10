@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
+import { Suspense } from "react";
 import { PostHogProvider } from "@/components/providers/posthog-provider";
+import { GaRouteTracker } from "@/components/analytics/ga-route-tracker";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -75,7 +77,12 @@ export default function RootLayout({
         )}
       </head>
       <body className="min-h-full flex flex-col">
-        <PostHogProvider>{children}</PostHogProvider>
+        <PostHogProvider>
+          <Suspense fallback={null}>
+            <GaRouteTracker />
+          </Suspense>
+          {children}
+        </PostHogProvider>
       </body>
     </html>
   );

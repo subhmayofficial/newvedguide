@@ -1,6 +1,6 @@
 "use client";
 
-// ─── GA4 helper ──────────────────────────────────────────────────────────────
+import { getOrCreateSessionId } from "@/lib/analytics/session";
 
 declare global {
   interface Window {
@@ -17,8 +17,6 @@ function ga(event: string, params: Record<string, unknown>) {
   }
 }
 
-// ─── PostHog helper (lazy import to avoid SSR issues) ────────────────────────
-
 function ph(event: string, props?: Record<string, unknown>) {
   if (typeof window === "undefined") return;
   import("posthog-js").then(({ default: posthog }) => {
@@ -26,10 +24,42 @@ function ph(event: string, props?: Record<string, unknown>) {
   });
 }
 
-// ─── Typed event helpers ─────────────────────────────────────────────────────
+function internalEvent(
+  eventName: string,
+  fields: {
+    eventGroup?: string;
+    pagePath?: string;
+    sourcePage?: string;
+    entryPath?: string;
+    utmSource?: string;
+    utmMedium?: string;
+    utmCampaign?: string;
+    referrer?: string;
+    metadata?: Record<string, unknown>;
+  } = {}
+) {
+  if (typeof window === "undefined") return;
+  const sessionId = getOrCreateSessionId();
+  fetch("/api/events/track", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      eventName,
+      sessionId,
+      pagePath: fields.pagePath ?? window.location.pathname,
+      sourcePage: fields.sourcePage,
+      entryPath: fields.entryPath,
+      utmSource: fields.utmSource,
+      utmMedium: fields.utmMedium,
+      utmCampaign: fields.utmCampaign,
+      referrer: fields.referrer ?? document.referrer,
+      eventGroup: fields.eventGroup,
+      metadata: fields.metadata ?? null,
+    }),
+  }).catch(() => {});
+}
 
 export const track = {
-  // ── Tool funnel ───────────────────────────────────────────────────────────
   toolPageViewed(toolSlug: string, attrs?: Record<string, string>) {
     ph("tool_page_viewed", { tool_slug: toolSlug, ...attrs });
   },
@@ -47,12 +77,32 @@ export const track = {
     });
   },
 
-  // ── Free Kundli funnel ────────────────────────────────────────────────────
+  homePageView() {
+    ph("home_page_view", {});
+    ga("home_page_view", {});
+    internalEvent("home_page_view", { eventGroup: "page" });
+  },
+
+  salesPageView(sourcePage?: string) {
+    ph("sales_page_view", { source_page: sourcePage });
+    ga("sales_page_view", { source_page: sourcePage });
+    internalEvent("sales_page_view", {
+      eventGroup: "page",
+      sourcePage,
+      pagePath: typeof window !== "undefined" ? window.location.pathname : undefined,
+    });
+  },
+
   freeKundliPageViewed(attrs?: Record<string, string>) {
     ph("free_kundli_page_viewed", attrs);
   },
   freeKundliFormStarted(source?: string) {
     ph("free_kundli_form_started", { source });
+    ga("free_kundli_start", { source });
+    internalEvent("free_kundli_start", {
+      eventGroup: "funnel",
+      metadata: { source },
+    });
   },
   freeKundliStepCompleted(stepNumber: number, stepName: string) {
     ph("free_kundli_step_completed", {
@@ -62,15 +112,31 @@ export const track = {
   },
   freeKundliSubmitted(source?: string, hasEmail = false) {
     ph("free_kundli_submitted", { source, has_email: hasEmail });
+    ga("free_kundli_submit", { source });
     ga("generate_lead", { source });
+    internalEvent("free_kundli_submit", {
+      eventGroup: "funnel",
+      metadata: { source, has_email: hasEmail },
+    });
   },
-  freeKundliResultViewed(kundliSubmissionId?: string) {
+  freeKundliResultViewed(
+    kundliSubmissionId?: string,
+    resultVariant?: "a" | "b"
+  ) {
     ph("free_kundli_result_viewed", {
       kundli_submission_id: kundliSubmissionId,
+      result_variant: resultVariant,
+    });
+    ga("free_kundli_result_view", {
+      kundli_submission_id: kundliSubmissionId,
+      result_variant: resultVariant,
+    });
+    internalEvent("free_kundli_result_view", {
+      eventGroup: "funnel",
+      metadata: { kundli_submission_id: kundliSubmissionId, result_variant: resultVariant },
     });
   },
 
-  // ── Paid report funnel ────────────────────────────────────────────────────
   paidReportCtaClicked(sourcePage: string, ctaPosition: string) {
     ph("paid_report_cta_clicked", {
       source_page: sourcePage,
@@ -78,63 +144,116 @@ export const track = {
     });
   },
 
-  // ── Checkout funnel ───────────────────────────────────────────────────────
-  checkoutViewed(productType: string, sourceFunnel?: string, prefilled = false) {
+  checkoutViewed(
+    productSlug: string,
+    sourceFunnel?: string,
+    prefilled = false
+  ) {
     ph("checkout_viewed", {
-      product_type: productType,
+      product_slug: productSlug,
       source_funnel: sourceFunnel,
       prefilled,
     });
+    ga("checkout_page_view", {
+      product_slug: productSlug,
+      source_funnel: sourceFunnel,
+      prefilled,
+    });
+    const params = new URLSearchParams(
+      typeof window !== "undefined" ? window.location.search : ""
+    );
+    fetch("/api/checkout/view", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        sessionId: getOrCreateSessionId(),
+        sourcePage: "/checkout/kundli",
+        pagePath: "/checkout/kundli",
+        sourceFunnel: sourceFunnel,
+        utmSource: params.get("utm_source") ?? undefined,
+        utmMedium: params.get("utm_medium") ?? undefined,
+        utmCampaign: params.get("utm_campaign") ?? undefined,
+        referrer: typeof document !== "undefined" ? document.referrer : undefined,
+        productSlug,
+      }),
+    }).catch(() => {});
+    internalEvent("checkout_page_view", {
+      eventGroup: "page",
+      entryPath: sourceFunnel,
+      metadata: { product_slug: productSlug, prefilled },
+    });
   },
-  checkoutDetailsFilled(productType: string) {
-    ph("checkout_details_filled", { product_type: productType });
+  checkoutDetailsFilled(productSlug: string) {
+    ph("checkout_details_filled", { product_slug: productSlug });
   },
-  paymentInitiated(productType: string, amountPaise: number, sourceFunnel?: string) {
+  paymentInitiated(
+    productSlug: string,
+    amountPaise: number,
+    sourceFunnel?: string
+  ) {
     ph("payment_initiated", {
-      product_type: productType,
+      product_slug: productSlug,
       amount_paise: amountPaise,
+      source_funnel: sourceFunnel,
+    });
+    ga("payment_initiated", {
+      product_slug: productSlug,
+      value: amountPaise / 100,
+      currency: "INR",
       source_funnel: sourceFunnel,
     });
   },
   paymentSuccess(
-    productType: string,
+    productSlug: string,
     amountPaise: number,
     orderId: string,
     sourceFunnel?: string
   ) {
     ph("payment_success", {
-      product_type: productType,
+      product_slug: productSlug,
       amount_paise: amountPaise,
       order_id: orderId,
       source_funnel: sourceFunnel,
+    });
+    ga("payment_success", {
+      payment: amountPaise / 100,
+      currency: "INR",
+      transaction_id: orderId,
     });
     ga("purchase", {
       transaction_id: orderId,
       value: amountPaise / 100,
       currency: "INR",
-      items: [{ item_name: productType, price: amountPaise / 100 }],
+      items: [{ item_name: productSlug, price: amountPaise / 100 }],
     });
   },
-  paymentFailed(productType: string, amountPaise: number, errorCode?: string) {
+  paymentFailed(productSlug: string, amountPaise: number, errorCode?: string) {
     ph("payment_failed", {
-      product_type: productType,
+      product_slug: productSlug,
       amount_paise: amountPaise,
       error_code: errorCode,
     });
   },
+  thankYouView(orderId?: string) {
+    ph("thank_you_view", { order_id: orderId });
+    ga("thank_you_view", { order_id: orderId });
+    internalEvent("thank_you_view", {
+      eventGroup: "funnel",
+      metadata: { order_id: orderId },
+    });
+  },
   checkoutAbandoned(
-    productType: string,
+    productSlug: string,
     sourceFunnel: string,
     stepReached: string
   ) {
     ph("checkout_abandoned", {
-      product_type: productType,
+      product_slug: productSlug,
       source_funnel: sourceFunnel,
       step_reached: stepReached,
     });
   },
 
-  // ── Consultation funnel ───────────────────────────────────────────────────
   consultationPageViewed(source?: string) {
     ph("consultation_page_viewed", { source });
   },
@@ -148,7 +267,6 @@ export const track = {
     });
   },
 
-  // ── Support ───────────────────────────────────────────────────────────────
   supportSubmitted(subjectCategory: string) {
     ph("support_submitted", { subject_category: subjectCategory });
   },

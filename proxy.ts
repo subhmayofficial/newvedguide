@@ -5,17 +5,23 @@ import { createServerClient } from "@supabase/ssr";
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Only protect /admin routes
   if (!pathname.startsWith("/admin")) {
     return NextResponse.next();
   }
 
-  // Allow access to /admin/login
+  const reqHeaders = new Headers(request.headers);
+  reqHeaders.set("x-admin-pathname", pathname);
+
+  const nextWithHeaders = () =>
+    NextResponse.next({
+      request: { headers: reqHeaders },
+    });
+
   if (pathname === "/admin/login") {
-    return NextResponse.next();
+    return nextWithHeaders();
   }
 
-  let response = NextResponse.next({ request });
+  let response = nextWithHeaders();
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -29,7 +35,7 @@ export async function proxy(request: NextRequest) {
           cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value)
           );
-          response = NextResponse.next({ request });
+          response = nextWithHeaders();
           cookiesToSet.forEach(({ name, value, options }) =>
             response.cookies.set(name, value, options)
           );

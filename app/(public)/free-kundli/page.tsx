@@ -153,7 +153,7 @@ function TestimonialCard() {
         className="absolute right-3 top-1 font-heading text-6xl font-black leading-none text-amber-300/40 md:text-7xl"
         aria-hidden
       >
-        "
+        {"\u201C"}
       </span>
 
       <div className="flex items-center gap-0.5 mb-2">
@@ -166,9 +166,11 @@ function TestimonialCard() {
       </div>
 
       <p className="relative text-sm font-medium leading-relaxed text-foreground md:text-[15px]">
-        "Pehli baar kisi ne meri life itni accurately describe ki — career ka struggle, relationship ki
+        {"\u201C"}
+        Pehli baar kisi ne meri life itni accurately describe ki — career ka struggle, relationship ki
         confusion, sab kuch. Mere dost ne bheja tha, socha bakwas hoga. Par result dekh ke aankhein bhar
-        aayi."
+        aayi.
+        {"\u201D"}
       </p>
       <div className="mt-3 flex items-center gap-2.5">
         <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand text-xs font-bold text-white">

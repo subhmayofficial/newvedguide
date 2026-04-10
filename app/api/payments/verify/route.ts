@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
-import { verifyRazorpaySignature } from "@/lib/razorpay";
 import { createServiceClient } from "@/lib/supabase/server";
+import {
+  markPaymentSuccess,
+  verifyRazorpayPayment,
+} from "@/lib/services/payment";
 
 interface VerifyBody {
   razorpay_order_id: string;
@@ -31,14 +34,14 @@ export async function POST(request: Request) {
       );
     }
 
-    // 1. Verify Razorpay signature
-    const isValid = verifyRazorpaySignature({
+    const ok = verifyRazorpayPayment({
       razorpay_order_id,
       razorpay_payment_id,
       razorpay_signature,
+      orderDbId,
     });
 
-    if (!isValid) {
+    if (!ok) {
       return NextResponse.json(
         { success: false, error: "Invalid payment signature" },
         { status: 400 }
@@ -47,38 +50,41 @@ export async function POST(request: Request) {
 
     const supabase = createServiceClient();
 
-    // 2. Update order to paid
-    const { data: order, error } = await supabase
-      .from("orders")
-      .update({
-        razorpay_payment_id,
-        razorpay_signature,
-        payment_verified: true,
-        payment_status: "paid",
-        order_status: "pending",
-      })
-      .eq("id", orderDbId)
-      .select()
-      .single();
+    const { data: payment } = await supabase
+      .from("payments")
+      .select("id,status,provider_payment_id")
+      .eq("order_id", orderDbId)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
 
-    if (error) throw error;
-
-    // 3. If consultation, create consultation record
-    if (
-      order.product_type === "consultation_15" ||
-      order.product_type === "consultation_full"
-    ) {
-      await supabase.from("consultations").insert({
-        order_id: order.id,
-        consultation_type:
-          order.product_type === "consultation_15" ? "15min" : "full",
-        problem_summary: order.problem_summary ?? null,
-        preferred_slot_raw: order.preferred_slot_note ?? null,
-        status: "pending_contact",
-      });
+    if (!payment?.id) {
+      return NextResponse.json(
+        { success: false, error: "Payment record not found" },
+        { status: 404 }
+      );
     }
 
-    return NextResponse.json({ success: true, orderId: order.id });
+    if (
+      payment.status === "paid" &&
+      payment.provider_payment_id === razorpay_payment_id
+    ) {
+      return NextResponse.json({ success: true, orderId: orderDbId, idempotent: true });
+    }
+
+    await markPaymentSuccess(supabase, {
+      orderId: orderDbId,
+      paymentId: payment.id,
+      providerPaymentId: razorpay_payment_id,
+      providerSignature: razorpay_signature,
+      rawResponse: {
+        razorpay_order_id,
+        razorpay_payment_id,
+        razorpay_signature,
+      },
+    });
+
+    return NextResponse.json({ success: true, orderId: orderDbId });
   } catch (err) {
     console.error("[verify-payment]", err);
     return NextResponse.json(

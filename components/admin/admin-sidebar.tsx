@@ -5,28 +5,136 @@ import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   Users,
-  ShoppingBag,
+  Package,
+  CreditCard,
+  FileStack,
   Wrench,
   CalendarClock,
-  MessageSquare,
-  Star,
-  BarChart2,
+  Settings,
   LogOut,
+  ChevronDown,
+  type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
-const NAV_ITEMS = [
-  { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
-  { label: "Leads", href: "/admin/leads", icon: Users },
-  { label: "Orders", href: "/admin/orders", icon: ShoppingBag },
-  { label: "Tool Submissions", href: "/admin/tool-submissions", icon: Wrench },
-  { label: "Consultations", href: "/admin/consultations", icon: CalendarClock },
-  { label: "Support", href: "/admin/support", icon: MessageSquare },
-  { label: "Testimonials", href: "/admin/testimonials", icon: Star },
-  { label: "Analytics", href: "/admin/analytics", icon: BarChart2 },
+type NavLeaf = { label: string; href: string };
+type NavGroup = { label: string; icon: LucideIcon; items: NavLeaf[] };
+
+const OVERVIEW: NavLeaf[] = [{ label: "Dashboard", href: "/admin" }];
+
+const CORE: NavLeaf[] = [
+  { label: "Leads", href: "/admin/leads" },
+  { label: "Orders", href: "/admin/orders" },
+  { label: "Analytics", href: "/admin/analytics" },
 ];
+
+const CATALOG: NavLeaf[] = [{ label: "Products", href: "/admin/products" }];
+
+const FINANCE: NavLeaf[] = [
+  { label: "Payments", href: "/admin/payments" },
+  { label: "Coupons", href: "/admin/coupons" },
+];
+
+const CONTENT: NavLeaf[] = [
+  { label: "Pages", href: "/admin/content/pages" },
+  { label: "FAQs", href: "/admin/content/faqs" },
+  { label: "Testimonials", href: "/admin/content/testimonials" },
+  { label: "Banners", href: "/admin/content/banners" },
+];
+
+const TOOLS_NAV: NavLeaf[] = [{ label: "Tools", href: "/admin/tools" }];
+
+const OPS: NavLeaf[] = [
+  { label: "Consultations", href: "/admin/consultations" },
+  { label: "Logs", href: "/admin/logs" },
+];
+
+const SYSTEM: NavLeaf[] = [
+  { label: "Team", href: "/admin/team" },
+  { label: "Settings", href: "/admin/settings" },
+];
+
+const GROUPS: NavGroup[] = [
+  { label: "Overview", icon: LayoutDashboard, items: OVERVIEW },
+  { label: "Core", icon: Users, items: CORE },
+  { label: "Catalog", icon: Package, items: CATALOG },
+  { label: "Finance", icon: CreditCard, items: FINANCE },
+  { label: "Content", icon: FileStack, items: CONTENT },
+  { label: "Tools", icon: Wrench, items: TOOLS_NAV },
+  { label: "Operations", icon: CalendarClock, items: OPS },
+  { label: "System", icon: Settings, items: SYSTEM },
+];
+
+function NavLink({
+  href,
+  label,
+  active,
+}: {
+  href: string;
+  label: string;
+  active: boolean;
+}) {
+  return (
+    <Link
+      href={href}
+      className={cn(
+        "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+        active
+          ? "bg-sidebar-primary text-sidebar-primary-foreground"
+          : "text-sidebar-foreground/90 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+      )}
+    >
+      {label}
+    </Link>
+  );
+}
+
+function NavSection({
+  group,
+  pathname,
+}: {
+  group: NavGroup;
+  pathname: string;
+}) {
+  const [open, setOpen] = useState(true);
+  const Icon = group.icon;
+
+  return (
+    <div className="mb-1">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        className="flex w-full items-center justify-between rounded-lg px-2 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-sidebar-foreground/50"
+      >
+        <span className="flex items-center gap-2">
+          <Icon className="size-3.5 opacity-70" />
+          {group.label}
+        </span>
+        <ChevronDown
+          className={cn("size-3.5 transition-transform", open ? "rotate-0" : "-rotate-90")}
+        />
+      </button>
+      {open && (
+        <ul className="mt-0.5 space-y-0.5 border-l border-sidebar-border/60 pl-2 ml-2">
+          {group.items.map((item) => {
+            const isActive =
+              item.href === "/admin"
+                ? pathname === "/admin"
+                : pathname === item.href || pathname.startsWith(`${item.href}/`);
+            return (
+              <li key={item.href}>
+                <NavLink href={item.href} label={item.label} active={isActive} />
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </div>
+  );
+}
 
 export function AdminSidebar() {
   const pathname = usePathname();
@@ -39,54 +147,30 @@ export function AdminSidebar() {
   }
 
   return (
-    <aside className="flex w-60 flex-col border-r border-sidebar-border bg-sidebar">
-      {/* Logo */}
-      <div className="flex h-16 items-center border-b border-sidebar-border px-6">
-        <span className="font-heading text-xl font-semibold text-sidebar-foreground">
+    <aside className="flex w-64 shrink-0 flex-col border-r border-sidebar-border bg-[oklch(0.18_0.02_50)] text-sidebar-foreground">
+      <div className="flex h-14 items-center border-b border-white/10 px-5">
+        <span className="font-heading text-lg font-semibold tracking-tight text-white">
           Vedगuide
         </span>
-        <span className="ml-2 rounded bg-sidebar-accent px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-sidebar-accent-foreground">
-          Admin
+        <span className="ml-2 rounded bg-white/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-white/80">
+          Ops
         </span>
       </div>
 
-      {/* Nav */}
       <nav className="flex-1 overflow-y-auto px-3 py-4">
-        <ul className="space-y-1">
-          {NAV_ITEMS.map(({ label, href, icon: Icon }) => {
-            const isActive =
-              href === "/admin"
-                ? pathname === "/admin"
-                : pathname.startsWith(href);
-
-            return (
-              <li key={href}>
-                <Link
-                  href={href}
-                  className={cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                    isActive
-                      ? "bg-sidebar-primary text-sidebar-primary-foreground"
-                      : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                  )}
-                >
-                  <Icon size={16} />
-                  {label}
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
+        {GROUPS.map((g) => (
+          <NavSection key={g.label} group={g} pathname={pathname} />
+        ))}
       </nav>
 
-      {/* Sign out */}
-      <div className="border-t border-sidebar-border p-3">
+      <div className="border-t border-white/10 p-3">
         <button
+          type="button"
           onClick={handleSignOut}
-          className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-sidebar-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+          className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-white/70 transition-colors hover:bg-white/10 hover:text-white"
         >
           <LogOut size={16} />
-          Sign Out
+          Sign out
         </button>
       </div>
     </aside>

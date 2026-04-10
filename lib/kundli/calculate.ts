@@ -264,15 +264,27 @@ function getPlanetaryPositions(jd: number, sunLon: number, moonLon: number, ayan
   return results;
 }
 
-function computeDoshas(planets: PlanetaryPosition[]): KundliResult["doshas"] {
+function computeDoshas(
+  planets: PlanetaryPosition[],
+  lagnaIndex: number
+): KundliResult["doshas"] {
   const mars = planets.find(p => p.planet === "Mars");
   const rahu = planets.find(p => p.planet === "Rahu");
   const ketu = planets.find(p => p.planet === "Ketu");
   const sun = planets.find(p => p.planet === "Sun");
 
-  // Mangal Dosha: Mars in 1,2,4,7,8,12
-  const mangalDoshaHouses = [0, 1, 3, 6, 7, 11];
-  const mangalDosha = mars ? mangalDoshaHouses.includes(mars.signIndex) : false;
+  // Mangal Dosha: Mars in 1st, 2nd, 4th, 7th, 8th, or 12th house from Lagna (whole-sign)
+  // Exceptions (widely accepted cancellations):
+  //   1. Mars in own sign — Aries (0) or Scorpio (7)
+  //   2. Mars in exaltation — Capricorn (9)
+  //   3. Mars in Cancer (3) is debilitated — some schools cancel, we cancel for safety
+  const mangalDoshaHouseFromLagna0 = [0, 1, 3, 6, 7, 11];
+  const marsHouseFromLagna = mars ? (mars.signIndex - lagnaIndex + 12) % 12 : -1;
+  const marsOwnOrExalted = mars != null && [0, 7, 9].includes(mars.signIndex);
+  const mangalDosha =
+    mars != null &&
+    mangalDoshaHouseFromLagna0.includes(marsHouseFromLagna) &&
+    !marsOwnOrExalted;
 
   // Kaal Sarp: all planets between Rahu and Ketu
   const kaalSarpDosha = (() => {
@@ -320,7 +332,7 @@ export function calculateKundli(input: KundliInput): KundliResult {
   const nakshatraPada = Math.min(Math.floor((siderealMoon % (360 / 27)) / (360 / 108)) + 1, 4);
 
   const planets = getPlanetaryPositions(jd, sunLon, moonLon, ayanamsha);
-  const doshas = computeDoshas(planets);
+  const doshas = computeDoshas(planets, lagnaIndex);
 
   const lagna = SIGNS[lagnaIndex];
   const moonSign = SIGNS[moonSignIndex];

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 
 const NAV_LINKS = [
   { label: "Free Kundli", href: "/free-kundli" },
+  { label: "Tools", href: "/tools" },
   { label: "Kundli Report", href: "/kundli-report" },
   { label: "Consultation", href: "/consultation" },
   { label: "About", href: "/about" },
@@ -19,11 +20,13 @@ export function SiteHeader() {
     <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
         {/* Logo */}
-        <Link
-          href="/"
-          className="font-heading text-2xl font-semibold tracking-wide text-foreground"
-        >
-          Vedगuide
+        <Link href="/" className="flex flex-col leading-none">
+          <span className="font-heading text-2xl font-semibold tracking-wide text-foreground">
+            Vedगuide
+          </span>
+          <span className="text-[10px] font-medium tracking-wide text-brand/70">
+            by AstroGuru Ashutosh
+          </span>
         </Link>
 
         {/* Desktop nav */}

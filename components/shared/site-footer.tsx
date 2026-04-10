@@ -1,63 +1,99 @@
 import Link from "next/link";
 
-const FOOTER_LINKS = {
-  Explore: [
-    { label: "Free Kundli", href: "/free-kundli" },
-    { label: "Kundli Report", href: "/kundli-report" },
-    { label: "Consultation", href: "/consultation" },
-    { label: "About VedGuide", href: "/about" },
-  ],
-  Tools: [
-    { label: "Kundal Dhatu Check", href: "/freedhatucheck" },
-    { label: "Moon Sign Finder", href: "/tools/moon-sign" },
-    { label: "Nakshatra Finder", href: "/tools/nakshatra-finder" },
-  ],
-  Support: [
-    { label: "FAQ", href: "/faq" },
-    { label: "Contact", href: "/contact" },
-    { label: "Support", href: "/support" },
-  ],
-  Legal: [
-    { label: "Privacy Policy", href: "/privacy-policy" },
-    { label: "Terms of Service", href: "/terms" },
-    { label: "Refund Policy", href: "/refund-policy" },
-    { label: "Disclaimer", href: "/disclaimer" },
-  ],
-};
+const QUICK_LINKS = [
+  { label: "Free Kundli", href: "/free-kundli" },
+  { label: "Tools", href: "/tools" },
+  { label: "Kundli Report", href: "/kundli-report" },
+  { label: "Privacy", href: "/privacy-policy" },
+  { label: "Terms", href: "/terms" },
+  { label: "Refund", href: "/refund-policy" },
+  { label: "Contact", href: "/contact" },
+];
 
 export function SiteFooter() {
   return (
-    <footer className="border-t border-border/60 bg-surface">
-      <div className="mx-auto max-w-6xl px-4 py-12">
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-5">
-          {/* Brand */}
-          <div className="lg:col-span-1">
+    <footer className="border-t border-border/50 bg-surface">
+      {/* ── Mobile: single compact block ── */}
+      <div className="px-4 py-6 sm:hidden">
+        <div className="flex items-center justify-between">
+          <Link href="/" className="flex flex-col leading-none">
+            <span className="font-heading text-xl font-bold text-foreground">Vedगuide</span>
+            <span className="text-[10px] font-medium text-brand/70">by AstroGuru Ashutosh</span>
+          </Link>
+          <p className="text-[10px] font-semibold text-muted-foreground">
+            © {new Date().getFullYear()} VedGuide
+          </p>
+        </div>
+
+        <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2">
+          {QUICK_LINKS.map((l) => (
             <Link
-              href="/"
-              className="font-heading text-2xl font-semibold text-foreground"
+              key={l.href}
+              href={l.href}
+              className="text-[12px] font-medium text-muted-foreground hover:text-foreground"
             >
-              Vedगuide
+              {l.label}
             </Link>
-            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-              Vedic astrology rooted in tradition, delivered with modern
-              clarity.
+          ))}
+        </div>
+
+        <p className="mt-4 text-[11px] leading-relaxed text-muted-foreground/70">
+          Astrology for guidance only — not a substitute for professional advice.
+        </p>
+      </div>
+
+      {/* ── Desktop: full grid ── */}
+      <div className="mx-auto hidden max-w-5xl px-6 py-10 sm:block">
+        <div className="flex flex-wrap gap-x-12 gap-y-8">
+          <div className="min-w-[160px]">
+            <Link href="/" className="flex flex-col leading-none">
+              <span className="font-heading text-2xl font-bold text-foreground">Vedगuide</span>
+              <span className="mt-0.5 text-[11px] font-medium text-brand/70">by AstroGuru Ashutosh</span>
+            </Link>
+            <p className="mt-3 max-w-[200px] text-sm leading-relaxed text-muted-foreground">
+              Vedic astrology rooted in tradition, guided by AstroGuru Ashutosh.
             </p>
           </div>
 
-          {/* Links */}
-          {Object.entries(FOOTER_LINKS).map(([category, links]) => (
-            <div key={category}>
-              <h4 className="mb-3 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                {category}
-              </h4>
+          {[
+            {
+              title: "Services",
+              links: [
+                { label: "Free Kundli", href: "/free-kundli" },
+                { label: "Tools", href: "/tools" },
+                { label: "Kundli Report", href: "/kundli-report" },
+                { label: "Consultation", href: "/consultation" },
+              ],
+            },
+            {
+              title: "Legal",
+              links: [
+                { label: "Privacy Policy", href: "/privacy-policy" },
+                { label: "Terms", href: "/terms" },
+                { label: "Refund Policy", href: "/refund-policy" },
+                { label: "Disclaimer", href: "/disclaimer" },
+              ],
+            },
+            {
+              title: "Support",
+              links: [
+                { label: "FAQ", href: "/faq" },
+                { label: "Contact", href: "/contact" },
+              ],
+            },
+          ].map(({ title, links }) => (
+            <div key={title}>
+              <p className="mb-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                {title}
+              </p>
               <ul className="space-y-2">
-                {links.map((link) => (
-                  <li key={link.href}>
+                {links.map((l) => (
+                  <li key={l.href}>
                     <Link
-                      href={link.href}
+                      href={l.href}
                       className="text-sm text-muted-foreground transition-colors hover:text-foreground"
                     >
-                      {link.label}
+                      {l.label}
                     </Link>
                   </li>
                 ))}
@@ -66,13 +102,12 @@ export function SiteFooter() {
           ))}
         </div>
 
-        <div className="mt-10 flex flex-col items-center justify-between gap-4 border-t border-border/60 pt-6 text-center sm:flex-row">
+        <div className="mt-8 flex items-center justify-between border-t border-border/50 pt-5">
           <p className="text-xs text-muted-foreground">
             © {new Date().getFullYear()} VedGuide. All rights reserved.
           </p>
           <p className="text-xs text-muted-foreground">
-            Astrology for guidance only. Not a substitute for professional
-            advice.
+            Astrology for guidance only — not a substitute for professional advice.
           </p>
         </div>
       </div>

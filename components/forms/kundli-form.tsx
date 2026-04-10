@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { track } from "@/lib/analytics/events";
+import { getOrCreateSessionId } from "@/lib/analytics/session";
 import {
   User, Calendar, Clock, MapPin,
   ChevronRight, ChevronLeft, Sparkles, Check,
@@ -374,6 +375,8 @@ export function KundliForm() {
           utmSource,
           utmMedium,
           utmCampaign,
+          sessionId: getOrCreateSessionId(),
+          referrer: typeof document !== "undefined" ? document.referrer : undefined,
         }),
       });
 

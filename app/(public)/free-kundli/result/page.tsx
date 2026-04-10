@@ -7,6 +7,7 @@ export const metadata: Metadata = {
     "Your Vedic birth chart is ready. Explore your Lagna, Moon sign, Nakshatra, and planetary positions — and unlock your full personalized report.",
 };
 
+/** Version A — default free kundli result (no Mangal Dosha promo block; A/B vs `/free-kundli/result/b`). */
 export default function FreeKundliResultPage() {
-  return <KundliResultView />;
+  return <KundliResultView variant="a" />;
 }

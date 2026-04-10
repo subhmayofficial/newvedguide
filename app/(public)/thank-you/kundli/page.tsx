@@ -27,7 +27,10 @@ export default function KundliThankYouPage() {
     }
     try {
       const parsed = JSON.parse(stored);
-      setOrderId(parsed.orderId);
+      queueMicrotask(() => {
+        setOrderId(parsed.orderId);
+      });
+      track.thankYouView(parsed.orderId);
       // Clear session after reading
       sessionStorage.removeItem("order_complete");
       sessionStorage.removeItem("kundli_result");
