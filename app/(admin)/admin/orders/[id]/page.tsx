@@ -77,9 +77,9 @@ export default async function OrderDetailPage({
           <Row label="Total" value={`₹${(Number(order.total_amount) / 100).toFixed(2)}`} />
           <Row label="Subtotal" value={`₹${(Number(order.subtotal_amount) / 100).toFixed(2)}`} />
           <Row label="Add-ons" value={`₹${(Number(order.addon_amount) / 100).toFixed(2)}`} />
-          <Row label="Discount" value={`â‚¹${(Number(order.discount_amount) / 100).toFixed(2)}`} />
+          <Row label="Discount" value={`Rs ${(Number(order.discount_amount) / 100).toFixed(2)}`} />
           <Row label="Coupon used" value={order.coupon_applied ? "true" : "false"} />
-          <Row label="Coupon code" value={order.coupon_code ?? "â€”"} />
+          <Row label="Coupon code" value={order.coupon_code ?? "-"} />
           <Row label="Order status" value={order.status} />
           <Row label="Payment" value={order.payment_status} />
           <Row label="Fulfillment" value={order.fulfillment_status} />
@@ -214,3 +214,5 @@ function Row({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
+
+
