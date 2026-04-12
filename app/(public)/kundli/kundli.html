@@ -1,0 +1,3881 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, follow" />
+    <link rel="icon" href="/favicon/favicon.ico" sizes="any">
+    <link rel="icon" href="/favicon/favicon-32x32.png" type="image/png" sizes="32x32">
+    <link rel="icon" href="/favicon/favicon-16x16.png" type="image/png" sizes="16x16">
+    <link rel="apple-touch-icon" href="/favicon/apple-touch-icon.png" sizes="180x180">
+    <link rel="manifest" href="/favicon/site.webmanifest">
+    <!-- GTM: dataLayer init (required for CTA tracking before GTM loads) -->
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        // Strip dob from URL query before any tracking (Meta PII-safe)
+        (function () {
+            try {
+                var url = new URL(window.location.href);
+                if (url.searchParams.has('dob')) {
+                    url.searchParams.delete('dob');
+                    var qs = url.searchParams.toString();
+                    var clean = url.origin + url.pathname + (qs ? ('?' + qs) : '') + url.hash;
+                    window.history.replaceState({}, document.title, clean);
+                }
+            } catch (e) { }
+        })();
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <script>
+        (function () {
+            var SUPABASE_URL = 'https://yhxbwlhfjznajnnlduwt.supabase.co';
+            var SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InloeGJ3bGhmanpuYWpubmxkdXd0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE3MDc0NjYsImV4cCI6MjA4NzI4MzQ2Nn0.IVZ9AjLF5FgMG4_W1vhGNUX-JSpblj2nhtgkkJn7-MY';
+            var _sid = sessionStorage.getItem('shubhmay_sid');
+            if (!_sid) {
+                _sid = 's_' + Date.now() + '_' + Math.random().toString(36).slice(2, 11);
+                sessionStorage.setItem('shubhmay_sid', _sid);
+                sessionStorage.setItem('shubhmay_session_start_ts', String(Date.now()));
+            }
+            var params = new URLSearchParams(window.location.search);
+            ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'].forEach(function (k) {
+                var v = params.get(k);
+                if (v && !sessionStorage.getItem('shubhmay_' + k)) sessionStorage.setItem('shubhmay_' + k, v);
+            });
+            function getAttribution() {
+                var o = {};
+                var st = sessionStorage.getItem('shubhmay_session_start_ts');
+                if (st) o.session_start_ts = parseInt(st, 10);
+                ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'].forEach(function (k) {
+                    var v = sessionStorage.getItem('shubhmay_' + k);
+                    if (v) o[k] = v;
+                });
+                return o;
+            }
+            window._shubhmaySupabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON) : null;
+            window._shubhmayTrack = function (et, pl) {
+                if (!window._shubhmaySupabase) return;
+                var payload = Object.assign({}, getAttribution(), pl || {});
+                try { window._shubhmaySupabase.from('analytics_events').insert([{ session_id: _sid, page_url: location.href, referrer: document.referrer || null, event_type: et, payload: payload, user_agent: navigator.userAgent, language: navigator.language }]).then(function () { }); } catch (e) { }
+            };
+            if (window._shubhmaySupabase) window._shubhmayTrack('page_view', { page: 'index', title: 'kundli_lp' });
+        })();
+    </script>
+    <!-- GTM: deferred to window.load so FCP/LCP stay fast; LP → checkout on Cosmofeed -->
+    <script>
+        window.addEventListener('load', function () {
+            (function (w, d, s, l, i) {
+                w[l] = w[l] || []; w[l].push({ 'gtm.start': new Date().getTime(), event: 'gtm.js' });
+                var f = d.getElementsByTagName(s)[0], j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : '';
+                j.async = true; j.src = 'https://www.googletagmanager.com/gtm.js?id=' + i + dl; f.parentNode.insertBefore(j, f);
+            })(window, document, 'script', 'dataLayer', 'GTM-MGBML6GZ');
+        });
+    </script>
+    <title>Personalized Kundli Report | Career, Marriage & Dasha Insights</title>
+    <meta name="description"
+        content="A 15–20 page report based on your birth details. Career, marriage, wealth, and dasha timelines—clear language, no hype. Prepared by a Vedic astrology specialist.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://www.googletagmanager.com">
+    <link rel="preconnect" href="https://www.google-analytics.com">
+    <link rel="preconnect" href="https://primedit-cdn.b-cdn.net" crossorigin>
+    <link rel="preload" as="image" href="/assets/premium_kundli.webp" fetchpriority="high">
+    <link rel="preload"
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=Inter:wght@400;500&display=optional"
+        as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+        <link rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=Inter:wght@400;500&display=optional">
+    </noscript>
+    <!-- CTA tracking: GTM trigger options (Click - All Elements, Some Clicks):
+         • Click ID matches regex: ^cta-
+         • Click Classes contains: cta-button
+         • Click Element matches CSS: [data-cta], button.cta-button, [id^="cta-"] -->
+    <script>
+        function trackCta(location, label) {
+            try {
+                window.dataLayer = window.dataLayer || [];
+                window.dataLayer.push({
+                    event: 'cta_click',
+                    cta_location: location,
+                    cta_label: label || 'Get Kundli Report',
+                    destination_url: '/checkout/kundli?source=kundli_direct_lp'
+                });
+                if (window._shubhmayTrack) window._shubhmayTrack('cta_click', { cta_location: location, cta_label: label || 'Get Kundli Report', page: 'index' });
+            } catch (e) { /* tracking fail-safe */ }
+            setTimeout(function () { window.location.href = '/checkout/kundli?source=kundli_direct_lp'; }, 250);
+        }
+    </script>
+    <style>
+        :root {
+            --deep-maroon: #2d080e;
+            --dark-maroon: #1f0509;
+            --light-maroon: #4d0e19;
+            --cream: #fbf9f3;
+            --cream-light: #ffffff;
+            --matte-gold: #c7a962;
+            --dark-gold: #a68a48;
+            --saffron: #f29f58;
+            --saffron-bright: #ffb873;
+            --text-dark: #2a2522;
+            --text-muted: #6b635e;
+            --text-light: #fefcfb;
+            --border-color: #e5dfd1;
+            --border-dark: #4d0e19;
+            --red-alert: #e55a5a;
+            --green-success: #44a66a;
+            --font-heading: 'Outfit', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            --transition: all 0.3s ease;
+            --shadow-sm: 0 4px 6px rgba(42, 37, 34, 0.05);
+            --shadow-md: 0 10px 15px rgba(42, 37, 34, 0.08);
+            --shadow-lg: 0 20px 25px rgba(42, 37, 34, 0.15);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-full: 9999px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-body);
+            color: var(--text-dark);
+            background-color: var(--cream);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            font-family: var(--font-heading);
+            font-weight: 600;
+            line-height: 1.2;
+            color: var(--deep-maroon);
+        }
+
+        img {
+            max-width: 100%;
+            display: block;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        section {
+            padding: 80px 0;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .text-light {
+            color: var(--text-light);
+        }
+
+        .text-muted {
+            color: var(--text-muted);
+        }
+
+        .text-red {
+            color: var(--red-alert);
+        }
+
+        .text-green {
+            color: var(--green-success);
+        }
+
+        .text-saffron {
+            color: var(--saffron);
+        }
+
+        .line-through {
+            text-decoration: line-through;
+        }
+
+        .icon-gold {
+            color: var(--matte-gold);
+        }
+
+        .icon-saffron {
+            color: var(--saffron);
+        }
+
+        .icon-small {
+            width: 16px;
+            height: 16px;
+            opacity: 0.9;
+        }
+
+        .icon-large {
+            width: 32px;
+            height: 32px;
+        }
+
+        .dark-section {
+            background-color: var(--deep-maroon);
+            background-image: radial-gradient(circle at top right, var(--light-maroon), var(--deep-maroon) 70%);
+            color: var(--text-light);
+        }
+
+        .dark-section h1,
+        .dark-section .headline,
+        .dark-section h2,
+        .dark-section h3,
+        .dark-section h4 {
+            color: var(--text-light);
+        }
+
+        .dark-section .text-muted {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 16px;
+            letter-spacing: -0.02em;
+            position: relative;
+        }
+
+        /* Impact underline decoration on section titles */
+        .section-title::after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--saffron), var(--matte-gold));
+            border-radius: 2px;
+            margin: 10px auto 0;
+            animation: titleUnderlineGrow 3s ease-in-out infinite;
+        }
+
+        @keyframes titleUnderlineGrow {
+            0%, 100% { width: 60px; opacity: 0.8; }
+            50% { width: 100px; opacity: 1; }
+        }
+
+        /* CTA left-right shimmer/nudge animation */
+        @keyframes ctaNudge {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-5px); }
+            40% { transform: translateX(5px); }
+            60% { transform: translateX(-3px); }
+            80% { transform: translateX(3px); }
+        }
+
+        /* Looping glow animation for section headings */
+        @keyframes headingGlow {
+            0%, 100% { text-shadow: none; }
+            50% { text-shadow: 0 0 20px rgba(199,169,98,0.35); }
+        }
+
+        /* Scroll-in fade animation for sections */
+        @keyframes fadeSlideUp {
+            from { opacity: 0; transform: translateY(28px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .anim-ready {
+            opacity: 0;
+            transform: translateY(28px);
+        }
+        .anim-visible {
+            animation: fadeSlideUp 0.6s ease forwards;
+        }
+
+        .cta-button.nudge-anim {
+            animation: pulseGlow 2s infinite, ctaNudge 4s ease-in-out 3s infinite;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            margin-bottom: 48px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .cta-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: linear-gradient(135deg, var(--saffron), var(--saffron-bright));
+            color: var(--deep-maroon);
+            font-family: var(--font-heading);
+            font-weight: 700;
+            font-size: 1.2rem;
+            padding: 18px 36px;
+            border: none;
+            border-radius: var(--radius-full);
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 8px 20px rgba(242, 159, 88, 0.3);
+            text-decoration: none;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(242, 159, 88, 0.4);
+            background: linear-gradient(135deg, var(--saffron-bright), var(--saffron));
+        }
+
+        .pulse-anim {
+            animation: pulseGlow 2s infinite;
+        }
+
+        @keyframes pulseGlow {
+            0% {
+                box-shadow: 0 0 0 0 rgba(242, 159, 88, 0.5);
+            }
+
+            70% {
+                box-shadow: 0 0 0 15px rgba(242, 159, 88, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(242, 159, 88, 0);
+            }
+        }
+
+        .hero-section {
+            position: relative;
+            padding: 60px 0 56px;
+            overflow: hidden;
+            background-color: var(--deep-maroon);
+        }
+
+        .hero-bg-gradient {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(ellipse at 50% 0%, rgba(199, 169, 98, 0.22) 0%, rgba(199, 169, 98, 0) 65%),
+                        radial-gradient(ellipse at 80% 80%, rgba(242, 159, 88, 0.12) 0%, transparent 55%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .hero-bg-pattern {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: radial-gradient(rgba(198, 169, 100, 0.07) 1px, transparent 1px);
+            background-size: 28px 28px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .hero-bg-overlay.watermark {
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 1000px;
+            height: 1000px;
+            background: radial-gradient(circle, rgba(199, 169, 98, 0.05) 0%, rgba(200, 170, 100, 0) 70%);
+            border-radius: 50%;
+            border: 1px dashed rgba(199, 169, 98, 0.15);
+            z-index: 0;
+            animation: spinSlow 200s linear infinite;
+            pointer-events: none;
+            contain: layout paint;
+            transform: translateZ(0);
+        }
+
+        @keyframes spinSlow {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-grid {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0;
+        }
+
+        .hero-text-col {
+            width: 100%;
+            max-width: 700px;
+            text-align: center;
+        }
+
+        .authority-badge-top {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--deep-maroon);
+            color: var(--cream-light);
+            border: 1px solid var(--matte-gold);
+            padding: 8px 20px;
+            border-radius: var(--radius-full);
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-bottom: 32px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .authority-badge-top .badge-divider {
+            color: var(--matte-gold);
+            opacity: 0.5;
+        }
+
+        .badge-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .headline {
+            font-size: 3.2rem;
+            letter-spacing: -0.02em;
+            margin-bottom: 20px;
+            line-height: 1.15;
+        }
+
+        .headline-white {
+            color: #ffffff;
+            display: block;
+        }
+
+        .headline-fire {
+            display: block;
+            font-size: 1.15em;
+            background: linear-gradient(90deg, #ffb347, #ffda70, #f29f58);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: none;
+            filter: drop-shadow(0 0 18px rgba(255, 179, 71, 0.55));
+            letter-spacing: -0.01em;
+        }
+
+        .headline-sub {
+            font-size: 0.45em;
+            font-weight: 500;
+            color: var(--text-dark);
+            letter-spacing: 0;
+            display: inline-block;
+            margin-top: 12px;
+            opacity: 0.9;
+        }
+
+        .accent-text {
+            color: transparent;
+            background: linear-gradient(to right, var(--deep-maroon), var(--light-maroon));
+            -webkit-background-clip: text;
+            background-clip: text;
+        }
+
+        .dark-section .accent-text {
+            background: linear-gradient(to right, var(--matte-gold), var(--saffron-bright));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 4px 15px rgba(242, 159, 88, 0.4);
+        }
+
+        .subheadline {
+            font-size: 1.25rem;
+            font-weight: 400;
+            color: var(--text-muted);
+            margin-bottom: 40px;
+            max-width: 600px;
+        }
+
+        .price-action-group {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .price-cta-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            width: 100%;
+        }
+
+        .urgency-banner {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(229, 90, 90, 0.1);
+            padding: 8px 16px;
+            border-radius: var(--radius-full);
+            border: 1px solid rgba(229, 90, 90, 0.2);
+            font-size: 0.9rem;
+        }
+
+        .pulse-anim-light {
+            animation: pulseLight 2s infinite;
+        }
+
+        @keyframes pulseLight {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.7;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        .inline-price {
+            margin-bottom: 0 !important;
+        }
+
+        .premium-price {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            background: white;
+            padding: 12px 36px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-sm);
+            position: relative;
+            justify-content: center;
+        }
+
+        .premium-price .mrp {
+            font-size: 1rem;
+            color: #999;
+            text-decoration: line-through;
+            font-weight: 500;
+            line-height: 1;
+        }
+
+        .premium-price .price-amount {
+            font-size: 2.2rem;
+            font-family: var(--font-heading);
+            font-weight: 800;
+            color: var(--red-alert);
+            line-height: 1.1;
+        }
+
+        .premium-price .price-note {
+            position: absolute;
+            top: -12px;
+            right: -16px;
+            background: var(--red-alert);
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: var(--radius-full);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .hero-cta-large {
+            padding: 22px 40px;
+            font-size: 1.3rem;
+            flex: 1;
+        }
+
+        .hero-trust-chips {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: flex-start;
+            align-items: center;
+            gap: 12px 16px;
+            margin-top: 24px;
+        }
+
+        .trust-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--text-dark);
+        }
+
+        .trust-chip i {
+            opacity: 0.9;
+        }
+
+        .hero-visual-col {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 8px 0 0;
+        }
+
+        .hero-offer-card {
+            width: 100%;
+            max-width: 520px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1.5px solid rgba(199, 169, 98, 0.55);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 0 40px rgba(199, 169, 98, 0.18), 0 12px 32px rgba(0,0,0,0.35);
+            padding: 28px 28px 24px;
+            text-align: center;
+        }
+
+        .hero-price-strip {
+            display: flex;
+            align-items: baseline;
+            justify-content: center;
+            gap: 14px;
+            margin-bottom: 18px;
+        }
+
+        .hero-price-mrp {
+            font-size: 1.4rem;
+            color: rgba(255,255,255,0.4);
+            text-decoration: line-through;
+            font-weight: 500;
+        }
+
+        .hero-price-now {
+            font-size: 3.6rem;
+            font-family: var(--font-heading);
+            font-weight: 800;
+            color: #ffffff;
+            line-height: 1;
+            letter-spacing: -0.03em;
+        }
+
+        .hero-price-badge {
+            background: var(--red-alert);
+            color: #fff;
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: var(--radius-full);
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            align-self: flex-start;
+            margin-top: 8px;
+        }
+
+        .hero-main-cta {
+            width: 100%;
+            font-size: 1.25rem;
+            padding: 20px 24px;
+            border-radius: 14px;
+            letter-spacing: 0.3px;
+            box-shadow: 0 8px 28px rgba(242, 159, 88, 0.5);
+        }
+
+        .hero-trust-row {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 16px;
+        }
+
+        .hero-trust-row .trust-chip {
+            font-size: 0.82rem;
+            color: rgba(255,255,255,0.65);
+            gap: 6px;
+        }
+
+        .hero-price-bottom {
+            width: 100%;
+            margin-top: 56px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-price-bottom .impact-price-wrapper {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 24px;
+            padding: 28px 40px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(199, 169, 98, 0.35);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            max-width: 560px;
+            width: 100%;
+        }
+
+        .hero-price-bottom .impact-price-box {
+            margin-bottom: 0;
+            padding: 0;
+            border: none;
+            display: flex;
+            flex-direction: row;
+            align-items: baseline;
+            gap: 16px;
+        }
+
+        .hero-price-bottom .price-header {
+            display: none;
+        }
+
+        .hero-price-bottom .price-content {
+            margin-bottom: 0;
+            gap: 12px;
+        }
+
+        .hero-price-bottom .mrp-impact {
+            font-size: 1.2rem;
+        }
+
+        .hero-price-bottom .price-amount-impact {
+            font-size: 2.5rem;
+        }
+
+        .hero-price-bottom .impact-cta {
+            flex-shrink: 0;
+            width: auto;
+            min-width: 200px;
+            margin-top: 0;
+        }
+
+        .hero-mockup-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 450px;
+        }
+
+        .mockup-chart {
+            background: var(--cream-light);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            aspect-ratio: 3/4;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            box-shadow: var(--shadow-lg), 0 30px 60px rgba(0, 0, 0, 0.05);
+            transform: perspective(1000px) rotateY(-5deg) rotateX(5deg);
+            transition: transform 0.5s ease;
+        }
+
+        .mockup-chart:hover {
+            transform: perspective(1000px) rotateY(0deg) rotateX(0deg);
+        }
+
+        .mockup-icon {
+            margin-bottom: 16px;
+            width: 48px;
+            height: 48px;
+        }
+
+        .mockup-label {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .astro-badge-overlap {
+            position: absolute;
+            bottom: -50px;
+            left: -30px;
+            background: var(--cream-light);
+            padding: 12px 20px;
+            border-radius: var(--radius-full);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border-color);
+            transform: translateZ(30px);
+        }
+
+        .astro-img-mini {
+            width: 40px;
+            height: 40px;
+            background: var(--border-color);
+            border-radius: var(--radius-full);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+        }
+
+        .astro-text-mini {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .astro-text-mini .light-text {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            line-height: 1;
+        }
+
+        .astro-text-mini strong {
+            font-size: 0.95rem;
+            color: var(--deep-maroon);
+            line-height: 1.2;
+        }
+
+        .agitation-section {
+            position: relative;
+            padding-bottom: 100px;
+        }
+
+        .problem-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 24px;
+            margin-bottom: 48px;
+        }
+
+        .problem-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-md);
+            padding: 32px 24px;
+            text-align: center;
+            transition: var(--transition);
+        }
+
+        .problem-card:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-5px);
+        }
+
+        .problem-card i {
+            margin-bottom: 16px;
+        }
+
+        .problem-card h3 {
+            font-size: 1.1rem;
+            font-family: var(--font-body);
+            font-weight: 500;
+            line-height: 1.4;
+        }
+
+        .audience-conclusion {
+            text-align: center;
+            font-family: var(--font-heading);
+            font-size: 1.5rem;
+            font-weight: 500;
+            color: var(--matte-gold);
+            max-width: 800px;
+            margin: 0 auto;
+            font-style: italic;
+            padding-top: 24px;
+            border-top: 1px dashed rgba(255, 255, 255, 0.2);
+        }
+
+        .deliverables-section {
+            background-color: var(--cream-light);
+        }
+
+        .deliverables-grid {
+            display: flex;
+            gap: 40px;
+            justify-content: center;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .deliverables-list {
+            list-style: none;
+            flex: 1;
+        }
+
+        .deliverables-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            font-size: 1.15rem;
+            margin-bottom: 24px;
+            background: var(--cream);
+            padding: 20px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .deliverables-list li i {
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .founder-section {
+            background-color: var(--cream);
+            padding: 100px 0;
+        }
+
+        .founder-layout {
+            display: flex;
+            gap: 48px;
+            align-items: center;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .founder-video-container {
+            flex: 1;
+        }
+
+        .video-placeholder {
+            background: var(--dark-maroon);
+            border-radius: var(--radius-lg);
+            aspect-ratio: 9/16;
+            max-width: 320px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--cream);
+            box-shadow: var(--shadow-lg);
+            border: 3px solid var(--matte-gold);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .video-placeholder::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at center, rgba(199, 169, 98, 0.2), transparent);
+        }
+
+        .play-icon {
+            width: 64px;
+            height: 64px;
+            color: var(--matte-gold);
+            margin-bottom: 24px;
+            z-index: 1;
+        }
+
+        .placeholder-text {
+            text-align: center;
+            font-size: 0.95rem;
+            z-index: 1;
+            opacity: 0.8;
+        }
+
+        .founder-content {
+            flex: 1;
+        }
+
+        .founder-badge {
+            display: inline-block;
+            background: rgba(199, 169, 98, 0.15);
+            color: var(--dark-gold);
+            padding: 6px 16px;
+            border-radius: var(--radius-full);
+            font-weight: 600;
+            font-size: 0.85rem;
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .founder-title {
+            font-size: 2.8rem;
+            margin-bottom: 24px;
+            line-height: 1.1;
+        }
+
+        .founder-desc {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            font-style: italic;
+            margin-bottom: 32px;
+            border-left: 3px solid var(--matte-gold);
+            padding-left: 24px;
+        }
+
+        .founder-stats {
+            display: flex;
+            gap: 32px;
+            margin-bottom: 40px;
+        }
+
+        .stat-num {
+            font-size: 2rem;
+            font-family: var(--font-heading);
+            font-weight: 800;
+            color: var(--deep-maroon);
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+
+        .founder-profile {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .profile-img-placeholder {
+            width: 64px;
+            height: 64px;
+            background: var(--border-color);
+            border-radius: var(--radius-full);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid var(--matte-gold);
+        }
+
+        .img-text {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-align: center;
+        }
+
+        .profile-info h4 {
+            font-size: 1.2rem;
+            margin-bottom: 2px;
+        }
+
+        .process-section {
+            background-color: var(--deep-maroon);
+        }
+
+        .process-compact-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            max-width: 640px;
+            margin: 0 auto;
+        }
+
+        /* Karmic solution banner — show only on mobile */
+        .karmic-outer-wrap {
+            display: none;
+        }
+        @media (max-width: 768px) {
+            .karmic-outer-wrap {
+                display: block;
+                background: var(--dark-maroon);
+                padding: 32px 0 0;
+            }
+            .karmic-img-wrap {
+                display: block;
+                width: 100%;
+                line-height: 0;
+            }
+            .karmic-img-wrap img {
+                width: 100% !important;
+                height: auto !important;
+                display: block;
+            }
+        }
+
+        .process-step {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: var(--radius-md);
+            padding: 18px 16px;
+        }
+
+        .ps-num {
+            width: 38px;
+            height: 38px;
+            min-width: 38px;
+            background: var(--matte-gold);
+            color: var(--deep-maroon);
+            font-family: var(--font-heading);
+            font-weight: 800;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .ps-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 3px;
+        }
+
+        .ps-desc {
+            font-size: 0.78rem;
+            color: rgba(255,255,255,0.55);
+            line-height: 1.4;
+        }
+
+        @media (max-width: 480px) {
+            .process-compact-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Karmic solution image — capped on desktop, full on mobile */
+        .karmic-img-wrap {
+            width: 100%;
+            max-height: 420px;
+            overflow: hidden;
+            line-height: 0;
+        }
+        @media (max-width: 768px) {
+            .karmic-img-wrap {
+                max-height: none;
+            }
+            .karmic-img-wrap img {
+                height: auto !important;
+                object-fit: unset !important;
+            }
+        }
+
+        .diff-section {
+            background-color: var(--cream);
+        }
+
+        .diff-split-grid {
+            display: flex;
+            gap: 32px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .diff-column {
+            flex: 1;
+            padding: 40px;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+        }
+
+        .neg-column {
+            background: #fff;
+            border: 1px solid var(--border-color);
+        }
+
+        .pos-column {
+            background: var(--cream-light);
+            border: 2px solid var(--matte-gold);
+            position: relative;
+        }
+
+        .pos-column::before {
+            content: 'Recommended';
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--matte-gold);
+            color: var(--deep-maroon);
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            padding: 4px 12px;
+            border-radius: var(--radius-full);
+            letter-spacing: 0.05em;
+        }
+
+        .diff-col-title {
+            font-size: 1.4rem;
+            text-align: center;
+            margin-bottom: 32px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .diff-list {
+            list-style: none;
+        }
+
+        .diff-list li {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            color: var(--text-dark);
+        }
+
+        .diff-list li i {
+            flex-shrink: 0;
+        }
+
+        .price-stack-section {
+            padding: 100px 0;
+        }
+
+        .stack-box {
+            background: var(--cream-light);
+            border-radius: var(--radius-lg);
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 48px;
+            color: var(--text-dark);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border: 2px solid var(--matte-gold);
+        }
+
+        .stack-items {
+            margin-bottom: 24px;
+        }
+
+        .stack-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.1rem;
+            padding: 16px 0;
+            border-bottom: 1px dashed var(--border-color);
+            color: var(--text-muted);
+        }
+
+        .stack-total {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.3rem;
+            font-family: var(--font-heading);
+            font-weight: 700;
+            padding: 24px 0;
+            border-bottom: 2px solid var(--border-color);
+            margin-bottom: 24px;
+        }
+
+        .stack-total .total-amount {
+            color: #999;
+        }
+
+        .stack-offer {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+
+        .offer-label {
+            font-size: 1.2rem;
+            color: var(--red-alert);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 8px;
+        }
+
+        .offer-amount {
+            font-size: 4rem;
+            font-family: var(--font-heading);
+            font-weight: 800;
+            color: var(--deep-maroon);
+            line-height: 1;
+        }
+
+        .final-cta {
+            width: 100%;
+        }
+
+        .who-section {
+            background-color: var(--cream-light);
+            padding: 80px 0;
+        }
+
+        .who-grid,
+        .areas-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .who-card {
+            background: var(--cream);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 28px 24px;
+            text-align: center;
+            transition: var(--transition);
+        }
+
+        .who-card:hover {
+            border-color: var(--matte-gold);
+            box-shadow: var(--shadow-md);
+        }
+
+        .who-card .who-icon {
+            width: 40px;
+            height: 40px;
+            margin: 0 auto 16px;
+            color: var(--matte-gold);
+        }
+
+        .who-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+        }
+
+        .who-card p {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .how-helps-section .section-subtitle {
+            margin-bottom: 48px;
+        }
+
+        .helps-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+        }
+
+        .helps-card {
+            background: var(--cream);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 28px;
+            text-align: left;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .helps-card:hover {
+            border-color: var(--matte-gold);
+            box-shadow: var(--shadow-md);
+        }
+
+        .helps-icon {
+            font-size: 2rem;
+            margin-bottom: 16px;
+        }
+
+        .helps-card h3 {
+            font-size: 1.15rem;
+            margin-bottom: 10px;
+        }
+
+        .helps-card p {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .why-details-section {
+            background: linear-gradient(180deg, var(--cream) 0%, rgba(199, 169, 98, 0.06) 100%);
+            padding: 80px 0;
+        }
+
+        .why-details-inner {
+            max-width: 680px;
+            margin: 0 auto;
+        }
+
+        .why-details-inner h2 {
+            margin-bottom: 24px;
+        }
+
+        .why-details-inner p {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            line-height: 1.7;
+            margin-bottom: 20px;
+        }
+
+        .testimonials-section {
+            background-color: var(--cream);
+            padding: 80px 0;
+            overflow: hidden;
+        }
+
+        .testimonials-mask {
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding: 24px 0;
+            scrollbar-width: thin;
+            -webkit-overflow-scrolling: touch;
+            scroll-behavior: smooth;
+        }
+
+        .testimonials-mask::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        .testimonials-mask::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 3px;
+        }
+
+        .testimonials-track {
+            display: flex;
+            gap: 24px;
+            width: max-content;
+            padding: 0 24px;
+        }
+
+        .review-card {
+            flex-shrink: 0;
+            width: 340px;
+            background: var(--cream-light);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 28px 24px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .review-stars {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 16px;
+            color: var(--matte-gold);
+        }
+
+        .review-text {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: var(--text-dark);
+            margin-bottom: 20px;
+        }
+
+        .review-author {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .review-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--matte-gold), var(--saffron));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--cream-light);
+            font-weight: 700;
+            font-size: 1rem;
+        }
+
+        .review-name {
+            font-weight: 600;
+            color: var(--deep-maroon);
+            font-size: 0.95rem;
+        }
+
+        .review-meta {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .authority-section {
+            background-color: var(--cream);
+        }
+
+        .social-proof-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 24px;
+            margin-top: 48px;
+        }
+
+        .img-placeholder {
+            background: var(--border-color);
+            border-radius: var(--radius-md);
+            height: 350px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: var(--text-muted);
+            border: 2px dashed #ccc;
+            font-size: 0.95rem;
+        }
+
+        .faq-section {
+            position: relative;
+            padding-bottom: 120px;
+        }
+
+        .faq-accordion {
+            max-width: 800px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .faq-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .faq-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .faq-question {
+            padding: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            font-family: var(--font-heading);
+            font-weight: 500;
+            font-size: 1.1rem;
+            color: white;
+        }
+
+        .faq-question .icon-gold {
+            transition: transform 0.3s ease;
+        }
+
+        .faq-item.active .faq-question .icon-gold {
+            transform: rotate(180deg);
+        }
+
+        .faq-answer {
+            padding: 0 24px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .faq-item.active .faq-answer {
+            padding: 0 24px 24px 24px;
+        }
+
+        .site-footer {
+            background-color: var(--dark-maroon);
+            color: rgba(255, 255, 255, 0.5);
+            text-align: center;
+            padding: 40px 0 120px 0;
+            font-size: 0.9rem;
+        }
+
+        .sticky-cta-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: var(--cream-light);
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 -10px 20px rgba(0, 0, 0, 0.05);
+            padding: 16px 20px;
+            z-index: 100;
+        }
+
+        .sticky-container {
+            max-width: 900px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .sticky-text {
+            font-size: 1.1rem;
+            font-family: var(--font-heading);
+            font-weight: 600;
+            color: var(--deep-maroon);
+        }
+
+        .sticky-price {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--red-alert);
+        }
+
+        .sticky-btn {
+            padding: 12px 32px;
+            font-size: 1rem;
+        }
+
+        @media (max-width:900px) {
+            .price-action-group {
+                justify-content: center;
+            }
+
+            .hero-trust-chips {
+                align-items: center;
+            }
+
+            .subheadline {
+                margin-left: auto;
+                margin-right: auto;
+            }
+        }
+
+        @media (max-width:768px) {
+            .hero-trust-chips {
+                justify-content: center;
+            }
+
+            .mockup-img-container {
+                margin-bottom: 0px !important;
+            }
+
+            .impact-price-wrapper {
+                margin-top: 0px !important;
+            }
+
+            .headline {
+                font-size: 2rem;
+            }
+
+            .subheadline {
+                font-size: 1rem;
+            }
+
+            .section-title {
+                font-size: 2rem;
+            }
+
+            .authority-badge-top {
+                font-size: 0.75rem;
+                padding: 6px 16px;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .deliverables-grid {
+                flex-direction: column;
+                gap: 24px;
+            }
+
+            .founder-layout {
+                flex-direction: column;
+                text-align: center;
+                gap: 32px;
+            }
+
+            .founder-desc {
+                border-left: none;
+                padding-left: 0;
+                font-size: 1.05rem;
+            }
+
+            .founder-stats,
+            .founder-profile {
+                justify-content: center;
+            }
+
+            .steps-layout {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .step-connector {
+                width: 1px;
+                height: 40px;
+                margin: 16px 0;
+                flex: none;
+            }
+
+            .diff-split-grid {
+                flex-direction: column;
+            }
+
+            .who-grid,
+            .areas-grid,
+            .helps-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .steps-five .step-title {
+                font-size: 1rem;
+            }
+
+            .review-card {
+                width: min(300px, calc(100vw - 64px));
+            }
+
+            .testimonials-track {
+                padding: 0 16px;
+            }
+
+            .testimonials-section {
+                padding: 48px 0;
+            }
+
+            .sticky-container {
+                flex-direction: column;
+                text-align: center;
+                gap: 12px;
+            }
+
+            .sticky-btn {
+                width: 100%;
+            }
+
+            .site-footer {
+                padding-bottom: 140px;
+            }
+        }
+
+        @media (max-width:500px) {
+            .hero-section {
+                padding: 50px 0 80px 0;
+            }
+
+            .headline {
+                font-size: 2rem;
+            }
+
+            .subheadline {
+                font-size: 0.95rem;
+                margin-bottom: 32px;
+            }
+
+            .price-action-group {
+                align-items: center;
+            }
+
+            .price-cta-wrapper {
+                flex-direction: column;
+                gap: 16px;
+            }
+
+            .premium-price {
+                width: 100%;
+            }
+
+            .hero-cta-large {
+                width: 100%;
+                padding: 18px 24px;
+                font-size: 1.1rem;
+            }
+
+            .trust-chip {
+                font-size: 0.85rem;
+            }
+
+            .review-card {
+                width: min(280px, calc(100vw - 48px));
+            }
+
+            .testimonials-track {
+                gap: 16px;
+                padding: 0 12px;
+            }
+
+            .mockup-chart {
+                max-width: 250px;
+                margin: 0 auto;
+            }
+
+            .hero-price-bottom {
+                margin-top: 32px;
+            }
+
+            .hero-price-bottom .impact-price-wrapper {
+                flex-direction: column;
+                padding: 24px 20px;
+                gap: 20px;
+            }
+
+            .hero-price-bottom .impact-cta {
+                width: 100%;
+                min-width: unset;
+            }
+        }
+
+        .impact-price-wrapper {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+
+        .impact-price-box {
+            background: transparent;
+            border: 1px solid rgba(199, 169, 98, 0.3);
+            border-radius: var(--radius-lg);
+            padding: 24px 32px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+
+        .price-header {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--matte-gold);
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .price-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            margin-bottom: 12px;
+        }
+
+        .mrp-impact {
+            font-size: 1.4rem;
+            color: rgba(255, 255, 255, 0.5);
+            font-weight: 500;
+        }
+
+        .mrp-impact .line-through {
+            text-decoration: line-through;
+        }
+
+        .price-amount-impact {
+            font-size: 3.5rem;
+            font-family: var(--font-heading);
+            color: #fff;
+            font-weight: 800;
+            line-height: 1;
+            text-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+        }
+
+        .price-urgency {
+            background: rgba(229, 90, 90, 0.15);
+            color: #fc7272;
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: var(--radius-full);
+            font-size: 0.85rem;
+            font-weight: 600;
+            border: 1px solid rgba(229, 90, 90, 0.3);
+        }
+
+        .impact-cta {
+            background: linear-gradient(135deg, #f29f58, #ff8c00);
+            box-shadow: 0 8px 24px rgba(242, 159, 88, 0.4);
+            color: #1f0509;
+            font-size: 1.3rem;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            width: 100%;
+            margin-top: 8px;
+        }
+
+        .impact-cta:hover {
+            background: linear-gradient(135deg, #ff8c00, #f29f58);
+            box-shadow: 0 12px 28px rgba(242, 159, 88, 0.6);
+            transform: translateY(-2px);
+        }
+
+        .hero-mockup-wrapper.mockup-img-container {
+            width: 100%;
+            max-width: 320px;
+            aspect-ratio: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .hero-mockup-wrapper.mockup-img-container .hero-png-img {
+            width: 100%;
+            height: auto;
+        }
+
+        .hero-png-img {
+            width: 100%;
+            height: auto;
+            object-fit: contain;
+            filter: drop-shadow(0 24px 48px rgba(199, 169, 98, 0.35)) drop-shadow(0 8px 16px rgba(0,0,0,0.5));
+            animation: floating 4s ease-in-out infinite;
+        }
+
+        @keyframes floating {
+            0% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-15px);
+            }
+
+            100% {
+                transform: translateY(0px);
+            }
+        }
+
+        .impulsive-founder {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 140, 0, 0.05));
+            border: 1px solid var(--matte-gold);
+            border-radius: var(--radius-md);
+            padding: 16px 24px;
+            margin-top: 16px;
+            box-shadow: 0 4px 15px rgba(199, 169, 98, 0.2);
+        }
+
+        .founder-name-highlight {
+            font-size: 1.6rem !important;
+            font-weight: 800 !important;
+            background: linear-gradient(to right, #c7a962, #f29f58);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 4px !important;
+        }
+
+        .founder-title-highlight {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--saffron);
+            letter-spacing: 0.5px;
+        }
+
+        .checkout-body {
+            background-color: var(--cream);
+            min-height: 100vh;
+        }
+
+        .checkout-header {
+            background: var(--deep-maroon);
+            border-bottom: 2px solid var(--border-dark);
+            padding: 16px 0;
+        }
+
+        .checkout-header-inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .back-link {
+            color: var(--cream-light);
+            text-decoration: none;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .back-link:hover {
+            color: var(--saffron);
+        }
+
+        .secure-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--green-success);
+            font-size: 0.9rem;
+            font-weight: 600;
+            background: rgba(68, 166, 106, 0.1);
+            padding: 6px 12px;
+            border-radius: var(--radius-full);
+        }
+
+        .checkout-main {
+            padding: 40px 0 80px 0;
+        }
+
+        .checkout-container {
+            max-width: 900px;
+        }
+
+        .checkout-grid {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 32px;
+            align-items: flex-start;
+        }
+
+        @media (max-width:800px) {
+            .checkout-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .checkout-card {
+            background: var(--cream-light);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 40px 32px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .checkout-title {
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+            line-height: 1.2;
+        }
+
+        .checkout-subtitle {
+            font-size: 1rem;
+            color: var(--text-muted);
+            margin-bottom: 32px;
+        }
+
+        .payment-form .form-group {
+            margin-bottom: 24px;
+        }
+
+        .payment-form label {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+            color: var(--deep-maroon);
+        }
+
+        .badge-tag {
+            font-size: 0.75rem;
+            background: rgba(242, 159, 88, 0.15);
+            color: var(--saffron);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .payment-form input[type="text"],
+        .payment-form input[type="email"],
+        .payment-form input[type="tel"] {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #d1ccc5;
+            border-radius: var(--radius-sm);
+            font-size: 1rem;
+            font-family: var(--font-body);
+            transition: var(--transition);
+            background: #faf8f5;
+        }
+
+        .payment-form input:focus {
+            outline: none;
+            border-color: var(--matte-gold);
+            box-shadow: 0 0 0 3px rgba(199, 169, 98, 0.2);
+            background: white;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 16px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        @media (max-width:600px) {
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+        }
+
+        .checkout-divider {
+            border: none;
+            height: 1px;
+            background: var(--border-color);
+            margin: 32px 0;
+        }
+
+        .subsection-title {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+
+        .payment-options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 32px;
+        }
+
+        .payment-option {
+            position: relative;
+            border: 1px solid #d1ccc5;
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            background: #faf8f5;
+            transition: var(--transition);
+        }
+
+        .payment-option.selected {
+            border-color: var(--matte-gold);
+            background: rgba(199, 169, 98, 0.05);
+            box-shadow: inset 0 0 0 1px var(--matte-gold);
+        }
+
+        .payment-option input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+        }
+
+        .payment-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            margin: 0;
+            width: 100%;
+        }
+
+        .pm-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .pm-name {
+            font-weight: 600;
+            color: var(--deep-maroon);
+            font-size: 1rem;
+        }
+
+        .pm-desc {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .checkout-cta {
+            width: 100%;
+            border-radius: var(--radius-sm);
+            padding: 20px;
+            font-size: 1.3rem;
+            display: block;
+            text-align: center;
+        }
+
+        .terms-text {
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 16px;
+        }
+
+        .summary-card {
+            background: linear-gradient(135deg, var(--deep-maroon), var(--light-maroon));
+            border: 1px solid rgba(199, 169, 98, 0.3);
+            border-radius: var(--radius-lg);
+            padding: 32px;
+            color: white;
+            position: sticky;
+            top: 24px;
+            box-shadow: var(--shadow-lg), 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .summary-title {
+            color: var(--matte-gold);
+            font-size: 1.4rem;
+            margin-bottom: 24px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        .product-item {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            margin-bottom: 24px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 16px;
+            border-radius: var(--radius-sm);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .product-img-box {
+            width: 70px;
+            height: 70px;
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            background: #fff;
+            flex-shrink: 0;
+        }
+
+        .product-img-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .product-name {
+            color: white;
+            font-size: 1.05rem;
+            margin-bottom: 6px;
+            line-height: 1.3;
+        }
+
+        .product-features {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .product-features li {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.7);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 4px;
+        }
+
+        .icon-green-small {
+            width: 12px;
+            height: 12px;
+            color: var(--green-success);
+        }
+
+        .price-breakdown {
+            margin-bottom: 24px;
+        }
+
+        .price-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 12px;
+        }
+
+        .discount-row {
+            color: var(--saffron-bright);
+            font-weight: 500;
+        }
+
+        .summary-divider {
+            border: none;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.1);
+            margin: 16px 0;
+        }
+
+        .total-row {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: white;
+            align-items: center;
+            margin-bottom: 0;
+        }
+
+        .total-amount {
+            font-size: 1.8rem;
+            font-family: var(--font-heading);
+            color: var(--matte-gold);
+        }
+
+        .trust-guarantee {
+            display: flex;
+            gap: 16px;
+            background: rgba(199, 169, 98, 0.1);
+            padding: 20px;
+            border-radius: var(--radius-sm);
+            border: 1px dashed rgba(199, 169, 98, 0.4);
+            margin-bottom: 24px;
+        }
+
+        .guarantee-text p {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-top: 4px;
+            line-height: 1.4;
+        }
+
+        .secure-logos {
+            text-align: center;
+        }
+
+        .logo-text {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.5);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .logo-row {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .payment-badge {
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 6px 12px;
+            border-radius: 4px;
+            letter-spacing: 0.5px;
+        }
+
+        @media (min-width: 901px) {
+            .mobile-only {
+                display: none !important;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .desktop-only {
+                display: none !important;
+            }
+        }
+
+        .metal-result-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.02));
+            border: 1px solid var(--matte-gold);
+            border-radius: var(--radius-lg);
+            padding: 40px;
+            margin: 0 auto 40px auto;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+            max-width: 680px;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+            text-align: center;
+        }
+
+        .metal-highlight {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 24px;
+            border-radius: var(--radius-md);
+            border: 1px dashed rgba(199, 169, 98, 0.5);
+            margin-bottom: 32px;
+            display: inline-block;
+            min-width: 250px;
+        }
+
+        .fear-alert-box {
+            background: rgba(229, 90, 90, 0.15);
+            border: 1px solid rgba(229, 90, 90, 0.4);
+            padding: 24px 32px;
+            border-radius: var(--radius-md);
+            margin-bottom: 32px;
+            text-align: left;
+            position: relative;
+        }
+
+        .fear-alert-box::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: #e55a5a;
+            border-top-left-radius: var(--radius-md);
+            border-bottom-left-radius: var(--radius-md);
+        }
+
+        .snapshot-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-lg);
+            padding: 48px 40px;
+            max-width: 850px;
+            margin: 0 auto 40px auto;
+            text-align: left;
+            position: relative;
+        }
+
+        .snapshot-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .trait-card {
+            background: rgba(68, 166, 106, 0.05);
+            border: 1px solid rgba(68, 166, 106, 0.2);
+            padding: 24px;
+            border-radius: var(--radius-md);
+        }
+
+        .critical-blockage-box {
+            background: linear-gradient(180deg, rgba(229, 90, 90, 0.08) 0%, rgba(229, 90, 90, 0.15) 100%);
+            border: 2px dashed #e55a5a;
+            padding: 40px 32px;
+            border-radius: var(--radius-md);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 0 30px rgba(229, 90, 90, 0.1);
+        }
+
+        .critical-badge {
+            position: absolute;
+            top: 0;
+            left: 0;
+            background: #e55a5a;
+            color: white;
+            padding: 6px 16px;
+            font-size: 0.8rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom-right-radius: 12px;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #e55a5a, #b33939) !important;
+            color: white !important;
+            box-shadow: 0 8px 24px rgba(229, 90, 90, 0.4) !important;
+            border: 1px solid #ff7676 !important;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: 0 12px 30px rgba(229, 90, 90, 0.6) !important;
+            background: linear-gradient(135deg, #ff6b6b, #cc4444) !important;
+        }
+
+        @media (max-width: 768px) {
+
+            .metal-result-card,
+            .snapshot-card {
+                padding: 24px 20px;
+            }
+
+            .fear-alert-box {
+                padding: 20px 24px;
+            }
+
+            .critical-blockage-box {
+                padding: 32px 20px;
+            }
+        }
+
+        .scarcity-section {
+            background-color: var(--cream-light);
+            padding: 64px 0;
+        }
+
+        .scarcity-box {
+            max-width: 520px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-md);
+            padding: 32px 28px;
+            text-align: center;
+        }
+
+        .scarcity-title {
+            font-size: 1.4rem;
+            margin-bottom: 12px;
+        }
+
+        .scarcity-sub {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+        }
+
+        .progress-shell {
+            width: 100%;
+            height: 14px;
+            border-radius: var(--radius-full);
+            background: #f3ede2;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            margin-bottom: 8px;
+        }
+
+        .progress-fill {
+            width: 64%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--saffron), var(--matte-gold));
+        }
+
+        .progress-meta {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* ───── HERO BOOK-BOTTOM LAYOUT ───── */
+        .hero-section {
+            padding-bottom: 0;
+        }
+
+        .hero-grid {
+            gap: 0;
+        }
+
+        .hero-text-col {
+            padding-bottom: 4px;
+        }
+
+        .hero-cta-block {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0;
+            background: rgba(0,0,0,0.25);
+            border-top: 1px solid rgba(199,169,98,0.2);
+            padding: 28px 20px 32px;
+        }
+
+        .hero-cta-block .hero-main-cta {
+            display: block;
+            width: 100%;
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        .hero-cta-block .hero-inline-price {
+            margin-bottom: 16px;
+        }
+
+        .hero-cta-block .hero-trust-row {
+            margin-top: 14px;
+        }
+
+        .hero-inline-price {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .hip-mrp {
+            font-size: 1.1rem;
+            color: rgba(255,255,255,0.4);
+            text-decoration: line-through;
+            font-weight: 500;
+        }
+
+        .hip-now {
+            font-size: 2rem;
+            font-family: var(--font-heading);
+            font-weight: 800;
+            color: #fff;
+            line-height: 1;
+        }
+
+        .hip-badge {
+            background: var(--red-alert);
+            color: #fff;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 4px 9px;
+            border-radius: var(--radius-full);
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+        }
+
+        .hero-book-bottom {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            margin-top: 32px;
+        }
+
+        .hero-book-bottom img {
+            max-width: 310px;
+            width: 100%;
+            height: auto;
+            display: block;
+            filter: drop-shadow(0 -12px 40px rgba(199,169,98,0.3)) drop-shadow(0 8px 24px rgba(0,0,0,0.5));
+            animation: floating 4s ease-in-out infinite;
+        }
+
+        /* ───── EXPLAINER SECTION ───── */
+        .explainer-section {
+            background: var(--cream-light);
+            padding: 72px 0;
+        }
+
+        .explainer-grid {
+            display: block;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .kundli-visual-box {
+            background: var(--deep-maroon);
+            border-radius: var(--radius-lg);
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            border: 2px solid rgba(199,169,98,0.4);
+            box-shadow: 0 20px 48px rgba(45,8,14,0.2);
+        }
+
+        .kundli-visual-box .kvb-emoji {
+            font-size: 4rem;
+            filter: drop-shadow(0 4px 16px rgba(199,169,98,0.6));
+        }
+
+        .kundli-stat-row {
+            display: flex;
+            gap: 16px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+
+        .kundli-stat {
+            background: rgba(199,169,98,0.1);
+            border: 1px solid rgba(199,169,98,0.3);
+            border-radius: var(--radius-sm);
+            padding: 10px 16px;
+            text-align: center;
+        }
+
+        .kundli-stat .ks-num {
+            font-family: var(--font-heading);
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--deep-maroon);
+            line-height: 1;
+        }
+
+        .kundli-stat .ks-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: 4px;
+        }
+
+        .explainer-keypoints {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0 0;
+        }
+
+        .explainer-keypoints li {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            font-size: 1rem;
+            color: var(--text-dark);
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .explainer-keypoints li:last-child {
+            border-bottom: none;
+        }
+
+        .ekp-icon {
+            font-size: 1.4rem;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        /* ───── WHO GETS SECTION ───── */
+        .who-gets-section {
+            padding: 72px 0;
+        }
+
+        .persona-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            max-width: 860px;
+            margin: 0 auto;
+        }
+
+        .persona-card {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: var(--radius-md);
+            padding: 24px 20px;
+            text-align: center;
+            transition: background 0.2s, border-color 0.2s;
+        }
+
+        .persona-card:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: rgba(199,169,98,0.4);
+        }
+
+        .pc-emoji {
+            font-size: 2.2rem;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .pc-label {
+            font-family: var(--font-heading);
+            font-size: 1rem;
+            font-weight: 600;
+            color: #fff;
+            line-height: 1.3;
+        }
+
+        /* ───── WHY SECTION ───── */
+        .why-kundli-section {
+            background: var(--cream);
+            padding: 72px 0;
+        }
+
+        .why-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            max-width: 860px;
+            margin: 0 auto;
+        }
+
+        .why-card {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            background: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 24px 20px;
+            box-shadow: var(--shadow-sm);
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .why-card:hover {
+            border-color: var(--matte-gold);
+            box-shadow: var(--shadow-md);
+        }
+
+        .why-icon {
+            font-size: 2rem;
+            flex-shrink: 0;
+            line-height: 1;
+        }
+
+        .why-card h3 {
+            font-size: 1rem;
+            margin-bottom: 4px;
+        }
+
+        .why-card p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+            margin: 0;
+        }
+
+        /* ───── INSIDE REPORT SECTION ───── */
+        .inside-section {
+            padding: 72px 0;
+        }
+
+        .inside-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .inside-card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: var(--radius-md);
+            padding: 28px 20px 24px;
+            text-align: center;
+            position: relative;
+            transition: border-color 0.2s;
+        }
+
+        .inside-card:hover {
+            border-color: rgba(199,169,98,0.5);
+        }
+
+        .inside-svg-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 60px;
+            height: 60px;
+            background: rgba(199,169,98,0.12);
+            border: 1px solid rgba(199,169,98,0.3);
+            border-radius: 50%;
+            margin: 0 auto 14px;
+            color: var(--matte-gold);
+        }
+
+        .inside-card h3 {
+            font-size: 1rem;
+            color: #fff;
+            margin-bottom: 6px;
+        }
+
+        .inside-card p {
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.65);
+            line-height: 1.5;
+            margin: 0;
+        }
+
+        @media (max-width: 768px) {
+            .explainer-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .persona-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .why-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .inside-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .inside-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .persona-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* ===== 2026 Visual Upgrade ===== */
+        body {
+            background:
+                radial-gradient(circle at 8% -8%, rgba(242, 159, 88, 0.22), transparent 32%),
+                radial-gradient(circle at 95% 8%, rgba(199, 169, 98, 0.18), transparent 30%),
+                var(--cream);
+        }
+
+        .section-subtitle {
+            font-size: 0.98rem;
+            line-height: 1.45;
+            margin-bottom: 34px;
+            max-width: 520px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .hero-section::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0.06) 0%, rgba(0, 0, 0, 0.24) 100%);
+            z-index: 0;
+        }
+
+        .hero-content {
+            z-index: 1;
+        }
+
+        .hero-grid {
+            gap: 14px;
+        }
+
+        .hero-text-col {
+            max-width: 780px;
+        }
+
+        .headline {
+            font-size: clamp(2.35rem, 5.2vw, 4.35rem);
+            margin-bottom: 14px;
+        }
+
+        .subheadline {
+            font-size: clamp(1rem, 2vw, 1.2rem);
+            max-width: 640px;
+            margin: 0 auto 2px;
+            line-height: 1.45;
+        }
+
+        .hero-visual-pills {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+            width: min(580px, 100%);
+            margin: 14px auto 0;
+        }
+
+        .hero-book-bottom {
+            margin-top: 14px;
+        }
+
+        .hero-book-bottom img {
+            max-width: min(470px, 90vw);
+            filter: drop-shadow(0 -16px 42px rgba(199, 169, 98, 0.35)) drop-shadow(0 12px 28px rgba(0, 0, 0, 0.56));
+        }
+
+        .hero-cta-block {
+            width: min(760px, 100%);
+            margin-top: 10px;
+            background: linear-gradient(160deg, rgba(255, 255, 255, 0.10), rgba(255, 255, 255, 0.04));
+            border: 1px solid rgba(199, 169, 98, 0.38);
+            border-radius: 20px;
+            box-shadow: 0 18px 42px rgba(0, 0, 0, 0.34);
+            padding: 24px 20px 24px;
+        }
+
+        .hero-inline-price {
+            margin-bottom: 14px;
+            gap: 12px;
+        }
+
+        .hip-now {
+            font-size: 2.25rem;
+            letter-spacing: -0.03em;
+        }
+
+        .hero-pill {
+            border: 1px solid rgba(199, 169, 98, 0.35);
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 999px;
+            padding: 8px 12px;
+            color: rgba(255, 255, 255, 0.88);
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+            text-align: center;
+            backdrop-filter: blur(4px);
+        }
+
+        .cta-button {
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            background: linear-gradient(135deg, #ffca7b 0%, #f29f58 50%, #ef8d3a 100%);
+            box-shadow:
+                0 14px 36px rgba(242, 159, 88, 0.35),
+                inset 0 1px 0 rgba(255, 255, 255, 0.35);
+            transform: translateY(0);
+        }
+
+        .cta-button::before {
+            content: "";
+            position: absolute;
+            top: -20%;
+            left: -120%;
+            width: 70%;
+            height: 140%;
+            background: linear-gradient(110deg, transparent, rgba(255, 255, 255, 0.45), transparent);
+            transform: skewX(-20deg);
+            animation: ctaSweep 3.8s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px) scale(1.01);
+            box-shadow:
+                0 20px 42px rgba(242, 159, 88, 0.44),
+                inset 0 1px 0 rgba(255, 255, 255, 0.45);
+        }
+
+        .hero-main-cta {
+            max-width: 560px;
+            margin: 0 auto;
+            font-size: 1.2rem;
+            letter-spacing: 0.01em;
+        }
+
+        .hero-trust-row {
+            gap: 10px;
+        }
+
+        .hero-trust-row .trust-chip {
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 999px;
+            padding: 6px 12px;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 600;
+            font-size: 0.77rem;
+            line-height: 1;
+        }
+
+        .explainer-keypoints li div,
+        .inside-card p,
+        .why-card p,
+        .scarcity-sub {
+            line-height: 1.4;
+            font-size: 0.9rem;
+        }
+
+        .explainer-keypoints li {
+            padding: 11px 0;
+        }
+
+        .persona-card,
+        .why-card,
+        .inside-card,
+        .process-step,
+        .review-card,
+        .stack-box,
+        .scarcity-box,
+        .faq-item {
+            box-shadow: 0 14px 30px rgba(45, 8, 14, 0.08);
+            transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+        }
+
+        .persona-card:hover,
+        .why-card:hover,
+        .inside-card:hover,
+        .process-step:hover,
+        .review-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 18px 38px rgba(45, 8, 14, 0.14);
+        }
+
+        .review-text {
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .diff-list li span {
+            font-size: 0.92rem;
+        }
+
+        .sticky-cta-bar {
+            border-top: 1px solid rgba(255, 255, 255, 0.25);
+            background: linear-gradient(90deg, rgba(45, 8, 14, 0.96), rgba(77, 14, 25, 0.96));
+            backdrop-filter: blur(8px);
+        }
+
+        .sticky-btn {
+            min-width: 220px;
+            font-size: 0.98rem;
+            font-weight: 700;
+        }
+
+        @keyframes ctaSweep {
+            0% {
+                left: -120%;
+            }
+
+            45% {
+                left: 165%;
+            }
+
+            100% {
+                left: 165%;
+            }
+        }
+
+        @media (max-width: 768px) {
+            section {
+                padding: 62px 0;
+            }
+
+            .headline {
+                font-size: clamp(2rem, 9.6vw, 2.8rem);
+            }
+
+            .subheadline {
+                font-size: 0.98rem;
+                max-width: 100%;
+            }
+
+            .hero-grid {
+                gap: 10px;
+            }
+
+            .hero-visual-pills {
+                grid-template-columns: 1fr;
+                max-width: 360px;
+                gap: 8px;
+            }
+
+            .hero-book-bottom img {
+                max-width: min(360px, 92vw);
+            }
+
+            .hero-cta-block {
+                border-radius: 16px;
+                padding: 20px 14px 20px;
+            }
+
+            .hero-pill {
+                font-size: 0.72rem;
+                padding: 7px 10px;
+            }
+
+            .hero-main-cta {
+                font-size: 1.05rem;
+            }
+
+            .hero-trust-row .trust-chip {
+                font-size: 0.7rem;
+                padding: 6px 10px;
+            }
+
+            .cta-button {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MGBML6GZ" height="0" width="0"
+            style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+
+
+    <!-- 1. Hero Section – Fear + Curiosity -->
+    <section class="hero-section dark-section">
+        <div class="hero-bg-gradient"></div>
+        <div class="hero-bg-pattern"></div>
+        <div class="hero-bg-overlay watermark"></div>
+
+        <div class="container hero-content">
+            <div class="hero-grid">
+
+                <!-- HEADLINE + SUBHEADLINE -->
+                <div class="hero-text-col">
+                    <h1 class="headline">
+                        <span class="headline-white">Personalized Kundli Insights For</span>
+                        <span class="headline-fire">Career, Marriage, Money & Timing</span>
+                    </h1>
+                    <p class="subheadline" style="color: rgba(255,255,255,0.72);">
+                        Manual analysis by AstroGuru Ashutosh. Fast, clear report in Hinglish with practical guidance.
+                    </p>
+                    <div class="hero-visual-pills">
+                        <span class="hero-pill">1237+ Kundli Reports Delivered</span>
+                        <span class="hero-pill">100% Manual Reading</span>
+                        <span class="hero-pill">PDF Delivery in 24-48 hrs</span>
+                    </div>
+                </div>
+
+                <!-- BOOK IMAGE -->
+                <div class="hero-book-bottom">
+                    <img src="/assets/premium_kundli.webp" alt="Personalized Kundli Report"
+                        fetchpriority="high" width="600" height="600" decoding="async" loading="eager">
+                </div>
+
+                <!-- CTA BLOCK: price + button + badges -->
+                <div class="hero-cta-block">
+                    <!-- Price row -->
+                    <div class="hero-inline-price">
+                        <span class="hip-mrp">₹1,995</span>
+                        <span class="hip-now">₹399</span>
+                        <span class="hip-badge">80% OFF</span>
+                    </div>
+                    <!-- Main CTA -->
+                    <button id="cta-hero" class="cta-button hero-main-cta pulse-anim" data-cta="hero"
+                        onclick="trackCta('hero','Get My Personalized Kundli – ₹399')">
+                        🔮 Get My Personalized Kundli — ₹399
+                    </button>
+                    <!-- 3 Trust badges -->
+                    <div class="hero-trust-row">
+                        <span class="trust-chip">✦ Manual Analysis</span>
+                        <span class="trust-chip">✦ PDF in 24-48 hrs</span>
+                        <span class="trust-chip">✦ Secure Checkout</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- A. What is Janam Kundli -->
+    <section class="explainer-section">
+        <div class="container" style="max-width:700px;">
+            <h2 class="section-title">Janam Kundli Kya Hai?</h2>
+            <p class="section-subtitle" style="margin-bottom:32px;">Aapke janam ke exact time pe planets ki position — wahi decide karti hai aapki life ka direction.<br>Career, shaadi, paisa, health — sab isme likha hota hai.</p>
+            <ul class="explainer-keypoints">
+                <li>
+                    <span class="ekp-icon">🏠</span>
+                    <div><strong>12 Bhaav (Houses)</strong> — Life ke 12 areas. Har house ek alag topic cover karta hai — shaadi, career, paisa, family.</div>
+                </li>
+                <li>
+                    <span class="ekp-icon">⭐</span>
+                    <div><strong>9 Grah (Planets)</strong> — Har planet alag area control karta hai. Inki strength aur position se pata chalta hai kab luck saath hai.</div>
+                </li>
+                <li>
+                    <span class="ekp-icon">🕒</span>
+                    <div><strong>Dasha — Planetary Time Period</strong> — Har dasha 2–20 saal chalti hai. Is waqt kaunsa planet aap pe raj kar raha hai — yeh sab kuch decide karta hai.</div>
+                </li>
+                <li>
+                    <span class="ekp-icon">⚠️</span>
+                    <div><strong>Yog &amp; Dosha</strong> — Kuch combinations success dete hain, kuch block karte hain. Mangal dosh, Shani sade sati — chart mein clearly dikhta hai.</div>
+                </li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- B. Who Should Get a Janam Kundli Made -->
+    <!-- Image banner above who-gets section — mobile only -->
+    <div class="karmic-outer-wrap">
+        <div class="karmic-img-wrap">
+            <img src="https://primedit-cdn.b-cdn.net/shubhmay-lp-kundli/karmic_solution_compressed.jpg"
+                alt="Karmic Solutions"
+                loading="lazy">
+        </div>
+    </div>
+
+    <section class="who-gets-section dark-section">
+        <div class="container">
+            <h2 class="section-title text-light" style="font-size:clamp(1.5rem,5vw,2.4rem);">Kya Aapne Vi Inme Se Kisi Problem Ko Face Kiya Hai?</h2>
+            <p class="section-subtitle" style="color:rgba(255,255,255,0.65);">Agar koi ek bhi aap pe fit hota hai — yeh report aapke liye hai.</p>
+            <div class="persona-grid">
+                <div class="persona-card">
+                    <span class="pc-emoji">💼</span>
+                    <div class="pc-label">Job switch ya promotion ka sahi time nahi pata</div>
+                </div>
+                <div class="persona-card">
+                    <span class="pc-emoji">💍</span>
+                    <div class="pc-label">Shaadi delay ho rahi hai, reason samajh nahi aa raha</div>
+                </div>
+                <div class="persona-card">
+                    <span class="pc-emoji">💰</span>
+                    <div class="pc-label">Paisa aata hai par tik nahi raha</div>
+                </div>
+                <div class="persona-card">
+                    <span class="pc-emoji">😰</span>
+                    <div class="pc-label">Life mein stuck — kuch karo toh result nahi</div>
+                </div>
+                <div class="persona-card">
+                    <span class="pc-emoji">✈️</span>
+                    <div class="pc-label">Abroad ya higher studies — timing clear nahi</div>
+                </div>
+                <div class="persona-card">
+                    <span class="pc-emoji">❤️</span>
+                    <div class="pc-label">Relationship mein confusion ya repeated problems</div>
+                </div>
+            </div>
+            <div style="text-align:center; margin-top:36px;">
+                <button class="cta-button pulse-anim" data-cta="who-gets"
+                    onclick="trackCta('who_gets','Solve Your Problem')">
+                    Solve Your Problem →
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- C. Why Should You Get Your Janam Kundli Made -->
+    <section class="why-kundli-section">
+        <div class="container">
+            <h2 class="section-title" style="font-size:clamp(1.6rem,5vw,2.5rem);">Kyun Banwaani Chahiye Kundli?</h2>
+            <p class="section-subtitle">Galat time pe decision = wasted years. Sahi time pe decision = life change.</p>
+            <div class="why-grid">
+                <div class="why-card">
+                    <span class="why-icon">📅</span>
+                    <div>
+                        <h3>Timing Ka Pata Chalta Hai</h3>
+                        <p>Kab job change karein, kab shaadi karein, kab invest karein — Dasha se exact timing milti hai.</p>
+                    </div>
+                </div>
+                <div class="why-card">
+                    <span class="why-icon">🚧</span>
+                    <div>
+                        <h3>Blockage Identify Hoti Hai</h3>
+                        <p>Kaunsa planet, kaunsa dosha aapko rok raha hai — chart se clear hota hai.</p>
+                    </div>
+                </div>
+                <div class="why-card">
+                    <span class="why-icon">💪</span>
+                    <div>
+                        <h3>Apni Strengths Pata Chalti Hain</h3>
+                        <p>Har kundli mein strong yog hote hain — inhe jaanoge toh sahi field choose karoge.</p>
+                    </div>
+                </div>
+                <div class="why-card">
+                    <span class="why-icon">🛡️</span>
+                    <div>
+                        <h3>Dosha Ka Samadhan Milta Hai</h3>
+                        <p>Mangal, Shani, Rahu dosh ke simple practical upaay — bina fear ke, bina heavy ritual ke.</p>
+                    </div>
+                </div>
+                <div class="why-card">
+                    <span class="why-icon">🎯</span>
+                    <div>
+                        <h3>Life Decisions Confident Hote Hain</h3>
+                        <p>Jab aapko pata ho ki stars kab support kar rahe hain — toh decision lena easy hoga.</p>
+                    </div>
+                </div>
+                <div class="why-card">
+                    <span class="why-icon">🔮</span>
+                    <div>
+                        <h3>Future Ka Realistic Blueprint</h3>
+                        <p>Koi false hope nahi, koi darana nahi — sirf aapke chart ke hisaab se clear picture.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- D. What's Inside the Kundli Report -->
+    <section class="inside-section dark-section" id="what-you-get">
+        <div class="container">
+            <h2 class="section-title text-light">Is Report Ke Andar Kya Hai?</h2>
+            <p class="section-subtitle" style="color:rgba(255,255,255,0.7);">15–20 page detailed PDF. Manually analysed. Aapki exact birth details se.</p>
+            <div class="inside-grid">
+                <div class="inside-card">
+                    <div class="inside-svg-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/>
+                            <line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/>
+                            <line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/>
+                            <line x1="4.93" y1="4.93" x2="7.05" y2="7.05"/><line x1="16.95" y1="16.95" x2="19.07" y2="19.07"/>
+                            <line x1="4.93" y1="19.07" x2="7.05" y2="16.95"/><line x1="16.95" y1="7.05" x2="19.07" y2="4.93"/>
+                        </svg>
+                    </div>
+                    <h3>Birth Chart &amp; Lagna</h3>
+                    <p>Aapka complete Kundli chart — Lagna, Rashi, planetary positions with house details.</p>
+                </div>
+                <div class="inside-card">
+                    <div class="inside-svg-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                            <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+                            <line x1="3" y1="10" x2="21" y2="10"/>
+                            <polyline points="8 14 10 16 14 12"/>
+                        </svg>
+                    </div>
+                    <h3>Dasha Timeline</h3>
+                    <p>Current dasha kya hai, agle 7 saal me kya aayega — month wise major shifts.</p>
+                </div>
+                <div class="inside-card">
+                    <div class="inside-svg-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                        </svg>
+                    </div>
+                    <h3>Marriage &amp; Relationship</h3>
+                    <p>Delay reason, timing window, partner nature aur compatibility analysis.</p>
+                </div>
+                <div class="inside-card">
+                    <div class="inside-svg-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/>
+                            <polyline points="16 7 22 7 22 13"/>
+                        </svg>
+                    </div>
+                    <h3>Career &amp; Finance</h3>
+                    <p>Job, business, promotion ke liye strong periods. Paisa kab aayega, kab risk hai.</p>
+                </div>
+                <div class="inside-card">
+                    <div class="inside-svg-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"/>
+                            <ellipse cx="12" cy="12" rx="4" ry="10" transform="rotate(30 12 12)"/>
+                            <ellipse cx="12" cy="12" rx="4" ry="10" transform="rotate(-30 12 12)"/>
+                            <circle cx="12" cy="12" r="2.5" fill="currentColor"/>
+                        </svg>
+                    </div>
+                    <h3>Dosha &amp; Yog</h3>
+                    <p>Mangal, Shani, Rahu–Ketu, Pitra Dosha — kya hai, kitna strong hai, kya effect hai.</p>
+                </div>
+                <div class="inside-card">
+                    <div class="inside-svg-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                            <polyline points="9 12 11 14 15 10"/>
+                        </svg>
+                    </div>
+                    <h3>Remedies &amp; Forecast</h3>
+                    <p>Simple upaay + 1-year monthly forecast — aage ka plan clear ho jaata hai.</p>
+                </div>
+            </div>
+            <div style="text-align:center; margin-top:40px;">
+                <button id="cta-inside" class="cta-button pulse-anim" data-cta="inside"
+                    onclick="trackCta('inside_section','Get My Kundli Report – ₹399')">
+                    🔮 Get My Kundli Report – ₹399
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials – right after What's Inside -->
+    <section class="testimonials-section" id="reviews">
+        <div class="container">
+            <h2 class="section-title">Log Kya Bol Rahe Hain?</h2>
+            <p class="section-subtitle">Real feedback from people who ordered the report.</p>
+        </div>
+        <div class="testimonials-mask" id="testimonialsMask">
+            <div class="testimonials-track" id="testimonialsTrack">
+                <div class="review-card">
+                    <div class="review-stars">★★★★★</div>
+                    <p class="review-text">"Dasha timeline section ne mujhe samajh aaya ki career move kab karni chahiye. Explanations bahut clear thi."</p>
+                    <div class="review-author">
+                        <div class="review-avatar">R</div>
+                        <div>
+                            <div class="review-name">Rahul M.</div>
+                            <div class="review-meta">Delhi · Career guidance</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="review-card">
+                    <div class="review-stars">★★★★★</div>
+                    <p class="review-text">"Shaadi delay ka reason finally samajh aaya. Report ne jo bataya woh bilkul accurate nikla. No superstition, just analysis."</p>
+                    <div class="review-author">
+                        <div class="review-avatar">P</div>
+                        <div>
+                            <div class="review-name">Priya S.</div>
+                            <div class="review-meta">Mumbai · Marriage timing</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="review-card">
+                    <div class="review-stars">★★★★★</div>
+                    <p class="review-text">"Mujhe laga tha sab bakwaas hoga, but the Dosha section explained patterns I had been seeing for years. Very detailed."</p>
+                    <div class="review-author">
+                        <div class="review-avatar">A</div>
+                        <div>
+                            <div class="review-name">Amit K.</div>
+                            <div class="review-meta">Bangalore · Dosha analysis</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="review-card">
+                    <div class="review-stars">★★★★★</div>
+                    <p class="review-text">"Business start karna tha, timing confirm nahi thi. Kundli se pata chala kaunsa period strong hai. Highly recommend."</p>
+                    <div class="review-author">
+                        <div class="review-avatar">V</div>
+                        <div>
+                            <div class="review-name">Vikram P.</div>
+                            <div class="review-meta">Pune · Business timing</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="review-card">
+                    <div class="review-stars">★★★★★</div>
+                    <p class="review-text">"Worth every rupee. 24 hours mein PDF mili, aur remedies practical hain — koi expensive pooja nahi bataya."</p>
+                    <div class="review-author">
+                        <div class="review-avatar">S</div>
+                        <div>
+                            <div class="review-name">Sneha R.</div>
+                            <div class="review-meta">Chennai · Remedies</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="review-card">
+                    <div class="review-stars">★★★★★</div>
+                    <p class="review-text">"Report padh ke feel hua ki koi mujhe sach mein samajhta hai. Career, love, paisa sab cover tha."</p>
+                    <div class="review-author">
+                        <div class="review-avatar">N</div>
+                        <div>
+                            <div class="review-name">Neha T.</div>
+                            <div class="review-meta">Hyderabad · Full report</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 5. Dasha Urgency Section -->
+    <section class="urgency-section dark-section" style="padding: 72px 0;">
+        <div class="container" style="max-width:680px; text-align:center;">
+            <div style="display:inline-block; background:rgba(229,90,90,0.15); border:1px solid rgba(229,90,90,0.4); border-radius:var(--radius-full); padding:6px 18px; font-size:0.85rem; font-weight:600; color:#fc7272; letter-spacing:0.06em; text-transform:uppercase; margin-bottom:20px;">⚠️ Important</div>
+            <h2 class="section-title text-light" style="font-size:clamp(1.7rem,5vw,2.8rem); margin-bottom:16px;">Janiye Aapki Konsi Dasha Chal Rahi Hai</h2>
+            <p style="color:rgba(255,255,255,0.8); font-size:1.1rem; line-height:1.7; margin-bottom:28px;">
+                Kyunki agar aap <strong style="color:#ffb347;">galat dasha mein galat decision lete hain</strong> — toh result nahi aata chahe kitni bhi mehnat karo.<br><br>
+                Sade Sati, Rahu Mahadasha, ya Shani ki antardasha mein kiye gaye bade decisions aksar regret dete hain.<br>
+                <strong style="color:#fff;">Aapki dasha kab change hogi — aur next window kaunsa hai</strong> — yeh jaanna zaroori hai.
+            </p>
+            <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-bottom:32px;">
+                <div style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); border-radius:var(--radius-md); padding:14px 20px; min-width:140px;">
+                    <div style="font-size:1.6rem; font-weight:800; color:#ffb347; font-family:var(--font-heading);">2–20 yr</div>
+                    <div style="font-size:0.8rem; color:rgba(255,255,255,0.6); text-transform:uppercase; letter-spacing:0.05em;">Dasha Duration</div>
+                </div>
+                <div style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); border-radius:var(--radius-md); padding:14px 20px; min-width:140px;">
+                    <div style="font-size:1.6rem; font-weight:800; color:#ffb347; font-family:var(--font-heading);">9 Planets</div>
+                    <div style="font-size:0.8rem; color:rgba(255,255,255,0.6); text-transform:uppercase; letter-spacing:0.05em;">Mahadasha Cycle</div>
+                </div>
+                <div style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); border-radius:var(--radius-md); padding:14px 20px; min-width:140px;">
+                    <div style="font-size:1.6rem; font-weight:800; color:#fc7272; font-family:var(--font-heading);">Now</div>
+                    <div style="font-size:0.8rem; color:rgba(255,255,255,0.6); text-transform:uppercase; letter-spacing:0.05em;">Your Dasha Active</div>
+                </div>
+            </div>
+            <button id="cta-dasha" class="cta-button impact-cta pulse-anim" data-cta="dasha"
+                onclick="trackCta('dasha_urgency','Meri Dasha Check Karo – ₹399')"
+                style="font-size:1.15rem; padding:20px 36px;">
+                🔮 Meri Dasha Check Karo — ₹399
+            </button>
+        </div>
+    </section>
+
+    <!-- 6. Authority Section -->
+    <section class="founder-section" style="background:var(--cream-light);">
+        <div class="container">
+            <div style="max-width:680px; margin:0 auto; text-align:center;">
+                <div class="founder-badge" style="margin-bottom:20px;">Kaun Banata Hai Ye Report?</div>
+                <h2 class="founder-title" style="font-size:clamp(1.6rem,5vw,2.4rem); margin-bottom:16px;">
+                    AstroGuru Ashutosh <span class="accent-text">Manually Verify</span> Karke Banate Hain<br>Kundli — Har Ek Ke Liye
+                </h2>
+                <p style="font-size:1.05rem; color:var(--text-muted); line-height:1.7; margin-bottom:32px;">
+                    Koi automated software nahi, koi copy-paste nahi. <strong style="color:var(--deep-maroon);">Aapki exact DOB, time aur place</strong> se manually kundli banai jaati hai — phir personally check karke aapko bheja jaata hai.
+                </p>
+
+                <!-- Trust badges row -->
+                <div style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap; margin-bottom:32px;">
+                    <div style="background:var(--cream); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:16px 24px; text-align:center; min-width:130px; box-shadow:var(--shadow-sm);">
+                        <div style="font-size:1.8rem; font-weight:800; font-family:var(--font-heading); color:var(--deep-maroon);">40K+</div>
+                        <div style="font-size:0.78rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em; margin-top:4px;">Community</div>
+                    </div>
+                    <div style="background:var(--cream); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:16px 24px; text-align:center; min-width:130px; box-shadow:var(--shadow-sm);">
+                        <div style="font-size:1.8rem; font-weight:800; font-family:var(--font-heading); color:var(--deep-maroon);">1000+</div>
+                        <div style="font-size:0.78rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em; margin-top:4px;">Charts Analysed</div>
+                    </div>
+                    <div style="background:var(--cream); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:16px 24px; text-align:center; min-width:130px; box-shadow:var(--shadow-sm);">
+                        <div style="font-size:1.8rem; font-weight:800; font-family:var(--font-heading); color:var(--deep-maroon);">100%</div>
+                        <div style="font-size:0.78rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em; margin-top:4px;">Manual Review</div>
+                    </div>
+                </div>
+
+                <!-- Astrologer image -->
+                <div style="margin-bottom:28px; display:flex; justify-content:center; width:100%;">
+                    <img src="https://primedit-cdn.b-cdn.net/shubhmay-lp-kundli/astroguruashutoshsize.jpg"
+                        alt="AstroGuru Ashutosh"
+                        style="width:220px; height:220px; border-radius:50%; object-fit:cover; object-position:center 15%; border:4px solid var(--matte-gold); box-shadow:0 0 40px rgba(199,169,98,0.45), 0 12px 32px rgba(0,0,0,0.2); display:block;"
+                        loading="lazy">
+                </div>
+
+                <!-- Astrologer profile chip -->
+                <div class="founder-profile impulsive-founder" style="display:inline-flex; justify-content:center;">
+                    <div class="profile-info">
+                        <h3 class="founder-name-highlight">AstroGuru Ashutosh</h3>
+                        <p class="founder-title-highlight">Vedic Astrologer · Manual Kundli Specialist</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 4. How Your Kundli Report Is Prepared -->
+    <section class="process-section dark-section" id="how-it-works">
+        <div class="container">
+            <h2 class="section-title text-light">Kaise Milegi Aapki Kundli?</h2>
+            <div class="process-compact-grid">
+                <div class="process-step">
+                    <div class="ps-num">1</div>
+                    <div class="ps-content">
+                        <div class="ps-title">Birth Details Do</div>
+                        <div class="ps-desc">Name, DOB, time &amp; place form fill karo</div>
+                    </div>
+                </div>
+                <div class="process-step">
+                    <div class="ps-num">2</div>
+                    <div class="ps-content">
+                        <div class="ps-title">Chart Banta Hai</div>
+                        <div class="ps-desc">Aapka Janam Kundli chart generate hota hai</div>
+                    </div>
+                </div>
+                <div class="process-step">
+                    <div class="ps-num">3</div>
+                    <div class="ps-content">
+                        <div class="ps-title">Manual Analysis</div>
+                        <div class="ps-desc">AstroGuru Ashutosh personally check karte hain</div>
+                    </div>
+                </div>
+                <div class="process-step">
+                    <div class="ps-num">4</div>
+                    <div class="ps-content">
+                        <div class="ps-title">PDF Email Pe</div>
+                        <div class="ps-desc">24–48 hrs mein detailed report milti hai</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 7. Differentiation -->
+    <section class="diff-section">
+        <div class="container">
+            <h2 class="section-title">Doosre Se Alag Kyun Hai Yeh?</h2>
+            <p class="section-subtitle">Baaki jagah se bhi report milti hai — par yeh wali different hai.</p>
+            <div class="diff-split-grid">
+                <div class="diff-column neg-column">
+                    <h4 class="diff-col-title" style="color:var(--red-alert);">❌ Baaki Jagah</h4>
+                    <ul class="diff-list">
+                        <li><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-red"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                            <span>Generic rashifal — sabke liye same text</span>
+                        </li>
+                        <li><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-red"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                            <span>Dara ke aur services bechna</span>
+                        </li>
+                        <li><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-red"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                            <span>Software se auto-generate, koi analysis nahi</span>
+                        </li>
+                        <li><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-red"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                            <span>Complicated jargon — samajh hi nahi aata</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="diff-column pos-column">
+                    <h4 class="diff-col-title" style="color:var(--green-success);">✅ Hamare Paas</h4>
+                    <ul class="diff-list">
+                        <li><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-green"><path d="M20 6 9 17l-5-5"/></svg>
+                            <span>Sirf aapki DOB se personally banai kundli</span>
+                        </li>
+                        <li><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-green"><path d="M20 6 9 17l-5-5"/></svg>
+                            <span>AstroGuru Ashutosh ki manual verify</span>
+                        </li>
+                        <li><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-green"><path d="M20 6 9 17l-5-5"/></svg>
+                            <span>Clear Hinglish mein — koi confusion nahi</span>
+                        </li>
+                        <li><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-green"><path d="M20 6 9 17l-5-5"/></svg>
+                            <span>Seedha answer — koi darna nahi, koi extra kharcha nahi</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 8. Value Stack / Pricing -->
+    <section class="price-stack-section dark-section" id="pricing">
+        <div class="container">
+            <h2 class="section-title text-light">Iss Price Mein Itna Kuch?</h2>
+            <div class="stack-box">
+                <div class="stack-items">
+                    <div class="stack-row"><span>Birth Chart Analysis</span> <span>₹499</span></div>
+                    <div class="stack-row"><span>Dasha Timeline</span> <span>₹399</span></div>
+                    <div class="stack-row"><span>Marriage &amp; Relationship Analysis</span> <span>₹399</span></div>
+                    <div class="stack-row"><span>Career &amp; Finance Section</span> <span>₹399</span></div>
+                    <div class="stack-row"><span>Yog, Dosha &amp; Remedial Suggestions</span> <span>₹299</span></div>
+                </div>
+                <div class="stack-total">
+                    <span class="total-label">Total Value</span>
+                    <span class="total-amount line-through">₹1995</span>
+                </div>
+                <div class="stack-offer">
+                    <span class="offer-label">Aaj Ke Liye Offer</span>
+                    <span class="offer-amount">₹399</span>
+                </div>
+                <button id="cta-pricing" class="cta-button final-cta pulse-anim" data-cta="pricing"
+                    onclick="trackCta('pricing','Get My Kundli PDF – ₹399')">
+                    <span class="cta-text">Get My Kundli PDF – ₹399</span>
+                </button>
+                <p style="text-align:center; margin-top:16px; font-size:0.9rem; color:var(--text-muted);">📦 Digital PDF &nbsp;|&nbsp; ⏱ 24–48 hrs delivery &nbsp;|&nbsp; 🔒 Secure payment</p>
+                <p style="text-align:center; margin-top:8px; font-size:0.85rem; color:var(--red-alert); font-weight:600;">⚠️ Yeh price sirf limited time ke liye hai. Baad mein ₹1499 ho sakti hai.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 9. FAQ Section -->
+    <section class="faq-section dark-section">
+        <div class="container">
+            <h2 class="section-title text-light">Frequently Asked Questions</h2>
+            <div class="faq-accordion">
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>Is this software generated?</span>
+                        <svg class="lucide lucide-chevron-down icon-gold" style="" class="lucide lucide-chevron-down"
+                            xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="m6 9 6 6 6-6" />
+                        </svg>
+
+                    </div>
+                    <div class="faq-answer">
+                        <p>No. Charts are Generated thru a software named "Astrosage", but interpretation is manual.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>What if I don't know exact birth time?</span>
+                        <svg class="lucide lucide-chevron-down icon-gold" style="" class="lucide lucide-chevron-down"
+                            xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="m6 9 6 6 6-6" />
+                        </svg>
+
+                    </div>
+                    <div class="faq-answer">
+                        <p>Approximate time can provide overview; exact time improves accuracy.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>How will I receive the report?</span>
+                        <svg class="lucide lucide-chevron-down icon-gold" style="" class="lucide lucide-chevron-down"
+                            xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="m6 9 6 6 6-6" />
+                        </svg>
+
+                    </div>
+                    <div class="faq-answer">
+                        <p>PDF via email and optionally WhatsApp.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>Is my data secure?</span>
+                        <svg class="lucide lucide-chevron-down icon-gold" style="" class="lucide lucide-chevron-down"
+                            xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="m6 9 6 6 6-6" />
+                        </svg>
+
+                    </div>
+                    <div class="faq-answer">
+                        <p>Birth details are used only for report preparation.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>Is consultation included?</span>
+                        <svg class="lucide lucide-chevron-down icon-gold" style="" class="lucide lucide-chevron-down"
+                            xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="m6 9 6 6 6-6" />
+                        </svg>
+
+                    </div>
+                    <div class="faq-answer">
+                        <p>The report is a standalone PDF. One-on-one consultation can be discussed separately if
+                            needed.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 9. Scarcity Push -->
+    <section class="scarcity-section">
+        <div class="container">
+            <div class="scarcity-box">
+                <div style="display:inline-block; background:rgba(229,90,90,0.1); border:1px solid rgba(229,90,90,0.25); border-radius:var(--radius-full); padding:5px 14px; font-size:0.8rem; font-weight:700; color:var(--red-alert); text-transform:uppercase; letter-spacing:0.07em; margin-bottom:12px;">⚠️ Sirf Aaj</div>
+                <h3 class="scarcity-title">Roz Sirf 50 Reports Banti Hain</h3>
+                <p class="scarcity-sub">Manual analysis hoti hai — ek ek kundli personally dekhni padti hai. Isliye slots limited hain.</p>
+                <div class="progress-shell">
+                    <div class="progress-fill"></div>
+                </div>
+                <p class="progress-meta" style="margin-bottom:4px;">Aaj ke liye <strong style="color:var(--red-alert);">32 / 50</strong> slots filled.</p>
+                <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:16px;">18 slots bache hain — kal price badh sakti hai.</p>
+                <button id="cta-scarcity" class="cta-button pulse-anim" data-cta="scarcity"
+                    style="width:100%;"
+                    onclick="trackCta('scarcity','Mera Slot Lock Karo – ₹399')">
+                    🔒 Mera Slot Lock Karo — ₹399
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <footer class="site-footer">
+        <div class="container">
+            <p>&copy; 2026 Kundli Reports. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- 10. Sticky CTA Bar -->
+    <div class="sticky-cta-bar">
+        <div class="sticky-container">
+            <span class="sticky-text">⚠️ Slots bhar rahe hain — sirf ₹399</span>
+            <button id="cta-sticky" class="cta-button sticky-btn pulse-anim" data-cta="sticky"
+                onclick="trackCta('sticky_bar','Abhi Order Karo – ₹399')">🔮 Abhi Order Karo — ₹399</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // FAQ Accordion
+            const faqItems = document.querySelectorAll('.faq-item');
+            faqItems.forEach(item => {
+                const question = item.querySelector('.faq-question');
+                question.addEventListener('click', () => {
+                    const isActive = item.classList.contains('active');
+                    faqItems.forEach(i => {
+                        i.classList.remove('active');
+                        const answer = i.querySelector('.faq-answer');
+                        answer.style.maxHeight = '0px';
+                        answer.style.padding = '0 24px';
+                    });
+                    if (!isActive) {
+                        item.classList.add('active');
+                        const answer = item.querySelector('.faq-answer');
+                        answer.style.maxHeight = `${answer.scrollHeight + 24}px`;
+                        answer.style.padding = '0 24px 24px 24px';
+                    }
+                });
+            });
+
+            // Scroll-in animations for sections
+            // Exclude hero-section to preserve LCP — hero must be visible immediately
+            const animTargets = document.querySelectorAll('section:not(.hero-section), .inside-card, .persona-card, .why-card, .review-card, .process-step');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach((entry, i) => {
+                    if (entry.isIntersecting) {
+                        const el = entry.target;
+                        el.style.animationDelay = (i * 0.05) + 's';
+                        el.classList.add('anim-visible');
+                        el.classList.remove('anim-ready');
+                        observer.unobserve(el);
+                    }
+                });
+            }, { threshold: 0.1 });
+            animTargets.forEach(el => {
+                el.classList.add('anim-ready');
+                observer.observe(el);
+            });
+
+            // CTA nudge animation — start nudge after 2s, repeat every 8s
+            const ctaButtons = document.querySelectorAll('.cta-button');
+            ctaButtons.forEach(btn => {
+                btn.classList.add('nudge-anim');
+            });
+        });
+    </script>
+</body>
+
+</html>
