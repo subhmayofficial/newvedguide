@@ -161,3 +161,6 @@
   background-image: radial-gradient(circle at 1px 1px, oklch(0.55 0.14 55 / 0.06) 1px, transparent 0);
   background-size: 32px 32px;
 }
+body[data-hide-site-header="true"] .site-header {
+  display: none;
+}

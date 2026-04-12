@@ -115,6 +115,7 @@ function BumpOffer({
         }
       `}</style>
       <div
+        id="checkout-kundli-fasttrack-toggle"
         onClick={() => onChange(!checked)}
         className={cn(
           "vg-ft-card relative cursor-pointer overflow-hidden rounded-2xl border-2 transition-all duration-200 bg-white",
@@ -217,6 +218,7 @@ function PayButton({
         }
       `}</style>
       <button
+        id="checkout-kundli-pay-btn"
         type="button"
         onClick={onPay}
         disabled={busy}
@@ -258,11 +260,11 @@ function PayButton({
 
       <p className="text-center text-[11px] text-stone-500">
         Aaj ke liye limited processing slots available.{" "}
-        <Link href="/terms" className="font-medium text-amber-800 underline underline-offset-2 hover:text-amber-950">
+        <Link id="checkout-kundli-terms-link" href="/terms" className="font-medium text-amber-800 underline underline-offset-2 hover:text-amber-950">
           Terms
         </Link>
         {" & "}
-        <Link href="/refund-policy" className="font-medium text-amber-800 underline underline-offset-2 hover:text-amber-950">
+        <Link id="checkout-kundli-refund-link" href="/refund-policy" className="font-medium text-amber-800 underline underline-offset-2 hover:text-amber-950">
           Refund Policy
         </Link>
       </p>
@@ -304,6 +306,7 @@ function StickyPayBar({
           ) : null}
         </div>
         <button
+          id="checkout-kundli-sticky-pay-btn"
           type="button"
           onClick={onPay}
           disabled={busy}
@@ -328,11 +331,11 @@ function StickyPayBar({
         </button>
       </div>
       <p className="border-t border-amber-100 bg-amber-50/40 px-4 py-1.5 text-center text-[9px] text-stone-500">
-        <Link href="/terms" className="font-medium text-amber-800 underline underline-offset-2">
+        <Link id="checkout-kundli-sticky-terms-link" href="/terms" className="font-medium text-amber-800 underline underline-offset-2">
           Terms
         </Link>
         {" · "}
-        <Link href="/refund-policy" className="font-medium text-amber-800 underline underline-offset-2">
+        <Link id="checkout-kundli-sticky-refund-link" href="/refund-policy" className="font-medium text-amber-800 underline underline-offset-2">
           Refund
         </Link>
         {" · "}
@@ -642,6 +645,7 @@ export function KundliCheckout() {
         {/* Heading */}
         <div className="mb-8">
           <Link
+            id="checkout-kundli-back-to-result-link"
             href="/free-kundli/result"
             className="mb-3 inline-block text-[12px] font-medium text-amber-800/80 transition-colors hover:text-amber-950"
           >
@@ -666,11 +670,11 @@ export function KundliCheckout() {
 
             {/* Name */}
             <div className="space-y-1.5">
-              <Label htmlFor="fullName" className={labelClass}>
+              <Label htmlFor="checkout-kundli-full-name-input" className={labelClass}>
                 Full name <span className="text-red-400">*</span>
               </Label>
               <Input
-                id="fullName"
+                id="checkout-kundli-full-name-input"
                 value={form.fullName}
                 onChange={(e) => set("fullName", e.target.value)}
                 placeholder="Your full name"
@@ -683,7 +687,7 @@ export function KundliCheckout() {
 
             {/* Phone — single seamless container */}
             <div className="space-y-1.5">
-              <Label htmlFor="phone" className={labelClass}>
+              <Label htmlFor="checkout-kundli-phone-input" className={labelClass}>
                 WhatsApp number <span className="text-red-400">*</span>
               </Label>
               <div
@@ -696,7 +700,7 @@ export function KundliCheckout() {
                   +91
                 </span>
                 <input
-                  id="phone"
+                  id="checkout-kundli-phone-input"
                   type="tel"
                   inputMode="numeric"
                   maxLength={10}
@@ -715,12 +719,12 @@ export function KundliCheckout() {
 
             {/* Email — optional */}
             <div className="space-y-1.5">
-              <Label htmlFor="email" className={labelClass}>
+              <Label htmlFor="checkout-kundli-email-input" className={labelClass}>
                 Email{" "}
                 <span className="text-[11px] font-normal text-stone-500">(optional)</span>
               </Label>
               <Input
-                id="email"
+                id="checkout-kundli-email-input"
                 type="email"
                 value={form.email}
                 onChange={(e) => set("email", e.target.value)}
@@ -743,6 +747,7 @@ export function KundliCheckout() {
               <div className="grid grid-cols-2 gap-2">
                 {(["male", "female"] as const).map((g) => (
                   <button
+                    id={`checkout-kundli-gender-${g}-btn`}
                     key={g}
                     type="button"
                     onClick={() => set("gender", g)}
@@ -774,11 +779,11 @@ export function KundliCheckout() {
             {/* DOB + TOB side by side */}
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label htmlFor="dob" className={labelClass}>
+                <Label htmlFor="checkout-kundli-dob-input" className={labelClass}>
                   Date of birth <span className="text-red-400">*</span>
                 </Label>
                 <Input
-                  id="dob"
+                  id="checkout-kundli-dob-input"
                   type="date"
                   value={form.dob}
                   max={new Date().toISOString().split("T")[0]}
@@ -789,11 +794,11 @@ export function KundliCheckout() {
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="tob" className={labelClass}>
+                <Label htmlFor="checkout-kundli-tob-input" className={labelClass}>
                   Time of birth <span className="text-red-400">*</span>
                 </Label>
                 <Input
-                  id="tob"
+                  id="checkout-kundli-tob-input"
                   type="time"
                   value={form.tob}
                   onChange={(e) => set("tob", e.target.value)}
@@ -805,12 +810,12 @@ export function KundliCheckout() {
 
             {/* POB */}
             <div className="space-y-1.5">
-              <Label htmlFor="pob" className={cn(labelClass, "flex items-center gap-1.5")}>
+              <Label htmlFor="checkout-kundli-pob-input" className={cn(labelClass, "flex items-center gap-1.5")}>
                 <MapPin size={12} className="text-amber-700" />
                 Place of birth <span className="text-red-400">*</span>
               </Label>
               <Input
-                id="pob"
+                id="checkout-kundli-pob-input"
                 value={form.pob}
                 onChange={(e) => set("pob", e.target.value)}
                 placeholder="City, State (e.g. Jaipur, Rajasthan)"
@@ -841,6 +846,7 @@ export function KundliCheckout() {
               <div className="grid grid-cols-2 gap-2">
                 {(["hindi", "english"] as const).map((lang) => (
                   <button
+                    id={`checkout-kundli-language-${lang}-btn`}
                     key={lang}
                     type="button"
                     onClick={() => set("reportLanguage", lang)}

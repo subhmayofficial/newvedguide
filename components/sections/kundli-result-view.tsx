@@ -235,6 +235,7 @@ function PatternSection({ careerShort, relShort }: { careerShort: string; relSho
 
         <div className="relative border-t border-red-100/80 bg-red-50/50 px-4 pb-4 pt-3">
           <button
+            id="free-kundli-result-pattern-cta"
             type="button"
             onClick={() => {
               track.paidReportCtaClicked("free_kundli_result", "pattern_section");
@@ -707,10 +708,11 @@ function CtaSection({ fn }: { fn: string }) {
               border-radius: inherit;
             }
           `}</style>
-          <Link
-            href="/checkout/kundli"
-            onClick={() => track.paidReportCtaClicked("free_kundli_result", "main_cta")}
-            className="vg-cta-btn relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-2xl bg-brand px-6 py-4 text-[15px] font-extrabold text-white shadow-lg transition-all hover:bg-brand-hover active:scale-[0.98]"
+            <Link
+              id="free-kundli-result-main-cta"
+              href="/checkout/kundli"
+              onClick={() => track.paidReportCtaClicked("free_kundli_result", "main_cta")}
+              className="vg-cta-btn relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-2xl bg-brand px-6 py-4 text-[15px] font-extrabold text-white shadow-lg transition-all hover:bg-brand-hover active:scale-[0.98]"
           >
             Mujhe sab clear samajhna hai
             <ChevronRight className="size-4 shrink-0" strokeWidth={2.5} />
@@ -872,6 +874,7 @@ function AutoManualBridge() {
 
       <div className="px-3 py-4 sm:px-4">
         <Link
+          id="free-kundli-result-bridge-cta"
           href="/checkout/kundli"
           onClick={() => track.paidReportCtaClicked("free_kundli_result", "manual_bridge_bottom")}
           className="flex w-full items-center justify-center gap-2 rounded-2xl bg-brand px-4 py-3.5 text-[14px] font-extrabold text-white shadow-md transition-all hover:bg-brand-hover active:scale-[0.98]"
@@ -939,6 +942,7 @@ function StickyBar() {
 
         {/* CTA button */}
         <Link
+          id="free-kundli-result-sticky-cta"
           href="/checkout/kundli"
           onClick={() => track.paidReportCtaClicked("free_kundli_result", "sticky")}
           className="relative shrink-0 overflow-hidden rounded-2xl bg-brand px-5 py-2.5 shadow-[0_4px_16px_-4px_rgba(180,83,9,0.55)] transition-transform active:scale-95"

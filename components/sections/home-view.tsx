@@ -209,6 +209,7 @@ export function HomeView() {
             {/* CTAs */}
             <div className="fade-up-4 mt-8 flex w-full max-w-[320px] flex-col gap-3 md:max-w-none md:flex-row">
               <Link
+                id="home-hero-free-kundli-cta"
                 href="/free-kundli"
                 className="glow-btn flex items-center justify-center gap-2 rounded-2xl bg-brand px-7 py-4 text-[15px] font-bold text-white shadow-md transition-all hover:bg-brand-hover active:scale-[0.97]"
               >
@@ -216,6 +217,7 @@ export function HomeView() {
                 <ArrowRight size={17} />
               </Link>
               <Link
+                id="home-hero-kundli-report-cta"
                 href="/free-kundli"
                 className="flex items-center justify-center gap-2 rounded-2xl border border-border/80 bg-background/80 px-7 py-4 text-[14px] font-semibold text-foreground transition-all hover:border-brand/40 hover:bg-surface active:scale-[0.97]"
               >
@@ -361,6 +363,7 @@ export function HomeView() {
                   {s.desc}
                 </p>
                 <Link
+                  id={`home-service-${s.href === "/free-kundli" ? "free-kundli" : s.href === "/kundli-report" ? "kundli-report" : "consultation"}-cta`}
                   href={s.href}
                   className={`mt-5 flex items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-bold transition-all active:scale-[0.97] ${
                     s.highlight
@@ -376,6 +379,7 @@ export function HomeView() {
 
           <p className="mt-8 text-center">
             <Link
+              id="home-browse-tools-link"
               href="/tools"
               className="inline-flex items-center gap-1.5 text-sm font-bold text-brand underline-offset-4 hover:underline"
             >
@@ -419,6 +423,7 @@ export function HomeView() {
 
           <div className="mt-9 text-center">
             <Link
+              id="home-understand-free-kundli-cta"
               href="/free-kundli"
               className="inline-flex items-center gap-2 rounded-xl bg-brand px-7 py-3.5 text-sm font-bold text-white shadow-sm transition-all hover:bg-brand-hover active:scale-[0.97]"
             >
@@ -469,6 +474,7 @@ export function HomeView() {
 
           <div className="mt-9 text-center">
             <Link
+              id="home-how-it-works-free-kundli-cta"
               href="/free-kundli"
               className="inline-flex items-center gap-2 rounded-xl bg-brand px-7 py-3.5 text-sm font-bold text-white shadow-sm transition-all hover:bg-brand-hover active:scale-[0.97]"
             >
@@ -589,6 +595,7 @@ export function HomeView() {
           </p>
           <div className="mt-8 flex flex-col items-center gap-3">
             <Link
+              id="home-final-free-kundli-cta"
               href="/free-kundli"
               className="glow-btn flex w-full max-w-[300px] items-center justify-center gap-2 rounded-2xl bg-brand px-8 py-4 text-[15px] font-bold text-white shadow-lg transition-all hover:bg-brand-hover active:scale-[0.97]"
             >

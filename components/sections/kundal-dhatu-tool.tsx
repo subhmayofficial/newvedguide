@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, ChevronLeft, Sparkles, Zap } from "lucide-react";
@@ -32,6 +32,14 @@ export function KundalDhatuTool() {
 
   const row = selectedId ? RASHI_DHATU.find((r) => r.id === selectedId) : undefined;
 
+  useEffect(() => {
+    document.body.dataset.hideSiteHeader = step === "result" ? "true" : "false";
+
+    return () => {
+      document.body.dataset.hideSiteHeader = "false";
+    };
+  }, [step]);
+
   function selectRashi(id: string) {
     setSelectedId(id);
     setStep("result");
@@ -59,6 +67,7 @@ export function KundalDhatuTool() {
                 Kundal metal ke fayde: positive energy, mental clarity, aur grah alignment.
               </p>
               <button
+                id="kundal-dhatu-start-btn"
                 type="button"
                 onClick={() => setStep("pick")}
                 className="mt-6 w-full rounded-2xl bg-brand py-3.5 text-center text-[15px] font-extrabold text-white shadow-[0_4px_16px_-4px_rgba(180,83,9,0.45)] transition-all active:scale-[0.98] hover:bg-brand-hover"
@@ -92,6 +101,7 @@ export function KundalDhatuTool() {
         {step === "pick" && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
             <button
+              id="kundal-dhatu-back-to-intro-btn"
               type="button"
               onClick={() => setStep("intro")}
               className="mb-5 flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-foreground"
@@ -110,6 +120,7 @@ export function KundalDhatuTool() {
               <div className="mt-5 grid grid-cols-3 gap-2.5">
                 {RASHI_DHATU.map((r) => (
                   <button
+                    id={`kundal-dhatu-rashi-${r.id}-btn`}
                     key={r.id}
                     type="button"
                     onClick={() => selectRashi(r.id)}
@@ -155,6 +166,7 @@ export function KundalDhatuTool() {
               }
             `}</style>
             <button
+              id="kundal-dhatu-change-rashi-btn"
               type="button"
               onClick={() => setStep("pick")}
               className="mb-5 flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-foreground"
@@ -234,6 +246,7 @@ export function KundalDhatuTool() {
               </p>
 
               <Link
+                id="kundal-dhatu-primary-kundli-cta"
                 href="/free-kundli"
                 className="relative mt-5 flex h-12 w-full items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-[13px] font-extrabold text-white transition-transform active:scale-[0.98] sm:text-[14px]"
                 style={{
@@ -292,6 +305,7 @@ export function KundalDhatuTool() {
                 karte hain
               </p>
               <Button
+                id="kundal-dhatu-secondary-kundli-cta"
                 className="relative mt-4 h-11 w-full border-0 bg-gradient-to-r from-brand to-orange-600 text-[14px] font-extrabold text-white shadow-[0_6px_20px_-6px_rgba(180,83,9,0.55)] hover:from-brand-hover hover:to-orange-600"
                 render={<Link href="/free-kundli" />}
               >
@@ -305,12 +319,12 @@ export function KundalDhatuTool() {
               </p>
             </div>
 
-            <p className="mt-5 px-2 text-center text-[11px] leading-relaxed text-muted-foreground">
-              Yeh tool general guidance ke liye hai. Medical / allergy advice ke liye doctor se milein.
-            </p>
-
             <p className="mt-4 text-center text-sm">
-              <Link href="/tools" className="font-medium text-brand hover:underline">
+              <Link
+                id="kundal-dhatu-all-tools-link"
+                href="/tools"
+                className="font-medium text-brand hover:underline"
+              >
                 ← Sab tools
               </Link>
             </p>
@@ -348,6 +362,7 @@ export function KundalDhatuTool() {
 
                 {/* CTA button */}
                 <Link
+                  id="kundal-dhatu-sticky-kundli-cta"
                   href="/free-kundli"
                   className="relative shrink-0 overflow-hidden rounded-2xl bg-brand px-5 py-2.5 shadow-[0_4px_18px_-4px_rgba(180,83,9,0.55)] transition-transform active:scale-95"
                 >

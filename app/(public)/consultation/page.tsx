@@ -64,12 +64,13 @@ export default function ConsultationPage() {
           </p>
           <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
             <Button
+              id="consultation-get-chart-first-cta"
               className="bg-brand font-bold text-white hover:bg-brand-hover"
               render={<Link href="/free-kundli" />}
             >
               Get your chart first (free)
             </Button>
-            <Button variant="outline" render={<Link href="/kundli-report" />}>
+            <Button id="consultation-see-report-cta" variant="outline" render={<Link href="/kundli-report" />}>
               See report option
             </Button>
           </div>

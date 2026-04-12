@@ -17,10 +17,10 @@ export function SiteHeader() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+    <header className="site-header sticky top-0 z-50 w-full border-b border-border/60 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
         {/* Logo */}
-        <Link href="/" className="flex flex-col leading-none">
+        <Link id="site-header-logo-link" href="/" className="flex flex-col leading-none">
           <span className="font-heading text-2xl font-semibold tracking-wide text-foreground">
             Vedगuide
           </span>
@@ -34,6 +34,7 @@ export function SiteHeader() {
           {NAV_LINKS.map((link) => (
             <Link
               key={link.href}
+              id={`site-header-${link.href === "/free-kundli" ? "free-kundli" : link.href === "/kundli-report" ? "kundli-report" : link.href === "/consultation" ? "consultation" : link.href === "/tools" ? "tools" : "about"}-link`}
               href={link.href}
               className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
             >
@@ -45,6 +46,7 @@ export function SiteHeader() {
         {/* Desktop CTA */}
         <div className="hidden md:flex">
           <Button
+            id="site-header-free-kundli-cta"
             size="sm"
             className="bg-brand hover:bg-brand-hover text-white"
             render={<Link href="/free-kundli" />}
@@ -55,6 +57,7 @@ export function SiteHeader() {
 
         {/* Mobile menu toggle */}
         <button
+          id="site-header-mobile-menu-toggle"
           className="flex md:hidden"
           onClick={() => setMobileOpen((v) => !v)}
           aria-label="Toggle menu"
@@ -70,6 +73,7 @@ export function SiteHeader() {
             {NAV_LINKS.map((link) => (
               <Link
                 key={link.href}
+                id={`site-header-mobile-${link.href === "/free-kundli" ? "free-kundli" : link.href === "/kundli-report" ? "kundli-report" : link.href === "/consultation" ? "consultation" : link.href === "/tools" ? "tools" : "about"}-link`}
                 href={link.href}
                 className="text-base font-medium text-foreground"
                 onClick={() => setMobileOpen(false)}
@@ -78,6 +82,7 @@ export function SiteHeader() {
               </Link>
             ))}
             <Button
+              id="site-header-mobile-free-kundli-cta"
               className="mt-2 w-full bg-brand hover:bg-brand-hover text-white"
               render={<Link href="/free-kundli" onClick={() => setMobileOpen(false)} />}
             >

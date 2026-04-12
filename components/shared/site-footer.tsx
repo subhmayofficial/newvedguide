@@ -16,7 +16,7 @@ export function SiteFooter() {
       {/* ── Mobile: single compact block ── */}
       <div className="px-4 py-6 sm:hidden">
         <div className="flex items-center justify-between">
-          <Link href="/" className="flex flex-col leading-none">
+          <Link id="site-footer-mobile-logo-link" href="/" className="flex flex-col leading-none">
             <span className="font-heading text-xl font-bold text-foreground">Vedगuide</span>
             <span className="text-[10px] font-medium text-brand/70">by AstroGuru Ashutosh</span>
           </Link>
@@ -29,6 +29,7 @@ export function SiteFooter() {
           {QUICK_LINKS.map((l) => (
             <Link
               key={l.href}
+              id={`site-footer-mobile-${l.href === "/free-kundli" ? "free-kundli" : l.href === "/kundli-report" ? "kundli-report" : l.href === "/tools" ? "tools" : l.href === "/privacy-policy" ? "privacy" : l.href === "/terms" ? "terms" : l.href === "/refund-policy" ? "refund" : "contact"}-link`}
               href={l.href}
               className="text-[12px] font-medium text-muted-foreground hover:text-foreground"
             >
@@ -46,7 +47,7 @@ export function SiteFooter() {
       <div className="mx-auto hidden max-w-5xl px-6 py-10 sm:block">
         <div className="flex flex-wrap gap-x-12 gap-y-8">
           <div className="min-w-[160px]">
-            <Link href="/" className="flex flex-col leading-none">
+            <Link id="site-footer-logo-link" href="/" className="flex flex-col leading-none">
               <span className="font-heading text-2xl font-bold text-foreground">Vedगuide</span>
               <span className="mt-0.5 text-[11px] font-medium text-brand/70">by AstroGuru Ashutosh</span>
             </Link>
@@ -90,6 +91,7 @@ export function SiteFooter() {
                 {links.map((l) => (
                   <li key={l.href}>
                     <Link
+                      id={`site-footer-${l.href === "/free-kundli" ? "free-kundli" : l.href === "/kundli-report" ? "kundli-report" : l.href === "/consultation" ? "consultation" : l.href === "/tools" ? "tools" : l.href === "/privacy-policy" ? "privacy" : l.href === "/terms" ? "terms" : l.href === "/refund-policy" ? "refund" : l.href === "/disclaimer" ? "disclaimer" : l.href === "/faq" ? "faq" : "contact"}-link`}
                       href={l.href}
                       className="text-sm text-muted-foreground transition-colors hover:text-foreground"
                     >
