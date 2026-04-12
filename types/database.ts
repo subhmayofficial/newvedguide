@@ -228,6 +228,9 @@ export interface Database {
           subtotal_amount: string;
           addon_amount: string;
           discount_amount: string;
+          coupon_id: string | null;
+          coupon_code: string | null;
+          coupon_applied: boolean;
           total_amount: string;
           currency: string;
           razorpay_order_id: string | null;
@@ -255,6 +258,9 @@ export interface Database {
           subtotal_amount?: string | number;
           addon_amount?: string | number;
           discount_amount?: string | number;
+          coupon_id?: string | null;
+          coupon_code?: string | null;
+          coupon_applied?: boolean;
           total_amount?: string | number;
           currency?: string;
           razorpay_order_id?: string | null;
@@ -265,6 +271,44 @@ export interface Database {
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["orders"]["Insert"]>;
+        Relationships: [];
+      };
+      coupons: {
+        Row: {
+          id: string;
+          code: string;
+          description: string | null;
+          discount_type: string;
+          discount_value: string;
+          min_order_amount: string;
+          max_discount_amount: string | null;
+          usage_limit: number | null;
+          usage_count: number;
+          applies_to_product_slug: string | null;
+          is_active: boolean;
+          valid_from: string | null;
+          valid_until: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          code: string;
+          description?: string | null;
+          discount_type: string;
+          discount_value: string | number;
+          min_order_amount?: string | number;
+          max_discount_amount?: string | number | null;
+          usage_limit?: number | null;
+          usage_count?: number;
+          applies_to_product_slug?: string | null;
+          is_active?: boolean;
+          valid_from?: string | null;
+          valid_until?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["coupons"]["Insert"]>;
         Relationships: [];
       };
       order_items: {

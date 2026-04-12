@@ -11,6 +11,7 @@ import {
 } from "@/lib/constants/commerce";
 import { logEvent } from "@/lib/services/event";
 import { updateOrderStatus } from "@/lib/services/order";
+import { incrementCouponUsage } from "@/lib/services/coupon";
 
 export interface CreatePaymentAttemptInput {
   orderId: string;
@@ -117,7 +118,7 @@ export async function markPaymentSuccess(
 
   const { data: order } = await supabase
     .from("orders")
-    .select("lead_id,customer_id")
+    .select("lead_id,customer_id,coupon_id,coupon_code")
     .eq("id", input.orderId)
     .single();
 
@@ -132,13 +133,20 @@ export async function markPaymentSuccess(
       .eq("id", order.lead_id);
   }
 
+  if (order?.coupon_id) {
+    await incrementCouponUsage(supabase, order.coupon_id);
+  }
+
   await logEvent(supabase, {
     eventName: "payment_success",
     eventGroup: EVENT_GROUP.COMMERCE,
     customerId: order?.customer_id ?? null,
     leadId: order?.lead_id ?? null,
     orderId: input.orderId,
-    metadataJson: { provider_payment_id: input.providerPaymentId },
+    metadataJson: {
+      provider_payment_id: input.providerPaymentId,
+      coupon_code: order?.coupon_code ?? null,
+    },
   });
 }
 

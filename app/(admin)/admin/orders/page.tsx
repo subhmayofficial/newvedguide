@@ -14,7 +14,7 @@ export default async function AdminOrdersPage({
   let q = supabase
     .from("orders")
     .select(
-      "id,order_number,product_slug,total_amount,status,payment_status,fulfillment_status,entry_path,created_at,customers(full_name,phone)",
+      "id,order_number,product_slug,total_amount,status,payment_status,fulfillment_status,entry_path,created_at,coupon_applied,coupon_code,customers(full_name,phone)",
       { count: "exact" }
     )
     .order("created_at", { ascending: false })
@@ -37,6 +37,8 @@ export default async function AdminOrdersPage({
     payment_status: string;
     fulfillment_status: string;
     entry_path: string | null;
+    coupon_applied: boolean;
+    coupon_code: string | null;
     created_at: string;
     customers: { full_name?: string | null; phone?: string | null } | null;
   };
@@ -108,6 +110,7 @@ export default async function AdminOrdersPage({
               <th className="px-4 py-3">Fulfillment</th>
               <th className="px-4 py-3">Status</th>
               <th className="px-4 py-3">Entry</th>
+              <th className="px-4 py-3">Coupon</th>
               <th className="px-4 py-3">Created</th>
               <th className="px-4 py-3 text-right">Actions</th>
             </tr>
@@ -132,6 +135,9 @@ export default async function AdminOrdersPage({
                   <td className="px-4 py-3 text-xs">{r.fulfillment_status}</td>
                   <td className="px-4 py-3 text-xs">{r.status}</td>
                   <td className="px-4 py-3 text-xs">{r.entry_path ?? "—"}</td>
+                  <td className="px-4 py-3 text-xs">
+                    {r.coupon_applied ? r.coupon_code ?? "used" : "no"}
+                  </td>
                   <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
                     {new Date(r.created_at).toLocaleString()}
                   </td>

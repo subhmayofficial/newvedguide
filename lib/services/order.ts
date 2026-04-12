@@ -27,6 +27,9 @@ export interface CreateOrderOnPaymentInitiationInput {
   subtotalPaise: number;
   addonPaise: number;
   discountPaise?: number;
+  couponId?: string | null;
+  couponCode?: string | null;
+  couponApplied?: boolean;
   currency?: string;
 }
 
@@ -53,6 +56,9 @@ export async function createOrderOnPaymentInitiation(
     subtotal_amount: input.subtotalPaise,
     addon_amount: input.addonPaise,
     discount_amount: discount,
+    coupon_id: input.couponId ?? null,
+    coupon_code: input.couponCode ?? null,
+    coupon_applied: input.couponApplied ?? false,
     total_amount: total,
     currency: input.currency ?? "INR",
     payment_initiated_at: new Date().toISOString(),

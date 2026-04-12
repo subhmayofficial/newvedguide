@@ -9,6 +9,7 @@ import {
   updateOrderFulfillmentStatus,
   updateOrderStatus,
 } from "@/lib/services/order";
+import { createCoupon } from "@/lib/services/coupon";
 import { FULFILLMENT_STATUS, ORDER_STATUS } from "@/lib/constants/commerce";
 
 export async function addLeadNote(leadId: string, note: string) {
@@ -104,4 +105,38 @@ export async function submitOrderFulfillmentForm(formData: FormData) {
   const status = String(formData.get("fulfillment") ?? "");
   if (!orderId || !status) return;
   await setOrderFulfillment(orderId, status);
+}
+
+export async function submitCouponCreateForm(formData: FormData) {
+  const supabase = createServiceClient();
+  const code = String(formData.get("code") ?? "").trim();
+  const description = String(formData.get("description") ?? "").trim();
+  const discountType = String(formData.get("discountType") ?? "fixed");
+  const discountValue = Number(formData.get("discountValue") ?? 0);
+  const minOrderAmount = Number(formData.get("minOrderAmount") ?? 0);
+  const maxDiscountAmountRaw = String(formData.get("maxDiscountAmount") ?? "").trim();
+  const usageLimitRaw = String(formData.get("usageLimit") ?? "").trim();
+  const appliesToProductSlug = String(formData.get("appliesToProductSlug") ?? "").trim();
+  const validFrom = String(formData.get("validFrom") ?? "").trim();
+  const validUntil = String(formData.get("validUntil") ?? "").trim();
+  const isActive = String(formData.get("isActive") ?? "off") === "on";
+
+  if (!code || !discountValue || discountValue <= 0) return;
+  if (discountType !== "fixed" && discountType !== "percentage") return;
+
+  await createCoupon(supabase, {
+    code,
+    description: description || null,
+    discountType,
+    discountValue,
+    minOrderAmount,
+    maxDiscountAmount: maxDiscountAmountRaw ? Number(maxDiscountAmountRaw) : null,
+    usageLimit: usageLimitRaw ? Number(usageLimitRaw) : null,
+    appliesToProductSlug: appliesToProductSlug || null,
+    validFrom: validFrom || null,
+    validUntil: validUntil || null,
+    isActive,
+  });
+
+  revalidatePath("/admin/coupons");
 }

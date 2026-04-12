@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 import { track } from "@/lib/analytics/events";
 import { getOrCreateSessionId } from "@/lib/analytics/session";
 
@@ -23,6 +24,7 @@ declare global {
   interface Window {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     Razorpay: any;
+    dataLayer?: Array<Record<string, unknown>>;
   }
 }
 
@@ -50,6 +52,12 @@ type CheckoutFormState = {
 };
 
 type CheckoutFormErrors = Partial<Record<keyof CheckoutFormState, string>>;
+
+type AppliedCoupon = {
+  code: string;
+  discountPaise: number;
+  finalAmountPaise: number;
+};
 
 function cn(...classes: (string | boolean | undefined)[]) {
   return classes.filter(Boolean).join(" ");
@@ -366,7 +374,12 @@ export function KundliCheckout() {
   const [loading, setLoading] = useState(false);
   const [razorpayReady, setRazorpayReady] = useState(false);
   const [fastTrack, setFastTrack] = useState(false);
-  const totalPaise = BASE_PRICE + (fastTrack ? BUMP_PRICE : 0);
+  const [couponCode, setCouponCode] = useState("");
+  const [couponError, setCouponError] = useState("");
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(null);
+  const baseTotalPaise = BASE_PRICE + (fastTrack ? BUMP_PRICE : 0);
+  const totalPaise = appliedCoupon?.finalAmountPaise ?? baseTotalPaise;
 
   const razorpayKeyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
 
@@ -473,6 +486,57 @@ export function KundliCheckout() {
     return ok;
   }
 
+  const applyCoupon = useCallback(async (code: string, silent = false) => {
+    const normalized = code.trim().toUpperCase();
+    if (!normalized) {
+      setAppliedCoupon(null);
+      setCouponError(silent ? "" : "Enter a coupon code first.");
+      return;
+    }
+
+    setCouponLoading(true);
+    if (!silent) setCouponError("");
+
+    try {
+      const res = await fetch("/api/coupons/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          code: normalized,
+          amountPaise: baseTotalPaise,
+          productSlug: "paid-kundli",
+        }),
+      });
+
+      const json = await res.json();
+      if (!res.ok) {
+        throw new Error(
+          typeof json.error === "string" ? json.error : "Coupon could not be applied."
+        );
+      }
+
+      setCouponCode(normalized);
+      setAppliedCoupon({
+        code: json.code,
+        discountPaise: json.discountPaise,
+        finalAmountPaise: json.finalAmountPaise,
+      });
+      setCouponError("");
+    } catch (err) {
+      setAppliedCoupon(null);
+      setCouponError(
+        err instanceof Error ? err.message : "Coupon could not be applied."
+      );
+    } finally {
+      setCouponLoading(false);
+    }
+  }, [baseTotalPaise]);
+
+  useEffect(() => {
+    if (!appliedCoupon) return;
+    void applyCoupon(couponCode || appliedCoupon.code, true);
+  }, [appliedCoupon, applyCoupon, couponCode, fastTrack]);
+
   async function handlePay() {
     if (!validate()) return;
 
@@ -496,11 +560,12 @@ export function KundliCheckout() {
       const res = await fetch("/api/payments/create-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          productSlug: "paid-kundli",
-          addOnSlugs: fastTrack ? ["fast-track-addon"] : [],
-          amountPaise: totalPaise,
-          customer: {
+          body: JSON.stringify({
+            productSlug: "paid-kundli",
+            addOnSlugs: fastTrack ? ["fast-track-addon"] : [],
+            amountPaise: totalPaise,
+            couponCode: appliedCoupon?.code,
+            customer: {
             fullName: form.fullName,
             phone: form.phone,
             email: form.email || undefined,
@@ -586,6 +651,34 @@ export function KundliCheckout() {
           const verifyJson = await verifyRes.json();
           if (verifyJson.success) {
             track.paymentSuccess("paid-kundli", totalPaise, dbId, sourceFunnel);
+            window.dataLayer = window.dataLayer || [];
+            window.dataLayer.push({
+              event: "Kundli_purchase",
+              ecommerce: {
+                transaction_id: dbId,
+                value: totalPaise / 100,
+                currency: "INR",
+                coupon: appliedCoupon?.code ?? undefined,
+                items: [
+                  {
+                    item_id: "paid-kundli",
+                    item_name: "Personalized Kundli Report",
+                    price: 399,
+                    quantity: 1,
+                  },
+                  ...(fastTrack
+                    ? [
+                        {
+                          item_id: "fasttrack",
+                          item_name: "FastTrack Delivery",
+                          price: 99,
+                          quantity: 1,
+                        },
+                      ]
+                    : []),
+                ],
+              },
+            });
             sessionStorage.setItem(
               "order_complete",
               JSON.stringify({ orderId: dbId, product: "kundli_report", fastTrack })
@@ -866,6 +959,61 @@ export function KundliCheckout() {
               )}
             </div>
 
+            <div className="rounded-xl border border-dashed border-stone-200 bg-stone-50/70 px-3 py-3">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-wide text-stone-500">
+                    Coupon
+                  </p>
+                  <p className="text-[11px] text-stone-500">
+                    Private code hai to yahan apply karein.
+                  </p>
+                </div>
+                {appliedCoupon && (
+                  <button
+                    type="button"
+                    className="text-[11px] font-semibold text-stone-500 hover:text-stone-800"
+                    onClick={() => {
+                      setAppliedCoupon(null);
+                      setCouponCode("");
+                      setCouponError("");
+                    }}
+                  >
+                    Remove
+                  </button>
+                )}
+              </div>
+              <div className="mt-2 flex gap-2">
+                <Input
+                  id="checkout-kundli-coupon-input"
+                  value={couponCode}
+                  onChange={(e) => {
+                    setCouponCode(e.target.value.toUpperCase());
+                    setCouponError("");
+                  }}
+                  placeholder="Coupon code"
+                  className="h-10 text-[12px] uppercase tracking-wide"
+                />
+                <Button
+                  id="checkout-kundli-apply-coupon-btn"
+                  type="button"
+                  variant="outline"
+                  className="h-10 shrink-0 text-[12px] font-bold"
+                  onClick={() => applyCoupon(couponCode)}
+                  disabled={couponLoading}
+                >
+                  {couponLoading ? "Applying..." : appliedCoupon ? "Applied" : "Apply"}
+                </Button>
+              </div>
+              {couponError && <p className="mt-2 text-[11px] text-red-500">{couponError}</p>}
+              {appliedCoupon && (
+                <p className="mt-2 text-[11px] font-medium text-emerald-700">
+                  {appliedCoupon.code} applied. You save Rs{" "}
+                  {(appliedCoupon.discountPaise / 100).toFixed(0)}.
+                </p>
+              )}
+            </div>
+
             {/* Bump offer */}
             <BumpOffer checked={fastTrack} onChange={setFastTrack} />
 
@@ -943,13 +1091,26 @@ export function KundliCheckout() {
                     <span className="font-semibold text-amber-950">₹99</span>
                   </div>
                 )}
+                {appliedCoupon && (
+                  <div className="mt-2 flex items-center justify-between">
+                    <span className="text-[13px] text-emerald-700">
+                      Coupon ({appliedCoupon.code})
+                    </span>
+                    <span className="hidden">
+                      -â‚¹{(appliedCoupon.discountPaise / 100).toFixed(0)}
+                    </span>
+                    <span className="font-semibold text-emerald-700">
+                      -Rs {(appliedCoupon.discountPaise / 100).toFixed(0)}
+                    </span>
+                  </div>
+                )}
                 <div className="mt-3 flex items-center justify-between border-t border-amber-100 pt-3">
                   <span className="text-sm font-bold text-amber-950">Total</span>
                   <div className="flex items-baseline gap-2">
                     <span className="font-heading text-2xl font-extrabold text-amber-950">
                       ₹{totalPaise / 100}
                     </span>
-                    {!fastTrack && (
+                    {!fastTrack && !appliedCoupon && (
                       <span className="text-xs text-stone-400 line-through">₹999</span>
                     )}
                   </div>
