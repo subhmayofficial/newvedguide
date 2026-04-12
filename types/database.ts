@@ -172,6 +172,7 @@ export interface Database {
           lead_id: string | null;
           full_name: string | null;
           gender: string | null;
+          report_language: string | null;
           date_of_birth: string | null;
           time_of_birth: string | null;
           birth_place: string | null;
@@ -191,6 +192,7 @@ export interface Database {
           lead_id?: string | null;
           full_name?: string | null;
           gender?: string | null;
+          report_language?: string | null;
           date_of_birth?: string | null;
           time_of_birth?: string | null;
           birth_place?: string | null;
@@ -220,6 +222,9 @@ export interface Database {
           status: string;
           payment_status: string;
           fulfillment_status: string;
+          fulfillment_assignee: string | null;
+          consultation_type: string | null;
+          session_note: string | null;
           subtotal_amount: string;
           addon_amount: string;
           discount_amount: string;
@@ -244,6 +249,9 @@ export interface Database {
           status: string;
           payment_status: string;
           fulfillment_status: string;
+          fulfillment_assignee?: string | null;
+          consultation_type?: string | null;
+          session_note?: string | null;
           subtotal_amount?: string | number;
           addon_amount?: string | number;
           discount_amount?: string | number;

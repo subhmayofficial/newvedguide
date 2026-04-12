@@ -20,6 +20,8 @@ export interface CreateOrderOnPaymentInitiationInput {
   leadId: string | null;
   birthDetailsId: string | null;
   productSlug: string;
+  consultationType?: "chat" | "call" | "video_call" | null;
+  sessionNote?: string | null;
   entryPath?: string | null;
   source?: string | null;
   subtotalPaise: number;
@@ -46,6 +48,8 @@ export async function createOrderOnPaymentInitiation(
     status: ORDER_STATUS.PENDING_PAYMENT,
     payment_status: PAYMENT_STATUS_ORDER.PENDING,
     fulfillment_status: FULFILLMENT_STATUS.UNFULFILLED,
+    consultation_type: input.consultationType ?? null,
+    session_note: input.sessionNote ?? null,
     subtotal_amount: input.subtotalPaise,
     addon_amount: input.addonPaise,
     discount_amount: discount,
@@ -114,5 +118,16 @@ export async function updateOrderFulfillmentStatus(
   await supabase
     .from("orders")
     .update({ fulfillment_status: fulfillmentStatus })
+    .eq("id", orderId);
+}
+
+export async function updateOrderFulfillmentAssignee(
+  supabase: SupabaseClient<Database>,
+  orderId: string,
+  assignee: string | null
+): Promise<void> {
+  await supabase
+    .from("orders")
+    .update({ fulfillment_assignee: assignee })
     .eq("id", orderId);
 }

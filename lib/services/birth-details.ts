@@ -6,6 +6,7 @@ export interface SaveBirthDetailsInput {
   leadId?: string | null;
   fullName?: string | null;
   gender?: string | null;
+  reportLanguage?: string | null;
   dateOfBirth?: string | null;
   timeOfBirth?: string | null;
   birthPlace?: string | null;
@@ -27,6 +28,7 @@ export async function saveBirthDetails(
     lead_id: input.leadId ?? null,
     full_name: input.fullName ?? null,
     gender: input.gender ?? null,
+    report_language: input.reportLanguage ?? null,
     date_of_birth: input.dateOfBirth ?? null,
     time_of_birth: input.timeOfBirth ?? null,
     birth_place: input.birthPlace ?? null,
