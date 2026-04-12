@@ -549,7 +549,7 @@ export function KundliForm() {
             id={step === 5 ? "free-kundli-submit-btn" : `free-kundli-next-step-${step}-btn`}
             onClick={handleNext}
             className={cn(
-              "flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl py-3 text-[15px] font-semibold text-white transition-all duration-200 md:min-h-13 md:text-base",
+              "flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl py-3 text-[15px] font-semibold text-white transition-all duration-200 md:min-h-13 md:text-base [&>*]:pointer-events-none",
               "bg-brand hover:bg-brand-hover active:scale-[0.98]"
             )}
           >
