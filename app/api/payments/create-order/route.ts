@@ -26,6 +26,8 @@ interface CreateOrderBody {
     fullName: string;
     phone: string;
     email?: string;
+    gender?: string;
+    reportLanguage?: string;
     dob?: string;
     tob?: string;
     pob?: string;
@@ -57,6 +59,19 @@ export async function POST(request: Request) {
     if (!amountPaise || !customer?.phone || !customer?.fullName) {
       return NextResponse.json(
         { error: "Missing required fields" },
+        { status: 400 }
+      );
+    }
+
+    const genderNorm = customer.gender?.toLowerCase().trim();
+    if (genderNorm !== "male" && genderNorm !== "female") {
+      return NextResponse.json({ error: "Gender is required" }, { status: 400 });
+    }
+
+    const reportLangNorm = customer.reportLanguage?.toLowerCase().trim();
+    if (reportLangNorm !== "hindi" && reportLangNorm !== "english") {
+      return NextResponse.json(
+        { error: "Report language must be Hindi or English" },
         { status: 400 }
       );
     }
@@ -135,6 +150,8 @@ export async function POST(request: Request) {
       customerId: cust.id,
       leadId: lead.id,
       fullName: customer.fullName,
+      gender: genderNorm,
+      reportLanguage: reportLangNorm,
       dateOfBirth: customer.dob ?? null,
       timeOfBirth: customer.tob ?? null,
       birthPlace: customer.pob ?? null,
@@ -216,9 +233,16 @@ export async function POST(request: Request) {
       currency: "INR",
     });
   } catch (err) {
+    const message =
+      err instanceof Error ? err.message : "Failed to create order";
     console.error("[create-order]", err);
     return NextResponse.json(
-      { error: "Failed to create order" },
+      {
+        error:
+          process.env.NODE_ENV === "development"
+            ? message
+            : "Failed to create order",
+      },
       { status: 500 }
     );
   }

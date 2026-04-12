@@ -27,13 +27,25 @@ export interface RazorpayVerifyPayload {
   razorpay_signature: string;
 }
 
+function getRazorpayCredentials() {
+  const keyId = process.env.RAZORPAY_KEY_ID?.trim();
+  const keySecret = process.env.RAZORPAY_KEY_SECRET?.trim();
+
+  if (!keyId || !keySecret) {
+    throw new Error(
+      "Razorpay credentials missing. Set RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET in .env.local and restart dev server."
+    );
+  }
+
+  return { keyId, keySecret };
+}
+
 // ─── Order Creation ───────────────────────────────────────────────────────────
 
 export async function createRazorpayOrder(
   payload: RazorpayOrderPayload
 ): Promise<RazorpayOrder> {
-  const keyId = process.env.RAZORPAY_KEY_ID!;
-  const keySecret = process.env.RAZORPAY_KEY_SECRET!;
+  const { keyId, keySecret } = getRazorpayCredentials();
 
   const body = {
     amount: payload.amount,
@@ -66,7 +78,7 @@ export async function createRazorpayOrder(
 export function verifyRazorpaySignature(
   payload: RazorpayVerifyPayload
 ): boolean {
-  const keySecret = process.env.RAZORPAY_KEY_SECRET!;
+  const { keySecret } = getRazorpayCredentials();
   const body = `${payload.razorpay_order_id}|${payload.razorpay_payment_id}`;
   const expectedSignature = crypto
     .createHmac("sha256", keySecret)
