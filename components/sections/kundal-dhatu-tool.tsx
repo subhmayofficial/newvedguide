@@ -131,7 +131,7 @@ export function KundalDhatuTool() {
                         : "border-border/60 hover:border-brand/30 hover:shadow-sm"
                     )}
                   >
-                    <div className="relative size-14">
+                    <div className="pointer-events-none relative size-14">
                       <Image
                         src={RASHI_IMG[r.id] ?? "/zodiac/mesh.webp"}
                         alt={r.nameHi}
@@ -140,7 +140,7 @@ export function KundalDhatuTool() {
                         sizes="56px"
                       />
                     </div>
-                    <p className="mt-2 text-center text-[11px] font-bold leading-tight text-foreground">
+                    <p className="pointer-events-none mt-2 text-center text-[11px] font-bold leading-tight text-foreground">
                       {r.nameHi}
                       <br />
                       <span className="font-medium text-muted-foreground">({r.nameEn})</span>
