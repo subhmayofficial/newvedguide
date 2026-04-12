@@ -9,7 +9,6 @@ import {
   Lock,
   CheckCircle2,
   Loader2,
-  ChevronLeft,
   Zap,
   Clock,
   MapPin,
@@ -30,6 +29,7 @@ declare global {
 interface KundliSessionData {
   submissionId?: string;
   name?: string;
+  gender?: string;
   dob?: string;
   tob?: string;
   pob?: string;
@@ -37,6 +37,38 @@ interface KundliSessionData {
 
 const BASE_PRICE = 39900; // ₹399 in paise
 const BUMP_PRICE = 9900;  // ₹99 in paise
+
+type CheckoutFormState = {
+  fullName: string;
+  phone: string;
+  email: string;
+  gender: "" | "male" | "female";
+  reportLanguage: "" | "hindi" | "english";
+  dob: string;
+  tob: string;
+  pob: string;
+};
+
+type CheckoutFormErrors = Partial<Record<keyof CheckoutFormState, string>>;
+
+function cn(...classes: (string | boolean | undefined)[]) {
+  return classes.filter(Boolean).join(" ");
+}
+
+/** Light checkout: white fields, dark orange focus */
+const fieldClass = (err?: boolean) =>
+  cn(
+    "h-11 border text-[14px] bg-white shadow-sm transition-[border-color,box-shadow]",
+    "border-stone-200 text-stone-900 placeholder:text-stone-400",
+    "focus-visible:border-amber-700 focus-visible:ring-2 focus-visible:ring-amber-600/25 focus-visible:outline-none",
+    err && "border-red-500 focus-visible:ring-red-200"
+  );
+
+const labelClass = "text-[13px] font-semibold text-stone-800";
+
+/** Same asset as free kundli result upsell (premium_kundli.png) */
+const PREMIUM_KUNDLI_IMAGE =
+  "https://primedit-cdn.b-cdn.net/shubhmay-lp-kundli/premium_kundli.png";
 
 const WHAT_YOU_GET = [
   "Aapki poori birth chart ka manual analysis",
@@ -51,10 +83,6 @@ const WHAT_YOU_GET = [
 
 function firstName(name: string): string {
   return name.trim().split(/\s+/)[0] ?? name;
-}
-
-function cn(...classes: (string | boolean | undefined)[]) {
-  return classes.filter(Boolean).join(" ");
 }
 
 // ─── Section divider with label ───────────────────────────────────────────────
@@ -89,14 +117,14 @@ function BumpOffer({
       <div
         onClick={() => onChange(!checked)}
         className={cn(
-          "vg-ft-card relative cursor-pointer overflow-hidden rounded-2xl border-2 transition-all duration-200",
+          "vg-ft-card relative cursor-pointer overflow-hidden rounded-2xl border-2 transition-all duration-200 bg-white",
           checked
-            ? "vg-ft-card-checked border-amber-500 bg-gradient-to-br from-amber-50 via-orange-50 to-amber-100/60 shadow-[0_0_0_4px_rgba(245,158,11,0.22),0_8px_28px_-6px_rgba(217,119,6,0.5)]"
-            : "border-amber-400/60 bg-gradient-to-br from-amber-50/80 to-orange-50/40 hover:border-amber-500/80"
+            ? "vg-ft-card-checked border-amber-600 bg-gradient-to-br from-amber-50 via-orange-50/90 to-amber-50 shadow-[0_0_0_3px_rgba(194,65,12,0.12),0_10px_32px_-8px_rgba(194,65,12,0.2)]"
+            : "border-amber-200 hover:border-amber-400 shadow-sm shadow-amber-900/5"
         )}
       >
         {/* Top badge strip */}
-        <div className="flex items-center justify-between bg-gradient-to-r from-amber-500 to-orange-500 px-4 py-1.5">
+        <div className="flex items-center justify-between bg-gradient-to-r from-amber-800 to-orange-800 px-4 py-1.5">
           <span className="flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-wide text-white">
             <Zap size={11} strokeWidth={3} />
             Add-on offer
@@ -111,38 +139,38 @@ function BumpOffer({
           <div
             className={cn(
               "mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-md border-2 transition-colors",
-              checked ? "border-amber-500 bg-amber-500" : "border-amber-400 bg-white"
+              checked ? "border-amber-700 bg-amber-600" : "border-amber-300 bg-white"
             )}
           >
             {checked && <CheckCircle2 className="size-3.5 text-white" strokeWidth={3} />}
           </div>
 
           <div className="min-w-0 flex-1">
-            <p className="text-[15px] font-black leading-tight tracking-tight text-foreground" style={{ fontFamily: "system-ui, -apple-system, sans-serif" }}>
+            <p className="text-[15px] font-black leading-tight tracking-tight text-amber-950" style={{ fontFamily: "system-ui, -apple-system, sans-serif" }}>
               ⚡ FastTrack Delivery —{" "}
-              <span className="text-amber-600">12 Ghante</span>
+              <span className="text-orange-700">12 Ghante</span>
             </p>
-            <p className="mt-1 text-[12px] leading-snug text-muted-foreground">
-              Aapki report <span className="font-bold text-amber-700">12 ghante</span> mein ready hogi —{" "}
+            <p className="mt-1 text-[12px] leading-snug text-stone-600">
+              Aapki report <span className="font-bold text-amber-800">12 ghante</span> mein ready hogi —{" "}
               normal 24-48h ke bajaye.
             </p>
 
             {/* Visual comparison */}
             <div className="mt-2.5 flex items-center gap-3">
-              <div className="flex items-center gap-1.5 rounded-lg bg-muted/60 px-2.5 py-1.5">
-                <Clock size={12} className="text-muted-foreground" />
-                <span className="text-[11px] font-medium text-muted-foreground line-through">24–48h</span>
+              <div className="flex items-center gap-1.5 rounded-lg bg-stone-100 px-2.5 py-1.5">
+                <Clock size={12} className="text-stone-400" />
+                <span className="text-[11px] font-medium text-stone-500 line-through">24–48h</span>
               </div>
-              <span className="text-[12px] font-bold text-amber-600">→</span>
-              <div className="flex items-center gap-1.5 rounded-lg bg-amber-500/15 px-2.5 py-1.5">
-                <Zap size={12} className="text-amber-600" />
-                <span className="font-heading text-[13px] font-black text-amber-700">
+              <span className="text-[12px] font-bold text-amber-700">→</span>
+              <div className="flex items-center gap-1.5 rounded-lg bg-amber-100 px-2.5 py-1.5 ring-1 ring-amber-300/80">
+                <Zap size={12} className="text-amber-700" />
+                <span className="font-heading text-[13px] font-black text-amber-900">
                   <span className="text-[15px]">12</span> ghante
                 </span>
               </div>
             </div>
 
-            <p className="mt-2 flex items-center gap-1 text-[11px] font-semibold text-amber-700">
+            <p className="mt-2 flex items-center gap-1 text-[11px] font-semibold text-orange-800">
               <span className="relative flex size-1.5">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-500 opacity-75" />
                 <span className="relative inline-flex size-1.5 rounded-full bg-amber-500" />
@@ -213,14 +241,14 @@ function PayButton({
       </button>
 
       {/* Trust block */}
-      <div className="rounded-xl border border-border/40 bg-muted/20 px-4 py-3">
+      <div className="rounded-xl border border-amber-200/90 bg-amber-50/30 px-4 py-3">
         <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-3">
           {[
             { icon: "✍️", text: "Manual analysis — automated nahi" },
             { icon: "⏰", text: "24-48 ghante delivery (FastTrack: 12h)" },
             { icon: "🔒", text: "Secure payment via Razorpay" },
           ].map(({ icon, text }) => (
-            <div key={text} className="flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground">
+            <div key={text} className="flex items-center gap-1.5 text-[11px] font-medium text-stone-600">
               <span>{icon}</span>
               {text}
             </div>
@@ -228,11 +256,87 @@ function PayButton({
         </div>
       </div>
 
-      <p className="text-center text-[11px] text-muted-foreground">
+      <p className="text-center text-[11px] text-stone-500">
         Aaj ke liye limited processing slots available.{" "}
-        <Link href="/terms" className="underline">Terms</Link>
+        <Link href="/terms" className="font-medium text-amber-800 underline underline-offset-2 hover:text-amber-950">
+          Terms
+        </Link>
         {" & "}
-        <Link href="/refund-policy" className="underline">Refund Policy</Link>
+        <Link href="/refund-policy" className="font-medium text-amber-800 underline underline-offset-2 hover:text-amber-950">
+          Refund Policy
+        </Link>
+      </p>
+    </div>
+  );
+}
+
+// ─── Sticky bottom bar (mobile) ───────────────────────────────────────────────
+
+function StickyPayBar({
+  loading,
+  paymentReady,
+  onPay,
+  totalPaise,
+  formComplete,
+}: {
+  loading: boolean;
+  paymentReady: boolean;
+  onPay: () => void;
+  totalPaise: number;
+  formComplete: boolean;
+}) {
+  const busy = loading || !paymentReady;
+  const totalLabel = `₹${totalPaise / 100}`;
+  return (
+    <div className="fixed inset-x-0 bottom-0 z-50 md:hidden border-t-2 border-amber-200/90 bg-white/95 shadow-[0_-8px_32px_-8px_rgba(194,65,12,0.12)] backdrop-blur-md">
+      <div className="mx-auto flex max-w-4xl items-center gap-3 px-4 py-3 pb-[max(0.85rem,env(safe-area-inset-bottom))]">
+        <div className="min-w-0 flex-1">
+          <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-amber-800/80">
+            Total
+          </p>
+          <p className="font-heading text-[1.35rem] font-black leading-tight text-amber-950">
+            {totalLabel}
+          </p>
+          {!formComplete && !busy ? (
+            <p className="mt-0.5 text-[10px] font-medium leading-snug text-orange-800">
+              Saari zaroori details bharein — tabhi payment khulega
+            </p>
+          ) : null}
+        </div>
+        <button
+          type="button"
+          onClick={onPay}
+          disabled={busy}
+          className="relative shrink-0 overflow-hidden rounded-2xl bg-brand px-5 py-3.5 text-[14px] font-extrabold text-white shadow-[0_6px_20px_-6px_rgba(180,83,9,0.55)] transition-all hover:bg-brand-hover active:scale-[0.98] disabled:opacity-70"
+        >
+          {loading ? (
+            <span className="flex items-center gap-2">
+              <Loader2 size={17} className="animate-spin" />
+              Wait…
+            </span>
+          ) : !paymentReady ? (
+            <span className="flex items-center gap-2">
+              <Loader2 size={17} className="animate-spin" />
+              Loading…
+            </span>
+          ) : (
+            <span className="flex items-center gap-2 whitespace-nowrap">
+              <Lock size={14} strokeWidth={2.5} />
+              Pay now
+            </span>
+          )}
+        </button>
+      </div>
+      <p className="border-t border-amber-100 bg-amber-50/40 px-4 py-1.5 text-center text-[9px] text-stone-500">
+        <Link href="/terms" className="font-medium text-amber-800 underline underline-offset-2">
+          Terms
+        </Link>
+        {" · "}
+        <Link href="/refund-policy" className="font-medium text-amber-800 underline underline-offset-2">
+          Refund
+        </Link>
+        {" · "}
+        <span className="text-stone-500">Razorpay secure</span>
       </p>
     </div>
   );
@@ -245,15 +349,17 @@ export function KundliCheckout() {
   const searchParams = useSearchParams();
 
   const [prefilled, setPrefilled] = useState<KundliSessionData>({});
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<CheckoutFormState>({
     fullName: "",
     phone: "",
     email: "",
+    gender: "",
+    reportLanguage: "",
     dob: "",
     tob: "",
     pob: "",
   });
-  const [errors, setErrors] = useState<Partial<typeof form>>({});
+  const [errors, setErrors] = useState<CheckoutFormErrors>({});
   const [loading, setLoading] = useState(false);
   const [razorpayReady, setRazorpayReady] = useState(false);
   const [fastTrack, setFastTrack] = useState(false);
@@ -294,13 +400,18 @@ export function KundliCheckout() {
       try {
         const parsed: KundliSessionData = JSON.parse(stored);
         setPrefilled(parsed);
-        setForm((f) => ({
-          ...f,
-          fullName: parsed.name ?? "",
-          dob: parsed.dob ?? "",
-          tob: parsed.tob ?? "",
-          pob: parsed.pob ?? "",
-        }));
+        setForm((f) => {
+          const g = parsed.gender?.toLowerCase();
+          const preGender = g === "male" || g === "female" ? g : f.gender;
+          return {
+            ...f,
+            fullName: parsed.name ?? "",
+            gender: preGender,
+            dob: parsed.dob ?? "",
+            tob: parsed.tob ?? "",
+            pob: parsed.pob ?? "",
+          };
+        });
       } catch { /* silent */ }
     }
 
@@ -311,20 +422,52 @@ export function KundliCheckout() {
     };
   }, [sourceFunnel]);
 
-  function set(key: keyof typeof form, value: string) {
+  function set<K extends keyof CheckoutFormState>(key: K, value: CheckoutFormState[K]) {
     setForm((f) => ({ ...f, [key]: value }));
     setErrors((e) => ({ ...e, [key]: undefined }));
   }
 
   function validate(): boolean {
-    const errs: Partial<typeof form> = {};
+    const errs: CheckoutFormErrors = {};
     if (!form.fullName.trim()) errs.fullName = "Name daalna zaroori hai";
     if (!/^[6-9]\d{9}$/.test(form.phone)) errs.phone = "Valid 10-digit WhatsApp number daalo";
+    if (form.gender !== "male" && form.gender !== "female") {
+      errs.gender = "Gender select karein";
+    }
+    if (form.reportLanguage !== "hindi" && form.reportLanguage !== "english") {
+      errs.reportLanguage = "Report language chunein — Hindi ya English";
+    }
     if (!form.dob) errs.dob = "Date of birth required";
     if (!form.tob) errs.tob = "Time of birth required";
     if (!form.pob.trim()) errs.pob = "Place of birth required";
     setErrors(errs);
-    return Object.keys(errs).length === 0;
+    const ok = Object.keys(errs).length === 0;
+    if (!ok) {
+      const order: (keyof CheckoutFormState)[] = [
+        "fullName",
+        "phone",
+        "gender",
+        "dob",
+        "tob",
+        "pob",
+        "reportLanguage",
+      ];
+      for (const key of order) {
+        if (errs[key]) {
+          const scrollId =
+            key === "gender"
+              ? "checkout-gender"
+              : key === "reportLanguage"
+                ? "checkout-report-language"
+                : key;
+          requestAnimationFrame(() => {
+            document.getElementById(scrollId)?.scrollIntoView({ behavior: "smooth", block: "center" });
+          });
+          break;
+        }
+      }
+    }
+    return ok;
   }
 
   async function handlePay() {
@@ -358,6 +501,8 @@ export function KundliCheckout() {
             fullName: form.fullName,
             phone: form.phone,
             email: form.email || undefined,
+            gender: form.gender,
+            reportLanguage: form.reportLanguage,
             dob: form.dob,
             tob: form.tob,
             pob: form.pob,
@@ -477,70 +622,77 @@ export function KundliCheckout() {
 
   const fn = form.fullName ? firstName(form.fullName) : null;
 
+  const formComplete =
+    !!form.fullName.trim() &&
+    /^[6-9]\d{9}$/.test(form.phone) &&
+    (form.gender === "male" || form.gender === "female") &&
+    (form.reportLanguage === "hindi" || form.reportLanguage === "english") &&
+    !!form.dob &&
+    !!form.tob &&
+    !!form.pob.trim();
+
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="border-b border-border/60 px-4 py-3.5">
-        <div className="mx-auto flex max-w-4xl items-center justify-between">
+    <div className="relative min-h-screen bg-gradient-to-b from-white via-amber-50/35 to-orange-50/45 pb-[7.25rem] text-stone-900 md:pb-0">
+      <div
+        aria-hidden
+        className="pointer-events-none fixed inset-0 bg-[radial-gradient(ellipse_100%_70%_at_50%_-20%,rgba(194,65,12,0.07),transparent_55%)]"
+      />
+
+      <div className="relative mx-auto max-w-4xl px-4 py-8 sm:py-10">
+        {/* Heading */}
+        <div className="mb-8">
           <Link
             href="/free-kundli/result"
-            className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+            className="mb-3 inline-block text-[12px] font-medium text-amber-800/80 transition-colors hover:text-amber-950"
           >
-            <ChevronLeft size={16} />
-            Back
+            ← Back to kundli result
           </Link>
-          <span className="font-heading text-lg font-bold text-foreground">Vedगuide</span>
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <Lock size={12} />
-            Secure
-          </div>
-        </div>
-      </div>
-
-      <div className="mx-auto max-w-4xl px-4 py-6 sm:py-8">
-        {/* Heading */}
-        <div className="mb-6">
-          <h1 className="font-heading text-[1.5rem] font-black leading-tight text-foreground sm:text-[1.85rem]">
+          <h1 className="font-heading text-[1.5rem] font-black leading-tight text-amber-950 sm:text-[1.9rem]">
             {fn ? `${fn}, complete your order` : "Complete your order"}
           </h1>
-          <p className="mt-1.5 text-[13px] text-muted-foreground">
-            We will prepare your kundli based on these details.
+          <p className="mt-2 text-[13px] text-stone-600">
+            Neeche form highlight kiya gaya hai — saari zaroori details bharen, phir report language chunein.
           </p>
         </div>
 
         <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
-          {/* ── Left: Form ────────────────────────────────────────────── */}
-          <div className="space-y-4">
+          {/* ── Left: Form (highlighted white card + dark orange trim) ─ */}
+          <div
+            className={cn(
+              "space-y-4 rounded-2xl border-2 border-amber-200/90 bg-white p-5 sm:p-6",
+              "shadow-[0_4px_48px_-12px_rgba(194,65,12,0.14),0_0_0_1px_rgba(255,237,213,0.6)]"
+            )}
+          >
 
             {/* Name */}
             <div className="space-y-1.5">
-              <Label htmlFor="fullName" className="text-[13px] font-semibold text-foreground">
-                Full name <span className="text-destructive">*</span>
+              <Label htmlFor="fullName" className={labelClass}>
+                Full name <span className="text-red-400">*</span>
               </Label>
               <Input
                 id="fullName"
                 value={form.fullName}
                 onChange={(e) => set("fullName", e.target.value)}
                 placeholder="Your full name"
-                className={cn("h-11 text-[14px]", errors.fullName ? "border-destructive" : "")}
+                className={fieldClass(!!errors.fullName)}
               />
               {errors.fullName && (
-                <p className="text-xs text-destructive">{errors.fullName}</p>
+                <p className="text-xs text-red-400">{errors.fullName}</p>
               )}
             </div>
 
             {/* Phone — single seamless container */}
             <div className="space-y-1.5">
-              <Label htmlFor="phone" className="text-[13px] font-semibold text-foreground">
-                WhatsApp number <span className="text-destructive">*</span>
+              <Label htmlFor="phone" className={labelClass}>
+                WhatsApp number <span className="text-red-400">*</span>
               </Label>
               <div
                 className={cn(
-                  "flex h-11 overflow-hidden rounded-lg border bg-background transition-colors focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-0",
-                  errors.phone ? "border-destructive" : "border-input"
+                  "flex h-11 overflow-hidden rounded-lg border bg-white shadow-sm transition-shadow focus-within:ring-2 focus-within:ring-amber-600/25 focus-within:ring-offset-0",
+                  errors.phone ? "border-red-500" : "border-stone-200"
                 )}
               >
-                <span className="flex shrink-0 items-center border-r border-input bg-muted px-3.5 text-[14px] font-semibold text-muted-foreground">
+                <span className="flex shrink-0 items-center border-r border-amber-200/90 bg-amber-50 px-3.5 text-[14px] font-bold text-amber-950">
                   +91
                 </span>
                 <input
@@ -553,19 +705,19 @@ export function KundliCheckout() {
                     set("phone", e.target.value.replace(/\D/g, "").slice(0, 10))
                   }
                   placeholder="10-digit number"
-                  className="min-w-0 flex-1 bg-transparent px-3 text-[14px] text-foreground placeholder:text-muted-foreground focus:outline-none"
+                  className="min-w-0 flex-1 bg-white px-3 text-[14px] text-stone-900 placeholder:text-stone-400 focus:outline-none"
                 />
               </div>
               {errors.phone && (
-                <p className="text-xs text-destructive">{errors.phone}</p>
+                <p className="text-xs text-red-400">{errors.phone}</p>
               )}
             </div>
 
             {/* Email — optional */}
             <div className="space-y-1.5">
-              <Label htmlFor="email" className="text-[13px] font-semibold text-foreground">
+              <Label htmlFor="email" className={labelClass}>
                 Email{" "}
-                <span className="text-[11px] font-normal text-muted-foreground">(optional)</span>
+                <span className="text-[11px] font-normal text-stone-500">(optional)</span>
               </Label>
               <Input
                 id="email"
@@ -573,25 +725,57 @@ export function KundliCheckout() {
                 value={form.email}
                 onChange={(e) => set("email", e.target.value)}
                 placeholder="For PDF delivery"
-                className="h-11 text-[14px]"
+                className={fieldClass()}
               />
+            </div>
+
+            {/* Gender */}
+            <div
+              id="checkout-gender"
+              className={cn(
+                "scroll-mt-28 space-y-1.5",
+                errors.gender && "rounded-xl ring-2 ring-red-500/35"
+              )}
+            >
+              <Label className={labelClass}>
+                Gender <span className="text-red-400">*</span>
+              </Label>
+              <div className="grid grid-cols-2 gap-2">
+                {(["male", "female"] as const).map((g) => (
+                  <button
+                    key={g}
+                    type="button"
+                    onClick={() => set("gender", g)}
+                    className={cn(
+                      "flex h-12 flex-col items-center justify-center gap-0.5 rounded-xl border-2 text-[13px] font-semibold transition-all",
+                      form.gender === g
+                        ? "border-amber-700 bg-amber-50 text-amber-950 shadow-sm shadow-amber-900/10"
+                        : "border-stone-200 bg-white text-stone-600 hover:border-amber-300 hover:text-stone-800"
+                    )}
+                  >
+                    <span className="text-lg">{g === "male" ? "👨" : "👩"}</span>
+                    <span>{g === "male" ? "Male" : "Female"}</span>
+                  </button>
+                ))}
+              </div>
+              {errors.gender && <p className="text-xs text-red-400">{errors.gender}</p>}
             </div>
 
             {/* Divider for birth details */}
             <div className="flex items-center gap-3 pt-2">
-              <div className="h-px flex-1 bg-border/60" />
-              <span className="flex items-center gap-1.5 text-[12px] font-extrabold uppercase tracking-wide text-foreground">
-                <Calendar size={12} className="text-brand" />
+              <div className="h-px flex-1 bg-amber-200/90" />
+              <span className="flex items-center gap-1.5 text-[12px] font-extrabold uppercase tracking-wide text-amber-900">
+                <Calendar size={12} className="text-amber-700" />
                 Birth Details
               </span>
-              <div className="h-px flex-1 bg-border/60" />
+              <div className="h-px flex-1 bg-amber-200/90" />
             </div>
 
             {/* DOB + TOB side by side */}
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label htmlFor="dob" className="text-[13px] font-semibold text-foreground">
-                  Date of birth <span className="text-destructive">*</span>
+                <Label htmlFor="dob" className={labelClass}>
+                  Date of birth <span className="text-red-400">*</span>
                 </Label>
                 <Input
                   id="dob"
@@ -599,43 +783,81 @@ export function KundliCheckout() {
                   value={form.dob}
                   max={new Date().toISOString().split("T")[0]}
                   onChange={(e) => set("dob", e.target.value)}
-                  className={cn("h-11 text-[14px]", errors.dob ? "border-destructive" : "")}
+                  className={fieldClass(!!errors.dob)}
                 />
-                {errors.dob && <p className="text-xs text-destructive">{errors.dob}</p>}
+                {errors.dob && <p className="text-xs text-red-400">{errors.dob}</p>}
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="tob" className="text-[13px] font-semibold text-foreground">
-                  Time of birth <span className="text-destructive">*</span>
+                <Label htmlFor="tob" className={labelClass}>
+                  Time of birth <span className="text-red-400">*</span>
                 </Label>
                 <Input
                   id="tob"
                   type="time"
                   value={form.tob}
                   onChange={(e) => set("tob", e.target.value)}
-                  className={cn("h-11 text-[14px]", errors.tob ? "border-destructive" : "")}
+                  className={fieldClass(!!errors.tob)}
                 />
-                {errors.tob && <p className="text-xs text-destructive">{errors.tob}</p>}
+                {errors.tob && <p className="text-xs text-red-400">{errors.tob}</p>}
               </div>
             </div>
-            <p className="rounded-xl border border-amber-200/60 bg-amber-50/70 px-3 py-2 text-[11px] font-medium text-amber-800">
-              ⏰ Sahi janam samay se Lagna sahi banega — report zyada accurate hogi
-            </p>
 
             {/* POB */}
             <div className="space-y-1.5">
-              <Label htmlFor="pob" className="flex items-center gap-1.5 text-[13px] font-semibold text-foreground">
-                <MapPin size={12} className="text-brand" />
-                Place of birth <span className="text-destructive">*</span>
+              <Label htmlFor="pob" className={cn(labelClass, "flex items-center gap-1.5")}>
+                <MapPin size={12} className="text-amber-700" />
+                Place of birth <span className="text-red-400">*</span>
               </Label>
               <Input
                 id="pob"
                 value={form.pob}
                 onChange={(e) => set("pob", e.target.value)}
                 placeholder="City, State (e.g. Jaipur, Rajasthan)"
-                className={cn("h-11 text-[14px]", errors.pob ? "border-destructive" : "")}
+                className={fieldClass(!!errors.pob)}
               />
-              {errors.pob && <p className="text-xs text-destructive">{errors.pob}</p>}
+              {errors.pob && <p className="text-xs text-red-400">{errors.pob}</p>}
+            </div>
+
+            {/* Report language — last step before add-on & pay */}
+            <div className="flex items-center gap-3 pt-3">
+              <div className="h-px flex-1 bg-amber-200/90" />
+              <span className="flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-[0.14em] text-amber-900">
+                Last step
+              </span>
+              <div className="h-px flex-1 bg-amber-200/90" />
+            </div>
+            <div
+              id="checkout-report-language"
+              className={cn(
+                "scroll-mt-28 space-y-1.5",
+                errors.reportLanguage && "rounded-xl ring-2 ring-red-500/35"
+              )}
+            >
+              <Label className={labelClass}>
+                Report language <span className="text-red-400">*</span>
+              </Label>
+              <p className="text-[11px] text-stone-600">PDF kis language mein chahiye</p>
+              <div className="grid grid-cols-2 gap-2">
+                {(["hindi", "english"] as const).map((lang) => (
+                  <button
+                    key={lang}
+                    type="button"
+                    onClick={() => set("reportLanguage", lang)}
+                    className={cn(
+                      "flex h-11 items-center justify-center rounded-xl border-2 text-[13px] font-bold transition-all",
+                      form.reportLanguage === lang
+                        ? "border-amber-700 bg-amber-50 text-amber-950 shadow-sm shadow-amber-900/10"
+                        : "border-stone-200 bg-white text-stone-600 hover:border-amber-300 hover:text-stone-800"
+                    )}
+                  >
+                    {lang === "hindi" ? "हिंदी" : "English"}
+                  </button>
+                ))}
+              </div>
+              {errors.reportLanguage && (
+                <p className="text-xs text-red-400">{errors.reportLanguage}</p>
+              )}
             </div>
 
             {/* Bump offer */}
@@ -654,33 +876,46 @@ export function KundliCheckout() {
 
           {/* ── Right: Order summary ──────────────────────────────────── */}
           <div>
-            <div className="sticky top-6 overflow-hidden rounded-2xl border border-border/50 bg-card shadow-md">
-              <div className="border-b border-border/40 bg-gradient-to-r from-gold-light/70 to-brand-light/30 px-5 py-4">
-                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-brand">
+            <div className="sticky top-6 overflow-hidden rounded-2xl border-2 border-amber-200/90 bg-white shadow-[0_8px_40px_-12px_rgba(194,65,12,0.18)]">
+              <div className="border-b border-amber-900/20 bg-gradient-to-r from-amber-900 via-orange-900 to-amber-950 px-5 py-4 text-white">
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-amber-100/90">
                   Your order
                 </p>
-                <h2 className="font-heading mt-0.5 text-lg font-extrabold text-foreground">
+                <h2 className="font-heading mt-0.5 text-lg font-extrabold text-white">
                   Aapko kya milega
                 </h2>
-                <p className="mt-1 text-[12px] leading-snug text-muted-foreground">
+                <p className="mt-1 text-[12px] leading-snug text-amber-100/85">
                   Yeh report sirf aapke birth details ke basis par manually prepare ki jayegi.
                 </p>
+              </div>
+
+              <div className="border-b border-amber-100/90 bg-gradient-to-b from-amber-50/50 to-white px-5 py-4">
+                <div className="flex justify-center">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={PREMIUM_KUNDLI_IMAGE}
+                    alt="Personalized Kundli report preview"
+                    width={160}
+                    height={192}
+                    className="h-[min(168px,42vw)] w-auto max-h-[190px] drop-shadow-xl sm:h-[185px] sm:max-h-[200px]"
+                  />
+                </div>
               </div>
 
               <div className="px-5 py-4">
                 <ul className="space-y-2.5">
                   {WHAT_YOU_GET.map((item) => (
                     <li key={item} className="flex items-start gap-2">
-                      <CheckCircle2 size={14} className="mt-0.5 shrink-0 text-brand" />
-                      <span className="text-[13px] font-medium text-foreground">{item}</span>
+                      <CheckCircle2 size={14} className="mt-0.5 shrink-0 text-amber-700" />
+                      <span className="text-[13px] font-medium text-stone-800">{item}</span>
                     </li>
                   ))}
                 </ul>
 
                 {fastTrack && (
-                  <div className="mt-3 flex items-center gap-2 rounded-xl border border-amber-200/80 bg-amber-50/80 px-3 py-2.5">
-                    <Clock className="size-4 shrink-0 text-amber-600" />
-                    <p className="text-[12px] font-semibold text-amber-900">
+                  <div className="mt-3 flex items-center gap-2 rounded-xl border border-amber-300 bg-amber-50 px-3 py-2.5">
+                    <Clock className="size-4 shrink-0 text-amber-800" />
+                    <p className="text-[12px] font-semibold text-amber-950">
                       FastTrack — 12 ghante delivery
                     </p>
                   </div>
@@ -688,42 +923,42 @@ export function KundliCheckout() {
               </div>
 
               {/* Pricing */}
-              <div className="border-t border-border/40 px-5 py-4">
+              <div className="border-t border-amber-100 px-5 py-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-[13px] text-muted-foreground">Personalized Kundli Report</span>
-                  <span className="font-semibold text-foreground">₹399</span>
+                  <span className="text-[13px] text-stone-600">Personalized Kundli Report</span>
+                  <span className="font-semibold text-amber-950">₹399</span>
                 </div>
                 {fastTrack && (
                   <div className="mt-2 flex items-center justify-between">
-                    <span className="flex items-center gap-1 text-[13px] text-muted-foreground">
-                      <Zap className="size-3 text-amber-500" />
+                    <span className="flex items-center gap-1 text-[13px] text-stone-600">
+                      <Zap className="size-3 text-amber-600" />
                       FastTrack Delivery
                     </span>
-                    <span className="font-semibold text-foreground">₹99</span>
+                    <span className="font-semibold text-amber-950">₹99</span>
                   </div>
                 )}
-                <div className="mt-3 flex items-center justify-between border-t border-border/40 pt-3">
-                  <span className="text-sm font-bold text-foreground">Total</span>
+                <div className="mt-3 flex items-center justify-between border-t border-amber-100 pt-3">
+                  <span className="text-sm font-bold text-amber-950">Total</span>
                   <div className="flex items-baseline gap-2">
-                    <span className="font-heading text-2xl font-extrabold text-foreground">
+                    <span className="font-heading text-2xl font-extrabold text-amber-950">
                       ₹{totalPaise / 100}
                     </span>
                     {!fastTrack && (
-                      <span className="text-xs text-muted-foreground line-through">₹999</span>
+                      <span className="text-xs text-stone-400 line-through">₹999</span>
                     )}
                   </div>
                 </div>
               </div>
 
               {/* Trust badges */}
-              <div className="border-t border-border/40 bg-muted/15 px-5 py-3">
+              <div className="border-t border-amber-100 bg-amber-50/40 px-5 py-3">
                 {[
                   { icon: Shield, text: "Secured by Razorpay" },
                   { icon: Lock, text: "SSL encrypted payment" },
                   { icon: CheckCircle2, text: "Instant order confirmation" },
                 ].map(({ icon: Icon, text }) => (
-                  <div key={text} className="flex items-center gap-2 py-0.5 text-[11px] text-muted-foreground">
-                    <Icon size={11} className="text-brand" />
+                  <div key={text} className="flex items-center gap-2 py-0.5 text-[11px] text-stone-600">
+                    <Icon size={11} className="text-amber-700" />
                     {text}
                   </div>
                 ))}
@@ -732,15 +967,14 @@ export function KundliCheckout() {
           </div>
         </div>
 
-        {/* Pay button — mobile */}
-        <div className="mt-6 md:hidden">
-          <PayButton
-            loading={loading}
-            paymentReady={razorpayReady}
-            onPay={handlePay}
-            total={totalPaise}
-          />
-        </div>
+        {/* Mobile: sticky Pay now bar (same handlePay + validation as desktop) */}
+        <StickyPayBar
+          loading={loading}
+          paymentReady={razorpayReady}
+          onPay={handlePay}
+          totalPaise={totalPaise}
+          formComplete={formComplete}
+        />
       </div>
     </div>
   );
