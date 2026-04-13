@@ -173,87 +173,90 @@ export function HomeView() {
       `}</style>
 
       {/* ─── 1. HERO ──────────────────────────────────────────────────────── */}
-      <section className="spiritual-pattern relative min-h-[92vh] overflow-hidden px-4 py-16 md:py-0">
-        {/* Background orbs */}
-        <div className="orb-bg pointer-events-none absolute left-[30%] top-1/2 h-[520px] w-[520px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-brand/10 blur-3xl" />
-        <div className="pointer-events-none absolute right-0 top-0 h-64 w-64 rounded-full bg-gold/8 blur-3xl" />
+      <section className="spiritual-pattern relative min-h-[92vh] overflow-hidden px-4 py-16 md:py-20">
+        <div className="orb-bg pointer-events-none absolute left-1/2 top-1/2 h-[700px] w-[700px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-brand/10 blur-3xl" />
+        <div className="pointer-events-none absolute right-0 top-0 h-72 w-72 rounded-full bg-gold/10 blur-3xl" />
+        <div className="pointer-events-none absolute left-0 top-20 h-56 w-56 rounded-full bg-brand/8 blur-3xl" />
 
-        <div className="relative z-10 mx-auto flex min-h-[92vh] max-w-5xl flex-col items-center justify-center gap-10 md:flex-row md:gap-0">
+        <div className="relative z-10 mx-auto flex min-h-[92vh] w-full max-w-6xl flex-col items-center justify-center text-center">
+          <div className="fade-up-1 mb-5 inline-flex items-center gap-2 rounded-full border border-brand/25 bg-gold-light/90 px-4 py-2 shadow-sm">
+            <span className="text-base">🪔</span>
+            <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-brand">
+              Vedic Astrology · AstroGuru Ashutosh
+            </span>
+          </div>
 
-          {/* Left: text */}
-          <div className="flex flex-col items-center text-center md:flex-1 md:items-start md:text-left">
-            {/* Badge */}
-            <div className="fade-up-1 mb-5 inline-flex items-center gap-2 rounded-full border border-brand/25 bg-gold-light/90 px-4 py-2 shadow-sm">
-              <span className="text-base">🪔</span>
-              <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-brand">
-                Vedic Astrology · AstroGuru Ashutosh
+          <div className="fade-up-1 mb-4 flex flex-wrap items-center justify-center gap-2 text-[11px]">
+            <span className="inline-flex items-center gap-1 rounded-full border border-border/70 bg-surface px-2.5 py-1 font-semibold text-foreground">
+              <Star size={12} className="fill-gold text-gold" />
+              4.9 Rated
+            </span>
+            <span className="rounded-full border border-border/70 bg-surface px-2.5 py-1 font-semibold text-muted-foreground">
+              15+ Countries
+            </span>
+            <span className="rounded-full border border-border/70 bg-surface px-2.5 py-1 font-semibold text-muted-foreground">
+              1237+ Sessions
+            </span>
+          </div>
+
+          <h1 className="fade-up-2 font-heading text-[2.85rem] font-bold leading-[1.05] tracking-tight text-foreground sm:text-[4.2rem] lg:text-[5rem]">
+            Aapki Kundli,{" "}
+            <span className="shimmer-text">Aapki Clarity</span>
+          </h1>
+
+          <p className="fade-up-3 mt-6 max-w-3xl text-[16px] leading-relaxed text-muted-foreground sm:text-[18px]">
+            Career, rishte, paisa aur life direction par practical guidance paayiye.
+            Pehle direct personalized kundli dekhein, phir zarurat ho to consultation book karein.
+          </p>
+
+          <div className="fade-up-4 mt-10 flex w-full max-w-[380px] flex-col gap-3 sm:max-w-none sm:flex-row sm:items-center sm:justify-center">
+            <Link
+              id="home-hero-free-kundli-cta"
+              href="/kundli"
+              className="glow-btn flex items-center justify-center gap-2 rounded-2xl bg-brand px-8 py-4 text-[16px] font-bold text-white shadow-md transition-all hover:bg-brand-hover active:scale-[0.97]"
+            >
+              Direct Kundli Dekhein
+              <ArrowRight size={18} />
+            </Link>
+            <Link
+              id="home-hero-kundli-report-cta"
+              href="/consultation"
+              className="flex items-center justify-center gap-2 rounded-2xl border border-border/80 bg-background/90 px-8 py-4 text-[15px] font-semibold text-foreground transition-all hover:border-brand/40 hover:bg-surface active:scale-[0.97]"
+            >
+              Consultation Book Karein
+            </Link>
+          </div>
+
+          <p className="fade-up-4 mt-4 text-[12px] text-muted-foreground">
+            ✓ Personalized guidance &nbsp;·&nbsp; ✓ Fast checkout &nbsp;·&nbsp; ✓ Private & secure
+          </p>
+
+          <div className="fade-up-4 mt-10 grid w-full gap-3 sm:grid-cols-3">
+            {[
+              { icon: "💼", title: "Career Timing", sub: "Kab switch karein, kab grow karein" },
+              { icon: "❤️", title: "Relationship Clarity", sub: "Pattern samjho, next step clear karo" },
+              { icon: "💰", title: "Money & Stability", sub: "Flow aur blocks dono ka reason" },
+            ].map((item) => (
+              <div
+                key={item.title}
+                className="rounded-2xl border border-border/65 bg-background/70 px-4 py-3 text-center shadow-sm backdrop-blur-[1px]"
+              >
+                <p className="text-lg">{item.icon}</p>
+                <p className="mt-1 text-sm font-bold text-foreground">{item.title}</p>
+                <p className="mt-0.5 text-[11px] leading-snug text-muted-foreground">{item.sub}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-5 flex flex-wrap items-center justify-center gap-2 text-[11px]">
+            {["Vedic-based", "Actionable Guidance", "No Confusing Jargon", "Real Human Support"].map((tag) => (
+              <span
+                key={tag}
+                className="rounded-full border border-brand/20 bg-brand-light/40 px-3 py-1 font-semibold text-brand"
+              >
+                {tag}
               </span>
-            </div>
-
-            {/* Headline */}
-            <h1 className="fade-up-2 font-heading text-[2.6rem] font-bold leading-[1.1] tracking-tight text-foreground sm:text-5xl lg:text-[3.4rem]">
-              Aapki Kundli Mein{" "}
-              <br className="hidden sm:block" />
-              <span className="shimmer-text">Aapka Jawab</span>
-              <br />
-              Chhupa Hai
-            </h1>
-
-            {/* Subtext */}
-            <p className="fade-up-3 mt-5 max-w-[380px] text-[15px] leading-relaxed text-muted-foreground">
-              Kundli ke through life ke important patterns samajhna aur sahi
-              direction mein chalte rehna — yahi hai{" "}
-              <span className="font-semibold text-foreground">VedGuide ka kaam.</span>
-            </p>
-
-            {/* CTAs */}
-            <div className="fade-up-4 mt-8 flex w-full max-w-[320px] flex-col gap-3 md:max-w-none md:flex-row">
-              <Link
-                id="home-hero-free-kundli-cta"
-                href="/free-kundli"
-                className="glow-btn flex items-center justify-center gap-2 rounded-2xl bg-brand px-7 py-4 text-[15px] font-bold text-white shadow-md transition-all hover:bg-brand-hover active:scale-[0.97]"
-              >
-                Free Kundli Check Karein
-                <ArrowRight size={17} />
-              </Link>
-              <Link
-                id="home-hero-kundli-report-cta"
-                href="/free-kundli"
-                className="flex items-center justify-center gap-2 rounded-2xl border border-border/80 bg-background/80 px-7 py-4 text-[14px] font-semibold text-foreground transition-all hover:border-brand/40 hover:bg-surface active:scale-[0.97]"
-              >
-                Kundli Report Dekhein
-              </Link>
-            </div>
-
-            {/* Micro-trust */}
-            <p className="fade-up-4 mt-4 text-[12px] text-muted-foreground">
-              ✓ Bilkul Free &nbsp;·&nbsp; ✓ 2 minute mein &nbsp;·&nbsp; ✓ Instant result
-            </p>
-          </div>
-
-          {/* Right: Ashutosh image */}
-          <div className="relative flex shrink-0 items-end justify-center md:flex-1 md:justify-end">
-            {/* Decorative glow ring behind photo */}
-            <div className="absolute bottom-0 left-1/2 h-64 w-64 -translate-x-1/2 rounded-full bg-gold/20 blur-2xl md:left-auto md:right-8 md:translate-x-0" />
-            <div className="float-img relative z-10">
-              <Image
-                src={ASTRO_IMG}
-                alt="AstroGuru Ashutosh"
-                width={320}
-                height={420}
-                priority
-                loading="eager"
-                style={{ width: "auto" }}
-                className="h-[280px] object-contain drop-shadow-2xl sm:h-[340px] md:h-[420px]"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Scroll hint */}
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 opacity-35">
-          <div className="flex h-8 w-5 items-start justify-center rounded-full border-2 border-muted-foreground/50 pt-1.5">
-            <div className="h-2 w-0.5 animate-bounce rounded-full bg-muted-foreground" />
+            ))}
           </div>
         </div>
       </section>
