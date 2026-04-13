@@ -8,6 +8,7 @@ import {
   CheckCircle2,
   Star,
   Bot,
+  AlertTriangle,
   UserCheck,
   ChevronRight,
   Calendar,
@@ -56,6 +57,62 @@ function initials(name: string): string {
   if (parts.length === 0) return "?";
   if (parts.length === 1) return parts[0]!.slice(0, 2).toUpperCase();
   return (parts[0]![0]! + parts[parts.length - 1]![0]!).toUpperCase();
+}
+
+// ─── Critical video card (first-fold priority) ───────────────────────────────
+
+function ImportantVideoSection({
+  videoEmbedUrl,
+  headline,
+}: {
+  videoEmbedUrl: string;
+  headline: string;
+}) {
+  return (
+    <section className="relative overflow-hidden rounded-3xl border-2 border-red-500/85 bg-gradient-to-br from-red-950 via-red-900 to-red-800 shadow-[0_24px_60px_-24px_rgba(127,29,29,0.7)]">
+      <div
+        className="pointer-events-none absolute -left-10 -top-16 size-44 rounded-full bg-red-300/20 blur-3xl"
+        aria-hidden
+      />
+      <div
+        className="pointer-events-none absolute -right-10 -bottom-14 size-40 rounded-full bg-orange-300/20 blur-3xl"
+        aria-hidden
+      />
+
+      <div className="relative flex items-center gap-2 border-b border-red-300/30 bg-red-700/75 px-4 py-2.5">
+        <span className="relative flex h-2.5 w-2.5 shrink-0">
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white/80" />
+          <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-white" />
+        </span>
+        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-red-50">
+          Danger alert
+        </p>
+        <AlertTriangle className="ml-auto size-4 text-amber-200" aria-hidden />
+      </div>
+
+      <div className="relative space-y-3 px-4 py-4">
+        <h2 className="font-heading text-center text-xl font-black uppercase leading-tight text-white sm:text-2xl">
+          {headline}
+        </h2>
+        <p className="text-center text-[12px] font-semibold leading-relaxed text-red-100/95">
+          Aage badhne se pehle yeh video zaroor dekhein.
+        </p>
+
+        <div className="overflow-hidden rounded-2xl border-2 border-red-200/45 bg-black shadow-2xl">
+          <div className="aspect-video">
+            <iframe
+              src={videoEmbedUrl}
+              title="Important kundli video"
+              className="h-full w-full"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+              allowFullScreen
+              loading="eager"
+            />
+          </div>
+        </div>
+      </div>
+    </section>
+  );
 }
 
 // ─── Insight swipe cards (visual-first, same copy, tighter) ───────────────────
@@ -1011,6 +1068,9 @@ type KundliResultViewProps = {
   fallbackInputPath?: string;
   checkoutHref?: string;
   ctaSourcePage?: string;
+  videoEmbedUrl?: string;
+  videoHeadline?: string;
+  videoPlacement?: "above_core_chart" | "below_core_chart" | "below_teen_zones";
 };
 
 export function KundliResultView({
@@ -1018,6 +1078,9 @@ export function KundliResultView({
   fallbackInputPath = "/free-kundli",
   checkoutHref = "/checkout/kundli",
   ctaSourcePage = "free_kundli_result",
+  videoEmbedUrl,
+  videoHeadline = "VERY IMPORTANT: WATCH THIS",
+  videoPlacement = "above_core_chart",
 }: KundliResultViewProps = {}) {
   const router = useRouter();
   const [data, setData] = useState<StoredKundliData | null>(null);
@@ -1099,6 +1162,13 @@ export function KundliResultView({
           </div>
         </header>
 
+        {videoEmbedUrl && videoPlacement === "above_core_chart" && (
+          <ImportantVideoSection
+            videoEmbedUrl={videoEmbedUrl}
+            headline={videoHeadline}
+          />
+        )}
+
         {/* ── 2. Chart snapshot — bold tiles ─────────────────────────────── */}
         <section aria-label="Chart snapshot">
           <div className="mb-3 px-0.5">
@@ -1141,6 +1211,13 @@ export function KundliResultView({
           )}
         </section>
 
+        {videoEmbedUrl && videoPlacement === "below_core_chart" && (
+          <ImportantVideoSection
+            videoEmbedUrl={videoEmbedUrl}
+            headline={videoHeadline}
+          />
+        )}
+
         {/* ── 3. Life areas — swipe ───────────────────────────────────────── */}
         <section aria-label="Life insights">
           <div className="mb-3 px-0.5">
@@ -1149,6 +1226,13 @@ export function KundliResultView({
           </div>
           <InsightSwipeCards blocks={[career, relationship, money]} />
         </section>
+
+        {videoEmbedUrl && videoPlacement === "below_teen_zones" && (
+          <ImportantVideoSection
+            videoEmbedUrl={videoEmbedUrl}
+            headline={videoHeadline}
+          />
+        )}
 
         <PatternSection
           careerShort={career.shortLine}

@@ -108,6 +108,9 @@ const TOOL_COPY: Record<KundalDhatuToolVariant, ToolCopy> = {
   },
 };
 
+const KUNDAL_DHATU_IMPORTANT_VIDEO_URL =
+  "https://player.mediadelivery.net/play/550381/68e0cafb-c45b-47ac-84da-8ead855af781";
+
 export function KundalDhatuTool({
   freeKundliHref = "/free-kundli",
   variant = "default",
@@ -312,6 +315,49 @@ export function KundalDhatuTool({
                 </p>
               </div>
             </div>
+
+            {variant === "astro" && (
+              <>
+                {/* ── Very Important video section (V2 only) ───────────── */}
+                <div className="relative mt-4 overflow-hidden rounded-3xl border-2 border-red-500/80 bg-gradient-to-br from-red-950 via-red-900 to-red-800 px-3 py-3.5 shadow-[0_20px_48px_-20px_rgba(127,29,29,0.7)] sm:px-4 sm:py-4">
+                  <div
+                    className="pointer-events-none absolute -left-12 -top-16 size-40 rounded-full bg-red-300/20 blur-3xl"
+                    aria-hidden
+                  />
+                  <div
+                    className="pointer-events-none absolute -bottom-12 -right-10 size-36 rounded-full bg-orange-300/20 blur-3xl"
+                    aria-hidden
+                  />
+
+                  <div className="relative flex items-center gap-2 border-b border-red-200/25 pb-2.5">
+                    <span className="relative flex h-2.5 w-2.5 shrink-0">
+                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white/80" />
+                      <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-white" />
+                    </span>
+                    <p className="text-[11px] font-black uppercase tracking-[0.18em] text-red-50">
+                      Very Important
+                    </p>
+                  </div>
+
+                  <p className="relative mt-2 text-center text-[11px] font-semibold text-red-100/95">
+                    Aage continue karne se pehle yeh zaroor dekhein
+                  </p>
+
+                  <div className="relative mt-2.5 overflow-hidden rounded-2xl border-2 border-red-200/45 bg-black shadow-2xl -mx-3 sm:-mx-4">
+                    <div className="relative aspect-[16/10] overflow-hidden">
+                      <iframe
+                        src={KUNDAL_DHATU_IMPORTANT_VIDEO_URL}
+                        title="Very important kundal dhatu video"
+                        className="absolute left-1/2 top-1/2 h-[108%] w-[108%] -translate-x-1/2 -translate-y-1/2"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                        allowFullScreen
+                        loading="eager"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
 
             {/* ── CTA 1 — Premium dark panel + animated primary CTA ───── */}
             <div className="relative mt-5 overflow-hidden rounded-3xl border-2 border-amber-500/45 bg-gradient-to-br from-stone-950 via-amber-950 to-stone-950 px-6 py-7 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.45),0_0_0_1px_rgba(251,191,36,0.15)_inset]">
