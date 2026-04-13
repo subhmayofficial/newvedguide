@@ -5,7 +5,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, ChevronLeft, Sparkles, Zap } from "lucide-react";
 import { RASHI_DHATU } from "@/lib/kundal-dhatu";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 // image slug per rashi id — matches /public/zodiac/*.webp
@@ -379,7 +378,7 @@ export function KundalDhatuTool({
               <Link
                 id={`${idPrefix}-primary-kundli-cta`}
                 href={freeKundliHref}
-                className="relative mt-5 flex h-12 w-full items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-[13px] font-extrabold text-white transition-transform active:scale-[0.98] sm:text-[14px]"
+                className="relative mt-5 flex h-12 w-full items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-[13px] font-extrabold text-white transition-transform active:scale-[0.98] sm:text-[14px] [&>*]:pointer-events-none"
                 style={{
                   animation: "vg-kundli-cta-glow 2.8s ease-in-out infinite",
                 }}
@@ -434,16 +433,16 @@ export function KundalDhatuTool({
               <p className="relative mt-1 text-[14px] font-bold leading-relaxed text-stone-900">
                 {copy.resultSecondaryStrong}
               </p>
-              <Button
+              <Link
                 id={`${idPrefix}-secondary-kundli-cta`}
-                className="relative mt-4 h-11 w-full border-0 bg-gradient-to-r from-brand to-orange-600 text-[14px] font-extrabold text-white shadow-[0_6px_20px_-6px_rgba(180,83,9,0.55)] hover:from-brand-hover hover:to-orange-600"
-                render={<Link href={freeKundliHref} />}
+                href={freeKundliHref}
+                className="relative mt-4 flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-brand to-orange-600 text-[14px] font-extrabold text-white shadow-[0_6px_20px_-6px_rgba(180,83,9,0.55)] hover:from-brand-hover hover:to-orange-600 [&>*]:pointer-events-none"
               >
                 <span className="flex items-center justify-center gap-2">
                   {copy.resultSecondaryCta}
                   <ArrowRight className="size-4" />
                 </span>
-              </Button>
+              </Link>
               <p className="relative mt-2 text-center text-[11px] font-medium text-amber-900/60">
                 {copy.resultSecondaryFootnote}
               </p>
@@ -494,7 +493,7 @@ export function KundalDhatuTool({
                 <Link
                   id={`${idPrefix}-sticky-kundli-cta`}
                   href={freeKundliHref}
-                  className="relative shrink-0 overflow-hidden rounded-2xl bg-brand px-5 py-2.5 shadow-[0_4px_18px_-4px_rgba(180,83,9,0.55)] transition-transform active:scale-95"
+                  className="relative shrink-0 overflow-hidden rounded-2xl bg-brand px-5 py-2.5 shadow-[0_4px_18px_-4px_rgba(180,83,9,0.55)] transition-transform active:scale-95 [&>*]:pointer-events-none"
                 >
                   {/* shimmer */}
                   <span
