@@ -24,6 +24,7 @@ interface SubmitKundliBody {
   lon?: number;
   timezone?: string;
   source?: string;
+  pagePath?: string;
   utmSource?: string;
   utmMedium?: string;
   utmCampaign?: string;
@@ -118,7 +119,7 @@ export async function POST(request: Request) {
       leadId: lead.id,
       sessionId: body.sessionId ?? null,
       sourcePage: body.source ?? null,
-      pagePath: "/free-kundli",
+      pagePath: body.pagePath ?? "/free-kundli",
       entryPath,
       utmSource: body.utmSource ?? null,
       utmMedium: body.utmMedium ?? null,

@@ -171,7 +171,15 @@ function InsightSwipeCards({ blocks }: { blocks: InsightBlock[] }) {
 
 // ─── Pattern section — simple scary copy (no jargon UI) ───────────────────────
 
-function PatternSection({ careerShort, relShort }: { careerShort: string; relShort: string }) {
+function PatternSection({
+  careerShort,
+  relShort,
+  ctaSourcePage,
+}: {
+  careerShort: string;
+  relShort: string;
+  ctaSourcePage: string;
+}) {
   return (
     <>
       <style>{`
@@ -238,7 +246,7 @@ function PatternSection({ careerShort, relShort }: { careerShort: string; relSho
             id="free-kundli-result-pattern-cta"
             type="button"
             onClick={() => {
-              track.paidReportCtaClicked("free_kundli_result", "pattern_section");
+              track.paidReportCtaClicked(ctaSourcePage, "pattern_section");
               document.getElementById("kundli-cta")?.scrollIntoView({ behavior: "smooth", block: "start" });
             }}
             className="flex w-full items-center justify-center gap-2 rounded-2xl bg-red-600 py-3.5 text-sm font-bold text-white shadow-md transition-all hover:bg-red-700 active:scale-[0.98]"
@@ -608,7 +616,15 @@ function PerkSvg({ type }: { type: string }) {
   );
 }
 
-function CtaSection({ fn }: { fn: string }) {
+function CtaSection({
+  fn,
+  checkoutHref,
+  ctaSourcePage,
+}: {
+  fn: string;
+  checkoutHref: string;
+  ctaSourcePage: string;
+}) {
   const perks = [
     { type: "compass", label: "Poori picture", sub: "clearly samajh" },
     { type: "clock",   label: "Kab kya hoga",  sub: "exact timing" },
@@ -717,8 +733,8 @@ function CtaSection({ fn }: { fn: string }) {
           `}</style>
             <Link
               id="free-kundli-result-main-cta"
-              href="/checkout/kundli"
-              onClick={() => track.paidReportCtaClicked("free_kundli_result", "main_cta")}
+              href={checkoutHref}
+              onClick={() => track.paidReportCtaClicked(ctaSourcePage, "main_cta")}
               className="vg-cta-btn relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-2xl bg-brand px-6 py-4 text-[15px] font-extrabold text-white shadow-lg transition-all hover:bg-brand-hover active:scale-[0.98]"
           >
             Mujhe sab clear samajhna hai
@@ -827,7 +843,13 @@ const COMPARE_ROWS = [
   { label: "Dosha + upay",         auto: false, manual: true  },
 ];
 
-function AutoManualBridge() {
+function AutoManualBridge({
+  checkoutHref,
+  ctaSourcePage,
+}: {
+  checkoutHref: string;
+  ctaSourcePage: string;
+}) {
   return (
     <div className="overflow-hidden rounded-3xl border border-border/50 bg-card shadow-md">
       <div className="border-b border-border/40 bg-muted/20 px-4 py-3.5">
@@ -882,8 +904,8 @@ function AutoManualBridge() {
       <div className="px-3 py-4 sm:px-4">
         <Link
           id="free-kundli-result-bridge-cta"
-          href="/checkout/kundli"
-          onClick={() => track.paidReportCtaClicked("free_kundli_result", "manual_bridge_bottom")}
+          href={checkoutHref}
+          onClick={() => track.paidReportCtaClicked(ctaSourcePage, "manual_bridge_bottom")}
           className="flex w-full items-center justify-center gap-2 rounded-2xl bg-brand px-4 py-3.5 text-[14px] font-extrabold text-white shadow-md transition-all hover:bg-brand-hover active:scale-[0.98]"
         >
           <UserCheck size={15} strokeWidth={2.5} />
@@ -932,7 +954,13 @@ function MangalDoshaSection({ result }: { result: KundliResult }) {
 
 // ─── Sticky CTA bar ───────────────────────────────────────────────────────────
 
-function StickyBar() {
+function StickyBar({
+  checkoutHref,
+  ctaSourcePage,
+}: {
+  checkoutHref: string;
+  ctaSourcePage: string;
+}) {
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-border/40 bg-background/97 px-3 pb-[env(safe-area-inset-bottom,0px)] pt-2.5 shadow-[0_-6px_28px_-4px_rgba(0,0,0,0.14)] backdrop-blur-md md:hidden">
       <div className="mx-auto flex max-w-md items-center gap-3 pb-2">
@@ -950,8 +978,8 @@ function StickyBar() {
         {/* CTA button */}
         <Link
           id="free-kundli-result-sticky-cta"
-          href="/checkout/kundli"
-          onClick={() => track.paidReportCtaClicked("free_kundli_result", "sticky")}
+          href={checkoutHref}
+          onClick={() => track.paidReportCtaClicked(ctaSourcePage, "sticky")}
           className="relative shrink-0 overflow-hidden rounded-2xl bg-brand px-5 py-2.5 shadow-[0_4px_16px_-4px_rgba(180,83,9,0.55)] transition-transform active:scale-95"
         >
           {/* shimmer sweep */}
@@ -978,24 +1006,36 @@ function StickyBar() {
 
 // ─── Main view ────────────────────────────────────────────────────────────────
 
-export function KundliResultView({ variant = "a" }: { variant?: KundliResultPageVariant }) {
+type KundliResultViewProps = {
+  variant?: KundliResultPageVariant;
+  fallbackInputPath?: string;
+  checkoutHref?: string;
+  ctaSourcePage?: string;
+};
+
+export function KundliResultView({
+  variant = "a",
+  fallbackInputPath = "/free-kundli",
+  checkoutHref = "/checkout/kundli",
+  ctaSourcePage = "free_kundli_result",
+}: KundliResultViewProps = {}) {
   const router = useRouter();
   const [data, setData] = useState<StoredKundliData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const stored = sessionStorage.getItem("kundli_result");
-    if (!stored) { router.replace("/free-kundli"); return; }
+    if (!stored) { router.replace(fallbackInputPath); return; }
     try {
       const parsed: StoredKundliData = JSON.parse(stored);
       setData(parsed);
       track.freeKundliResultViewed(parsed.submissionId, variant);
     } catch {
-      router.replace("/free-kundli");
+      router.replace(fallbackInputPath);
     } finally {
       setLoading(false);
     }
-  }, [router, variant]);
+  }, [router, variant, fallbackInputPath]);
 
   if (loading) {
     return (
@@ -1110,13 +1150,21 @@ export function KundliResultView({ variant = "a" }: { variant?: KundliResultPage
           <InsightSwipeCards blocks={[career, relationship, money]} />
         </section>
 
-        <PatternSection careerShort={career.shortLine} relShort={relationship.shortLine} />
+        <PatternSection
+          careerShort={career.shortLine}
+          relShort={relationship.shortLine}
+          ctaSourcePage={ctaSourcePage}
+        />
 
         <DepthGapCard />
 
         <BenefitsSection />
 
-        <CtaSection fn={fn} />
+        <CtaSection
+          fn={fn}
+          checkoutHref={checkoutHref}
+          ctaSourcePage={ctaSourcePage}
+        />
 
         <section aria-label="Reviews">
           <div className="mb-3 px-0.5">
@@ -1126,12 +1174,15 @@ export function KundliResultView({ variant = "a" }: { variant?: KundliResultPage
           <Testimonials />
         </section>
 
-        <AutoManualBridge />
+        <AutoManualBridge
+          checkoutHref={checkoutHref}
+          ctaSourcePage={ctaSourcePage}
+        />
 
         <div className="h-2" />
       </div>
 
-      <StickyBar />
+      <StickyBar checkoutHref={checkoutHref} ctaSourcePage={ctaSourcePage} />
     </div>
   );
 }

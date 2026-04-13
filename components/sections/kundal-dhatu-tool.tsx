@@ -26,9 +26,95 @@ const RASHI_IMG: Record<string, string> = {
 
 type Step = "intro" | "pick" | "result";
 
-export function KundalDhatuTool() {
+type KundalDhatuToolVariant = "default" | "astro";
+
+type KundalDhatuToolProps = {
+  freeKundliHref?: string;
+  variant?: KundalDhatuToolVariant;
+};
+
+type ToolCopy = {
+  introTitle: string;
+  introBody1: string;
+  introBody2: string;
+  startLabel: string;
+  introFooter: string;
+  introBenefits: string[];
+  pickTitle: string;
+  pickSub: string;
+  resultNextStepLabel: string;
+  resultLead: string;
+  resultTitle: string;
+  resultPrimaryCta: string;
+  resultPrimarySub: string;
+  resultSecondaryLead: string;
+  resultSecondaryStrong: string;
+  resultSecondaryCta: string;
+  resultSecondaryFootnote: string;
+  stickyTitle: string;
+  stickySub: string;
+  stickyCta: string;
+};
+
+const TOOL_COPY: Record<KundalDhatuToolVariant, ToolCopy> = {
+  default: {
+    introTitle: "Apna sahi kundal metal jaanen",
+    introBody1:
+      "Right ear mein Gold, Silver ya Copper — rashi ke hisaab se sahi dhatu pehenne se energy balance hoti hai. Yeh quick guide se aap apni rashi ka metal jaan sakte ho.",
+    introBody2:
+      "Kundal metal ke fayde: positive energy, mental clarity, aur grah alignment.",
+    startLabel: "Start Now",
+    introFooter: "1 minute • Free • No signup",
+    introBenefits: ["Energy balance", "Mental clarity", "Grah alignment", "Right ear specific"],
+    pickTitle: "Apni Rashi Select Karo",
+    pickSub: "Neeche se apni janam rashi choose karein — aapko right ear metal ka suggestion milega.",
+    resultNextStepLabel: "Next step",
+    resultLead: "Yeh sirf Rashi ke basis par hai —",
+    resultTitle: "Aapki poori kundli kya kehti hai?",
+    resultPrimaryCta: "Apni exact Kundli check karein (Free)",
+    resultPrimarySub: "Moon sign, Lagna aur nakshatra ke hisaab se aapka sahi dhatu aur bhi clear hota hai",
+    resultSecondaryLead: "Abhi jo result aapne dekha — wo sirf ek part hai",
+    resultSecondaryStrong:
+      "Aapki poori kundli mein aur bhi important signals hote hain jo decisions ko affect karte hain",
+    resultSecondaryCta: "Meri poori Kundli dekho (Free)",
+    resultSecondaryFootnote: "Free · 1 minute · No signup",
+    stickyTitle: "Apni poori Kundli jaano 🔮",
+    stickySub: "Lagna · Moon sign · Nakshatra — sab free",
+    stickyCta: "Check karein",
+  },
+  astro: {
+    introTitle: "Kundal metal quick match",
+    introBody1:
+      "Rashi ke base par right-ear metal ka quick suggestion paayein. Yeh fast starter check hai jo aapko direction deta hai.",
+    introBody2:
+      "Uske baad free kundli flow mein jaakar apna complete life pattern bhi dekh sakte ho.",
+    startLabel: "Check My Metal",
+    introFooter: "Fast check • Free • Beginner friendly",
+    introBenefits: ["Rashi based", "Right ear focus", "Quick result", "No signup"],
+    pickTitle: "Apni Janam Rashi select karein",
+    pickSub: "Ek tap mein rashi choose karein, turant recommended dhatu mil jayega.",
+    resultNextStepLabel: "Upgrade insight",
+    resultLead: "Metal hint mil gaya —",
+    resultTitle: "Ab apni full kundli ka exact pattern dekhein",
+    resultPrimaryCta: "Ab free kundli open karein",
+    resultPrimarySub: "Lagna, moon sign aur nakshatra ke saath metal guidance aur precise hoti hai",
+    resultSecondaryLead: "Metal suggestion ek strong start hai",
+    resultSecondaryStrong: "Puri kundli se career, rishta aur money ke signals bhi clear hote hain",
+    resultSecondaryCta: "Open Full Free Kundli",
+    resultSecondaryFootnote: "Free • No card needed • 1 minute",
+    stickyTitle: "Full kundli unlock karein 🔮",
+    stickySub: "Pattern clarity · next-step guidance",
+    stickyCta: "Open now",
+  },
+};
+
+export function KundalDhatuTool({
+  freeKundliHref = "/free-kundli",
+  variant = "default",
+}: KundalDhatuToolProps = {}) {
   const [step, setStep] = useState<Step>("intro");
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const copy = TOOL_COPY[variant];
 
   const row = selectedId ? RASHI_DHATU.find((r) => r.id === selectedId) : undefined;
 
@@ -48,7 +134,12 @@ export function KundalDhatuTool() {
   return (
     <div
       className="min-h-[70vh] px-4 py-10"
-      style={{ background: "linear-gradient(160deg, #fef9e7 0%, #fdf3d0 100%)" }}
+      style={{
+        background:
+          variant === "astro"
+            ? "linear-gradient(160deg, #fff7e8 0%, #feeeca 52%, #fde8bf 100%)"
+            : "linear-gradient(160deg, #fef9e7 0%, #fdf3d0 100%)",
+      }}
     >
       <div className="mx-auto max-w-sm">
 
@@ -57,14 +148,13 @@ export function KundalDhatuTool() {
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
             <div className="rounded-3xl bg-white px-7 py-8 shadow-lg">
               <h1 className="font-heading text-[1.55rem] font-black leading-snug text-foreground">
-                Apna sahi kundal metal jaanen
+                {copy.introTitle}
               </h1>
               <p className="mt-3 text-[14px] leading-relaxed text-muted-foreground">
-                Right ear mein Gold, Silver ya Copper — rashi ke hisaab se sahi dhatu pehenne se
-                energy balance hoti hai. Yeh quick guide se aap apni rashi ka metal jaan sakte ho.
+                {copy.introBody1}
               </p>
               <p className="mt-3 text-[13px] leading-relaxed text-muted-foreground">
-                Kundal metal ke fayde: positive energy, mental clarity, aur grah alignment.
+                {copy.introBody2}
               </p>
               <button
                 id="kundal-dhatu-start-btn"
@@ -72,10 +162,10 @@ export function KundalDhatuTool() {
                 onClick={() => setStep("pick")}
                 className="mt-6 w-full rounded-2xl bg-brand py-3.5 text-center text-[15px] font-extrabold text-white shadow-[0_4px_16px_-4px_rgba(180,83,9,0.45)] transition-all active:scale-[0.98] hover:bg-brand-hover"
               >
-                Start Now
+                {copy.startLabel}
               </button>
               <p className="mt-3 text-center text-[12px] text-muted-foreground">
-                1 minute &nbsp;•&nbsp; Free &nbsp;•&nbsp; No signup
+                {copy.introFooter}
               </p>
             </div>
 
@@ -84,7 +174,7 @@ export function KundalDhatuTool() {
                 Kundal metal benefits
               </p>
               <div className="mt-3 flex flex-wrap justify-center gap-2">
-                {["Energy balance", "Mental clarity", "Grah alignment", "Right ear specific"].map((b) => (
+                {copy.introBenefits.map((b) => (
                   <span
                     key={b}
                     className="rounded-full border border-brand/20 bg-white/80 px-3 py-1 text-[12px] font-medium text-foreground/70"
@@ -111,10 +201,10 @@ export function KundalDhatuTool() {
 
             <div className="rounded-3xl bg-white px-5 py-6 shadow-lg">
               <h2 className="font-heading text-[1.3rem] font-black text-foreground">
-                Apni Rashi Select Karo
+                {copy.pickTitle}
               </h2>
               <p className="mt-1.5 text-[13px] leading-relaxed text-muted-foreground">
-                Neeche se apni janam rashi choose karein — aapko right ear metal ka suggestion milega.
+                {copy.pickSub}
               </p>
 
               <div className="mt-5 grid grid-cols-3 gap-2.5">
@@ -236,18 +326,18 @@ export function KundalDhatuTool() {
               />
 
               <p className="relative text-[12px] font-semibold uppercase tracking-wide text-amber-200/85">
-                Next step
+                {copy.resultNextStepLabel}
               </p>
               <p className="relative mt-1 text-[13px] font-medium leading-snug text-amber-100/90">
-                Yeh sirf Rashi ke basis par hai —
+                {copy.resultLead}
               </p>
               <p className="font-heading relative mt-1 text-[1.15rem] font-black leading-snug text-white">
-                Aapki poori kundli kya kehti hai?
+                {copy.resultTitle}
               </p>
 
               <Link
                 id="kundal-dhatu-primary-kundli-cta"
-                href="/free-kundli"
+                href={freeKundliHref}
                 className="relative mt-5 flex h-12 w-full items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-[13px] font-extrabold text-white transition-transform active:scale-[0.98] sm:text-[14px]"
                 style={{
                   animation: "vg-kundli-cta-glow 2.8s ease-in-out infinite",
@@ -258,13 +348,13 @@ export function KundalDhatuTool() {
                   aria-hidden
                 />
                 <span className="relative flex items-center gap-2 drop-shadow-sm">
-                  Apni exact Kundli check karein (Free)
+                  {copy.resultPrimaryCta}
                   <ArrowRight className="size-4" strokeWidth={2.5} />
                 </span>
               </Link>
 
               <p className="relative mt-4 text-center text-[12px] leading-relaxed text-amber-100/75">
-                Moon sign, Lagna aur nakshatra ke hisaab se aapka sahi dhatu aur bhi clear hota hai
+                {copy.resultPrimarySub}
               </p>
             </div>
 
@@ -298,24 +388,23 @@ export function KundalDhatuTool() {
               />
 
               <p className="relative text-[13px] leading-snug text-amber-900/75">
-                Abhi jo result aapne dekha — wo sirf ek part hai
+                {copy.resultSecondaryLead}
               </p>
               <p className="relative mt-1 text-[14px] font-bold leading-relaxed text-stone-900">
-                Aapki poori kundli mein aur bhi important signals hote hain jo decisions ko affect
-                karte hain
+                {copy.resultSecondaryStrong}
               </p>
               <Button
                 id="kundal-dhatu-secondary-kundli-cta"
                 className="relative mt-4 h-11 w-full border-0 bg-gradient-to-r from-brand to-orange-600 text-[14px] font-extrabold text-white shadow-[0_6px_20px_-6px_rgba(180,83,9,0.55)] hover:from-brand-hover hover:to-orange-600"
-                render={<Link href="/free-kundli" />}
+                render={<Link href={freeKundliHref} />}
               >
                 <span className="flex items-center justify-center gap-2">
-                  Meri poori Kundli dekho (Free)
+                  {copy.resultSecondaryCta}
                   <ArrowRight className="size-4" />
                 </span>
               </Button>
               <p className="relative mt-2 text-center text-[11px] font-medium text-amber-900/60">
-                Free · 1 minute · No signup
+                {copy.resultSecondaryFootnote}
               </p>
             </div>
 
@@ -352,18 +441,18 @@ export function KundalDhatuTool() {
                 {/* left copy */}
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-[13px] font-extrabold leading-tight text-foreground">
-                    Apni poori Kundli jaano 🔮
+                    {copy.stickyTitle}
                   </p>
                   <p className="mt-0.5 flex items-center gap-1 text-[11px] font-medium text-muted-foreground">
                     <Zap size={10} className="text-brand" />
-                    Lagna · Moon sign · Nakshatra — sab free
+                    {copy.stickySub}
                   </p>
                 </div>
 
                 {/* CTA button */}
                 <Link
                   id="kundal-dhatu-sticky-kundli-cta"
-                  href="/free-kundli"
+                  href={freeKundliHref}
                   className="relative shrink-0 overflow-hidden rounded-2xl bg-brand px-5 py-2.5 shadow-[0_4px_18px_-4px_rgba(180,83,9,0.55)] transition-transform active:scale-95"
                 >
                   {/* shimmer */}
@@ -372,7 +461,7 @@ export function KundalDhatuTool() {
                     aria-hidden
                   />
                   <span className="relative flex items-center gap-1.5 text-[13px] font-extrabold text-white">
-                    Check karein
+                    {copy.stickyCta}
                     <ArrowRight size={13} />
                   </span>
                 </Link>

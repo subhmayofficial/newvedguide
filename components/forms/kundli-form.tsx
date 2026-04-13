@@ -311,10 +311,20 @@ function GenderToggle({
 
 // ─── Main Form ────────────────────────────────────────────────────────────────
 
-export function KundliForm() {
+type KundliFormProps = {
+  sourceDefault?: string;
+  pagePath?: string;
+  resultPath?: string;
+};
+
+export function KundliForm({
+  sourceDefault = "free_kundli_page",
+  pagePath = "/free-kundli",
+  resultPath = "/free-kundli/result",
+}: KundliFormProps = {}) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const source = searchParams.get("source") ?? "free_kundli_page";
+  const source = searchParams.get("source") ?? sourceDefault;
   const utmSource = searchParams.get("utm_source") ?? undefined;
   const utmMedium = searchParams.get("utm_medium") ?? undefined;
   const utmCampaign = searchParams.get("utm_campaign") ?? undefined;
@@ -402,6 +412,7 @@ export function KundliForm() {
           pob: data.pob,
           whatsappConsent: data.whatsappConsent,
           source,
+          pagePath,
           utmSource,
           utmMedium,
           utmCampaign,
@@ -430,7 +441,7 @@ export function KundliForm() {
 
       // Let processing animation finish (min 4s total)
       await new Promise((r) => setTimeout(r, 4200));
-      router.push("/free-kundli/result");
+      router.push(resultPath);
     } catch {
       setPhase("form");
       setError("Kuch problem aayi. Dobara try karein.");

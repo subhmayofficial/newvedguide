@@ -372,6 +372,7 @@ export function KundliCheckout() {
   const razorpayKeyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
 
   const sourceFunnel = searchParams.get("source") ?? "direct_kundli";
+  const backToResultPath = searchParams.get("back") ?? "/free-kundli/result";
   const utmSource = searchParams.get("utm_source") ?? undefined;
   const utmMedium = searchParams.get("utm_medium") ?? undefined;
   const utmCampaign = searchParams.get("utm_campaign") ?? undefined;
@@ -700,7 +701,7 @@ export function KundliCheckout() {
         <div className="mb-8">
           <Link
             id="checkout-kundli-back-to-result-link"
-            href="/free-kundli/result"
+            href={backToResultPath}
             className="mb-3 inline-block text-[12px] font-medium text-amber-800/80 transition-colors hover:text-amber-950"
           >
             ← Back to kundli result
