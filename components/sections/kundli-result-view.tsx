@@ -314,7 +314,7 @@ function PatternSection({
               track.paidReportCtaClicked(ctaSourcePage, "pattern_section");
               document.getElementById(ctaAnchorId)?.scrollIntoView({ behavior: "smooth", block: "start" });
             }}
-            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-red-600 py-3.5 text-sm font-bold text-white shadow-md transition-all hover:bg-red-700 active:scale-[0.98]"
+            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-red-600 py-3.5 text-sm font-bold text-white shadow-md transition-all hover:bg-red-700 active:scale-[0.98] [&_*]:pointer-events-none"
           >
             Mujhe poori samajh chahiye
             <ChevronRight className="size-4 shrink-0" strokeWidth={2.5} />
@@ -807,7 +807,7 @@ function CtaSection({
               id={ctaButtonId}
               href={checkoutHref}
               onClick={() => track.paidReportCtaClicked(ctaSourcePage, "main_cta")}
-              className="vg-cta-btn relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-2xl bg-brand px-6 py-4 text-[15px] font-extrabold text-white shadow-lg transition-all hover:bg-brand-hover active:scale-[0.98]"
+              className="vg-cta-btn relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-2xl bg-brand px-6 py-4 text-[15px] font-extrabold text-white shadow-lg transition-all hover:bg-brand-hover active:scale-[0.98] [&_*]:pointer-events-none"
           >
             Mujhe sab clear samajhna hai
             <ChevronRight className="size-4 shrink-0" strokeWidth={2.5} />
@@ -980,7 +980,7 @@ function AutoManualBridge({
           id={bridgeCtaId}
           href={checkoutHref}
           onClick={() => track.paidReportCtaClicked(ctaSourcePage, "manual_bridge_bottom")}
-          className="flex w-full items-center justify-center gap-2 rounded-2xl bg-brand px-4 py-3.5 text-[14px] font-extrabold text-white shadow-md transition-all hover:bg-brand-hover active:scale-[0.98]"
+          className="flex w-full items-center justify-center gap-2 rounded-2xl bg-brand px-4 py-3.5 text-[14px] font-extrabold text-white shadow-md transition-all hover:bg-brand-hover active:scale-[0.98] [&_*]:pointer-events-none"
         >
           <UserCheck size={15} strokeWidth={2.5} />
           Detailed kundli banwayein — ₹399
@@ -1074,7 +1074,7 @@ function StickyBar({
           id={stickyCtaId}
           href={checkoutHref}
           onClick={() => track.paidReportCtaClicked(ctaSourcePage, "sticky")}
-          className="relative shrink-0 overflow-hidden rounded-2xl bg-brand px-5 py-2.5 shadow-[0_4px_16px_-4px_rgba(180,83,9,0.55)] transition-transform active:scale-95"
+          className="relative shrink-0 overflow-hidden rounded-2xl bg-brand px-5 py-2.5 shadow-[0_4px_16px_-4px_rgba(180,83,9,0.55)] transition-transform active:scale-95 [&_*]:pointer-events-none"
         >
           {/* shimmer sweep */}
           <span className="pointer-events-none absolute inset-0 -translate-x-full animate-[vg-sticky-shimmer_2.4s_ease-in-out_infinite] bg-gradient-to-r from-transparent via-white/25 to-transparent" aria-hidden />
