@@ -1117,6 +1117,10 @@ export function KundliResultView({
   const fn = firstName(name);
   const insights = getKundliInsights(result);
   const { career, relationship, money } = insights;
+  const resolvedVideoPlacement =
+    ctaSourcePage === "free_kundli_result_v2"
+      ? "below_core_chart"
+      : videoPlacement;
   return (
     <div className="spiritual-pattern pb-28 md:pb-12">
       <div className="mx-auto max-w-xl space-y-6 px-3 pt-4 sm:px-4 sm:pt-6">
@@ -1162,7 +1166,7 @@ export function KundliResultView({
           </div>
         </header>
 
-        {videoEmbedUrl && videoPlacement === "above_core_chart" && (
+        {videoEmbedUrl && resolvedVideoPlacement === "above_core_chart" && (
           <ImportantVideoSection
             videoEmbedUrl={videoEmbedUrl}
             headline={videoHeadline}
@@ -1211,7 +1215,7 @@ export function KundliResultView({
           )}
         </section>
 
-        {videoEmbedUrl && videoPlacement === "below_core_chart" && (
+        {videoEmbedUrl && resolvedVideoPlacement === "below_core_chart" && (
           <ImportantVideoSection
             videoEmbedUrl={videoEmbedUrl}
             headline={videoHeadline}
@@ -1227,7 +1231,7 @@ export function KundliResultView({
           <InsightSwipeCards blocks={[career, relationship, money]} />
         </section>
 
-        {videoEmbedUrl && videoPlacement === "below_teen_zones" && (
+        {videoEmbedUrl && resolvedVideoPlacement === "below_teen_zones" && (
           <ImportantVideoSection
             videoEmbedUrl={videoEmbedUrl}
             headline={videoHeadline}
