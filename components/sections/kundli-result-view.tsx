@@ -700,10 +700,13 @@ function CtaSection({
     { type: "arrow",   label: "Sahi direction", sub: "clearly dikhega" },
     { type: "shield",  label: "Dosha ka upay",  sub: "tested remedy" },
   ];
+  const isV2Source = ctaSourcePage === "free_kundli_result_v2";
+  const ctaContainerId = isV2Source ? undefined : ctaAnchorId;
+  const ctaButtonId = isV2Source ? ctaAnchorId : mainCtaId;
 
   return (
     <div
-      id={ctaAnchorId}
+      id={ctaContainerId}
       className="relative overflow-hidden rounded-3xl border-2 border-brand/35 bg-gradient-to-br from-gold-light via-brand-light/50 to-gold-light shadow-[0_24px_60px_-28px_rgba(180,83,9,0.35)]"
     >
       <div className="pointer-events-none absolute -left-10 top-1/2 size-40 -translate-y-1/2 rounded-full bg-brand/10 blur-3xl" aria-hidden />
@@ -801,7 +804,7 @@ function CtaSection({
             }
           `}</style>
             <Link
-              id={mainCtaId}
+              id={ctaButtonId}
               href={checkoutHref}
               onClick={() => track.paidReportCtaClicked(ctaSourcePage, "main_cta")}
               className="vg-cta-btn relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-2xl bg-brand px-6 py-4 text-[15px] font-extrabold text-white shadow-lg transition-all hover:bg-brand-hover active:scale-[0.98]"
