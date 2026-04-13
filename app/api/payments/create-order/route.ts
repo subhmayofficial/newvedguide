@@ -16,14 +16,12 @@ import {
 import { logEvent } from "@/lib/services/event";
 import { EVENT_GROUP } from "@/lib/constants/commerce";
 import { getProductBySlug } from "@/lib/services/product";
-import { validateCouponForAmount } from "@/lib/services/coupon";
 import type { Json } from "@/types/database";
 
 interface CreateOrderBody {
   productSlug?: string;
   addOnSlugs?: string[];
   amountPaise: number;
-  couponCode?: string;
   customer: {
     fullName: string;
     phone: string;
@@ -49,7 +47,7 @@ interface CreateOrderBody {
 export async function POST(request: Request) {
   try {
     const body: CreateOrderBody = await request.json();
-    const { amountPaise, customer, attribution, addOnSlugs = [], couponCode } = body;
+    const { amountPaise, customer, attribution, addOnSlugs = [] } = body;
 
     const productSlug = body.productSlug ?? PRODUCT_SLUGS.PAID_KUNDLI;
 
@@ -109,22 +107,9 @@ export async function POST(request: Request) {
     }
 
     const baseTotal = subtotal + addonTotal;
-    let discountPaise = 0;
-    let appliedCouponId: string | null = null;
-    let appliedCouponCode: string | null = null;
+    const discountPaise = 0;
 
-    if (couponCode?.trim()) {
-      const couponResult = await validateCouponForAmount(supabase, {
-        code: couponCode,
-        orderAmountPaise: baseTotal,
-        productSlug,
-      });
-      discountPaise = couponResult.discountPaise;
-      appliedCouponId = couponResult.coupon.id;
-      appliedCouponCode = couponResult.coupon.code;
-    }
-
-    const expectedTotal = baseTotal - discountPaise;
+    const expectedTotal = baseTotal;
     if (expectedTotal !== amountPaise) {
       return NextResponse.json(
         { error: "Amount mismatch", expected: expectedTotal, got: amountPaise },
@@ -180,9 +165,9 @@ export async function POST(request: Request) {
       subtotalPaise: subtotal,
       addonPaise: addonTotal,
       discountPaise,
-      couponId: appliedCouponId,
-      couponCode: appliedCouponCode,
-      couponApplied: !!appliedCouponCode,
+      couponId: null,
+      couponCode: null,
+      couponApplied: false,
     });
 
     await createOrderItems(supabase, order.id, items);
@@ -228,7 +213,6 @@ export async function POST(request: Request) {
         product_slug: productSlug,
         amount_paise: amountPaise,
         razorpay_order_id: razorpayOrder.id,
-        coupon_code: appliedCouponCode,
         discount_paise: discountPaise,
       },
     });
