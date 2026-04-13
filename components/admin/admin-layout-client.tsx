@@ -5,7 +5,7 @@ import { AdminSidebar } from "@/components/admin/admin-sidebar";
 
 export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  if (pathname === "/admin/login") {
+  if (pathname === "/admindeoghar/login" || pathname === "/admin/login") {
     return <>{children}</>;
   }
 

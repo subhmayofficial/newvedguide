@@ -178,7 +178,7 @@ function TestimonialCard() {
         </div>
         <div>
           <p className="text-xs font-bold text-foreground">Priya Mehta</p>
-          <p className="text-[10px] text-muted-foreground">Pune · Instagram se aayi thi</p>
+          <p className="text-[10px] text-muted-foreground">Pune</p>
         </div>
       </div>
     </div>

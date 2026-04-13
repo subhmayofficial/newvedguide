@@ -4,9 +4,9 @@ import { ArrowRight, Sparkles } from "lucide-react";
 import { TOOLS } from "@/lib/tools";
 
 export const metadata: Metadata = {
-  title: "Astrology Tools",
+  title: "Free Astrology Tools",
   description:
-    "Free kundli calculator and more Vedic astrology tools from VedGuide. Full reports are sold separately.",
+    "Use VedGuide tools to get fast, practical astrology insights. Start with Free Kundli and move to detailed reports or consultation when you are ready.",
 };
 
 export default function ToolsHomePage() {
@@ -19,11 +19,14 @@ export default function ToolsHomePage() {
             VedGuide tools
           </p>
           <h1 className="font-heading text-3xl font-black tracking-tight text-foreground sm:text-4xl">
-            Tools & calculators
+            Free Astrology Tools That Help You Decide Faster
           </h1>
           <p className="mx-auto mt-3 max-w-xl text-[15px] leading-relaxed text-muted-foreground">
-            Free calculators only. The detailed paid kundli report lives on its own page — linked at
-            the bottom.
+            Career, shaadi, paisa, ya timing confusion? In tools se quick clarity lo, phir next step
+            confidence ke saath choose karo.
+          </p>
+          <p className="mx-auto mt-2 max-w-xl text-[13px] font-medium text-brand/90">
+            100% online • instant results • beginner-friendly
           </p>
         </div>
       </section>
@@ -68,17 +71,29 @@ export default function ToolsHomePage() {
           ))}
         </ul>
 
-        <p className="mt-10 text-center text-sm text-muted-foreground">
-          For the full paid PDF report (not a free tool), see{" "}
-          <Link href="/kundli-report" className="font-semibold text-brand underline-offset-4 hover:underline">
-            Personalized Kundli Report
-          </Link>
-          . Or{" "}
-          <Link href="/consultation" className="font-semibold text-brand underline-offset-4 hover:underline">
-            book a consultation
-          </Link>
-          .
-        </p>
+        <div className="mt-10 rounded-2xl border border-brand/20 bg-gradient-to-r from-brand/5 via-gold-light/30 to-brand/5 p-5 text-center shadow-sm">
+          <h2 className="font-heading text-xl font-bold text-foreground">
+            Want Deeper Personal Guidance?
+          </h2>
+          <p className="mx-auto mt-2 max-w-xl text-sm text-muted-foreground">
+            Start with free tools, then unlock full personalized reading based on your birth details.
+          </p>
+          <div className="mt-4 flex flex-wrap justify-center gap-2.5">
+            <Link
+              href="/free-kundli"
+              className="inline-flex items-center gap-1.5 rounded-full bg-brand px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-hover"
+            >
+              Start Free Kundli
+              <ArrowRight className="size-4" />
+            </Link>
+            <Link
+              href="/consultation"
+              className="inline-flex items-center gap-1.5 rounded-full border border-brand/30 bg-background px-4 py-2 text-sm font-semibold text-brand transition hover:border-brand hover:bg-brand/5"
+            >
+              Book Consultation
+            </Link>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -73,7 +73,7 @@ export default async function AnalyticsPage({
           </p>
         </div>
         <Link
-          href="/admin/analytics/funnels/kfp"
+          href="/admindeoghar/analytics/funnels/kfp"
           className="text-sm font-medium text-brand hover:underline"
         >
           KFP funnel detail →

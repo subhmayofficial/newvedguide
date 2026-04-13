@@ -11,7 +11,7 @@ export default async function AdminAppLayout({
   const h = await headers();
   const path = h.get("x-admin-pathname");
 
-  if (path === "/admin/login") {
+  if (path === "/admindeoghar/login" || path === "/admin/login") {
     return <>{children}</>;
   }
 

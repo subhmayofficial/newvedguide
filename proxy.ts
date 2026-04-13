@@ -4,8 +4,10 @@ import { createServerClient } from "@supabase/ssr";
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const isAdminPath =
+    pathname.startsWith("/admin") || pathname.startsWith("/admindeoghar");
 
-  if (!pathname.startsWith("/admin")) {
+  if (!isAdminPath) {
     return NextResponse.next();
   }
 
@@ -17,7 +19,7 @@ export async function proxy(request: NextRequest) {
       request: { headers: reqHeaders },
     });
 
-  if (pathname === "/admin/login") {
+  if (pathname === "/admin/login" || pathname === "/admindeoghar/login") {
     return nextWithHeaders();
   }
 
@@ -49,7 +51,7 @@ export async function proxy(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    const loginUrl = new URL("/admin/login", request.url);
+    const loginUrl = new URL("/admindeoghar/login", request.url);
     loginUrl.searchParams.set("redirect", pathname);
     return NextResponse.redirect(loginUrl);
   }
@@ -58,5 +60,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*"],
+  matcher: ["/admin", "/admin/:path*", "/admindeoghar", "/admindeoghar/:path*"],
 };

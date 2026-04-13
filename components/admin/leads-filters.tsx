@@ -25,7 +25,7 @@ export function LeadsFilters() {
         const n = new URLSearchParams(sp.toString());
         if (value === null || value === "") n.delete(key);
         else n.set(key, value);
-        router.push(`/admin/leads?${n.toString()}`);
+        router.push(`/admindeoghar/leads?${n.toString()}`);
       });
     },
     [router, sp]

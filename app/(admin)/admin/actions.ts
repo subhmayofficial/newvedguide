@@ -3,14 +3,20 @@
 import { revalidatePath } from "next/cache";
 import { createServiceClient } from "@/lib/supabase/server";
 import { addEntityNote } from "@/lib/services/notes";
-import { ENTITY_NOTE_TYPE, LEAD_STATUS } from "@/lib/constants/commerce";
 import { updateLeadStatus } from "@/lib/services/lead";
 import {
+  updateOrderFulfillmentAssignee,
   updateOrderFulfillmentStatus,
   updateOrderStatus,
 } from "@/lib/services/order";
 import { createCoupon } from "@/lib/services/coupon";
-import { FULFILLMENT_STATUS, ORDER_STATUS } from "@/lib/constants/commerce";
+import {
+  ENTITY_NOTE_TYPE,
+  FULFILLMENT_STATUS,
+  LEAD_STATUS,
+  ORDER_FULFILLMENT_ASSIGNEES,
+  ORDER_STATUS,
+} from "@/lib/constants/commerce";
 
 export async function addLeadNote(leadId: string, note: string) {
   const supabase = createServiceClient();
@@ -19,8 +25,8 @@ export async function addLeadNote(leadId: string, note: string) {
     entityId: leadId,
     note,
   });
-  revalidatePath(`/admin/leads/${leadId}`);
-  revalidatePath("/admin/leads");
+  revalidatePath(`/admindeoghar/leads/${leadId}`);
+  revalidatePath("/admindeoghar/leads");
 }
 
 export async function submitLeadNoteForm(formData: FormData) {
@@ -44,8 +50,8 @@ async function markLeadLost(leadId: string, reason: string) {
     status: LEAD_STATUS.LOST,
     lostReason: reason,
   });
-  revalidatePath(`/admin/leads/${leadId}`);
-  revalidatePath("/admin/leads");
+  revalidatePath(`/admindeoghar/leads/${leadId}`);
+  revalidatePath("/admindeoghar/leads");
 }
 
 export async function addOrderNote(orderId: string, note: string) {
@@ -55,8 +61,8 @@ export async function addOrderNote(orderId: string, note: string) {
     entityId: orderId,
     note,
   });
-  revalidatePath(`/admin/orders/${orderId}`);
-  revalidatePath("/admin/orders");
+  revalidatePath(`/admindeoghar/orders/${orderId}`);
+  revalidatePath("/admindeoghar/orders");
 }
 
 export async function submitOrderNoteForm(formData: FormData) {
@@ -81,8 +87,8 @@ export async function setOrderFulfillment(
       status: ORDER_STATUS.PROCESSING,
     });
   }
-  revalidatePath(`/admin/orders/${orderId}`);
-  revalidatePath("/admin/orders");
+  revalidatePath(`/admindeoghar/orders/${orderId}`);
+  revalidatePath("/admindeoghar/orders");
 }
 
 export async function setOrderProcessing(orderId: string) {
@@ -90,8 +96,8 @@ export async function setOrderProcessing(orderId: string) {
   await updateOrderStatus(supabase, orderId, {
     status: ORDER_STATUS.PROCESSING,
   });
-  revalidatePath(`/admin/orders/${orderId}`);
-  revalidatePath("/admin/orders");
+  revalidatePath(`/admindeoghar/orders/${orderId}`);
+  revalidatePath("/admindeoghar/orders");
 }
 
 export async function submitOrderProcessingForm(formData: FormData) {
@@ -138,5 +144,28 @@ export async function submitCouponCreateForm(formData: FormData) {
     isActive,
   });
 
-  revalidatePath("/admin/coupons");
+  revalidatePath("/admindeoghar/coupons");
+}
+
+const ALLOWED_FULFILLMENT = new Set<string>(Object.values(FULFILLMENT_STATUS));
+const ALLOWED_ASSIGNEES = new Set<string>(ORDER_FULFILLMENT_ASSIGNEES);
+
+export async function updateOrderFulfillmentFromList(
+  orderId: string,
+  fulfillmentStatus: string
+) {
+  if (!orderId || !ALLOWED_FULFILLMENT.has(fulfillmentStatus)) return;
+  await setOrderFulfillment(orderId, fulfillmentStatus);
+}
+
+export async function updateOrderAssigneeFromList(orderId: string, assignee: string) {
+  if (!orderId) return;
+  const trimmed = assignee.trim();
+  const value =
+    trimmed === "" ? null : ALLOWED_ASSIGNEES.has(trimmed) ? trimmed : null;
+  if (trimmed !== "" && value === null) return;
+  const supabase = createServiceClient();
+  await updateOrderFulfillmentAssignee(supabase, orderId, value);
+  revalidatePath("/admindeoghar/orders");
+  revalidatePath(`/admindeoghar/orders/${orderId}`);
 }

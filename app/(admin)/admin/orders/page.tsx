@@ -1,5 +1,9 @@
 import Link from "next/link";
 import { createServiceClient } from "@/lib/supabase/server";
+import {
+  AdminOrderRowAssigneeSelect,
+  AdminOrderRowFulfillmentSelect,
+} from "@/components/admin/admin-order-row-controls";
 
 export const dynamic = "force-dynamic";
 
@@ -14,7 +18,7 @@ export default async function AdminOrdersPage({
   let q = supabase
     .from("orders")
     .select(
-      "id,order_number,product_slug,total_amount,status,payment_status,fulfillment_status,entry_path,created_at,coupon_applied,coupon_code,customers(full_name,phone)",
+      "id,order_number,product_slug,total_amount,status,payment_status,fulfillment_status,fulfillment_assignee,entry_path,created_at,coupon_applied,coupon_code,customers(full_name,phone)",
       { count: "exact" }
     )
     .order("created_at", { ascending: false })
@@ -36,6 +40,7 @@ export default async function AdminOrdersPage({
     status: string;
     payment_status: string;
     fulfillment_status: string;
+    fulfillment_assignee: string | null;
     entry_path: string | null;
     coupon_applied: boolean;
     coupon_code: string | null;
@@ -108,6 +113,7 @@ export default async function AdminOrdersPage({
               <th className="px-4 py-3">Total</th>
               <th className="px-4 py-3">Payment</th>
               <th className="px-4 py-3">Fulfillment</th>
+              <th className="px-4 py-3">Assigned to</th>
               <th className="px-4 py-3">Status</th>
               <th className="px-4 py-3">Entry</th>
               <th className="px-4 py-3">Coupon</th>
@@ -121,7 +127,7 @@ export default async function AdminOrdersPage({
               return (
                 <tr key={r.id} className="hover:bg-muted/20">
                   <td className="px-4 py-3 font-mono text-xs font-medium">
-                    <Link href={`/admin/orders/${r.id}`} className="hover:underline">
+                    <Link href={`/admindeoghar/orders/${r.id}`} className="hover:underline">
                       {r.order_number}
                     </Link>
                   </td>
@@ -129,10 +135,24 @@ export default async function AdminOrdersPage({
                     <div>{c?.full_name ?? "—"}</div>
                     <div className="text-[11px] text-muted-foreground">{c?.phone ?? ""}</div>
                   </td>
-                  <td className="px-4 py-3 text-xs">{r.product_slug}</td>
+                  <td className="px-4 py-3">
+                    <p className="text-xs font-medium">{formatAdminProductLabel(r.product_slug)}</p>
+                    <p className="text-[10px] text-muted-foreground">{r.product_slug}</p>
+                  </td>
                   <td className="px-4 py-3 tabular-nums">₹{(Number(r.total_amount) / 100).toFixed(0)}</td>
                   <td className="px-4 py-3 text-xs">{r.payment_status}</td>
-                  <td className="px-4 py-3 text-xs">{r.fulfillment_status}</td>
+                  <td className="px-4 py-3 align-top">
+                    <AdminOrderRowFulfillmentSelect
+                      orderId={r.id}
+                      fulfillmentStatus={r.fulfillment_status}
+                    />
+                  </td>
+                  <td className="px-4 py-3 align-top">
+                    <AdminOrderRowAssigneeSelect
+                      orderId={r.id}
+                      assignee={r.fulfillment_assignee}
+                    />
+                  </td>
                   <td className="px-4 py-3 text-xs">{r.status}</td>
                   <td className="px-4 py-3 text-xs">{r.entry_path ?? "—"}</td>
                   <td className="px-4 py-3 text-xs">
@@ -142,7 +162,7 @@ export default async function AdminOrdersPage({
                     {new Date(r.created_at).toLocaleString()}
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <Link href={`/admin/orders/${r.id}`} className="text-sm font-medium text-brand hover:underline">
+                    <Link href={`/admindeoghar/orders/${r.id}`} className="text-sm font-medium text-brand hover:underline">
                       Open
                     </Link>
                   </td>
@@ -157,4 +177,15 @@ export default async function AdminOrdersPage({
       </div>
     </div>
   );
+}
+
+function formatAdminProductLabel(slug: string): string {
+  if (slug === "paid-kundli") return "Paid Kundli Report";
+  if (slug === "fast-track-addon") return "FastTrack Add-on";
+  if (slug === "consultation-15min") return "Consultation · 15 Min";
+  if (slug === "consultation-45min") return "Consultation · 45 Min";
+  return slug
+    .split("-")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
 }

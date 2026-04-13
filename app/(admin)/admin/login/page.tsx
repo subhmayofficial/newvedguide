@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 export default function AdminLoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirect = searchParams.get("redirect") ?? "/admin";
+  const redirect = searchParams.get("redirect") ?? "/admindeoghar";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

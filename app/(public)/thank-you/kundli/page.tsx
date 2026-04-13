@@ -3,40 +3,64 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { CheckCircle2, MessageCircle, Clock, FileText, ChevronRight } from "lucide-react";
+import {
+  CheckCircle2,
+  MessageCircle,
+  Clock,
+  FileText,
+  ChevronRight,
+  Sparkles,
+  Video,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { track } from "@/lib/analytics/events";
 
 const CONSULTATION_OFFER = {
-  title: "Want deeper guidance?",
-  description:
-    "Book a 15-minute focused consultation with our astrologer to discuss your Kundli, specific life questions, or current challenges.",
+  title: "Live consultation — doubts clear karein",
+  bullets: [
+    "15 min focused session — seedha aapki chart pe baat",
+    "Career, rishte, shaadi, health — jahan bhi clarity chahiye",
+    "Practical next steps, na ki generic advice",
+  ],
   price: "₹1,499",
   href: "/consultation",
 };
+
+/**
+ * Survives React Strict Mode double-mount: first effect clears sessionStorage,
+ * second run would see empty storage and wrongly redirect home without this.
+ */
+let thankYouOrderIdCache: string | null = null;
 
 export default function KundliThankYouPage() {
   const router = useRouter();
   const [orderId, setOrderId] = useState<string | null>(null);
 
   useEffect(() => {
-    const stored = sessionStorage.getItem("order_complete");
-    if (!stored) {
-      router.replace("/");
+    const raw = sessionStorage.getItem("order_complete");
+    if (raw) {
+      try {
+        const parsed = JSON.parse(raw) as { orderId?: string };
+        const id = parsed.orderId;
+        if (typeof id === "string" && id.length > 0) {
+          thankYouOrderIdCache = id;
+          setOrderId(id);
+          track.thankYouView(id);
+          sessionStorage.removeItem("order_complete");
+          sessionStorage.removeItem("kundli_result");
+          return;
+        }
+      } catch {
+        /* fall through */
+      }
+    }
+
+    if (thankYouOrderIdCache) {
+      setOrderId(thankYouOrderIdCache);
       return;
     }
-    try {
-      const parsed = JSON.parse(stored);
-      queueMicrotask(() => {
-        setOrderId(parsed.orderId);
-      });
-      track.thankYouView(parsed.orderId);
-      // Clear session after reading
-      sessionStorage.removeItem("order_complete");
-      sessionStorage.removeItem("kundli_result");
-    } catch {
-      router.replace("/");
-    }
+
+    router.replace("/");
   }, [router]);
 
   if (!orderId) return null;
@@ -59,7 +83,8 @@ export default function KundliThankYouPage() {
         </h1>
         <p className="mx-auto mt-4 max-w-md text-base text-muted-foreground">
           We&apos;ve received your order and our astrologer is preparing your
-          personalized report. You&apos;ll receive it within 24 hours.
+          personalized report. You&apos;ll receive it within 24–48 hours (or faster
+          if you chose FastTrack).
         </p>
 
         {/* What happens next */}
@@ -73,13 +98,13 @@ export default function KundliThankYouPage() {
                 icon: FileText,
                 title: "Report preparation",
                 description:
-                  "Our astrologer reviews your birth data and prepares your 15–20 page personalized report",
+                  "Our astrologer reviews your birth data and prepares your 40–45 page personalized PDF — manually written for you, not auto-generated.",
               },
               {
                 icon: Clock,
-                title: "Delivery within 24 hours",
+                title: "Delivery timeline",
                 description:
-                  "You'll receive your report on WhatsApp. Check for a message from VedGuide.",
+                  "Standard: 24–48 hours on WhatsApp (+ email if you shared it). FastTrack orders get priority within ~12 hours.",
               },
               {
                 icon: MessageCircle,
@@ -124,32 +149,62 @@ export default function KundliThankYouPage() {
           </p>
         </div>
 
-        {/* Soft upsell: Consultation */}
-        <div className="mx-auto mt-10 max-w-md rounded-2xl border border-border/60 bg-surface p-6 text-left">
-          <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            While you wait
-          </p>
-          <h3 className="font-heading text-lg font-semibold text-foreground">
-            {CONSULTATION_OFFER.title}
-          </h3>
-          <p className="mt-2 text-sm text-muted-foreground">
-            {CONSULTATION_OFFER.description}
-          </p>
-          <div className="mt-4 flex items-center justify-between">
-            <span className="font-heading text-xl font-bold text-foreground">
-              {CONSULTATION_OFFER.price}
-            </span>
-            <Button
-              variant="outline"
-              className="border-brand text-brand hover:bg-brand hover:text-white"
-              render={<Link href={CONSULTATION_OFFER.href} />}
-              onClick={() =>
-                track.consultationPageViewed("thank_you_kundli")
-              }
-            >
-              Learn more
-              <ChevronRight size={14} />
-            </Button>
+        {/* Consultation upsell */}
+        <div className="relative mx-auto mt-12 max-w-md overflow-hidden rounded-3xl border-2 border-brand/35 bg-gradient-to-br from-amber-100/80 via-white to-brand-light/40 p-[1px] shadow-[0_20px_56px_-20px_rgba(180,83,9,0.45)]">
+          <div className="relative rounded-[1.35rem] bg-card/98 px-5 py-6 text-left backdrop-blur-sm">
+            <div
+              aria-hidden
+              className="pointer-events-none absolute -right-8 -top-8 size-28 rounded-full bg-brand/15 blur-2xl"
+            />
+            <div className="relative flex items-start gap-3">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-brand to-orange-700 text-white shadow-lg shadow-brand/25">
+                <Sparkles className="size-5" strokeWidth={2.2} />
+              </div>
+              <div className="min-w-0 pt-0.5">
+                <p className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-brand">
+                  While you wait
+                </p>
+                <h3 className="font-heading text-lg font-extrabold leading-snug text-foreground md:text-xl">
+                  {CONSULTATION_OFFER.title}
+                </h3>
+                <p className="mt-1 flex items-center gap-1.5 text-[11px] font-semibold text-muted-foreground">
+                  <Video className="size-3.5 shrink-0 text-brand" />
+                  Voice / video slot — book online
+                </p>
+              </div>
+            </div>
+            <ul className="relative mt-4 space-y-2.5 border-t border-border/50 pt-4">
+              {CONSULTATION_OFFER.bullets.map((line) => (
+                <li key={line} className="flex gap-2.5 text-[13px] leading-snug text-foreground">
+                  <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-brand/12 text-[10px] font-bold text-brand">
+                    ✓
+                  </span>
+                  <span className="text-muted-foreground">{line}</span>
+                </li>
+              ))}
+            </ul>
+            <div className="relative mt-5 flex flex-col gap-3 border-t border-border/50 pt-5 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                  From
+                </p>
+                <p className="font-heading text-2xl font-extrabold text-foreground">
+                  {CONSULTATION_OFFER.price}
+                  <span className="ml-1 text-sm font-semibold text-muted-foreground">
+                    / session
+                  </span>
+                </p>
+              </div>
+              <Button
+                size="lg"
+                className="w-full shrink-0 bg-brand px-6 font-extrabold text-white shadow-md hover:bg-brand-hover sm:w-auto"
+                render={<Link href={CONSULTATION_OFFER.href} />}
+                onClick={() => track.consultationPageViewed("thank_you_kundli")}
+              >
+                Book consultation
+                <ChevronRight className="size-4" />
+              </Button>
+            </div>
           </div>
         </div>
 

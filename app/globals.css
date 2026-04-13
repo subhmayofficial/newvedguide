@@ -161,6 +161,131 @@
   background-image: radial-gradient(circle at 1px 1px, oklch(0.55 0.14 55 / 0.06) 1px, transparent 0);
   background-size: 32px 32px;
 }
+
 body[data-hide-site-header="true"] .site-header {
   display: none;
+}
+
+@keyframes consultation-marquee {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.animate-consultation-marquee {
+  animation: consultation-marquee 55s linear infinite;
+  will-change: transform;
+}
+
+@keyframes consultation-soft-float {
+  0%,
+  100% {
+    transform: translateY(0) translateZ(0);
+  }
+  50% {
+    transform: translateY(-10px) translateZ(0);
+  }
+}
+
+@keyframes consultation-orb-breathe {
+  0%,
+  100% {
+    opacity: 0.12;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.26;
+    transform: scale(1.07);
+  }
+}
+
+@keyframes consultation-ring-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes consultation-twinkle {
+  0%,
+  100% {
+    opacity: 0.25;
+    transform: scale(0.92);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+}
+
+@keyframes consultation-card-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 oklch(0.55 0.14 55 / 0.12);
+  }
+  50% {
+    box-shadow: 0 16px 48px -12px oklch(0.55 0.14 55 / 0.28);
+  }
+}
+
+@keyframes consultation-shimmer-gold {
+  0% {
+    background-position: 0% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+.animate-consultation-soft-float {
+  animation: consultation-soft-float 5s ease-in-out infinite;
+}
+
+.animate-consultation-orb-breathe {
+  animation: consultation-orb-breathe 6s ease-in-out infinite;
+}
+
+.animate-consultation-ring-spin {
+  animation: consultation-ring-spin 48s linear infinite;
+}
+
+.animate-consultation-twinkle {
+  animation: consultation-twinkle 3.2s ease-in-out infinite;
+}
+
+.animate-consultation-card-glow {
+  animation: consultation-card-glow 4s ease-in-out infinite;
+}
+
+.consultation-shimmer-gold {
+  background: linear-gradient(
+    100deg,
+    oklch(0.88 0.12 85) 0%,
+    oklch(0.96 0.14 90) 25%,
+    oklch(0.88 0.12 85) 50%,
+    oklch(0.82 0.1 82) 75%,
+    oklch(0.88 0.12 85) 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: consultation-shimmer-gold 5s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-consultation-soft-float,
+  .animate-consultation-orb-breathe,
+  .animate-consultation-ring-spin,
+  .animate-consultation-twinkle,
+  .animate-consultation-card-glow,
+  .consultation-shimmer-gold,
+  .animate-consultation-marquee {
+    animation: none !important;
+  }
 }

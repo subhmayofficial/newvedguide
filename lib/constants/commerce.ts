@@ -55,6 +55,10 @@ export const FULFILLMENT_STATUS = {
   DELIVERED: "delivered",
 } as const;
 
+/** Admin order list — who fulfils (stored in orders.fulfillment_assignee) */
+export const ORDER_FULFILLMENT_ASSIGNEES = ["Ashu", "Roshan"] as const;
+export type OrderFulfillmentAssignee = (typeof ORDER_FULFILLMENT_ASSIGNEES)[number];
+
 export const PAYMENT_ROW_STATUS = {
   CREATED: "created",
   PENDING: "pending",
@@ -79,6 +83,8 @@ export const ENTITY_NOTE_TYPE = {
 export const PRODUCT_SLUGS = {
   PAID_KUNDLI: "paid-kundli",
   FAST_TRACK_ADDON: "fast-track-addon",
+  CONSULTATION_15MIN: "consultation-15min",
+  CONSULTATION_45MIN: "consultation-45min",
 } as const;
 
 /** Map checkout ?source= and page sources to analytics entry_path */

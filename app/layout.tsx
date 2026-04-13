@@ -19,19 +19,62 @@ const cormorant = Cormorant_Garamond({
   display: "swap",
 });
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://vedguide.in";
+
 export const metadata: Metadata = {
   title: {
     default: "VedGuide — Vedic Astrology & Kundli",
     template: "%s | VedGuide",
   },
   description:
-    "Get your free Kundli and personalized Vedic astrology insights. Understand your birth chart, life path, and destiny with VedGuide.",
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL ?? "https://vedguide.in"
-  ),
+    "Get your free Kundli and personalized Vedic astrology guidance. Explore life, career, marriage, and remedies with AstroGuru Ashutosh.",
+  keywords: [
+    "free kundli",
+    "vedic astrology",
+    "kundli report",
+    "astro consultation",
+    "astro guru ashutosh",
+    "birth chart analysis",
+    "online astrology consultation",
+  ],
+  metadataBase: new URL(siteUrl),
+  alternates: {
+    canonical: "/",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
   openGraph: {
+    title: "VedGuide — Vedic Astrology & Kundli",
+    description:
+      "Get your free Kundli and personalized Vedic astrology guidance with AstroGuru Ashutosh.",
     siteName: "VedGuide",
     type: "website",
+    url: siteUrl,
+    locale: "en_IN",
+    images: [
+      {
+        url: "/assets/premium_kundli.webp",
+        width: 1200,
+        height: 630,
+        alt: "VedGuide Kundli and Astrology Services",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "VedGuide — Vedic Astrology & Kundli",
+    description:
+      "Get your free Kundli and personalized Vedic astrology guidance with AstroGuru Ashutosh.",
+    images: ["/assets/premium_kundli.webp"],
   },
 };
 

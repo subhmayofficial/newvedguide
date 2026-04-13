@@ -23,38 +23,38 @@ import { useState } from "react";
 type NavLeaf = { label: string; href: string };
 type NavGroup = { label: string; icon: LucideIcon; items: NavLeaf[] };
 
-const OVERVIEW: NavLeaf[] = [{ label: "Dashboard", href: "/admin" }];
+const OVERVIEW: NavLeaf[] = [{ label: "Dashboard", href: "/admindeoghar" }];
 
 const CORE: NavLeaf[] = [
-  { label: "Leads", href: "/admin/leads" },
-  { label: "Orders", href: "/admin/orders" },
-  { label: "Analytics", href: "/admin/analytics" },
+  { label: "Leads", href: "/admindeoghar/leads" },
+  { label: "Orders", href: "/admindeoghar/orders" },
+  { label: "Analytics", href: "/admindeoghar/analytics" },
 ];
 
-const CATALOG: NavLeaf[] = [{ label: "Products", href: "/admin/products" }];
+const CATALOG: NavLeaf[] = [{ label: "Products", href: "/admindeoghar/products" }];
 
 const FINANCE: NavLeaf[] = [
-  { label: "Payments", href: "/admin/payments" },
-  { label: "Coupons", href: "/admin/coupons" },
+  { label: "Payments", href: "/admindeoghar/payments" },
+  { label: "Coupons", href: "/admindeoghar/coupons" },
 ];
 
 const CONTENT: NavLeaf[] = [
-  { label: "Pages", href: "/admin/content/pages" },
-  { label: "FAQs", href: "/admin/content/faqs" },
-  { label: "Testimonials", href: "/admin/content/testimonials" },
-  { label: "Banners", href: "/admin/content/banners" },
+  { label: "Pages", href: "/admindeoghar/content/pages" },
+  { label: "FAQs", href: "/admindeoghar/content/faqs" },
+  { label: "Testimonials", href: "/admindeoghar/content/testimonials" },
+  { label: "Banners", href: "/admindeoghar/content/banners" },
 ];
 
-const TOOLS_NAV: NavLeaf[] = [{ label: "Tools", href: "/admin/tools" }];
+const TOOLS_NAV: NavLeaf[] = [{ label: "Tools", href: "/admindeoghar/tools" }];
 
 const OPS: NavLeaf[] = [
-  { label: "Consultations", href: "/admin/consultations" },
-  { label: "Logs", href: "/admin/logs" },
+  { label: "Consultations", href: "/admindeoghar/consultations" },
+  { label: "Logs", href: "/admindeoghar/logs" },
 ];
 
 const SYSTEM: NavLeaf[] = [
-  { label: "Team", href: "/admin/team" },
-  { label: "Settings", href: "/admin/settings" },
+  { label: "Team", href: "/admindeoghar/team" },
+  { label: "Settings", href: "/admindeoghar/settings" },
 ];
 
 const GROUPS: NavGroup[] = [
@@ -121,8 +121,8 @@ function NavSection({
         <ul className="mt-0.5 space-y-0.5 border-l border-sidebar-border/60 pl-2 ml-2">
           {group.items.map((item) => {
             const isActive =
-              item.href === "/admin"
-                ? pathname === "/admin"
+              item.href === "/admindeoghar"
+                ? pathname === "/admindeoghar"
                 : pathname === item.href || pathname.startsWith(`${item.href}/`);
             return (
               <li key={item.href}>
@@ -143,7 +143,7 @@ export function AdminSidebar() {
 
   async function handleSignOut() {
     await supabase.auth.signOut();
-    router.push("/admin/login");
+    router.push("/admindeoghar/login");
   }
 
   return (

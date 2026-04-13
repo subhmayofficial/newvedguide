@@ -24,6 +24,7 @@ export default async function AdminProductsPage() {
               <th className="px-4 py-3">Name</th>
               <th className="px-4 py-3">Slug</th>
               <th className="px-4 py-3">Type</th>
+              <th className="px-4 py-3">Used in</th>
               <th className="px-4 py-3">Price (paise)</th>
               <th className="px-4 py-3">Active</th>
             </tr>
@@ -34,6 +35,7 @@ export default async function AdminProductsPage() {
                 <td className="px-4 py-3 font-medium">{p.name}</td>
                 <td className="px-4 py-3 font-mono text-xs">{p.slug}</td>
                 <td className="px-4 py-3">{p.type}</td>
+                <td className="px-4 py-3 text-xs">{productUsageLabel(p.slug)}</td>
                 <td className="px-4 py-3 tabular-nums">{p.price}</td>
                 <td className="px-4 py-3">{p.is_active ? "Yes" : "No"}</td>
               </tr>
@@ -85,4 +87,12 @@ export default async function AdminProductsPage() {
       </div>
     </div>
   );
+}
+
+function productUsageLabel(slug: string): string {
+  if (slug === "paid-kundli" || slug === "fast-track-addon") return "Kundli checkout";
+  if (slug === "consultation-15min" || slug === "consultation-45min") {
+    return "Consultation checkout";
+  }
+  return "General";
 }

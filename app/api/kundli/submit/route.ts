@@ -14,6 +14,7 @@ interface SubmitKundliBody {
   leadId?: string;
   fullName: string;
   phone?: string;
+  whatsappConsent?: boolean;
   gender?: string;
   email?: string;
   dob: string;
@@ -34,9 +35,23 @@ export async function POST(request: Request) {
   try {
     const body: SubmitKundliBody = await request.json();
 
-    if (!body.fullName || !body.dob || !body.tob || !body.pob) {
+    const phone = body.phone?.replace(/\D/g, "").slice(-10);
+    if (
+      !body.fullName ||
+      !body.dob ||
+      !body.tob ||
+      !body.pob ||
+      !phone ||
+      !/^[6-9]\d{9}$/.test(phone)
+    ) {
       return NextResponse.json(
         { error: "Missing required birth details" },
+        { status: 400 }
+      );
+    }
+    if (body.whatsappConsent !== true) {
+      return NextResponse.json(
+        { error: "WhatsApp consent is required" },
         { status: 400 }
       );
     }
@@ -60,7 +75,7 @@ export async function POST(request: Request) {
 
     const customer = await upsertCustomer(supabase, {
       fullName: body.fullName,
-      phone: body.phone,
+      phone,
       email: body.email,
       source: body.source ?? "free_kundli_page",
       utmSource: body.utmSource,
@@ -78,6 +93,8 @@ export async function POST(request: Request) {
       utmJson,
       payloadJson: {
         gender: body.gender ?? null,
+        whatsapp_consent: body.whatsappConsent,
+        phone,
       } as Json,
     });
 
@@ -117,7 +134,7 @@ export async function POST(request: Request) {
         .insert({
           lead_id: lead.id,
           full_name: body.fullName,
-          phone: body.phone ?? "",
+          phone,
           email: body.email ?? null,
           dob: body.dob,
           tob: body.tob,
@@ -127,6 +144,7 @@ export async function POST(request: Request) {
           timezone: body.timezone ?? "Asia/Kolkata",
           result_data: resultData as unknown as Json,
           source: body.source ?? "free_kundli_page",
+          whatsapp_consent: body.whatsappConsent,
           utm_source: body.utmSource ?? null,
           utm_medium: body.utmMedium ?? null,
           utm_campaign: body.utmCampaign ?? null,

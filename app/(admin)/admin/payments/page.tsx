@@ -66,7 +66,7 @@ export default async function AdminPaymentsPage() {
                   <td className="px-4 py-3 font-mono text-xs">{p.id.slice(0, 8)}…</td>
                   <td className="px-4 py-3">
                     {o?.order_number && o?.id ? (
-                      <Link href={`/admin/orders/${o.id}`} className="hover:underline">
+                      <Link href={`/admindeoghar/orders/${o.id}`} className="hover:underline">
                         {o.order_number}
                       </Link>
                     ) : (

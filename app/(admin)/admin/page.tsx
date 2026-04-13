@@ -100,14 +100,14 @@ export default async function AdminDashboardPage({
       </div>
 
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4">
-        <Stat label="Total leads" value={String(totalLeads)} href="/admin/leads" />
-        <Stat label="Qualified" value={String(qualified)} href="/admin/leads?status=qualified" />
-        <Stat label="Converted" value={String(converted)} href="/admin/leads?status=converted" />
-        <Stat label="Lost" value={String(lost)} href="/admin/leads?status=lost" />
-        <Stat label="Orders" value={String(orderKpis.total)} href="/admin/orders" />
-        <Stat label="Paid orders" value={String(orderKpis.paid)} href="/admin/orders?payment_status=paid" />
-        <Stat label="Revenue (₹)" value={revenueRupees.toFixed(0)} href="/admin/analytics" />
-        <Stat label="Payment success %" value={`${successRate}%`} href="/admin/analytics" />
+        <Stat label="Total leads" value={String(totalLeads)} href="/admindeoghar/leads" />
+        <Stat label="Qualified" value={String(qualified)} href="/admindeoghar/leads?status=qualified" />
+        <Stat label="Converted" value={String(converted)} href="/admindeoghar/leads?status=converted" />
+        <Stat label="Lost" value={String(lost)} href="/admindeoghar/leads?status=lost" />
+        <Stat label="Orders" value={String(orderKpis.total)} href="/admindeoghar/orders" />
+        <Stat label="Paid orders" value={String(orderKpis.paid)} href="/admindeoghar/orders?payment_status=paid" />
+        <Stat label="Revenue (₹)" value={revenueRupees.toFixed(0)} href="/admindeoghar/analytics" />
+        <Stat label="Payment success %" value={`${successRate}%`} href="/admindeoghar/analytics" />
       </section>
 
       <section className="grid gap-6 lg:grid-cols-2">
@@ -115,7 +115,7 @@ export default async function AdminDashboardPage({
           <div className="mb-4 flex items-center justify-between">
             <h2 className="font-heading text-lg font-semibold">KFP funnel (preview)</h2>
             <Link
-              href="/admin/analytics/funnels/kfp"
+              href="/admindeoghar/analytics/funnels/kfp"
               className="text-sm font-medium text-brand hover:underline"
             >
               Open funnel
@@ -126,7 +126,7 @@ export default async function AdminDashboardPage({
         <div className="rounded-2xl border border-border/60 bg-card p-6 shadow-sm">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="font-heading text-lg font-semibold">Direct sales path</h2>
-            <Link href="/admin/analytics" className="text-sm font-medium text-brand hover:underline">
+            <Link href="/admindeoghar/analytics" className="text-sm font-medium text-brand hover:underline">
               Analytics
             </Link>
           </div>
@@ -157,7 +157,7 @@ export default async function AdminDashboardPage({
         <div className="rounded-2xl border border-border/60 bg-card p-6 shadow-sm">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="font-heading text-lg font-semibold">Recent leads</h2>
-            <Link href="/admin/leads" className="text-sm font-medium text-brand hover:underline">
+            <Link href="/admindeoghar/leads" className="text-sm font-medium text-brand hover:underline">
               View all
             </Link>
           </div>
@@ -171,7 +171,7 @@ export default async function AdminDashboardPage({
               return (
                 <li key={row.id} className="flex items-center justify-between gap-3 py-3 text-sm">
                   <div>
-                    <Link href={`/admin/leads/${row.id}`} className="font-medium hover:underline">
+                    <Link href={`/admindeoghar/leads/${row.id}`} className="font-medium hover:underline">
                       {c?.full_name ?? "—"}
                     </Link>
                     <p className="text-xs text-muted-foreground">{c?.phone ?? "—"}</p>
@@ -187,7 +187,7 @@ export default async function AdminDashboardPage({
         <div className="rounded-2xl border border-border/60 bg-card p-6 shadow-sm">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="font-heading text-lg font-semibold">Recent orders</h2>
-            <Link href="/admin/orders" className="text-sm font-medium text-brand hover:underline">
+            <Link href="/admindeoghar/orders" className="text-sm font-medium text-brand hover:underline">
               View all
             </Link>
           </div>
@@ -197,7 +197,7 @@ export default async function AdminDashboardPage({
               return (
                 <li key={row.id} className="flex items-center justify-between gap-3 py-3 text-sm">
                   <div>
-                    <Link href={`/admin/orders/${row.id}`} className="font-medium hover:underline">
+                    <Link href={`/admindeoghar/orders/${row.id}`} className="font-medium hover:underline">
                       {row.order_number}
                     </Link>
                     <p className="text-xs text-muted-foreground">{c?.full_name ?? "—"}</p>

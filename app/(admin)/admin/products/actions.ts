@@ -34,5 +34,5 @@ export async function upsertProduct(formData: FormData) {
   } else {
     await supabase.from("products").insert(row);
   }
-  revalidatePath("/admin/products");
+  revalidatePath("/admindeoghar/products");
 }

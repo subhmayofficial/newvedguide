@@ -663,6 +663,13 @@ function CtaSection({ fn }: { fn: string }) {
           <p className="mt-1.5 text-[13px] font-semibold text-muted-foreground">
             Sirf <span className="font-bold text-foreground">{fn}</span> ke liye, personal analysis
           </p>
+          <p className="mt-2 inline-flex flex-wrap items-center justify-center gap-1.5 rounded-full border border-brand/25 bg-brand/5 px-3 py-1 text-[11px] font-bold text-brand sm:justify-start">
+            <span>40–45 page</span>
+            <span className="text-brand/40">·</span>
+            <span>detailed PDF</span>
+            <span className="text-brand/40">·</span>
+            <span>WhatsApp + Email</span>
+          </p>
           <div className="mt-3 flex flex-wrap items-center justify-center gap-2 sm:justify-start">
             <span className="text-3xl font-extrabold tracking-tight text-foreground">₹399</span>
             <span className="text-sm text-muted-foreground line-through">₹999</span>

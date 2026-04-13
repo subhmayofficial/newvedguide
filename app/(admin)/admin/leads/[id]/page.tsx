@@ -38,6 +38,7 @@ export default async function LeadDetailPage({
   const events = await getEntityTimeline(supabase, { leadId: id, limit: 40 });
 
   const c = customer as Record<string, unknown> | null;
+  const payload = parseLeadPayload(lead.payload_json);
 
   return (
     <div className="mx-auto max-w-5xl space-y-10">
@@ -53,7 +54,7 @@ export default async function LeadDetailPage({
         </div>
         <div className="flex gap-2">
           {lead.linked_order_id && (
-            <Button variant="outline" render={<Link href={`/admin/orders/${lead.linked_order_id}`} />}>
+            <Button variant="outline" render={<Link href={`/admindeoghar/orders/${lead.linked_order_id}`} />}>
               Open order
             </Button>
           )}
@@ -86,6 +87,16 @@ export default async function LeadDetailPage({
           <Row label="Type" value={lead.lead_type} />
           <Row label="Status" value={lead.status} />
           <Row label="Journey stage" value={lead.journey_stage ?? "—"} />
+          <Row
+            label="WhatsApp consent"
+            value={
+              typeof payload.whatsapp_consent === "boolean"
+                ? payload.whatsapp_consent
+                  ? "Yes"
+                  : "No"
+                : "—"
+            }
+          />
           <Row label="Qualification" value={lead.qualification_reason ?? "—"} />
           <Row label="Conversion" value={lead.conversion_reason ?? "—"} />
           <Row label="Lost reason" value={lead.lost_reason ?? "—"} />
@@ -171,4 +182,19 @@ function Row({ label, value }: { label: string; value: string }) {
       <dd className="text-right font-medium">{value}</dd>
     </div>
   );
+}
+
+function parseLeadPayload(
+  payload: unknown
+): { whatsapp_consent?: boolean } {
+  if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
+    return {};
+  }
+  const obj = payload as Record<string, unknown>;
+  return {
+    whatsapp_consent:
+      typeof obj.whatsapp_consent === "boolean"
+        ? obj.whatsapp_consent
+        : undefined,
+  };
 }

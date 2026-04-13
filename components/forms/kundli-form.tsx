@@ -18,6 +18,8 @@ interface FormData {
   tob: string;
   tobUnknown: boolean;
   pob: string;
+  phone: string;
+  whatsappConsent: boolean;
 }
 
 const EMPTY: FormData = {
@@ -27,9 +29,11 @@ const EMPTY: FormData = {
   tob: "",
   tobUnknown: false,
   pob: "",
+  phone: "",
+  whatsappConsent: false,
 };
 
-type StepNum = 1 | 2 | 3 | 4 | 5;
+type StepNum = 1 | 2 | 3 | 4 | 5 | 6;
 
 const STEPS = [
   {
@@ -77,7 +81,18 @@ const STEPS = [
     fact: null,
     field: "pob" as keyof FormData,
   },
+  {
+    step: 6 as StepNum,
+    icon: User,
+    emoji: "📲",
+    question: "WhatsApp number confirm karein",
+    sub: "Result + important updates isi number par share honge.",
+    fact: null,
+    field: "phone" as keyof FormData,
+  },
 ] as const;
+
+const TOTAL_STEPS = STEPS.length;
 
 /** First word of full name for friendly copy on steps 2+ */
 function firstNameFrom(fullName: string): string {
@@ -115,6 +130,11 @@ function getPersonalizedCopy(
       return {
         question: `${fn}, janm ki jagah?`,
         sub: `${fn}, sirf city aur state kaafi hai. Isse aapka rising sign set hoga.`,
+      };
+    case 6:
+      return {
+        question: `${fn}, aapka WhatsApp number?`,
+        sub: `${fn}, isi par aapko result updates milenge.`,
       };
     default:
       return { question: base.question, sub: base.sub };
@@ -199,17 +219,20 @@ function ProcessingScreen() {
 // ─── Progress bar ─────────────────────────────────────────────────────────────
 
 function ProgressBar({ current }: { current: number }) {
+  const progress = Math.round((current / TOTAL_STEPS) * 100);
   /* Single stable classNames (no sm/md split on wrappers) to avoid hydration mismatches */
   return (
     <div className="mb-8">
       <div className="mb-2 flex items-center justify-between text-xs">
-        <span className="font-semibold text-brand">Step {current} of 5</span>
-        <span className="text-muted-foreground">{current * 20}%</span>
+        <span className="font-semibold text-brand">
+          Step {current} of {TOTAL_STEPS}
+        </span>
+        <span className="text-muted-foreground">{progress}%</span>
       </div>
       <div className="h-1.5 w-full overflow-hidden rounded-full bg-border">
         <div
           className="h-full rounded-full bg-brand transition-all duration-500 ease-out"
-          style={{ width: `${current * 20}%` }}
+          style={{ width: `${progress}%` }}
         />
       </div>
       <div className="mt-3 flex justify-between px-0.5">
@@ -335,6 +358,10 @@ export function KundliForm() {
       case 5:
         if (data.pob.trim().length < 2) return "Apna janm sheher daalen";
         return null;
+      case 6:
+        if (!/^[6-9]\d{9}$/.test(data.phone)) return "Valid 10-digit WhatsApp number daalen";
+        if (!data.whatsappConsent) return "Aage badhne ke liye WhatsApp consent dena zaroori hai";
+        return null;
     }
   }
 
@@ -345,7 +372,7 @@ export function KundliForm() {
     if (step === 1) track.freeKundliFormStarted(source);
     track.freeKundliStepCompleted(step, displayQuestion);
 
-    if (step < 5) {
+    if (step < TOTAL_STEPS) {
       setStep((s) => (s + 1) as StepNum);
     } else {
       await handleSubmit();
@@ -368,10 +395,12 @@ export function KundliForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           fullName: data.fullName,
+          phone: data.phone,
           gender: data.gender || undefined,
           dob: data.dob,
           tob: effectiveTob,
           pob: data.pob,
+          whatsappConsent: data.whatsappConsent,
           source,
           utmSource,
           utmMedium,
@@ -523,6 +552,50 @@ export function KundliForm() {
               className="h-13 rounded-xl text-base"
             />
           )}
+
+          {step === 6 && (
+            <div className="space-y-3">
+              <Input
+                ref={inputRef}
+                type="tel"
+                inputMode="numeric"
+                maxLength={10}
+                placeholder="e.g. 9876543210"
+                value={data.phone}
+                onChange={(e) =>
+                  set("phone", e.target.value.replace(/\D/g, "").slice(0, 10))
+                }
+                className="h-13 rounded-xl text-base"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  set("whatsappConsent", !data.whatsappConsent);
+                  setError("");
+                }}
+                className={cn(
+                  "flex w-full items-start gap-2.5 rounded-xl border-2 px-4 py-3 text-left text-sm font-medium transition-all duration-200",
+                  data.whatsappConsent
+                    ? "border-brand bg-brand-light/60 text-brand"
+                    : "border-border text-muted-foreground hover:border-brand/40 hover:text-foreground"
+                )}
+              >
+                <div
+                  className={cn(
+                    "mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded border-2 transition-all",
+                    data.whatsappConsent ? "border-brand bg-brand" : "border-border"
+                  )}
+                >
+                  {data.whatsappConsent && (
+                    <Check size={10} strokeWidth={3} className="text-white" />
+                  )}
+                </div>
+                <span>
+                  I agree to receive my free kundli result and related updates on WhatsApp.
+                </span>
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Fact — desktop only to keep mobile step in one fold */}
@@ -553,7 +626,7 @@ export function KundliForm() {
               "bg-brand hover:bg-brand-hover active:scale-[0.98]"
             )}
           >
-            {step === 5 ? (
+            {step === TOTAL_STEPS ? (
               <>
                 <Sparkles size={17} />
                 <span>Check My Kundli</span>
@@ -575,13 +648,13 @@ export function KundliForm() {
         <p className="mt-2 text-center text-[11px] text-muted-foreground md:mt-3 md:text-xs">
           {step === 1
             ? "No account needed — 100% free"
-            : step === 5
+            : step === TOTAL_STEPS
             ? fn
               ? `Last step — ${fn}, aapki Kundli almost ready hai ✨`
               : "Last step — aapki Kundli almost ready hai ✨"
             : fn
-              ? `${fn}, ${5 - step} aur step${5 - step > 1 ? "s" : ""} baaki hain`
-              : `${5 - step} aur step${5 - step > 1 ? "s" : ""} baaki hain`}
+              ? `${fn}, ${TOTAL_STEPS - step} aur step${TOTAL_STEPS - step > 1 ? "s" : ""} baaki hain`
+              : `${TOTAL_STEPS - step} aur step${TOTAL_STEPS - step > 1 ? "s" : ""} baaki hain`}
         </p>
       </StepFade>
     </div>

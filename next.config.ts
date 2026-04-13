@@ -1,6 +1,32 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  async redirects() {
+    return [
+      {
+        source: "/admin",
+        destination: "/admindeoghar",
+        permanent: false,
+      },
+      {
+        source: "/admin/:path*",
+        destination: "/admindeoghar/:path*",
+        permanent: false,
+      },
+    ];
+  },
+  async rewrites() {
+    return [
+      {
+        source: "/admindeoghar",
+        destination: "/admin",
+      },
+      {
+        source: "/admindeoghar/:path*",
+        destination: "/admin/:path*",
+      },
+    ];
+  },
   images: {
     remotePatterns: [
       {

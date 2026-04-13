@@ -133,6 +133,7 @@ export default async function AdminLeadsPage({
             <tr>
               <th className="px-4 py-3">Lead</th>
               <th className="px-4 py-3">Phone</th>
+              <th className="px-4 py-3">Source</th>
               <th className="px-4 py-3">Type</th>
               <th className="px-4 py-3">Status</th>
               <th className="px-4 py-3">Journey</th>
@@ -151,12 +152,15 @@ export default async function AdminLeadsPage({
               return (
                 <tr key={r.id} className="hover:bg-muted/20">
                   <td className="px-4 py-3 font-medium">
-                    <Link href={`/admin/leads/${r.id}`} className="hover:underline">
+                    <Link href={`/admindeoghar/leads/${r.id}`} className="hover:underline">
                       {c?.full_name ?? "—"}
                     </Link>
                     <p className="text-[11px] text-muted-foreground font-mono">{r.id.slice(0, 8)}…</p>
                   </td>
                   <td className="px-4 py-3 tabular-nums">{c?.phone ?? "—"}</td>
+                  <td className="max-w-[170px] truncate px-4 py-3 text-xs">
+                    {r.source_page ?? "—"}
+                  </td>
                   <td className="px-4 py-3">{r.lead_type}</td>
                   <td className="px-4 py-3">
                     <span className="rounded-full bg-muted px-2 py-0.5 text-xs">{r.status}</span>
@@ -167,7 +171,7 @@ export default async function AdminLeadsPage({
                   <td className="px-4 py-3 text-xs">{r.entry_path ?? "—"}</td>
                   <td className="px-4 py-3 text-xs">
                     {r.linked_order_id ? (
-                      <Link href={`/admin/orders/${r.linked_order_id}`} className="text-brand hover:underline font-mono">
+                      <Link href={`/admindeoghar/orders/${r.linked_order_id}`} className="text-brand hover:underline font-mono">
                         {String(r.linked_order_id).slice(0, 8)}…
                       </Link>
                     ) : (
@@ -179,7 +183,7 @@ export default async function AdminLeadsPage({
                   </td>
                   <td className="px-4 py-3 text-right">
                     <Link
-                      href={`/admin/leads/${r.id}`}
+                      href={`/admindeoghar/leads/${r.id}`}
                       className="text-sm font-medium text-brand hover:underline"
                     >
                       View

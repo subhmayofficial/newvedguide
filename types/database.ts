@@ -443,6 +443,7 @@ export interface Database {
           lead_id: string | null;
           full_name: string;
           phone: string;
+          whatsapp_consent: boolean;
           email: string | null;
           dob: string;
           tob: string;
@@ -462,6 +463,7 @@ export interface Database {
           lead_id?: string | null;
           full_name: string;
           phone: string;
+          whatsapp_consent?: boolean;
           email?: string | null;
           dob: string;
           tob: string;

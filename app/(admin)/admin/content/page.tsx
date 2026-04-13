@@ -2,10 +2,10 @@ import Link from "next/link";
 
 export default function AdminContentHubPage() {
   const links = [
-    { href: "/admin/content/pages", label: "Pages" },
-    { href: "/admin/content/faqs", label: "FAQs" },
-    { href: "/admin/content/testimonials", label: "Testimonials" },
-    { href: "/admin/content/banners", label: "Banners" },
+    { href: "/admindeoghar/content/pages", label: "Pages" },
+    { href: "/admindeoghar/content/faqs", label: "FAQs" },
+    { href: "/admindeoghar/content/testimonials", label: "Testimonials" },
+    { href: "/admindeoghar/content/banners", label: "Banners" },
   ];
   return (
     <div className="space-y-6">
