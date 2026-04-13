@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -392,6 +392,7 @@ export function KundliCheckout({
   const baseTotalPaise = BASE_PRICE + (fastTrack ? BUMP_PRICE : 0);
   const couponDiscountPaise = couponApplied?.discountPaise ?? 0;
   const totalPaise = Math.max(0, baseTotalPaise - couponDiscountPaise);
+  const prevBaseTotalRef = useRef(baseTotalPaise);
 
   const razorpayKeyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
 
@@ -458,9 +459,17 @@ export function KundliCheckout({
   }
 
   useEffect(() => {
-    if (!isV2Checkout || !couponApplied) return;
-    setCouponApplied(null);
-    setCouponNotice("Amount update ke baad coupon remove hua. Dobara apply karein.");
+    if (!isV2Checkout) {
+      prevBaseTotalRef.current = baseTotalPaise;
+      return;
+    }
+
+    const amountChanged = prevBaseTotalRef.current !== baseTotalPaise;
+    if (amountChanged && couponApplied) {
+      setCouponApplied(null);
+      setCouponNotice("Amount update ke baad coupon remove hua. Dobara apply karein.");
+    }
+    prevBaseTotalRef.current = baseTotalPaise;
   }, [baseTotalPaise, couponApplied, isV2Checkout]);
 
   async function applyCoupon() {
