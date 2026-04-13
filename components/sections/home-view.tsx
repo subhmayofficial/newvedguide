@@ -1,10 +1,6 @@
-"use client";
-
-import { useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Star, ChevronRight, Shield, Zap, Lock } from "lucide-react";
-import { track } from "@/lib/analytics/events";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -126,10 +122,6 @@ const RELATABLE_POINTS = [
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function HomeView() {
-  useEffect(() => {
-    track.homePageView();
-  }, []);
-
   return (
     <div className="overflow-x-hidden">
       <style>{`
@@ -262,7 +254,7 @@ export function HomeView() {
       </section>
 
       {/* ─── 2. TRUST STRIP ───────────────────────────────────────────────── */}
-      <div className="border-y border-border/60 bg-surface py-4">
+      <div className="cv-auto border-y border-border/60 bg-surface py-4">
         <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-center gap-6 px-4">
           {TRUST_PILLS.map((p) => (
             <span
@@ -277,7 +269,7 @@ export function HomeView() {
       </div>
 
       {/* ─── 3. ABOUT ASTROGURU ───────────────────────────────────────────── */}
-      <section className="px-4 py-16 md:py-20">
+      <section className="cv-auto px-4 py-16 md:py-20">
         <div className="mx-auto max-w-5xl">
           <div className="flex flex-col items-center gap-10 md:flex-row md:gap-14">
 
@@ -327,7 +319,7 @@ export function HomeView() {
       </section>
 
       {/* ─── 4. SERVICES ──────────────────────────────────────────────────── */}
-      <section className="bg-surface px-4 py-16">
+      <section className="cv-auto bg-surface px-4 py-16">
         <div className="mx-auto max-w-5xl">
           <div className="mb-10 text-center">
             <p className="mb-2 text-[11px] font-bold uppercase tracking-widest text-brand">
@@ -393,7 +385,7 @@ export function HomeView() {
       </section>
 
       {/* ─── 5. WHAT YOU'LL UNDERSTAND ────────────────────────────────────── */}
-      <section className="px-4 py-16">
+      <section className="cv-auto px-4 py-16">
         <div className="mx-auto max-w-4xl">
           <div className="mb-10 text-center">
             <p className="mb-2 text-[11px] font-bold uppercase tracking-widest text-brand">
@@ -437,7 +429,7 @@ export function HomeView() {
       </section>
 
       {/* ─── 6. HOW IT WORKS ──────────────────────────────────────────────── */}
-      <section className="bg-surface px-4 py-16">
+      <section className="cv-auto bg-surface px-4 py-16">
         <div className="mx-auto max-w-4xl">
           <div className="mb-10 text-center">
             <p className="mb-2 text-[11px] font-bold uppercase tracking-widest text-brand">
@@ -488,7 +480,7 @@ export function HomeView() {
       </section>
 
       {/* ─── 7. TESTIMONIALS ──────────────────────────────────────────────── */}
-      <section className="px-4 py-16">
+      <section className="cv-auto px-4 py-16">
         <div className="mx-auto max-w-4xl">
           <div className="mb-10 text-center">
             <p className="mb-2 text-[11px] font-bold uppercase tracking-widest text-brand">
@@ -528,7 +520,7 @@ export function HomeView() {
       </section>
 
       {/* ─── 8. RELATABILITY (SOFT) ───────────────────────────────────────── */}
-      <section className="bg-surface px-4 py-16">
+      <section className="cv-auto bg-surface px-4 py-16">
         <div className="mx-auto max-w-2xl text-center">
           <p className="mb-2 text-[11px] font-bold uppercase tracking-widest text-brand">
             Aapko Bhi?
@@ -560,7 +552,7 @@ export function HomeView() {
       </section>
 
       {/* ─── Trust icons strip ────────────────────────────────────────────── */}
-      <section className="px-4 py-10">
+      <section className="cv-auto px-4 py-10">
         <div className="mx-auto max-w-3xl">
           <div className="grid grid-cols-3 gap-4 text-center">
             {[
@@ -581,7 +573,7 @@ export function HomeView() {
       </section>
 
       {/* ─── 9. FINAL CTA ─────────────────────────────────────────────────── */}
-      <section className="spiritual-pattern relative overflow-hidden px-4 py-20 text-center">
+      <section className="cv-auto spiritual-pattern relative overflow-hidden px-4 py-20 text-center">
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
           <div className="h-72 w-72 rounded-full bg-brand/8 blur-3xl" />
         </div>

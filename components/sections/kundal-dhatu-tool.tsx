@@ -31,6 +31,7 @@ type KundalDhatuToolVariant = "default" | "astro";
 type KundalDhatuToolProps = {
   freeKundliHref?: string;
   variant?: KundalDhatuToolVariant;
+  idPrefix?: string;
 };
 
 type ToolCopy = {
@@ -114,6 +115,7 @@ const KUNDAL_DHATU_IMPORTANT_VIDEO_URL =
 export function KundalDhatuTool({
   freeKundliHref = "/free-kundli",
   variant = "default",
+  idPrefix = "kundal-dhatu",
 }: KundalDhatuToolProps = {}) {
   const [step, setStep] = useState<Step>("intro");
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -160,7 +162,7 @@ export function KundalDhatuTool({
                 {copy.introBody2}
               </p>
               <button
-                id="kundal-dhatu-start-btn"
+                id={`${idPrefix}-start-btn`}
                 type="button"
                 onClick={() => setStep("pick")}
                 className="mt-6 w-full rounded-2xl bg-brand py-3.5 text-center text-[15px] font-extrabold text-white shadow-[0_4px_16px_-4px_rgba(180,83,9,0.45)] transition-all active:scale-[0.98] hover:bg-brand-hover"
@@ -194,7 +196,7 @@ export function KundalDhatuTool({
         {step === "pick" && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
             <button
-              id="kundal-dhatu-back-to-intro-btn"
+              id={`${idPrefix}-back-to-intro-btn`}
               type="button"
               onClick={() => setStep("intro")}
               className="mb-5 flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-foreground"
@@ -213,7 +215,7 @@ export function KundalDhatuTool({
               <div className="mt-5 grid grid-cols-3 gap-2.5">
                 {RASHI_DHATU.map((r) => (
                   <button
-                    id={`kundal-dhatu-rashi-${r.id}-btn`}
+                    id={`${idPrefix}-rashi-${r.id}-btn`}
                     key={r.id}
                     type="button"
                     onClick={() => selectRashi(r.id)}
@@ -259,7 +261,7 @@ export function KundalDhatuTool({
               }
             `}</style>
             <button
-              id="kundal-dhatu-change-rashi-btn"
+              id={`${idPrefix}-change-rashi-btn`}
               type="button"
               onClick={() => setStep("pick")}
               className="mb-5 flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-foreground"
@@ -307,13 +309,6 @@ export function KundalDhatuTool({
 
               <p className="mt-4 text-[13px] leading-relaxed text-muted-foreground">{row.why}</p>
 
-              {/* Note */}
-              <div className="mt-4 rounded-xl border border-border/50 bg-muted/20 px-3 py-2.5">
-                <p className="text-[12px] leading-relaxed text-muted-foreground">
-                  <span className="font-bold text-foreground">Note: </span>
-                  {row.note}
-                </p>
-              </div>
             </div>
 
             {variant === "astro" && (
@@ -351,7 +346,7 @@ export function KundalDhatuTool({
                         className="absolute left-1/2 top-1/2 h-[108%] w-[108%] -translate-x-1/2 -translate-y-1/2"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
                         allowFullScreen
-                        loading="eager"
+                        loading="lazy"
                       />
                     </div>
                   </div>
@@ -382,7 +377,7 @@ export function KundalDhatuTool({
               </p>
 
               <Link
-                id="kundal-dhatu-primary-kundli-cta"
+                id={`${idPrefix}-primary-kundli-cta`}
                 href={freeKundliHref}
                 className="relative mt-5 flex h-12 w-full items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-[13px] font-extrabold text-white transition-transform active:scale-[0.98] sm:text-[14px]"
                 style={{
@@ -440,7 +435,7 @@ export function KundalDhatuTool({
                 {copy.resultSecondaryStrong}
               </p>
               <Button
-                id="kundal-dhatu-secondary-kundli-cta"
+                id={`${idPrefix}-secondary-kundli-cta`}
                 className="relative mt-4 h-11 w-full border-0 bg-gradient-to-r from-brand to-orange-600 text-[14px] font-extrabold text-white shadow-[0_6px_20px_-6px_rgba(180,83,9,0.55)] hover:from-brand-hover hover:to-orange-600"
                 render={<Link href={freeKundliHref} />}
               >
@@ -456,7 +451,7 @@ export function KundalDhatuTool({
 
             <p className="mt-4 text-center text-sm">
               <Link
-                id="kundal-dhatu-all-tools-link"
+                id={`${idPrefix}-all-tools-link`}
                 href="/tools"
                 className="font-medium text-brand hover:underline"
               >
@@ -497,7 +492,7 @@ export function KundalDhatuTool({
 
                 {/* CTA button */}
                 <Link
-                  id="kundal-dhatu-sticky-kundli-cta"
+                  id={`${idPrefix}-sticky-kundli-cta`}
                   href={freeKundliHref}
                   className="relative shrink-0 overflow-hidden rounded-2xl bg-brand px-5 py-2.5 shadow-[0_4px_18px_-4px_rgba(180,83,9,0.55)] transition-transform active:scale-95"
                 >

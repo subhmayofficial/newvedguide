@@ -1,5 +1,11 @@
 import { HomeView } from "@/components/sections/home-view";
+import { HomePageTracker } from "@/components/analytics/home-page-tracker";
 
 export default function HomePage() {
-  return <HomeView />;
+  return (
+    <>
+      <HomePageTracker />
+      <HomeView />
+    </>
+  );
 }

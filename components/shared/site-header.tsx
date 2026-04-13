@@ -1,9 +1,5 @@
-"use client";
-
 import Link from "next/link";
-import { useState } from "react";
-import { Menu, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Menu } from "lucide-react";
 
 const NAV_LINKS = [
   { label: "Free Kundli", href: "/free-kundli" },
@@ -14,8 +10,6 @@ const NAV_LINKS = [
 ];
 
 export function SiteHeader() {
-  const [mobileOpen, setMobileOpen] = useState(false);
-
   return (
     <header className="site-header sticky top-0 z-50 w-full border-b border-border/60 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
@@ -45,52 +39,47 @@ export function SiteHeader() {
 
         {/* Desktop CTA */}
         <div className="hidden md:flex">
-          <Button
+          <Link
             id="site-header-free-kundli-cta"
-            size="sm"
-            className="bg-brand hover:bg-brand-hover text-white"
-            render={<Link href="/free-kundli" />}
+            href="/free-kundli"
+            className="inline-flex h-7 items-center justify-center rounded-[12px] bg-brand px-2.5 text-[0.8rem] font-medium text-white transition-colors hover:bg-brand-hover"
           >
             Get Free Kundli
-          </Button>
+          </Link>
         </div>
 
-        {/* Mobile menu toggle */}
-        <button
-          id="site-header-mobile-menu-toggle"
-          className="flex md:hidden"
-          onClick={() => setMobileOpen((v) => !v)}
-          aria-label="Toggle menu"
-        >
-          {mobileOpen ? <X size={22} /> : <Menu size={22} />}
-        </button>
-      </div>
-
-      {/* Mobile nav */}
-      {mobileOpen && (
-        <div className="border-t border-border/60 bg-background px-4 pb-6 pt-4 md:hidden">
-          <nav className="flex flex-col gap-4">
-            {NAV_LINKS.map((link) => (
+        {/* Mobile menu (no client JS state) */}
+        <details className="relative md:hidden [&_summary::-webkit-details-marker]:hidden">
+          <summary
+            id="site-header-mobile-menu-toggle"
+            className="flex cursor-pointer list-none items-center rounded-md p-1.5 text-foreground"
+            aria-label="Toggle menu"
+          >
+            <Menu size={22} />
+          </summary>
+          <div className="absolute right-0 top-[calc(100%+0.45rem)] z-50 w-[min(92vw,22rem)] rounded-2xl border border-border/60 bg-background p-4 shadow-lg">
+            <nav className="flex flex-col gap-4">
+              {NAV_LINKS.map((link) => (
+                <Link
+                  key={link.href}
+                  id={`site-header-mobile-${link.href === "/free-kundli" ? "free-kundli" : link.href === "/kundli-report" ? "kundli-report" : link.href === "/consultation" ? "consultation" : link.href === "/tools" ? "tools" : "about"}-link`}
+                  href={link.href}
+                  className="text-base font-medium text-foreground"
+                >
+                  {link.label}
+                </Link>
+              ))}
               <Link
-                key={link.href}
-                id={`site-header-mobile-${link.href === "/free-kundli" ? "free-kundli" : link.href === "/kundli-report" ? "kundli-report" : link.href === "/consultation" ? "consultation" : link.href === "/tools" ? "tools" : "about"}-link`}
-                href={link.href}
-                className="text-base font-medium text-foreground"
-                onClick={() => setMobileOpen(false)}
+                id="site-header-mobile-free-kundli-cta"
+                href="/free-kundli"
+                className="mt-1 inline-flex w-full items-center justify-center rounded-lg bg-brand px-3 py-2.5 text-sm font-semibold text-white hover:bg-brand-hover"
               >
-                {link.label}
+                Get Free Kundli
               </Link>
-            ))}
-            <Button
-              id="site-header-mobile-free-kundli-cta"
-              className="mt-2 w-full bg-brand hover:bg-brand-hover text-white"
-              render={<Link href="/free-kundli" onClick={() => setMobileOpen(false)} />}
-            >
-              Get Free Kundli
-            </Button>
-          </nav>
-        </div>
-      )}
+            </nav>
+          </div>
+        </details>
+      </div>
     </header>
   );
 }

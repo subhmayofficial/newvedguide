@@ -13,6 +13,7 @@ export default function AstroPathKundalDhatuToolPage() {
       <KundalDhatuTool
         variant="astro"
         freeKundliHref="/astro-path/free-kundli?source=kfp_v2_kundal_dhatu"
+        idPrefix="kundal-dhatu-v2"
       />
     </div>
   );

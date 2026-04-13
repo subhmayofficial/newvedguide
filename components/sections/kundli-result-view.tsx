@@ -64,9 +64,11 @@ function initials(name: string): string {
 function ImportantVideoSection({
   videoEmbedUrl,
   headline,
+  showTopAlertStrip = true,
 }: {
   videoEmbedUrl: string;
   headline: string;
+  showTopAlertStrip?: boolean;
 }) {
   return (
     <section className="relative overflow-hidden rounded-3xl border-2 border-red-500/85 bg-gradient-to-br from-red-950 via-red-900 to-red-800 shadow-[0_24px_60px_-24px_rgba(127,29,29,0.7)]">
@@ -79,16 +81,18 @@ function ImportantVideoSection({
         aria-hidden
       />
 
-      <div className="relative flex items-center gap-2 border-b border-red-300/30 bg-red-700/75 px-4 py-2.5">
-        <span className="relative flex h-2.5 w-2.5 shrink-0">
-          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white/80" />
-          <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-white" />
-        </span>
-        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-red-50">
-          Danger alert
-        </p>
-        <AlertTriangle className="ml-auto size-4 text-amber-200" aria-hidden />
-      </div>
+      {showTopAlertStrip && (
+        <div className="relative flex items-center gap-2 border-b border-red-300/30 bg-red-700/75 px-4 py-2.5">
+          <span className="relative flex h-2.5 w-2.5 shrink-0">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white/80" />
+            <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-white" />
+          </span>
+          <p className="text-[10px] font-black uppercase tracking-[0.18em] text-red-50">
+            Danger alert
+          </p>
+          <AlertTriangle className="ml-auto size-4 text-amber-200" aria-hidden />
+        </div>
+      )}
 
       <div className="relative space-y-3 px-4 py-4">
         <h2 className="font-heading text-center text-xl font-black uppercase leading-tight text-white sm:text-2xl">
@@ -106,7 +110,7 @@ function ImportantVideoSection({
               className="h-full w-full"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
               allowFullScreen
-              loading="eager"
+              loading="lazy"
             />
           </div>
         </div>
@@ -232,10 +236,14 @@ function PatternSection({
   careerShort,
   relShort,
   ctaSourcePage,
+  patternCtaId,
+  ctaAnchorId,
 }: {
   careerShort: string;
   relShort: string;
   ctaSourcePage: string;
+  patternCtaId: string;
+  ctaAnchorId: string;
 }) {
   return (
     <>
@@ -300,11 +308,11 @@ function PatternSection({
 
         <div className="relative border-t border-red-100/80 bg-red-50/50 px-4 pb-4 pt-3">
           <button
-            id="free-kundli-result-pattern-cta"
+            id={patternCtaId}
             type="button"
             onClick={() => {
               track.paidReportCtaClicked(ctaSourcePage, "pattern_section");
-              document.getElementById("kundli-cta")?.scrollIntoView({ behavior: "smooth", block: "start" });
+              document.getElementById(ctaAnchorId)?.scrollIntoView({ behavior: "smooth", block: "start" });
             }}
             className="flex w-full items-center justify-center gap-2 rounded-2xl bg-red-600 py-3.5 text-sm font-bold text-white shadow-md transition-all hover:bg-red-700 active:scale-[0.98]"
           >
@@ -677,10 +685,14 @@ function CtaSection({
   fn,
   checkoutHref,
   ctaSourcePage,
+  ctaAnchorId,
+  mainCtaId,
 }: {
   fn: string;
   checkoutHref: string;
   ctaSourcePage: string;
+  ctaAnchorId: string;
+  mainCtaId: string;
 }) {
   const perks = [
     { type: "compass", label: "Poori picture", sub: "clearly samajh" },
@@ -691,7 +703,7 @@ function CtaSection({
 
   return (
     <div
-      id="kundli-cta"
+      id={ctaAnchorId}
       className="relative overflow-hidden rounded-3xl border-2 border-brand/35 bg-gradient-to-br from-gold-light via-brand-light/50 to-gold-light shadow-[0_24px_60px_-28px_rgba(180,83,9,0.35)]"
     >
       <div className="pointer-events-none absolute -left-10 top-1/2 size-40 -translate-y-1/2 rounded-full bg-brand/10 blur-3xl" aria-hidden />
@@ -789,7 +801,7 @@ function CtaSection({
             }
           `}</style>
             <Link
-              id="free-kundli-result-main-cta"
+              id={mainCtaId}
               href={checkoutHref}
               onClick={() => track.paidReportCtaClicked(ctaSourcePage, "main_cta")}
               className="vg-cta-btn relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-2xl bg-brand px-6 py-4 text-[15px] font-extrabold text-white shadow-lg transition-all hover:bg-brand-hover active:scale-[0.98]"
@@ -903,9 +915,11 @@ const COMPARE_ROWS = [
 function AutoManualBridge({
   checkoutHref,
   ctaSourcePage,
+  bridgeCtaId,
 }: {
   checkoutHref: string;
   ctaSourcePage: string;
+  bridgeCtaId: string;
 }) {
   return (
     <div className="overflow-hidden rounded-3xl border border-border/50 bg-card shadow-md">
@@ -960,7 +974,7 @@ function AutoManualBridge({
 
       <div className="px-3 py-4 sm:px-4">
         <Link
-          id="free-kundli-result-bridge-cta"
+          id={bridgeCtaId}
           href={checkoutHref}
           onClick={() => track.paidReportCtaClicked(ctaSourcePage, "manual_bridge_bottom")}
           className="flex w-full items-center justify-center gap-2 rounded-2xl bg-brand px-4 py-3.5 text-[14px] font-extrabold text-white shadow-md transition-all hover:bg-brand-hover active:scale-[0.98]"
@@ -1002,7 +1016,25 @@ function MangalDoshaSection({ result }: { result: KundliResult }) {
           baar wahi jhagde, delay ya tootne wale patterns aa sakte hain.
         </p>
         <p className="mt-2 text-[12px] font-medium text-red-800/90">
-          Poori calculation, upay aur timing — detailed personalized kundli mein.
+          Poori calculation, upay aur timing janna jaruri hai.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function PitruYogHighlightV2() {
+  return (
+    <div className="mt-3 overflow-hidden rounded-2xl border-2 border-amber-500/90 bg-gradient-to-br from-amber-50 via-orange-50 to-amber-100/85 shadow-[0_14px_36px_-18px_rgba(180,83,9,0.5)]">
+      <div className="h-1.5 bg-amber-600" />
+
+      <div className="space-y-2 px-4 py-3.5">
+        <p className="font-heading text-[15px] font-extrabold leading-snug text-amber-950">
+          Pitru ka yog — chart mein clearly present hai
+        </p>
+        <p className="text-[13px] leading-relaxed text-amber-900/90">
+          Iska detailed impact aur practical remedy samajhna zaroori hai, taaki life patterns ko
+          sahi direction di ja sake.
         </p>
       </div>
     </div>
@@ -1014,9 +1046,11 @@ function MangalDoshaSection({ result }: { result: KundliResult }) {
 function StickyBar({
   checkoutHref,
   ctaSourcePage,
+  stickyCtaId,
 }: {
   checkoutHref: string;
   ctaSourcePage: string;
+  stickyCtaId: string;
 }) {
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-border/40 bg-background/97 px-3 pb-[env(safe-area-inset-bottom,0px)] pt-2.5 shadow-[0_-6px_28px_-4px_rgba(0,0,0,0.14)] backdrop-blur-md md:hidden">
@@ -1034,7 +1068,7 @@ function StickyBar({
 
         {/* CTA button */}
         <Link
-          id="free-kundli-result-sticky-cta"
+          id={stickyCtaId}
           href={checkoutHref}
           onClick={() => track.paidReportCtaClicked(ctaSourcePage, "sticky")}
           className="relative shrink-0 overflow-hidden rounded-2xl bg-brand px-5 py-2.5 shadow-[0_4px_16px_-4px_rgba(180,83,9,0.55)] transition-transform active:scale-95"
@@ -1068,6 +1102,7 @@ type KundliResultViewProps = {
   fallbackInputPath?: string;
   checkoutHref?: string;
   ctaSourcePage?: string;
+  idPrefix?: string;
   videoEmbedUrl?: string;
   videoHeadline?: string;
   videoPlacement?: "above_core_chart" | "below_core_chart" | "below_teen_zones";
@@ -1078,6 +1113,7 @@ export function KundliResultView({
   fallbackInputPath = "/free-kundli",
   checkoutHref = "/checkout/kundli",
   ctaSourcePage = "free_kundli_result",
+  idPrefix = "free-kundli-result",
   videoEmbedUrl,
   videoHeadline = "VERY IMPORTANT: WATCH THIS",
   videoPlacement = "above_core_chart",
@@ -1117,10 +1153,16 @@ export function KundliResultView({
   const fn = firstName(name);
   const insights = getKundliInsights(result);
   const { career, relationship, money } = insights;
+  const isV2Result = ctaSourcePage === "free_kundli_result_v2";
   const resolvedVideoPlacement =
-    ctaSourcePage === "free_kundli_result_v2"
+    isV2Result
       ? "below_core_chart"
       : videoPlacement;
+  const ctaAnchorId = idPrefix === "free-kundli-result" ? "kundli-cta" : `${idPrefix}-cta`;
+  const patternCtaId = `${idPrefix}-pattern-cta`;
+  const mainCtaId = `${idPrefix}-main-cta`;
+  const bridgeCtaId = `${idPrefix}-bridge-cta`;
+  const stickyCtaId = `${idPrefix}-sticky-cta`;
   return (
     <div className="spiritual-pattern pb-28 md:pb-12">
       <div className="mx-auto max-w-xl space-y-6 px-3 pt-4 sm:px-4 sm:pt-6">
@@ -1170,6 +1212,7 @@ export function KundliResultView({
           <ImportantVideoSection
             videoEmbedUrl={videoEmbedUrl}
             headline={videoHeadline}
+            showTopAlertStrip={!isV2Result}
           />
         )}
 
@@ -1199,26 +1242,29 @@ export function KundliResultView({
           </div>
           {variant === "b" && <MangalDoshaSection result={result} />}
 
-          {(result.doshas.kaalSarpDosha || result.doshas.pitruDosha) && (
+          {(result.doshas.kaalSarpDosha || (result.doshas.pitruDosha && !isV2Result)) && (
             <div className="mt-3 flex flex-wrap gap-2">
               {result.doshas.kaalSarpDosha && (
                 <span className="rounded-full border border-amber-400/80 bg-amber-50 px-3 py-1 text-[11px] font-bold text-amber-900">
                   Kaal Sarp Yog — chart mein
                 </span>
               )}
-              {result.doshas.pitruDosha && (
+              {result.doshas.pitruDosha && !isV2Result && (
                 <span className="rounded-full border border-amber-400/80 bg-amber-50 px-3 py-1 text-[11px] font-bold text-amber-900">
                   Pitru ka yog — chart mein
                 </span>
               )}
             </div>
           )}
+
+          {isV2Result && result.doshas.pitruDosha && <PitruYogHighlightV2 />}
         </section>
 
         {videoEmbedUrl && resolvedVideoPlacement === "below_core_chart" && (
           <ImportantVideoSection
             videoEmbedUrl={videoEmbedUrl}
             headline={videoHeadline}
+            showTopAlertStrip={!isV2Result}
           />
         )}
 
@@ -1235,6 +1281,7 @@ export function KundliResultView({
           <ImportantVideoSection
             videoEmbedUrl={videoEmbedUrl}
             headline={videoHeadline}
+            showTopAlertStrip={!isV2Result}
           />
         )}
 
@@ -1242,6 +1289,8 @@ export function KundliResultView({
           careerShort={career.shortLine}
           relShort={relationship.shortLine}
           ctaSourcePage={ctaSourcePage}
+          patternCtaId={patternCtaId}
+          ctaAnchorId={ctaAnchorId}
         />
 
         <DepthGapCard />
@@ -1252,6 +1301,8 @@ export function KundliResultView({
           fn={fn}
           checkoutHref={checkoutHref}
           ctaSourcePage={ctaSourcePage}
+          ctaAnchorId={ctaAnchorId}
+          mainCtaId={mainCtaId}
         />
 
         <section aria-label="Reviews">
@@ -1265,12 +1316,17 @@ export function KundliResultView({
         <AutoManualBridge
           checkoutHref={checkoutHref}
           ctaSourcePage={ctaSourcePage}
+          bridgeCtaId={bridgeCtaId}
         />
 
         <div className="h-2" />
       </div>
 
-      <StickyBar checkoutHref={checkoutHref} ctaSourcePage={ctaSourcePage} />
+      <StickyBar
+        checkoutHref={checkoutHref}
+        ctaSourcePage={ctaSourcePage}
+        stickyCtaId={stickyCtaId}
+      />
     </div>
   );
 }

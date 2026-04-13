@@ -203,7 +203,7 @@ export default function AstroPathFreeKundliPage() {
 
           <div className="space-y-4">
             <div
-              id="kundli-form"
+              id="kundli-form-v2"
               className="relative overflow-hidden rounded-3xl border border-brand/30 bg-gradient-to-br from-brand-light/45 via-gold-light/25 to-background p-[1px] shadow-[0_22px_55px_-30px_rgba(180,83,9,0.6)]"
             >
               <div className="rounded-[1.45rem] bg-card px-4 py-5 sm:px-5 sm:py-6 md:px-6 md:py-7">
@@ -222,6 +222,7 @@ export default function AstroPathFreeKundliPage() {
                     sourceDefault="kfp_v2_free_kundli_page"
                     pagePath="/astro-path/free-kundli"
                     resultPath="/astro-path/free-kundli/result"
+                    idPrefix="free-kundli-v2"
                   />
                 </Suspense>
 

@@ -281,16 +281,18 @@ function StepFade({ children, stepKey }: { children: React.ReactNode; stepKey: n
 
 function GenderToggle({
   value,
+  idPrefix,
   onChange,
 }: {
   value: string;
+  idPrefix: string;
   onChange: (v: "male" | "female") => void;
 }) {
   return (
     <div className="grid grid-cols-2 gap-3">
       {(["male", "female"] as const).map((g) => (
         <button
-          id={`free-kundli-gender-${g}-btn`}
+          id={`${idPrefix}-gender-${g}-btn`}
           key={g}
           type="button"
           onClick={() => onChange(g)}
@@ -315,12 +317,14 @@ type KundliFormProps = {
   sourceDefault?: string;
   pagePath?: string;
   resultPath?: string;
+  idPrefix?: string;
 };
 
 export function KundliForm({
   sourceDefault = "free_kundli_page",
   pagePath = "/free-kundli",
   resultPath = "/free-kundli/result",
+  idPrefix = "free-kundli",
 }: KundliFormProps = {}) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -483,7 +487,7 @@ export function KundliForm({
         <div className="space-y-2.5">
           {step === 1 && (
             <Input
-              id="free-kundli-full-name-input"
+              id={`${idPrefix}-full-name-input`}
               ref={inputRef}
               placeholder="e.g. Rahul Sharma"
               value={data.fullName}
@@ -495,13 +499,14 @@ export function KundliForm({
           {step === 2 && (
             <GenderToggle
               value={data.gender}
+              idPrefix={idPrefix}
               onChange={(v) => set("gender", v)}
             />
           )}
 
           {step === 3 && (
             <Input
-              id="free-kundli-dob-input"
+              id={`${idPrefix}-dob-input`}
               ref={inputRef}
               type="date"
               value={data.dob}
@@ -514,7 +519,7 @@ export function KundliForm({
           {step === 4 && (
             <div className="space-y-3">
               <Input
-                id="free-kundli-tob-input"
+                id={`${idPrefix}-tob-input`}
                 ref={inputRef}
                 type="time"
                 value={data.tob}
@@ -526,7 +531,7 @@ export function KundliForm({
                 )}
               />
               <button
-                id="free-kundli-tob-unknown-btn"
+                id={`${idPrefix}-tob-unknown-btn`}
                 type="button"
                 onClick={() => {
                   set("tobUnknown", !data.tobUnknown);
@@ -555,7 +560,7 @@ export function KundliForm({
 
           {step === 5 && (
             <Input
-              id="free-kundli-pob-input"
+              id={`${idPrefix}-pob-input`}
               ref={inputRef}
               placeholder="e.g. Mumbai, Maharashtra"
               value={data.pob}
@@ -567,6 +572,7 @@ export function KundliForm({
           {step === 6 && (
             <div className="space-y-3">
               <Input
+                id={`${idPrefix}-phone-input`}
                 ref={inputRef}
                 type="tel"
                 inputMode="numeric"
@@ -579,6 +585,7 @@ export function KundliForm({
                 className="h-13 rounded-xl text-base"
               />
               <button
+                id={`${idPrefix}-whatsapp-consent-btn`}
                 type="button"
                 onClick={() => {
                   set("whatsappConsent", !data.whatsappConsent);
@@ -621,7 +628,7 @@ export function KundliForm({
         <div className="mt-5 flex items-center gap-2.5 md:mt-8 md:gap-3">
           {step > 1 && (
             <button
-              id={`free-kundli-back-step-${step}-btn`}
+              id={`${idPrefix}-back-step-${step}-btn`}
               onClick={handleBack}
               className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-border text-muted-foreground hover:border-brand hover:text-brand transition-colors md:h-12 md:w-12"
             >
@@ -630,7 +637,11 @@ export function KundliForm({
           )}
 
           <button
-            id={step === 5 ? "free-kundli-submit-btn" : `free-kundli-next-step-${step}-btn`}
+            id={
+              step === 5
+                ? `${idPrefix}-submit-btn`
+                : `${idPrefix}-next-step-${step}-btn`
+            }
             onClick={handleNext}
             className={cn(
               "flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl py-3 text-[15px] font-semibold text-white transition-all duration-200 md:min-h-13 md:text-base [&>*]:pointer-events-none",
