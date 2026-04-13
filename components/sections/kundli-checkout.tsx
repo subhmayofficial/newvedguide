@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -377,6 +377,7 @@ export function KundliCheckout() {
   const [couponError, setCouponError] = useState("");
   const [couponLoading, setCouponLoading] = useState(false);
   const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(null);
+  const hasSentBeginCheckout = useRef(false);
   const baseTotalPaise = BASE_PRICE + (fastTrack ? BUMP_PRICE : 0);
   const totalPaise = appliedCoupon?.finalAmountPaise ?? baseTotalPaise;
 
@@ -432,6 +433,25 @@ export function KundliCheckout() {
 
     getOrCreateSessionId();
     track.checkoutViewed("paid-kundli", sourceFunnel, !!stored);
+    if (typeof window !== "undefined" && !hasSentBeginCheckout.current) {
+      hasSentBeginCheckout.current = true;
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({
+        event: "Kundli_begin_checkout",
+        ecommerce: {
+          currency: "INR",
+          value: BASE_PRICE / 100,
+          items: [
+            {
+              item_id: "paid-kundli",
+              item_name: "Personalized Kundli Report",
+              price: BASE_PRICE / 100,
+              quantity: 1,
+            },
+          ],
+        },
+      });
+    }
     return () => {
       cancelled = true;
     };
