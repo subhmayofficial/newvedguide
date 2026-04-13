@@ -16,11 +16,13 @@ import {
 import { logEvent } from "@/lib/services/event";
 import { EVENT_GROUP } from "@/lib/constants/commerce";
 import { getProductBySlug } from "@/lib/services/product";
+import { validateCouponForAmount } from "@/lib/services/coupon";
 import type { Json } from "@/types/database";
 
 interface CreateOrderBody {
   productSlug?: string;
   addOnSlugs?: string[];
+  couponCode?: string;
   amountPaise: number;
   customer: {
     fullName: string;
@@ -107,9 +109,29 @@ export async function POST(request: Request) {
     }
 
     const baseTotal = subtotal + addonTotal;
-    const discountPaise = 0;
+    const rawCouponCode = body.couponCode?.trim();
+    let discountPaise = 0;
+    let couponId: string | null = null;
+    let couponCode: string | null = null;
 
-    const expectedTotal = baseTotal;
+    if (rawCouponCode) {
+      try {
+        const couponResult = await validateCouponForAmount(supabase, {
+          code: rawCouponCode,
+          orderAmountPaise: baseTotal,
+          productSlug,
+        });
+        discountPaise = couponResult.discountPaise;
+        couponId = couponResult.coupon.id;
+        couponCode = couponResult.coupon.code;
+      } catch (err) {
+        const message =
+          err instanceof Error ? err.message : "Invalid coupon code.";
+        return NextResponse.json({ error: message }, { status: 400 });
+      }
+    }
+
+    const expectedTotal = baseTotal - discountPaise;
     if (expectedTotal !== amountPaise) {
       return NextResponse.json(
         { error: "Amount mismatch", expected: expectedTotal, got: amountPaise },
@@ -165,9 +187,9 @@ export async function POST(request: Request) {
       subtotalPaise: subtotal,
       addonPaise: addonTotal,
       discountPaise,
-      couponId: null,
-      couponCode: null,
-      couponApplied: false,
+      couponId,
+      couponCode,
+      couponApplied: Boolean(couponId),
     });
 
     await createOrderItems(supabase, order.id, items);
@@ -184,6 +206,7 @@ export async function POST(request: Request) {
         order_id: order.id,
         product: productSlug,
         phone: customer.phone,
+        ...(couponCode ? { coupon_code: couponCode } : {}),
       },
     });
 
@@ -203,7 +226,7 @@ export async function POST(request: Request) {
       orderId: order.id,
       sessionId: attribution.sessionId ?? null,
       sourcePage: attribution.sourcePage ?? null,
-      pagePath: "/checkout/kundli",
+      pagePath: attribution.sourcePage ?? "/checkout/kundli",
       entryPath,
       utmSource: attribution.utmSource ?? null,
       utmMedium: attribution.utmMedium ?? null,
@@ -214,6 +237,7 @@ export async function POST(request: Request) {
         amount_paise: amountPaise,
         razorpay_order_id: razorpayOrder.id,
         discount_paise: discountPaise,
+        coupon_code: couponCode,
       },
     });
 

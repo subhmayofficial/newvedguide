@@ -50,6 +50,11 @@ type CheckoutFormState = {
 };
 
 type CheckoutFormErrors = Partial<Record<keyof CheckoutFormState, string>>;
+type AppliedCoupon = {
+  code: string;
+  discountPaise: number;
+  finalAmountPaise: number;
+};
 
 function cn(...classes: (string | boolean | undefined)[]) {
   return classes.filter(Boolean).join(" ");
@@ -347,9 +352,22 @@ function StickyPayBar({
 
 // ─── Main checkout ────────────────────────────────────────────────────────────
 
-export function KundliCheckout() {
+type KundliCheckoutVariant = "v1" | "v2";
+
+type KundliCheckoutProps = {
+  variant?: KundliCheckoutVariant;
+  checkoutPagePath?: string;
+};
+
+export function KundliCheckout({
+  variant = "v1",
+  checkoutPagePath,
+}: KundliCheckoutProps = {}) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const isV2Checkout = variant === "v2";
+  const resolvedCheckoutPath = checkoutPagePath
+    ?? (isV2Checkout ? "/astro-path/checkout/kundli" : "/checkout/kundli");
 
   const [prefilled, setPrefilled] = useState<KundliSessionData>({});
   const [form, setForm] = useState<CheckoutFormState>({
@@ -366,13 +384,20 @@ export function KundliCheckout() {
   const [loading, setLoading] = useState(false);
   const [razorpayReady, setRazorpayReady] = useState(false);
   const [fastTrack, setFastTrack] = useState(false);
+  const [couponInput, setCouponInput] = useState("");
+  const [couponApplied, setCouponApplied] = useState<AppliedCoupon | null>(null);
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [couponError, setCouponError] = useState("");
+  const [couponNotice, setCouponNotice] = useState("");
   const baseTotalPaise = BASE_PRICE + (fastTrack ? BUMP_PRICE : 0);
-  const totalPaise = baseTotalPaise;
+  const couponDiscountPaise = couponApplied?.discountPaise ?? 0;
+  const totalPaise = Math.max(0, baseTotalPaise - couponDiscountPaise);
 
   const razorpayKeyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
 
   const sourceFunnel = searchParams.get("source") ?? "direct_kundli";
-  const backToResultPath = searchParams.get("back") ?? "/free-kundli/result";
+  const backToResultPath = searchParams.get("back")
+    ?? (isV2Checkout ? "/astro-path/free-kundli/result" : "/free-kundli/result");
   const utmSource = searchParams.get("utm_source") ?? undefined;
   const utmMedium = searchParams.get("utm_medium") ?? undefined;
   const utmCampaign = searchParams.get("utm_campaign") ?? undefined;
@@ -421,15 +446,83 @@ export function KundliCheckout() {
     }
 
     getOrCreateSessionId();
-    track.checkoutViewed("paid-kundli", sourceFunnel, !!stored);
+    track.checkoutViewed("paid-kundli", sourceFunnel, !!stored, resolvedCheckoutPath);
     return () => {
       cancelled = true;
     };
-  }, [sourceFunnel]);
+  }, [sourceFunnel, resolvedCheckoutPath]);
 
   function set<K extends keyof CheckoutFormState>(key: K, value: CheckoutFormState[K]) {
     setForm((f) => ({ ...f, [key]: value }));
     setErrors((e) => ({ ...e, [key]: undefined }));
+  }
+
+  useEffect(() => {
+    if (!isV2Checkout || !couponApplied) return;
+    setCouponApplied(null);
+    setCouponNotice("Amount update ke baad coupon remove hua. Dobara apply karein.");
+  }, [baseTotalPaise, couponApplied, isV2Checkout]);
+
+  async function applyCoupon() {
+    const code = couponInput.trim().toUpperCase();
+    if (!code) {
+      setCouponError("Coupon code daaliye.");
+      setCouponNotice("");
+      return;
+    }
+
+    setCouponLoading(true);
+    setCouponError("");
+    setCouponNotice("");
+    try {
+      const res = await fetch("/api/coupons/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          code,
+          amountPaise: baseTotalPaise,
+          productSlug: "paid-kundli",
+        }),
+      });
+
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        const msg =
+          typeof json.error === "string"
+            ? json.error
+            : "Coupon validate nahi ho paya.";
+        throw new Error(msg);
+      }
+
+      const discountPaise = Number(json.discountPaise ?? 0);
+      const finalAmountPaise = Number(json.finalAmountPaise ?? baseTotalPaise);
+      const appliedCode = String(json.code ?? code).toUpperCase();
+
+      if (discountPaise <= 0 || finalAmountPaise >= baseTotalPaise) {
+        throw new Error("Coupon is order par apply nahi hota.");
+      }
+
+      setCouponApplied({
+        code: appliedCode,
+        discountPaise,
+        finalAmountPaise,
+      });
+      setCouponInput(appliedCode);
+      setCouponNotice(`Coupon ${appliedCode} applied. ₹${discountPaise / 100} off.`);
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Coupon apply nahi hua. Dobara try karein.";
+      setCouponApplied(null);
+      setCouponError(message);
+    } finally {
+      setCouponLoading(false);
+    }
+  }
+
+  function removeCoupon() {
+    setCouponApplied(null);
+    setCouponError("");
+    setCouponNotice("Coupon removed.");
   }
 
   function validate(): boolean {
@@ -502,6 +595,7 @@ export function KundliCheckout() {
             productSlug: "paid-kundli",
             addOnSlugs: fastTrack ? ["fast-track-addon"] : [],
             amountPaise: totalPaise,
+            couponCode: couponApplied?.code,
             customer: {
             fullName: form.fullName,
             phone: form.phone,
@@ -514,7 +608,7 @@ export function KundliCheckout() {
           },
           attribution: {
             sourceFunnel,
-            sourcePage: "/checkout/kundli",
+            sourcePage: resolvedCheckoutPath,
             utmSource,
             utmMedium,
             utmCampaign,
@@ -590,11 +684,12 @@ export function KundliCheckout() {
             track.paymentSuccess("paid-kundli", totalPaise, dbId, sourceFunnel);
             window.dataLayer = window.dataLayer || [];
             window.dataLayer.push({
-              event: "Kundli_purchase",
+              event: isV2Checkout ? "v2_purchase_kundli" : "Kundli_purchase",
               ecommerce: {
                 transaction_id: dbId,
                 value: totalPaise / 100,
                 currency: "INR",
+                ...(couponApplied ? { coupon: couponApplied.code } : {}),
                 items: [
                   {
                     item_id: "paid-kundli",
@@ -642,10 +737,11 @@ export function KundliCheckout() {
       });
       window.dataLayer = window.dataLayer || [];
       window.dataLayer.push({
-        event: "Kundli_begin_checkout",
+        event: isV2Checkout ? "v2_begin_checkout" : "Kundli_begin_checkout",
         ecommerce: {
           currency: "INR",
           value: totalPaise / 100,
+          ...(couponApplied ? { coupon: couponApplied.code } : {}),
           items: [
             {
               item_id: "paid-kundli",
@@ -921,6 +1017,59 @@ export function KundliCheckout() {
               )}
             </div>
 
+            {isV2Checkout && (
+              <div
+                id="checkout-kundli-v2-coupon"
+                className="space-y-2 rounded-xl border border-amber-200/90 bg-amber-50/35 px-3.5 py-3.5"
+              >
+                <p className="text-[12px] font-bold text-amber-950">Coupon code (optional)</p>
+                <div className="flex gap-2">
+                  <Input
+                    id="checkout-kundli-v2-coupon-input"
+                    value={couponInput}
+                    onChange={(e) => {
+                      setCouponInput(e.target.value.toUpperCase());
+                      if (couponApplied) setCouponApplied(null);
+                      setCouponError("");
+                      setCouponNotice("");
+                    }}
+                    placeholder="Enter coupon"
+                    className="h-10 bg-white"
+                  />
+                  <button
+                    id="checkout-kundli-v2-coupon-apply-btn"
+                    type="button"
+                    onClick={applyCoupon}
+                    disabled={couponLoading}
+                    className="h-10 shrink-0 rounded-lg bg-amber-800 px-4 text-[12px] font-bold text-white transition hover:bg-amber-900 disabled:opacity-70"
+                  >
+                    {couponLoading ? "Applying…" : "Apply"}
+                  </button>
+                </div>
+                {couponApplied && (
+                  <div className="flex items-center justify-between rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-2">
+                    <p className="text-[11px] font-semibold text-emerald-800">
+                      {couponApplied.code} applied · ₹{couponApplied.discountPaise / 100} off
+                    </p>
+                    <button
+                      id="checkout-kundli-v2-coupon-remove-btn"
+                      type="button"
+                      onClick={removeCoupon}
+                      className="text-[11px] font-bold text-emerald-900 underline underline-offset-2"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                )}
+                {couponError && (
+                  <p className="text-[11px] font-medium text-red-600">{couponError}</p>
+                )}
+                {!couponError && couponNotice && (
+                  <p className="text-[11px] font-medium text-amber-900">{couponNotice}</p>
+                )}
+              </div>
+            )}
+
             {/* Bump offer */}
             <BumpOffer checked={fastTrack} onChange={setFastTrack} />
 
@@ -996,6 +1145,14 @@ export function KundliCheckout() {
                       FastTrack Delivery
                     </span>
                     <span className="font-semibold text-amber-950">₹99</span>
+                  </div>
+                )}
+                {isV2Checkout && couponApplied && (
+                  <div className="mt-2 flex items-center justify-between">
+                    <span className="text-[13px] text-emerald-700">
+                      Coupon ({couponApplied.code})
+                    </span>
+                    <span className="font-semibold text-emerald-700">-₹{couponApplied.discountPaise / 100}</span>
                   </div>
                 )}
                 <div className="mt-3 flex items-center justify-between border-t border-amber-100 pt-3">

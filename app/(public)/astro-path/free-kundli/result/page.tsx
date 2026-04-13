@@ -12,7 +12,7 @@ export default function AstroPathFreeKundliResultPage() {
     <KundliResultView
       variant="a"
       fallbackInputPath="/astro-path/free-kundli"
-      checkoutHref="/checkout/kundli?source=kfp_v2&back=%2Fastro-path%2Ffree-kundli%2Fresult"
+      checkoutHref="/astro-path/checkout/kundli?source=kfp_v2&back=%2Fastro-path%2Ffree-kundli%2Fresult"
       ctaSourcePage="free_kundli_result_v2"
       idPrefix="free-kundli-result-v2"
       videoEmbedUrl="https://player.mediadelivery.net/play/550381/2a2bf641-1191-4b83-98b5-dc37a5184255"

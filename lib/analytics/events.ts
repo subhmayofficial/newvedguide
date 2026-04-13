@@ -147,7 +147,8 @@ export const track = {
   checkoutViewed(
     productSlug: string,
     sourceFunnel?: string,
-    prefilled = false
+    prefilled = false,
+    checkoutPagePath = "/checkout/kundli"
   ) {
     ph("checkout_viewed", {
       product_slug: productSlug,
@@ -167,8 +168,8 @@ export const track = {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         sessionId: getOrCreateSessionId(),
-        sourcePage: "/checkout/kundli",
-        pagePath: "/checkout/kundli",
+        sourcePage: checkoutPagePath,
+        pagePath: checkoutPagePath,
         sourceFunnel: sourceFunnel,
         utmSource: params.get("utm_source") ?? undefined,
         utmMedium: params.get("utm_medium") ?? undefined,
