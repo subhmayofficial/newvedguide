@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createServiceClient } from "@/lib/supabase/server";
+import { formatAdminDateTime } from "@/lib/admin/time";
 
 export const dynamic = "force-dynamic";
 
@@ -82,7 +83,7 @@ export default async function AdminPaymentsPage() {
                   <td className="px-4 py-3 text-xs">{p.provider}</td>
                   <td className="px-4 py-3 text-xs">{p.status}</td>
                   <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
-                    {p.paid_at ? new Date(p.paid_at).toLocaleString() : "—"}
+                    {formatAdminDateTime(p.paid_at)}
                   </td>
                   <td className="px-4 py-3 text-xs">
                     <details>

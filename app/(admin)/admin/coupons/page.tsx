@@ -4,6 +4,7 @@ import { submitCouponCreateForm } from "@/app/(admin)/admin/actions";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { formatAdminDateTime } from "@/lib/admin/time";
 
 export const dynamic = "force-dynamic";
 
@@ -111,7 +112,7 @@ export default async function AdminCouponsPage() {
                 <td className="px-4 py-3 text-xs">{coupon.is_active ? "active" : "inactive"}</td>
                 <td className="px-4 py-3 text-xs">{coupon.applies_to_product_slug ?? "all"}</td>
                 <td className="px-4 py-3 text-xs text-muted-foreground">
-                  {coupon.valid_until ? new Date(coupon.valid_until).toLocaleString() : "No expiry"}
+                  {coupon.valid_until ? formatAdminDateTime(coupon.valid_until) : "No expiry"}
                 </td>
               </tr>
             ))}

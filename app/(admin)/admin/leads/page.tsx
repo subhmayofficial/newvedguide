@@ -1,14 +1,9 @@
 import Link from "next/link";
 import { createServiceClient } from "@/lib/supabase/server";
 import { LeadsFilters } from "@/components/admin/leads-filters";
+import { formatAdminDateTime, startOfTodayIstIso } from "@/lib/admin/time";
 
 export const dynamic = "force-dynamic";
-
-function startOfTodayIso() {
-  const d = new Date();
-  d.setHours(0, 0, 0, 0);
-  return d.toISOString();
-}
 
 export default async function AdminLeadsPage({
   searchParams,
@@ -33,7 +28,7 @@ export default async function AdminLeadsPage({
   if (sp.entry_path) q = q.eq("entry_path", sp.entry_path);
 
   if (sp.preset === "today") {
-    q = q.gte("created_at", startOfTodayIso());
+    q = q.gte("created_at", startOfTodayIstIso());
   } else if (sp.preset === "7d") {
     const t = new Date();
     t.setDate(t.getDate() - 7);
@@ -93,7 +88,7 @@ export default async function AdminLeadsPage({
     converted: rows?.filter((r) => r.status === "converted").length ?? 0,
     lost: rows?.filter((r) => r.status === "lost").length ?? 0,
     today:
-      rows?.filter((r) => r.created_at >= startOfTodayIso()).length ?? 0,
+      rows?.filter((r) => r.created_at >= startOfTodayIstIso()).length ?? 0,
   };
 
   return (
@@ -179,7 +174,7 @@ export default async function AdminLeadsPage({
                     )}
                   </td>
                   <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
-                    {new Date(r.created_at).toLocaleString()}
+                    {formatAdminDateTime(r.created_at)}
                   </td>
                   <td className="px-4 py-3 text-right">
                     <Link

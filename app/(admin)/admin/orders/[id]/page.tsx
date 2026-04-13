@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { FULFILLMENT_STATUS } from "@/lib/constants/commerce";
 import type { Json } from "@/types/database";
+import { formatAdminDateTime } from "@/lib/admin/time";
 
 export const dynamic = "force-dynamic";
 
@@ -103,8 +104,8 @@ export default async function OrderDetailPage({
           <Row label="Fulfillment" value={order.fulfillment_status} />
           <Row label="Assigned to" value={order.fulfillment_assignee ?? "—"} />
           <Row label="Entry path" value={order.entry_path ?? "—"} />
-          <Row label="Created" value={new Date(order.created_at).toLocaleString()} />
-          <Row label="Paid at" value={order.paid_at ? new Date(order.paid_at).toLocaleString() : "—"} />
+          <Row label="Created" value={formatAdminDateTime(order.created_at)} />
+          <Row label="Paid at" value={formatAdminDateTime(order.paid_at)} />
         </dl>
         {order.lead_id && (
           <p className="mt-4 text-sm">
@@ -263,7 +264,7 @@ export default async function OrderDetailPage({
           {events.map((e) => (
             <li key={e.id} className="border-b border-border/40 py-2 last:border-0">
               <span className="font-medium">{e.event_name}</span>{" "}
-              <span className="text-muted-foreground">{new Date(e.created_at).toLocaleString()}</span>
+              <span className="text-muted-foreground">{formatAdminDateTime(e.created_at)}</span>
             </li>
           ))}
         </ul>

@@ -7,6 +7,7 @@ import { ENTITY_NOTE_TYPE } from "@/lib/constants/commerce";
 import { submitLeadLostForm, submitLeadNoteForm } from "@/app/(admin)/admin/actions";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { formatAdminDateTime } from "@/lib/admin/time";
 
 export const dynamic = "force-dynamic";
 
@@ -122,7 +123,7 @@ export default async function LeadDetailPage({
             <li key={n.id} className="rounded-lg border border-border/50 bg-muted/20 px-3 py-2">
               <p>{n.note}</p>
               <p className="mt-1 text-[11px] text-muted-foreground">
-                {new Date(n.created_at).toLocaleString()}
+                {formatAdminDateTime(n.created_at)}
               </p>
             </li>
           ))}
@@ -164,7 +165,7 @@ export default async function LeadDetailPage({
             <li key={e.id} className="flex flex-wrap gap-2 border-b border-border/40 py-2 last:border-0">
               <span className="font-medium">{e.event_name}</span>
               <span className="text-muted-foreground">
-                {new Date(e.created_at).toLocaleString()}
+                {formatAdminDateTime(e.created_at)}
               </span>
             </li>
           ))}

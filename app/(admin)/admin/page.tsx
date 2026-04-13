@@ -10,6 +10,7 @@ import {
   ordersDaily,
   sourceBreakdown,
 } from "@/lib/admin/queries";
+import { formatAdminDateTime } from "@/lib/admin/time";
 
 export const dynamic = "force-dynamic";
 
@@ -219,7 +220,7 @@ export default async function AdminDashboardPage({
             <li key={e.created_at + e.event_name} className="flex flex-wrap gap-2 border-b border-border/40 py-2 last:border-0">
               <span className="font-medium">{e.event_name}</span>
               <span className="text-muted-foreground">
-                {new Date(e.created_at).toLocaleString()}
+                {formatAdminDateTime(e.created_at)}
               </span>
               {e.entry_path && (
                 <span className="rounded bg-muted px-1.5 py-0.5 text-[11px]">{e.entry_path}</span>

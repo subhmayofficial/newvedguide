@@ -4,6 +4,7 @@ import {
   AdminOrderRowAssigneeSelect,
   AdminOrderRowFulfillmentSelect,
 } from "@/components/admin/admin-order-row-controls";
+import { formatAdminDateTime } from "@/lib/admin/time";
 
 export const dynamic = "force-dynamic";
 
@@ -159,7 +160,7 @@ export default async function AdminOrdersPage({
                     {r.coupon_applied ? r.coupon_code ?? "used" : "no"}
                   </td>
                   <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
-                    {new Date(r.created_at).toLocaleString()}
+                    {formatAdminDateTime(r.created_at)}
                   </td>
                   <td className="px-4 py-3 text-right">
                     <Link href={`/admindeoghar/orders/${r.id}`} className="text-sm font-medium text-brand hover:underline">
