@@ -38,9 +38,6 @@ export function SiteFooter() {
           ))}
         </div>
 
-        <p className="mt-4 text-[11px] leading-relaxed text-muted-foreground/70">
-          Astrology for guidance only — not a substitute for professional advice.
-        </p>
       </div>
 
       {/* ── Desktop: full grid ── */}
@@ -104,12 +101,9 @@ export function SiteFooter() {
           ))}
         </div>
 
-        <div className="mt-8 flex items-center justify-between border-t border-border/50 pt-5">
+        <div className="mt-8 border-t border-border/50 pt-5">
           <p className="text-xs text-muted-foreground">
             © {new Date().getFullYear()} VedGuide. All rights reserved.
-          </p>
-          <p className="text-xs text-muted-foreground">
-            Astrology for guidance only — not a substitute for professional advice.
           </p>
         </div>
       </div>

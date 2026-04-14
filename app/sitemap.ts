@@ -9,6 +9,8 @@ const PUBLIC_ROUTES = [
   "/consultation",
   "/tools",
   "/tools/kundal-dhatu",
+  "/tools/name-letter/a",
+  "/tools/name-letter/a/free-kundli",
   "/tools/numerology",
   "/tools/muhurat",
   "/kundli-report",

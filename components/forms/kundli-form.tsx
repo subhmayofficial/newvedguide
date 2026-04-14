@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { track } from "@/lib/analytics/events";
 import { getOrCreateSessionId } from "@/lib/analytics/session";
+import { NAME_LETTER_PREFILL_STORAGE_KEY } from "@/lib/name-letter";
 import {
   User, Calendar, Clock, MapPin,
   ChevronRight, ChevronLeft, Sparkles, Check,
@@ -32,6 +33,14 @@ const EMPTY: FormData = {
   phone: "",
   whatsappConsent: false,
 };
+
+function firstIncompleteStep(data: FormData): StepNum {
+  if (data.fullName.trim().length < 2) return 1;
+  if (!data.dob) return 3;
+  if (!data.tobUnknown && !data.tob) return 4;
+  if (data.pob.trim().length < 2) return 5;
+  return 6;
+}
 
 type StepNum = 1 | 2 | 3 | 4 | 5 | 6;
 
@@ -342,6 +351,38 @@ export function KundliForm({
   const currentStep = STEPS[step - 1];
   const fn = firstNameFrom(data.fullName);
   const { question: displayQuestion, sub: displaySub } = getPersonalizedCopy(step, data.fullName);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const raw = sessionStorage.getItem(NAME_LETTER_PREFILL_STORAGE_KEY);
+    if (!raw) return;
+
+    try {
+      const parsed = JSON.parse(raw) as Partial<FormData>;
+      const nextData: FormData = {
+        ...EMPTY,
+        fullName: typeof parsed.fullName === "string" ? parsed.fullName : "",
+        gender:
+          parsed.gender === "male" || parsed.gender === "female"
+            ? parsed.gender
+            : "",
+        dob: typeof parsed.dob === "string" ? parsed.dob : "",
+        tob: typeof parsed.tob === "string" ? parsed.tob : "",
+        tobUnknown: false,
+        pob: typeof parsed.pob === "string" ? parsed.pob : "",
+        phone: "",
+        whatsappConsent: false,
+      };
+
+      setData((prev) => ({ ...prev, ...nextData }));
+      setStep(firstIncompleteStep(nextData));
+      setError("");
+    } catch {
+      // no-op
+    } finally {
+      sessionStorage.removeItem(NAME_LETTER_PREFILL_STORAGE_KEY);
+    }
+  }, []);
 
   useEffect(() => {
     if (phase !== "form") return;

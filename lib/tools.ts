@@ -31,6 +31,14 @@ export const TOOLS: ToolDefinition[] = [
     emoji: "📿",
   },
   {
+    slug: "name-letter-insight",
+    title: "Name-letter insights",
+    blurb: "Naam ke first letter se personality aur relationship pattern ka quick astrology-style insight.",
+    href: "/tools/name-letter/a",
+    status: "live",
+    emoji: "🔠",
+  },
+  {
     slug: "numerology",
     title: "Numerology snapshot",
     blurb: "Life path & name number — quick insight from your date of birth.",
