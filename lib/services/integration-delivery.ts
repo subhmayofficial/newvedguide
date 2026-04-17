@@ -35,8 +35,22 @@ export interface InteraktWebhookInput extends DeliveryContext {
   fullName?: string | null;
   phone?: string | null;
   templateName?: string | null;
+  languageCode?: string | null;
+  callbackData?: string | null;
+  campaignId?: string | null;
+  fileName?: string | null;
+  headerValues?: string[];
   bodyValues?: string[];
+  buttonValues?: Record<string, string[]>;
+  buttonPayload?: Record<string, string[]>;
   metadata?: Record<string, unknown>;
+}
+
+export interface InteraktCreateCampaignInput {
+  campaignName: string;
+  templateName: string;
+  languageCode: string;
+  createdBy?: string | null;
 }
 
 export interface SmtpEmailInput extends DeliveryContext {
@@ -56,6 +70,14 @@ export interface PaymentSuccessEmailInput extends DeliveryContext {
   amount: string;
   deliveryText: string;
   supportLink: string;
+}
+
+export interface InteraktCampaignResult {
+  ok: boolean;
+  message: string;
+  responseStatus: number | null;
+  responseBody: string | null;
+  campaignId: string | null;
 }
 
 type DeliveryLogInput = {
@@ -104,7 +126,7 @@ function toErrorMessage(error: unknown): string {
 
 function truncateText(input: string | null | undefined, max = MAX_RESPONSE_TEXT_LENGTH): string | null {
   if (!input) return null;
-  return input.length > max ? `${input.slice(0, max)}…` : input;
+  return input.length > max ? `${input.slice(0, max)}...` : input;
 }
 
 function normalizePhone(phone: string | null | undefined): string | null {
@@ -396,14 +418,34 @@ export async function sendInteraktWhatsApp(
   const requestBody: Record<string, unknown> = {
     countryCode: normalizeCountryCode(config.countryCode),
     phoneNumber: normalizedPhone,
-    callbackData: input.orderId ?? input.leadId ?? `vedguide_${Date.now()}`,
+    callbackData:
+      input.callbackData?.trim() ||
+      input.orderId ||
+      input.leadId ||
+      `vedguide_${Date.now()}`,
     type: "Template",
     template: {
       name: input.templateName?.trim() || config.templateName,
-      languageCode: config.languageCode,
+      languageCode: input.languageCode?.trim() || config.languageCode,
       bodyValues,
     },
   };
+  const template = requestBody.template as Record<string, unknown>;
+  if (input.headerValues?.length) {
+    template.headerValues = input.headerValues;
+  }
+  if (input.fileName?.trim()) {
+    template.fileName = input.fileName.trim();
+  }
+  if (input.buttonValues && Object.keys(input.buttonValues).length) {
+    template.buttonValues = input.buttonValues;
+  }
+  if (input.buttonPayload && Object.keys(input.buttonPayload).length) {
+    template.buttonPayload = input.buttonPayload;
+  }
+  if (input.campaignId?.trim()) {
+    requestBody.campaignId = input.campaignId.trim();
+  }
   if (input.metadata && Object.keys(input.metadata).length) {
     requestBody.metadata = input.metadata;
   }
@@ -420,6 +462,104 @@ export async function sendInteraktWhatsApp(
     },
     requestBody,
   });
+}
+
+export async function createInteraktApiCampaign(
+  supabase: SupabaseClient<Database>,
+  input: InteraktCreateCampaignInput
+): Promise<InteraktCampaignResult> {
+  const config = getDeliveryIntegrationsConfig().interakt;
+  const campaignUrl = "https://api.interakt.ai/v1/public/create-campaign/";
+
+  if (!config.enabled) {
+    await insertDeliveryLog(supabase, {
+      provider: "interakt",
+      channel: "webhook",
+      eventName: "create_api_campaign",
+      status: "skipped",
+      triggerSource: "admin_interakt_campaign_test",
+      requestUrl: campaignUrl,
+      requestMethod: "POST",
+      errorMessage: "Interakt integration is disabled",
+      createdBy: input.createdBy ?? null,
+    });
+
+    return {
+      ok: false,
+      message: "Interakt integration is disabled",
+      responseStatus: null,
+      responseBody: null,
+      campaignId: null,
+    };
+  }
+
+  if (!config.apiKey) {
+    await insertDeliveryLog(supabase, {
+      provider: "interakt",
+      channel: "webhook",
+      eventName: "create_api_campaign",
+      status: "failed",
+      triggerSource: "admin_interakt_campaign_test",
+      requestUrl: campaignUrl,
+      requestMethod: "POST",
+      errorMessage: "Interakt API key is not configured",
+      createdBy: input.createdBy ?? null,
+    });
+
+    return {
+      ok: false,
+      message: "Interakt API key is not configured",
+      responseStatus: null,
+      responseBody: null,
+      campaignId: null,
+    };
+  }
+
+  const requestBody = {
+    campaign_name: input.campaignName.trim(),
+    campaign_type: "PublicAPI",
+    template_name: input.templateName.trim(),
+    language_code: input.languageCode.trim() || config.languageCode,
+  };
+
+  const result = await postJsonWithLogging(supabase, {
+    provider: "interakt",
+    channel: "webhook",
+    context: {
+      eventName: "create_api_campaign",
+      triggerSource: "admin_interakt_campaign_test",
+      createdBy: input.createdBy ?? null,
+    },
+    url: campaignUrl,
+    requestHeaders: {
+      Authorization: `Basic ${config.apiKey}`,
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    requestBody,
+  });
+
+  let campaignId: string | null = null;
+  if (result.responseBody) {
+    try {
+      const parsed = JSON.parse(result.responseBody) as {
+        data?: { campaign_id?: string };
+      };
+      campaignId = parsed.data?.campaign_id ?? null;
+    } catch {
+      campaignId = null;
+    }
+  }
+
+  return {
+    ok: result.ok,
+    message: campaignId
+      ? `${result.message} (campaign ${campaignId})`
+      : result.message,
+    responseStatus: result.responseStatus,
+    responseBody: result.responseBody,
+    campaignId,
+  };
 }
 
 export async function sendSmtpEmail(
@@ -664,7 +804,7 @@ function renderPaymentSuccessEmailHtml(input: PaymentSuccessEmailInput): string 
 <ul>
 <li>Order ID: ${safeOrderId}</li>
 <li>Product: ${safeProduct}</li>
-<li>Amount: ₹${safeAmount}</li>
+<li>Amount: Rs ${safeAmount}</li>
 </ul>
 
 <p>${safeDelivery}</p>
@@ -679,7 +819,7 @@ export async function sendPaymentSuccessSmtpEmail(
 ): Promise<DeliveryAttemptResult> {
   return sendSmtpEmail(supabase, {
     ...input,
-    subject: `Payment Successful – Your Order is Confirmed (${input.orderIdLabel})`,
+    subject: `Payment Successful - Your Order is Confirmed (${input.orderIdLabel})`,
     html: renderPaymentSuccessEmailHtml(input),
     payloadExtras: {
       name: input.fullName ?? null,

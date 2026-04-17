@@ -485,7 +485,42 @@ export interface Database {
         >;
         Relationships: [];
       };
-      kundli_submissions: {
+      admin_interakt_templates: {
+        Row: {
+          id: string;
+          name: string;
+          language_code: string;
+          header_labels_json: Json;
+          body_labels_json: Json;
+          button_value_labels_json: Json;
+          button_payload_labels_json: Json;
+          file_name_required: boolean;
+          notes: string | null;
+          source: string;
+          is_active: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          language_code?: string;
+          header_labels_json?: Json;
+          body_labels_json?: Json;
+          button_value_labels_json?: Json;
+          button_payload_labels_json?: Json;
+          file_name_required?: boolean;
+          notes?: string | null;
+          source?: string;
+          is_active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["admin_interakt_templates"]["Insert"]
+        >;
+        Relationships: [];
+      };      kundli_submissions: {
         Row: {
           id: string;
           lead_id: string | null;
@@ -775,3 +810,5 @@ export interface Database {
     Enums: Record<string, never>;
   };
 }
+
+

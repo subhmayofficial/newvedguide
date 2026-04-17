@@ -4,10 +4,13 @@ import {
   maskSecret,
 } from "@/lib/services/integration-config";
 import {
-  submitInteraktWebhookTestForm,
+  submitInteraktSavedTemplateSendForm,
   submitSmtpEmailTestForm,
+  submitInteraktTemplateCatalogForm,
 } from "@/app/(admin)/admin/actions";
 import { formatAdminDateTime } from "@/lib/admin/time";
+import { InteraktTemplateConsole } from "@/components/admin/interakt-template-console";
+import { listSavedInteraktTemplates } from "@/lib/services/interakt-template-catalog";
 
 export const dynamic = "force-dynamic";
 
@@ -37,6 +40,11 @@ export default async function AdminIntegrationsPage({
   const sp = await searchParams;
   const supabase = createServiceClient();
   const config = getDeliveryIntegrationsConfig();
+  const {
+    data: savedTemplates,
+    errorCode: templatesErrorCode,
+    errorMessage: templatesErrorMessage,
+  } = await listSavedInteraktTemplates(supabase);
 
   const { data: logsRaw, error: logsError } = await supabase
     .from("integration_deliveries")
@@ -56,7 +64,7 @@ export default async function AdminIntegrationsPage({
           Integrations
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          WhatsApp delivery via Interakt + SMTP email delivery via Nodemailer, with full logs and test flow.
+          WhatsApp delivery via Interakt and SMTP email delivery via Nodemailer, with full logs and test flow.
         </p>
       </header>
 
@@ -85,12 +93,29 @@ export default async function AdminIntegrationsPage({
         </section>
       )}
 
+      {(templatesErrorCode === "42P01" || templatesErrorCode === "42703") && (
+        <section className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900/40 dark:bg-amber-950/20 dark:text-amber-300">
+          <p className="font-semibold">Saved template migration required.</p>
+          <p className="mt-1">
+            Run: <code>supabase/migrations/012_admin_interakt_templates.sql</code>
+          </p>
+          {templatesErrorMessage && <p className="mt-1 text-xs">{templatesErrorMessage}</p>}
+        </section>
+      )}
+
       <section className="grid gap-4 md:grid-cols-2">
         <ConfigCard
           title="Interakt WhatsApp"
-          status={config.interakt.enabled ? "Enabled" : "Disabled"}
+          status={
+            config.interakt.enabled && config.interakt.apiKey
+              ? "Enabled + API key present"
+              : config.interakt.enabled
+                ? "Enabled, API key missing"
+                : "Disabled"
+          }
           rows={[
             ["API URL", config.interakt.endpointUrl],
+            ["Template list API", config.interakt.templateListApiUrl ?? "Not set"],
             ["API key", maskSecret(config.interakt.apiKey)],
             ["Template default", config.interakt.templateName],
             ["Language", config.interakt.languageCode],
@@ -124,67 +149,12 @@ export default async function AdminIntegrationsPage({
       </section>
 
       <section className="grid gap-4 xl:grid-cols-2">
-        <article className="rounded-2xl border border-border/60 bg-card p-5 shadow-sm">
-          <h2 className="text-lg font-semibold text-foreground">Interakt webhook test</h2>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Sends a template WhatsApp API call with test payload and stores full response in logs.
-          </p>
-
-          <form action={submitInteraktWebhookTestForm} className="mt-4 grid gap-3">
-            <Field label="Full name">
-              <input name="fullName" placeholder="Sameer Kumar" className={inputCls} />
-            </Field>
-            <Field label="Phone (required)">
-              <input name="phone" placeholder="9876543210" required className={inputCls} />
-            </Field>
-            <Field label="Template name (optional override)">
-              <input name="templateName" placeholder={config.interakt.templateName} className={inputCls} />
-            </Field>
-            <Field label="Body values (comma separated)">
-              <input
-                name="bodyValues"
-                placeholder="Sameer, Paid Kundli Report, Rs 399"
-                className={inputCls}
-              />
-            </Field>
-            <div className="grid gap-3 sm:grid-cols-2">
-              <Field label="Order ID (optional)">
-                <input name="orderId" placeholder="UUID" className={inputCls} />
-              </Field>
-              <Field label="Lead ID (optional)">
-                <input name="leadId" placeholder="UUID" className={inputCls} />
-              </Field>
-            </div>
-            <button
-              type="submit"
-              className="inline-flex h-10 items-center justify-center rounded-lg bg-brand px-4 text-sm font-semibold text-primary-foreground transition hover:bg-brand-hover"
-            >
-              Send Interakt test
-            </button>
-          </form>
-
-          <ApiDetail
-            title="API details used"
-            method="POST"
-            endpoint={config.interakt.endpointUrl}
-            headers={[
-              "Authorization: Basic <INTERAKT_API_KEY>",
-              "Content-Type: application/json",
-              "Accept: application/json",
-            ]}
-            payloadExample={{
-              countryCode: config.interakt.countryCode,
-              phoneNumber: "9876543210",
-              callbackData: "order_or_lead_id",
-              type: "Template",
-              template: {
-                name: config.interakt.templateName,
-                languageCode: config.interakt.languageCode,
-                bodyValues: ["Customer", "Product", "Rs 399"],
-              },
-            }}
-          />
-        </article>
+        <InteraktTemplateConsole
+          templates={savedTemplates}
+          sendAction={submitInteraktSavedTemplateSendForm}
+          addTemplateAction={submitInteraktTemplateCatalogForm}
+          syncEndpoint="/api/admin/interakt/templates/sync"
+        />
 
         <article className="rounded-2xl border border-border/60 bg-card p-5 shadow-sm">
           <h2 className="text-lg font-semibold text-foreground">SMTP email test</h2>
@@ -258,7 +228,7 @@ export default async function AdminIntegrationsPage({
               "replyTo: EMAIL_REPLY_TO (optional)",
             ]}
             payloadExample={{
-              subject: "Payment Successful – Your Order is Confirmed ({{order_id}})",
+              subject: "Payment Successful - Your Order is Confirmed ({{order_id}})",
               variables: {
                 name: "Customer Name",
                 order_id: "VG-20260415-ABCD",
@@ -316,22 +286,22 @@ export default async function AdminIntegrationsPage({
                     </td>
                     <td className="px-4 py-3 text-xs">
                       <div className="font-medium">{log.event_name}</div>
-                      <div className="text-muted-foreground">{log.trigger_source ?? "—"}</div>
+                      <div className="text-muted-foreground">{log.trigger_source ?? "-"}</div>
                     </td>
                     <td className="px-4 py-3 text-xs">
                       <StatusDot status={log.status} />
                     </td>
                     <td className="px-4 py-3 text-xs font-mono">
-                      {log.order_id ? `o:${shortId(log.order_id)}` : "—"}
+                      {log.order_id ? `o:${shortId(log.order_id)}` : "-"}
                       <br />
-                      {log.lead_id ? `l:${shortId(log.lead_id)}` : "—"}
+                      {log.lead_id ? `l:${shortId(log.lead_id)}` : "-"}
                     </td>
                     <td className="px-4 py-3 text-xs text-muted-foreground max-w-[240px] truncate">
-                      {log.request_url ?? "—"}
+                      {log.request_url ?? "-"}
                     </td>
-                    <td className="px-4 py-3 text-xs">{log.response_status ?? "—"}</td>
+                    <td className="px-4 py-3 text-xs">{log.response_status ?? "-"}</td>
                     <td className="px-4 py-3 text-xs text-red-600 dark:text-red-400 max-w-[220px] truncate">
-                      {log.error_message ?? "—"}
+                      {log.error_message ?? "-"}
                     </td>
                     <td className="px-4 py-3 text-xs">
                       <details>
@@ -367,7 +337,7 @@ export default async function AdminIntegrationsPage({
 }
 
 function shortId(value: string): string {
-  return value.length > 8 ? `${value.slice(0, 8)}…` : value;
+  return value.length > 8 ? `${value.slice(0, 8)}...` : value;
 }
 
 function Field({
@@ -396,7 +366,7 @@ function ConfigCard({
 }) {
   return (
     <article className="rounded-2xl border border-border/60 bg-card p-5 shadow-sm">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-3">
         <h2 className="text-lg font-semibold text-foreground">{title}</h2>
         <span className="rounded-full border border-border px-2 py-0.5 text-xs font-medium text-muted-foreground">
           {status}

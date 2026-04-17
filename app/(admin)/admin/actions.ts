@@ -15,9 +15,11 @@ import {
 } from "@/lib/services/order";
 import { createCoupon } from "@/lib/services/coupon";
 import {
+  createInteraktApiCampaign,
   sendInteraktWhatsApp,
   sendSmtpEmail,
 } from "@/lib/services/integration-delivery";
+import { upsertSavedInteraktTemplate } from "@/lib/services/interakt-template-catalog";
 import {
   ENTITY_NOTE_TYPE,
   FULFILLMENT_STATUS,
@@ -237,6 +239,236 @@ export async function submitInteraktWebhookTestForm(formData: FormData) {
   redirectWithIntegrationResult("interakt", result.status, result.message);
 }
 
+function parseStringList(formData: FormData, key: string): string[] {
+  return formData
+    .getAll(key)
+    .map((value) => String(value).trim())
+    .filter(Boolean);
+}
+
+function parseGroupedValueMap(
+  formData: FormData,
+  indexKey: string,
+  valuesKey: string
+): Record<string, string[]> {
+  const indices = formData.getAll(indexKey).map((value) => String(value).trim());
+  const values = formData.getAll(valuesKey).map((value) => String(value).trim());
+  const out: Record<string, string[]> = {};
+
+  for (let idx = 0; idx < indices.length; idx += 1) {
+    const index = indices[idx];
+    const raw = values[idx] ?? "";
+    if (!index || !raw) continue;
+    const parsed = raw
+      .split(",")
+      .map((part) => part.trim())
+      .filter(Boolean);
+    if (!parsed.length) continue;
+    out[index] = parsed;
+  }
+
+  return out;
+}
+
+function parseOptionalJsonObject(value: string | null): Record<string, unknown> | undefined {
+  if (!value) return undefined;
+  try {
+    const parsed = JSON.parse(value) as unknown;
+    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+      return parsed as Record<string, unknown>;
+    }
+  } catch {
+    return undefined;
+  }
+  return undefined;
+}
+
+export async function submitInteraktAdvancedTemplateForm(formData: FormData) {
+  const supabase = createServiceClient();
+  const headerValues = parseStringList(formData, "headerValues");
+  const bodyValues = parseStringList(formData, "bodyValues");
+  const buttonValues = parseGroupedValueMap(formData, "buttonValueIndex", "buttonValueItems");
+  const buttonPayload = parseGroupedValueMap(
+    formData,
+    "buttonPayloadIndex",
+    "buttonPayloadItems"
+  );
+
+  const metadataRaw = toNullable(formData.get("metadataJson"));
+  const metadata = parseOptionalJsonObject(metadataRaw);
+  const result = await sendInteraktWhatsApp(supabase, {
+    eventName: "webhook_test",
+    triggerSource: "admin_interakt_advanced_test",
+    createdBy: await getAdminActor(),
+    orderId: toNullable(formData.get("orderId")),
+    leadId: toNullable(formData.get("leadId")),
+    fullName: toNullable(formData.get("fullName")),
+    phone: toNullable(formData.get("phone")),
+    templateName: toNullable(formData.get("templateName")),
+    languageCode: toNullable(formData.get("languageCode")),
+    callbackData: toNullable(formData.get("callbackData")),
+    campaignId: toNullable(formData.get("campaignId")),
+    fileName: toNullable(formData.get("fileName")),
+    headerValues: headerValues.length ? headerValues : undefined,
+    bodyValues: bodyValues.length ? bodyValues : undefined,
+    buttonValues: Object.keys(buttonValues).length ? buttonValues : undefined,
+    buttonPayload: Object.keys(buttonPayload).length ? buttonPayload : undefined,
+    metadata: {
+      test_origin: "admin_panel",
+      ...(metadata ?? {}),
+    },
+  });
+
+  revalidatePath("/admindeoghar/integrations");
+  redirectWithIntegrationResult("interakt", result.status, result.message);
+}
+
+export async function submitInteraktCreateCampaignForm(formData: FormData) {
+  const supabase = createServiceClient();
+  const campaignName = toNullable(formData.get("campaignName"));
+  const templateName = toNullable(formData.get("templateName"));
+  const languageCode = toNullable(formData.get("languageCode")) ?? "en";
+
+  if (!campaignName || !templateName) {
+    return redirectWithIntegrationResult(
+      "interakt",
+      "failed",
+      "Campaign name and template name are required"
+    );
+  }
+
+  const result = await createInteraktApiCampaign(supabase, {
+    campaignName,
+    templateName,
+    languageCode,
+    createdBy: await getAdminActor(),
+  });
+
+  revalidatePath("/admindeoghar/integrations");
+  redirectWithIntegrationResult(
+    "interakt",
+    result.ok ? "success" : "failed",
+    result.message
+  );
+}
+
+function parseCsvLabels(value: string | null): string[] {
+  if (!value) return [];
+  return value
+    .split(",")
+    .map((part) => part.trim())
+    .filter(Boolean);
+}
+
+function parseButtonLabelLines(
+  value: string | null
+): Array<{ buttonIndex: string; label: string }> {
+  if (!value) return [];
+  return value
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .flatMap((line) => {
+      const separatorIndex = line.indexOf(":");
+      if (separatorIndex < 0) return [];
+      const buttonIndex = line.slice(0, separatorIndex).trim();
+      const labels = line
+        .slice(separatorIndex + 1)
+        .split(",")
+        .map((part) => part.trim())
+        .filter(Boolean);
+      return labels.map((label) => ({ buttonIndex, label }));
+    });
+}
+
+function parseIndexedValuePairs(
+  formData: FormData,
+  indexKey: string,
+  valueKey: string
+): Record<string, string[]> {
+  const indices = formData.getAll(indexKey).map((value) => String(value).trim());
+  const values = formData.getAll(valueKey).map((value) => String(value).trim());
+  const out: Record<string, string[]> = {};
+
+  for (let idx = 0; idx < indices.length; idx += 1) {
+    const buttonIndex = indices[idx];
+    const value = values[idx];
+    if (!buttonIndex || !value) continue;
+    if (!out[buttonIndex]) out[buttonIndex] = [];
+    out[buttonIndex].push(value);
+  }
+
+  return out;
+}
+
+export async function submitInteraktTemplateCatalogForm(formData: FormData) {
+  const supabase = createServiceClient();
+  const name = toNullable(formData.get("templateName"));
+  const languageCode = toNullable(formData.get("languageCode")) ?? "en";
+
+  if (!name) {
+    return redirectWithIntegrationResult("interakt", "failed", "Template name is required");
+  }
+
+  await upsertSavedInteraktTemplate(supabase, {
+    name,
+    languageCode,
+    headerLabels: parseCsvLabels(toNullable(formData.get("headerLabels"))),
+    bodyLabels: parseCsvLabels(toNullable(formData.get("bodyLabels"))),
+    buttonValueLabels: parseButtonLabelLines(toNullable(formData.get("buttonValueLabels"))),
+    buttonPayloadLabels: parseButtonLabelLines(
+      toNullable(formData.get("buttonPayloadLabels"))
+    ),
+    fileNameRequired: String(formData.get("fileNameRequired") ?? "") === "on",
+    notes: toNullable(formData.get("notes")),
+    source: "manual",
+    isActive: true,
+  });
+
+  revalidatePath("/admindeoghar/integrations");
+  redirectWithIntegrationResult("interakt", "success", `${name} saved`);
+}
+
+export async function submitInteraktSavedTemplateSendForm(formData: FormData) {
+  const supabase = createServiceClient();
+  const templateName = toNullable(formData.get("templateName"));
+  const languageCode = toNullable(formData.get("languageCode"));
+
+  if (!templateName) {
+    return redirectWithIntegrationResult("interakt", "failed", "Select a saved template");
+  }
+
+  const result = await sendInteraktWhatsApp(supabase, {
+    eventName: "saved_template_send",
+    triggerSource: "admin_interakt_saved_template_send",
+    createdBy: await getAdminActor(),
+    orderId: toNullable(formData.get("orderId")),
+    leadId: toNullable(formData.get("leadId")),
+    fullName: toNullable(formData.get("fullName")),
+    phone: toNullable(formData.get("phone")),
+    templateName,
+    languageCode,
+    callbackData: toNullable(formData.get("callbackData")),
+    campaignId: toNullable(formData.get("campaignId")),
+    fileName: toNullable(formData.get("fileName")),
+    headerValues: formData.getAll("headerValues").map((value) => String(value).trim()).filter(Boolean),
+    bodyValues: formData.getAll("bodyValues").map((value) => String(value).trim()).filter(Boolean),
+    buttonValues: parseIndexedValuePairs(formData, "buttonValueIndex", "buttonValueValue"),
+    buttonPayload: parseIndexedValuePairs(
+      formData,
+      "buttonPayloadIndex",
+      "buttonPayloadValue"
+    ),
+    metadata: {
+      test_origin: "admin_saved_template_send",
+      ...(parseOptionalJsonObject(toNullable(formData.get("metadataJson"))) ?? {}),
+    },
+  });
+
+  revalidatePath("/admindeoghar/integrations");
+  redirectWithIntegrationResult("interakt", result.status, result.message);
+}
+
 export async function submitSmtpEmailTestForm(formData: FormData) {
   const supabase = createServiceClient();
   const fullName = toNullable(formData.get("fullName"));
@@ -259,7 +491,7 @@ export async function submitSmtpEmailTestForm(formData: FormData) {
 <ul>
 <li>Order ID: ${orderIdLabel}</li>
 <li>Product: ${product}</li>
-<li>Amount: ₹${amount}</li>
+<li>Amount: Rs ${amount}</li>
 </ul>
 
 <p>${deliveryText}</p>
@@ -275,7 +507,7 @@ export async function submitSmtpEmailTestForm(formData: FormData) {
     leadId: toNullable(formData.get("leadId")),
     fullName,
     email,
-    subject: `Payment Successful – Your Order is Confirmed (${orderIdLabel})`,
+    subject: `Payment Successful - Your Order is Confirmed (${orderIdLabel})`,
     html,
     payloadExtras: {
       name: fullName,

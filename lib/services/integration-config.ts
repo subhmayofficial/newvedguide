@@ -1,6 +1,7 @@
 export interface InteraktIntegrationConfig {
   enabled: boolean;
   endpointUrl: string;
+  templateListApiUrl: string | null;
   apiKey: string | null;
   templateName: string;
   languageCode: string;
@@ -52,6 +53,7 @@ export function getDeliveryIntegrationsConfig(): DeliveryIntegrationsConfig {
     interakt: {
       enabled: readBoolean(process.env.INTERAKT_ENABLED, false),
       endpointUrl: process.env.INTERAKT_API_URL?.trim() || INTERAKT_DEFAULT_ENDPOINT,
+      templateListApiUrl: process.env.INTERAKT_TEMPLATE_LIST_API_URL?.trim() || null,
       apiKey: process.env.INTERAKT_API_KEY?.trim() || null,
       templateName: process.env.INTERAKT_TEMPLATE_NAME?.trim() || "order_paid_update",
       languageCode: process.env.INTERAKT_TEMPLATE_LANGUAGE?.trim() || "en",
@@ -79,8 +81,8 @@ export function getDeliveryIntegrationsConfig(): DeliveryIntegrationsConfig {
 
 export function maskSecret(value: string | null | undefined): string {
   if (!value) return "Not set";
-  if (value.length <= 8) return "••••••••";
-  return `${value.slice(0, 4)}••••••${value.slice(-4)}`;
+  if (value.length <= 8) return "********";
+  return `${value.slice(0, 4)}******${value.slice(-4)}`;
 }
 
 export function isValidHttpUrl(url: string | null | undefined): boolean {
@@ -92,3 +94,4 @@ export function isValidHttpUrl(url: string | null | undefined): boolean {
     return false;
   }
 }
+
