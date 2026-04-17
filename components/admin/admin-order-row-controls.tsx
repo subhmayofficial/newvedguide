@@ -5,13 +5,42 @@ import {
   updateOrderAssigneeFromList,
   updateOrderFulfillmentFromList,
 } from "@/app/(admin)/admin/actions";
-import { FULFILLMENT_STATUS, ORDER_FULFILLMENT_ASSIGNEES } from "@/lib/constants/commerce";
+import { ORDER_FULFILLMENT_ASSIGNEES } from "@/lib/constants/commerce";
+import {
+  AdminStatusDropdown,
+  type DropdownOption,
+} from "@/components/admin/admin-status-dropdown";
 
-const FULFILLMENT_OPTIONS = Object.values(FULFILLMENT_STATUS);
+// ─── Fulfillment options ──────────────────────────────────────────────────
 
-function formatFulfillmentLabel(value: string) {
-  return value.replace(/_/g, " ");
-}
+const FULFILLMENT_OPTIONS: DropdownOption[] = [
+  { value: "unfulfilled", label: "Unfulfilled", dotClass: "bg-zinc-300 dark:bg-zinc-600" },
+  { value: "queued",      label: "Queued",      dotClass: "bg-blue-400" },
+  { value: "in_progress", label: "In Progress", dotClass: "bg-amber-400" },
+  { value: "delivered",   label: "Delivered",   dotClass: "bg-emerald-500" },
+];
+
+// ─── Assignee options ─────────────────────────────────────────────────────
+
+const AVATAR_COLORS: Record<string, string> = {
+  Ashu:   "bg-violet-500",
+  Roshan: "bg-blue-500",
+};
+
+const ASSIGNEE_OPTIONS: DropdownOption[] = [
+  {
+    value: "",
+    label: "Unassigned",
+    dotClass: "bg-zinc-300 dark:bg-zinc-600",
+  },
+  ...ORDER_FULFILLMENT_ASSIGNEES.map((name) => ({
+    value: name,
+    label: name,
+    avatarClass: AVATAR_COLORS[name] ?? "bg-zinc-500",
+  })),
+];
+
+// ─── Controls ─────────────────────────────────────────────────────────────
 
 export function AdminOrderRowFulfillmentSelect({
   orderId,
@@ -23,24 +52,16 @@ export function AdminOrderRowFulfillmentSelect({
   const [pending, startTransition] = useTransition();
 
   return (
-    <select
-      aria-label="Fulfillment status"
-      className="max-w-[9.5rem] rounded-md border border-border bg-background px-2 py-1.5 text-xs capitalize disabled:opacity-50"
+    <AdminStatusDropdown
       value={fulfillmentStatus}
-      disabled={pending}
-      onChange={(e) => {
-        const next = e.target.value;
+      options={FULFILLMENT_OPTIONS}
+      pending={pending}
+      onSelect={(next) => {
         startTransition(async () => {
           await updateOrderFulfillmentFromList(orderId, next);
         });
       }}
-    >
-      {FULFILLMENT_OPTIONS.map((s) => (
-        <option key={s} value={s}>
-          {formatFulfillmentLabel(s)}
-        </option>
-      ))}
-    </select>
+    />
   );
 }
 
@@ -54,23 +75,15 @@ export function AdminOrderRowAssigneeSelect({
   const [pending, startTransition] = useTransition();
 
   return (
-    <select
-      aria-label="Assigned to"
-      className="max-w-[9.5rem] rounded-md border border-border bg-background px-2 py-1.5 text-xs disabled:opacity-50"
+    <AdminStatusDropdown
       value={assignee ?? ""}
-      disabled={pending}
-      onChange={(e) => {
+      options={ASSIGNEE_OPTIONS}
+      pending={pending}
+      onSelect={(next) => {
         startTransition(async () => {
-          await updateOrderAssigneeFromList(orderId, e.target.value);
+          await updateOrderAssigneeFromList(orderId, next);
         });
       }}
-    >
-      <option value="">— Unassigned —</option>
-      {ORDER_FULFILLMENT_ASSIGNEES.map((name) => (
-        <option key={name} value={name}>
-          {name}
-        </option>
-      ))}
-    </select>
+    />
   );
 }

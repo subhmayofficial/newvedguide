@@ -109,6 +109,220 @@
   --sidebar-ring: oklch(0.55 0.14 55);
 }
 
+/* ═══════════════════════════════════════════════════════════
+   ADMIN PANEL THEME
+   Scoped to .admin-shell — completely isolated from site theme.
+   Zinc/neutral palette. Sidebar is always dark in both modes.
+   ════════════════════════════════════════════════════════════ */
+
+/* ── Light mode ── */
+.admin-shell {
+  --background: #f7f7f7;
+  --foreground: #0a0a0a;
+  --card: #ffffff;
+  --card-foreground: #0a0a0a;
+  --popover: #ffffff;
+  --popover-foreground: #0a0a0a;
+  --primary: #0a0a0a;
+  --primary-foreground: #fafafa;
+  --secondary: #f0f0f0;
+  --secondary-foreground: #0a0a0a;
+  --muted: #f0f0f0;
+  --muted-foreground: #737373;
+  --accent: #f0f0f0;
+  --accent-foreground: #0a0a0a;
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: #e2e2e2;
+  --input: #ffffff;
+  --ring: #0a0a0a;
+
+  /* Sidebar — always dark regardless of content theme */
+  --sidebar: #0f0f0f;
+  --sidebar-foreground: rgba(240, 240, 240, 1);
+  --sidebar-primary: rgba(255, 255, 255, 0.09);
+  --sidebar-primary-foreground: rgba(255, 255, 255, 0.95);
+  --sidebar-accent: rgba(255, 255, 255, 0.055);
+  --sidebar-accent-foreground: rgba(255, 255, 255, 0.85);
+  --sidebar-border: rgba(255, 255, 255, 0.055);
+  --sidebar-ring: rgba(255, 255, 255, 0.25);
+}
+
+/* ── Dark mode ── */
+.admin-shell.dark {
+  --background: #0c0c0c;
+  --foreground: #f2f2f2;
+  --card: #141414;
+  --card-foreground: #f2f2f2;
+  --popover: #111111;
+  --popover-foreground: #f2f2f2;
+  --primary: #f2f2f2;
+  --primary-foreground: #0c0c0c;
+  --secondary: #1c1c1c;
+  --secondary-foreground: #f2f2f2;
+  --muted: #1c1c1c;
+  --muted-foreground: #737373;
+  --accent: #1c1c1c;
+  --accent-foreground: #f2f2f2;
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: #242424;
+  --input: #1a1a1a;
+  --ring: #555555;
+
+  /* Sidebar — even deeper in dark mode */
+  --sidebar: #080808;
+  --sidebar-foreground: rgba(230, 230, 230, 1);
+  --sidebar-primary: rgba(255, 255, 255, 0.08);
+  --sidebar-primary-foreground: rgba(255, 255, 255, 0.95);
+  --sidebar-accent: rgba(255, 255, 255, 0.05);
+  --sidebar-accent-foreground: rgba(255, 255, 255, 0.80);
+  --sidebar-border: rgba(255, 255, 255, 0.05);
+  --sidebar-ring: rgba(255, 255, 255, 0.2);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ADMIN ROW HIGHLIGHTS — gradient backgrounds per row type
+   Scoped inside .admin-shell so they don't leak to main site
+   ════════════════════════════════════════════════════════════ */
+
+/* FastTrack — warm golden gradient from left edge */
+.admin-shell .row-fasttrack {
+  background: linear-gradient(
+    to right,
+    rgba(251, 191, 36, 0.13) 0,
+    rgba(251, 191, 36, 0.05) 260px,
+    transparent 520px
+  );
+  transition: background 0.12s ease;
+}
+.admin-shell .row-fasttrack:hover {
+  background: linear-gradient(
+    to right,
+    rgba(251, 191, 36, 0.20) 0,
+    rgba(251, 191, 36, 0.07) 260px,
+    transparent 520px
+  );
+}
+.admin-shell.dark .row-fasttrack {
+  background: linear-gradient(
+    to right,
+    rgba(251, 191, 36, 0.09) 0,
+    rgba(251, 191, 36, 0.03) 200px,
+    transparent 400px
+  );
+}
+.admin-shell.dark .row-fasttrack:hover {
+  background: linear-gradient(
+    to right,
+    rgba(251, 191, 36, 0.14) 0,
+    rgba(251, 191, 36, 0.05) 200px,
+    transparent 400px
+  );
+}
+
+/* Failed payment — red gradient */
+.admin-shell .row-failed {
+  background: linear-gradient(
+    to right,
+    rgba(239, 68, 68, 0.09) 0,
+    rgba(239, 68, 68, 0.03) 260px,
+    transparent 520px
+  );
+  transition: background 0.12s ease;
+}
+.admin-shell .row-failed:hover {
+  background: linear-gradient(
+    to right,
+    rgba(239, 68, 68, 0.14) 0,
+    rgba(239, 68, 68, 0.05) 260px,
+    transparent 520px
+  );
+}
+.admin-shell.dark .row-failed {
+  background: linear-gradient(
+    to right,
+    rgba(239, 68, 68, 0.08) 0,
+    rgba(239, 68, 68, 0.02) 200px,
+    transparent 400px
+  );
+}
+.admin-shell.dark .row-failed:hover {
+  background: linear-gradient(
+    to right,
+    rgba(239, 68, 68, 0.12) 0,
+    rgba(239, 68, 68, 0.04) 200px,
+    transparent 400px
+  );
+}
+
+/* Cancelled — softer red gradient */
+.admin-shell .row-cancelled {
+  background: linear-gradient(
+    to right,
+    rgba(239, 68, 68, 0.05) 0,
+    transparent 320px
+  );
+  transition: background 0.12s ease;
+}
+.admin-shell .row-cancelled:hover {
+  background: linear-gradient(
+    to right,
+    rgba(239, 68, 68, 0.09) 0,
+    transparent 320px
+  );
+}
+.admin-shell.dark .row-cancelled {
+  background: linear-gradient(
+    to right,
+    rgba(239, 68, 68, 0.05) 0,
+    transparent 260px
+  );
+}
+.admin-shell.dark .row-cancelled:hover {
+  background: linear-gradient(
+    to right,
+    rgba(239, 68, 68, 0.08) 0,
+    transparent 260px
+  );
+}
+
+/* Normal row hover */
+.admin-shell .row-normal:hover {
+  background: rgba(0, 0, 0, 0.025);
+}
+.admin-shell.dark .row-normal:hover {
+  background: rgba(255, 255, 255, 0.025);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ADMIN ANIMATIONS
+   ════════════════════════════════════════════════════════════ */
+
+/* Page content entrance */
+@keyframes adminPageIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to   { opacity: 1; transform: translateY(0);   }
+}
+
+.admin-page-enter {
+  animation: adminPageIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Table row stagger entrance */
+@keyframes adminRowIn {
+  from { opacity: 0; transform: translateY(3px); }
+  to   { opacity: 1; transform: translateY(0);   }
+}
+
+.admin-row-in {
+  animation: adminRowIn 0.18s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Smooth custom scrollbar inside admin */
+.admin-shell ::-webkit-scrollbar        { width: 4px; height: 4px; }
+.admin-shell ::-webkit-scrollbar-track  { background: transparent; }
+.admin-shell ::-webkit-scrollbar-thumb  { background: rgba(120,120,120,0.18); border-radius: 100px; }
+.admin-shell ::-webkit-scrollbar-thumb:hover { background: rgba(120,120,120,0.30); }
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

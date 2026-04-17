@@ -1,7 +1,11 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createServiceClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
+import {
+  createClient as createAuthedClient,
+  createServiceClient,
+} from "@/lib/supabase/server";
 import { addEntityNote } from "@/lib/services/notes";
 import { updateLeadStatus } from "@/lib/services/lead";
 import {
@@ -10,6 +14,10 @@ import {
   updateOrderStatus,
 } from "@/lib/services/order";
 import { createCoupon } from "@/lib/services/coupon";
+import {
+  sendInteraktWhatsApp,
+  sendSmtpEmail,
+} from "@/lib/services/integration-delivery";
 import {
   ENTITY_NOTE_TYPE,
   FULFILLMENT_STATUS,
@@ -168,4 +176,119 @@ export async function updateOrderAssigneeFromList(orderId: string, assignee: str
   await updateOrderFulfillmentAssignee(supabase, orderId, value);
   revalidatePath("/admindeoghar/orders");
   revalidatePath(`/admindeoghar/orders/${orderId}`);
+}
+
+async function getAdminActor(): Promise<string | null> {
+  try {
+    const authClient = await createAuthedClient();
+    const {
+      data: { user },
+    } = await authClient.auth.getUser();
+    if (!user) return null;
+    return user.email ?? user.id;
+  } catch {
+    return null;
+  }
+}
+
+function toNullable(value: FormDataEntryValue | null): string | null {
+  const text = String(value ?? "").trim();
+  return text ? text : null;
+}
+
+function redirectWithIntegrationResult(
+  provider: "interakt" | "smtp",
+  status: string,
+  message: string
+) {
+  const q = new URLSearchParams();
+  q.set("provider", provider);
+  q.set("test_status", status);
+  q.set("test_message", message);
+  redirect(`/admindeoghar/integrations?${q.toString()}`);
+}
+
+export async function submitInteraktWebhookTestForm(formData: FormData) {
+  const supabase = createServiceClient();
+  const bodyValuesRaw = toNullable(formData.get("bodyValues"));
+  const bodyValues = bodyValuesRaw
+    ? bodyValuesRaw
+        .split(",")
+        .map((part) => part.trim())
+        .filter(Boolean)
+    : undefined;
+
+  const result = await sendInteraktWhatsApp(supabase, {
+    eventName: "webhook_test",
+    triggerSource: "admin_webhook_test",
+    createdBy: await getAdminActor(),
+    orderId: toNullable(formData.get("orderId")),
+    leadId: toNullable(formData.get("leadId")),
+    fullName: toNullable(formData.get("fullName")),
+    phone: toNullable(formData.get("phone")),
+    templateName: toNullable(formData.get("templateName")),
+    bodyValues,
+    metadata: {
+      test_origin: "admin_panel",
+    },
+  });
+
+  revalidatePath("/admindeoghar/integrations");
+  redirectWithIntegrationResult("interakt", result.status, result.message);
+}
+
+export async function submitSmtpEmailTestForm(formData: FormData) {
+  const supabase = createServiceClient();
+  const fullName = toNullable(formData.get("fullName"));
+  const email = toNullable(formData.get("email"));
+  const messageNote = toNullable(formData.get("message"));
+  const orderIdLabel = toNullable(formData.get("orderIdLabel")) ?? "VG-TEST-EMAIL";
+  const product = toNullable(formData.get("product")) ?? "Paid Kundli Report";
+  const amount = toNullable(formData.get("amount")) ?? "399";
+  const deliveryText =
+    toNullable(formData.get("deliveryText")) ??
+    "Your report delivery is in process. Typical timeline is 24-48 hours.";
+  const supportLink =
+    toNullable(formData.get("supportLink")) ?? "https://wa.me/919999999999";
+
+  const html = `
+<h2>Hey ${fullName ?? "Customer"},</h2>
+<p>Payment successful! Your order is confirmed.</p>
+
+<h3>Order Details:</h3>
+<ul>
+<li>Order ID: ${orderIdLabel}</li>
+<li>Product: ${product}</li>
+<li>Amount: ₹${amount}</li>
+</ul>
+
+<p>${deliveryText}</p>
+
+<p>Support: <a href="${supportLink}">Click here</a></p>
+`.trim();
+
+  const result = await sendSmtpEmail(supabase, {
+    eventName: "webhook_test",
+    triggerSource: "admin_webhook_test",
+    createdBy: await getAdminActor(),
+    orderId: toNullable(formData.get("orderId")),
+    leadId: toNullable(formData.get("leadId")),
+    fullName,
+    email,
+    subject: `Payment Successful – Your Order is Confirmed (${orderIdLabel})`,
+    html,
+    payloadExtras: {
+      name: fullName,
+      order_id: orderIdLabel,
+      product,
+      amount,
+      delivery_text: deliveryText,
+      support_link: supportLink,
+      note: messageNote,
+      test_origin: "admin_panel",
+    },
+  });
+
+  revalidatePath("/admindeoghar/integrations");
+  redirectWithIntegrationResult("smtp", result.status, result.message);
 }

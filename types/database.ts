@@ -437,6 +437,54 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["notes"]["Insert"]>;
         Relationships: [];
       };
+      integration_deliveries: {
+        Row: {
+          id: string;
+          provider: string;
+          channel: string;
+          event_name: string;
+          status: string;
+          trigger_source: string | null;
+          customer_id: string | null;
+          lead_id: string | null;
+          order_id: string | null;
+          request_url: string | null;
+          request_method: string;
+          request_headers_json: Json | null;
+          request_body_json: Json | null;
+          response_status: number | null;
+          response_headers_json: Json | null;
+          response_body: string | null;
+          error_message: string | null;
+          created_by: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          provider: string;
+          channel: string;
+          event_name: string;
+          status: string;
+          trigger_source?: string | null;
+          customer_id?: string | null;
+          lead_id?: string | null;
+          order_id?: string | null;
+          request_url?: string | null;
+          request_method?: string;
+          request_headers_json?: Json | null;
+          request_body_json?: Json | null;
+          response_status?: number | null;
+          response_headers_json?: Json | null;
+          response_body?: string | null;
+          error_message?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["integration_deliveries"]["Insert"]
+        >;
+        Relationships: [];
+      };
       kundli_submissions: {
         Row: {
           id: string;

@@ -12,6 +12,7 @@ import {
 import { logEvent } from "@/lib/services/event";
 import { updateOrderStatus } from "@/lib/services/order";
 import { incrementCouponUsage } from "@/lib/services/coupon";
+import { triggerPaymentSuccessDeliveries } from "@/lib/services/integration-delivery";
 
 export interface CreatePaymentAttemptInput {
   orderId: string;
@@ -148,6 +149,12 @@ export async function markPaymentSuccess(
       coupon_code: order?.coupon_code ?? null,
     },
   });
+
+  try {
+    await triggerPaymentSuccessDeliveries(supabase, input.orderId);
+  } catch (deliveryError) {
+    console.error("[payment-success][delivery]", deliveryError);
+  }
 }
 
 export async function markPaymentFailure(
