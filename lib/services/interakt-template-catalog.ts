@@ -136,6 +136,38 @@ export async function upsertSavedInteraktTemplate(
   if (error) throw error;
 }
 
+export async function updateSavedInteraktTemplateById(
+  supabase: SupabaseClient<Database>,
+  id: string,
+  input: SavedInteraktTemplateInput
+): Promise<void> {
+  const row: Database["public"]["Tables"]["admin_interakt_templates"]["Update"] = {
+    name: input.name.trim(),
+    language_code: input.languageCode.trim() || "en",
+    header_labels_json: uniqueStrings(input.headerLabels) as Json,
+    body_labels_json: uniqueStrings(input.bodyLabels) as Json,
+    button_value_labels_json: uniqueMappings(input.buttonValueLabels) as unknown as Json,
+    button_payload_labels_json: uniqueMappings(input.buttonPayloadLabels) as unknown as Json,
+    file_name_required: Boolean(input.fileNameRequired),
+    notes: input.notes?.trim() || null,
+  };
+  if (input.source?.trim()) {
+    row.source = input.source.trim();
+  }
+
+  const { error } = await supabase.from("admin_interakt_templates").update(row).eq("id", id);
+
+  if (error) throw error;
+}
+
+export async function deleteSavedInteraktTemplateById(
+  supabase: SupabaseClient<Database>,
+  id: string
+): Promise<void> {
+  const { error } = await supabase.from("admin_interakt_templates").delete().eq("id", id);
+  if (error) throw error;
+}
+
 function extractPlaceholders(input: string | null | undefined, prefix: string): string[] {
   if (!input) return [];
   const matches = new Set<number>();
