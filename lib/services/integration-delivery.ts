@@ -4,6 +4,7 @@ import type { Database, Json } from "@/types/database";
 import {
   getDeliveryIntegrationsConfig,
   isValidHttpUrl,
+  type InteraktIntegrationConfig,
 } from "@/lib/services/integration-config";
 
 const REQUEST_TIMEOUT_MS = 12_000;
@@ -129,6 +130,37 @@ function truncateText(input: string | null | undefined, max = MAX_RESPONSE_TEXT_
   return input.length > max ? `${input.slice(0, max)}...` : input;
 }
 
+/** Surfaces Interakt/Meta-style JSON errors in admin; 400 usually means template/payload mismatch. */
+function formatHttpProviderError(
+  provider: DeliveryProvider,
+  status: number,
+  body: string | null
+): string {
+  const snippet = (body ?? "").trim();
+  if (!snippet) {
+    return `${provider} API returned ${status}`;
+  }
+  try {
+    const j = JSON.parse(snippet) as Record<string, unknown>;
+    const nested =
+      j.result && typeof j.result === "object" && j.result !== null
+        ? (j.result as Record<string, unknown>)
+        : null;
+    const msg =
+      (typeof j.message === "string" && j.message) ||
+      (typeof j.error === "string" && j.error) ||
+      (typeof j.msg === "string" && j.msg) ||
+      (nested && typeof nested.message === "string" && nested.message) ||
+      null;
+    if (msg) {
+      return `${provider} API returned ${status}: ${msg}`;
+    }
+  } catch {
+    /* not JSON */
+  }
+  return `${provider} API returned ${status}: ${snippet.slice(0, 500)}`;
+}
+
 function normalizePhone(phone: string | null | undefined): string | null {
   if (!phone) return null;
   const digits = phone.replace(/\D/g, "");
@@ -236,7 +268,7 @@ async function postJsonWithLogging(
     const status: DeliveryStatus = response.ok ? "success" : "failed";
     const message = response.ok
       ? `${input.provider} delivery sent`
-      : `${input.provider} API returned ${response.status}`;
+      : formatHttpProviderError(input.provider, response.status, responseText);
 
     await insertDeliveryLog(supabase, {
       provider: input.provider,
@@ -411,6 +443,7 @@ export async function sendInteraktWhatsApp(
     };
   }
 
+  // Interakt returns 400 if bodyValues length ≠ template {{n}} count, or wrong template/language.
   const bodyValues =
     input.bodyValues && input.bodyValues.length
       ? input.bodyValues
@@ -853,6 +886,35 @@ function resolveDeliveryText(productSlug: string): string {
   return "Your report delivery is in process. Typical timeline is 24-48 hours.";
 }
 
+function siteOriginFromEnv(): string {
+  const raw = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+  if (!raw) return "";
+  try {
+    return new URL(raw).origin;
+  } catch {
+    return "";
+  }
+}
+
+/** URL for WhatsApp template button variable (dynamic URL). */
+function buildKundliDeliveryButtonUrl(
+  config: InteraktIntegrationConfig,
+  order: PaidOrderDeliveryRow
+): string {
+  const tmpl = config.kundliDeliveryButtonLinkTemplate;
+  const num = order.order_number ?? "";
+  const id = order.id ?? "";
+  if (tmpl) {
+    return tmpl
+      .replaceAll("{order_number}", num)
+      .replaceAll("{order_id}", id);
+  }
+  const origin = siteOriginFromEnv();
+  const path = "/kundli-report";
+  if (origin) return `${origin.replace(/\/$/, "")}${path}`;
+  return `https://vedguide.com${path}`;
+}
+
 export async function triggerPaymentSuccessDeliveries(
   supabase: SupabaseClient<Database>,
   orderId: string
@@ -879,22 +941,47 @@ export async function triggerPaymentSuccessDeliveries(
   const productName = formatProductLabel(order.product_slug);
 
   if (config.interakt.triggerOnPaymentSuccess) {
-    await sendInteraktWhatsApp(supabase, {
-      eventName: "payment_success",
-      triggerSource: "payment_success_auto",
-      orderId: order.id,
-      leadId: order.lead_id,
-      customerId: order.customer_id,
-      fullName,
-      phone: customer?.phone ?? null,
-      bodyValues: [fullName, productName, `Rs ${amountRupees}`],
-      metadata: {
-        order_number: order.order_number,
-        product_slug: order.product_slug,
-        source: order.source,
-        entry_path: order.entry_path,
-      },
-    });
+    if (order.product_slug === "paid-kundli") {
+      const btnIdx = config.interakt.kundliDeliveryButtonIndex || "0";
+      const buttonUrl = buildKundliDeliveryButtonUrl(config.interakt, order);
+      await sendInteraktWhatsApp(supabase, {
+        eventName: "payment_success",
+        triggerSource: "payment_success_auto_kundli",
+        orderId: order.id,
+        leadId: order.lead_id,
+        customerId: order.customer_id,
+        fullName,
+        phone: customer?.phone ?? null,
+        templateName: config.interakt.kundliDeliveryTemplateName,
+        languageCode: config.interakt.kundliDeliveryTemplateLanguage,
+        bodyValues: [fullName],
+        buttonValues: { [btnIdx]: [buttonUrl] },
+        metadata: {
+          order_number: order.order_number,
+          product_slug: order.product_slug,
+          source: order.source,
+          entry_path: order.entry_path,
+          interakt_template: config.interakt.kundliDeliveryTemplateName,
+        },
+      });
+    } else {
+      await sendInteraktWhatsApp(supabase, {
+        eventName: "payment_success",
+        triggerSource: "payment_success_auto",
+        orderId: order.id,
+        leadId: order.lead_id,
+        customerId: order.customer_id,
+        fullName,
+        phone: customer?.phone ?? null,
+        bodyValues: [fullName, productName, `Rs ${amountRupees}`],
+        metadata: {
+          order_number: order.order_number,
+          product_slug: order.product_slug,
+          source: order.source,
+          entry_path: order.entry_path,
+        },
+      });
+    }
   }
 
   if (config.email.triggerOnPaymentSuccess) {

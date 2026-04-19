@@ -14,8 +14,11 @@ export function AdminThemeProvider({ children }: { children: React.ReactNode }) 
   const [theme, setTheme] = useState<Theme>("light");
 
   useEffect(() => {
-    const stored = localStorage.getItem("admin-theme");
-    if (stored === "dark") setTheme("dark");
+    const id = requestAnimationFrame(() => {
+      const stored = localStorage.getItem("admin-theme");
+      if (stored === "dark") setTheme("dark");
+    });
+    return () => cancelAnimationFrame(id);
   }, []);
 
   function toggle() {

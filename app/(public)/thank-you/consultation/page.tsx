@@ -22,17 +22,22 @@ export default function ConsultationThankYouPage() {
         const parsed = JSON.parse(raw) as { orderId?: string; packageId?: string };
         if (parsed.orderId) {
           cachedOrderId = parsed.orderId;
-          setOrderId(parsed.orderId);
-          setPackageId(parsed.packageId ?? "45min");
-          track.thankYouView(parsed.orderId);
+          const oid = parsed.orderId;
+          const pkg = parsed.packageId ?? "45min";
+          track.thankYouView(oid);
           sessionStorage.removeItem("consultation_complete");
-          return;
+          const raf = requestAnimationFrame(() => {
+            setOrderId(oid);
+            setPackageId(pkg);
+          });
+          return () => cancelAnimationFrame(raf);
         }
       } catch { /* fall through */ }
     }
     if (cachedOrderId) {
-      setOrderId(cachedOrderId);
-      return;
+      const cid = cachedOrderId;
+      const raf = requestAnimationFrame(() => setOrderId(cid));
+      return () => cancelAnimationFrame(raf);
     }
     router.replace("/consultation");
   }, [router]);

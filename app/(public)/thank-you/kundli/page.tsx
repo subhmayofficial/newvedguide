@@ -44,11 +44,11 @@ export default function KundliThankYouPage() {
         const id = parsed.orderId;
         if (typeof id === "string" && id.length > 0) {
           thankYouOrderIdCache = id;
-          setOrderId(id);
           track.thankYouView(id);
           sessionStorage.removeItem("order_complete");
           sessionStorage.removeItem("kundli_result");
-          return;
+          const raf = requestAnimationFrame(() => setOrderId(id));
+          return () => cancelAnimationFrame(raf);
         }
       } catch {
         /* fall through */
@@ -56,8 +56,9 @@ export default function KundliThankYouPage() {
     }
 
     if (thankYouOrderIdCache) {
-      setOrderId(thankYouOrderIdCache);
-      return;
+      const cid = thankYouOrderIdCache;
+      const raf = requestAnimationFrame(() => setOrderId(cid));
+      return () => cancelAnimationFrame(raf);
     }
 
     router.replace("/");

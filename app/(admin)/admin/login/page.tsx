@@ -2,17 +2,60 @@
 
 export const dynamic = "force-dynamic";
 
-import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import type { AuthError } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
+const DEFAULT_ADMIN_PATH = "/admindeoghar";
+
+/** Only same-site admin paths — blocks open redirects via ?redirect= */
+function safeAdminRedirect(raw: string | null): string {
+  if (!raw) return DEFAULT_ADMIN_PATH;
+  let path = raw.trim();
+  try {
+    path = decodeURIComponent(path);
+  } catch {
+    return DEFAULT_ADMIN_PATH;
+  }
+  if (!path.startsWith("/") || path.startsWith("//")) return DEFAULT_ADMIN_PATH;
+  if (!path.startsWith("/admin") && !path.startsWith("/admindeoghar")) {
+    return DEFAULT_ADMIN_PATH;
+  }
+  return path;
+}
+
+function signInErrorMessage(authError: AuthError): string {
+  const msg = (authError.message ?? "").toLowerCase();
+  if (
+    msg.includes("invalid login credentials") ||
+    msg.includes("invalid_credentials")
+  ) {
+    return "Wrong email or password for this Supabase project — or the user does not exist.";
+  }
+  if (msg.includes("email not confirmed")) {
+    return "Email not confirmed. In Supabase Dashboard → Authentication → Providers, disable “Confirm email” for testing, or confirm the user’s email.";
+  }
+  if (
+    authError.status === 0 ||
+    msg.includes("fetch") ||
+    msg.includes("network")
+  ) {
+    return "Network error — check internet, VPN, and that NEXT_PUBLIC_SUPABASE_URL is reachable.";
+  }
+  return authError.message || "Sign-in failed.";
+}
+
 export default function AdminLoginPage() {
-  const router = useRouter();
   const searchParams = useSearchParams();
-  const redirect = searchParams.get("redirect") ?? "/admindeoghar";
+  const redirect = useMemo(
+    () => safeAdminRedirect(searchParams.get("redirect")),
+    [searchParams]
+  );
+  const configError = searchParams.get("error") === "config";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -26,17 +69,19 @@ export default function AdminLoginPage() {
 
     const supabase = createClient();
     const { error: authError } = await supabase.auth.signInWithPassword({
-      email,
+      email: email.trim(),
       password,
     });
 
     if (authError) {
-      setError("Invalid email or password.");
+      setError(signInErrorMessage(authError));
       setLoading(false);
       return;
     }
 
-    router.push(redirect);
+    // Full navigation so the browser sends fresh auth cookies to the proxy.
+    // Client-side router.push alone often fails with @supabase/ssr + middleware.
+    window.location.assign(redirect);
   }
 
   return (
@@ -49,6 +94,21 @@ export default function AdminLoginPage() {
           <p className="mt-2 text-sm text-sidebar-foreground/60">
             Internal access only
           </p>
+          {configError && (
+            <p className="mt-4 rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-left text-xs text-amber-200">
+              Set{" "}
+              <span className="font-mono">
+                NEXT_PUBLIC_SUPABASE_URL
+              </span>{" "}
+              and{" "}
+              <span className="font-mono">
+                NEXT_PUBLIC_SUPABASE_ANON_KEY
+              </span>{" "}
+              in{" "}
+              <span className="font-mono">.env.local</span>, then restart{" "}
+              <span className="font-mono">next dev</span>.
+            </p>
+          )}
         </div>
 
         <form

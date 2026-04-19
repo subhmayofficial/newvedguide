@@ -75,7 +75,10 @@ export function AdminStatusDropdown({
   const current = options.find((o) => o.value === value);
 
   // Portal needs document.body — only available after hydration
-  useEffect(() => { setDomReady(true); }, []);
+  useEffect(() => {
+    const id = requestAnimationFrame(() => setDomReady(true));
+    return () => cancelAnimationFrame(id);
+  }, []);
 
   // Close on outside interaction
   useEffect(() => {
