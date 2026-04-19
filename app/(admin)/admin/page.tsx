@@ -11,6 +11,8 @@ import {
   sourceBreakdown,
 } from "@/lib/admin/queries";
 import { formatAdminDateTime } from "@/lib/admin/time";
+import { OrderSlaCountdown } from "@/components/admin/order-sla-countdown";
+import { orderHasFastTrackSla } from "@/lib/admin/order-sla-helpers";
 
 export const dynamic = "force-dynamic";
 
@@ -34,7 +36,9 @@ export default async function AdminDashboardPage({
         .limit(8),
       supabase
         .from("orders")
-        .select("id,order_number,total_amount,payment_status,created_at,customers(full_name,phone)")
+        .select(
+          "id,order_number,product_slug,status,total_amount,payment_status,fulfillment_status,created_at,customers(full_name,phone),order_items(product_slug)"
+        )
         .order("created_at", { ascending: false })
         .limit(8),
       supabase
@@ -193,17 +197,43 @@ export default async function AdminDashboardPage({
             </Link>
           </div>
           <ul className="divide-y divide-border/50">
-            {(recentOrders.data as { order_number: string; total_amount: string; payment_status: string; created_at: string; id: string; customers?: { full_name?: string | null; phone?: string | null } | null }[] | null ?? []).map((row) => {
+            {(recentOrders.data as {
+              order_number: string;
+              product_slug: string;
+              status: string;
+              total_amount: string;
+              payment_status: string;
+              fulfillment_status: string;
+              created_at: string;
+              id: string;
+              customers?: { full_name?: string | null; phone?: string | null } | null;
+              order_items?: { product_slug: string }[] | null;
+            }[] | null ?? []).map((row) => {
               const c = row.customers;
+              const fastTrack = orderHasFastTrackSla(row.product_slug, row.order_items ?? null);
               return (
-                <li key={row.id} className="flex items-center justify-between gap-3 py-3 text-sm">
-                  <div>
+                <li
+                  key={row.id}
+                  className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 py-3 text-sm"
+                >
+                  <div className="min-w-0 flex-1">
                     <Link href={`/admindeoghar/orders/${row.id}`} className="font-medium hover:underline">
                       {row.order_number}
                     </Link>
                     <p className="text-xs text-muted-foreground">{c?.full_name ?? "—"}</p>
                   </div>
-                  <span className="text-xs font-medium tabular-nums">
+                  <div className="shrink-0">
+                    <OrderSlaCountdown
+                      createdAtIso={row.created_at}
+                      productSlug={row.product_slug}
+                      fulfillmentStatus={row.fulfillment_status}
+                      paymentStatus={row.payment_status}
+                      orderStatus={row.status}
+                      hasFastTrackAddon={fastTrack}
+                      compact
+                    />
+                  </div>
+                  <span className="shrink-0 text-xs font-medium tabular-nums">
                     ₹{(Number(row.total_amount) / 100).toFixed(0)} · {row.payment_status}
                   </span>
                 </li>

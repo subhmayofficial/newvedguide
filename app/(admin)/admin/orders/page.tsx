@@ -4,6 +4,10 @@ import {
   AdminOrderRowAssigneeSelect,
   AdminOrderRowFulfillmentSelect,
 } from "@/components/admin/admin-order-row-controls";
+import { getBunnyCdnSettings } from "@/lib/admin/bunny-cdn-settings";
+import { OrderDeliverButton } from "@/components/admin/order-deliver-button";
+import { OrderSlaCountdown } from "@/components/admin/order-sla-countdown";
+import { orderHasFastTrackSla } from "@/lib/admin/order-sla-helpers";
 import { formatAdminDateTime } from "@/lib/admin/time";
 import {
   ENTRY_PATH,
@@ -32,6 +36,7 @@ type OrderRow = {
   coupon_code: string | null;
   created_at: string;
   customers: { full_name?: string | null; phone?: string | null } | null;
+  order_items?: { product_slug: string }[] | null;
 };
 
 type RowKind = "failed" | "cancelled" | "fasttrack" | "normal";
@@ -45,11 +50,17 @@ export default async function AdminOrdersPage({
 }) {
   const sp = await searchParams;
   const supabase = createServiceClient();
+  const bunnySettings = await getBunnyCdnSettings(supabase);
+  const bunnyUploadReady =
+    bunnySettings.storage_zone_name.trim() !== "" &&
+    bunnySettings.cdn_public_base_url.trim() !== "";
+
+  const showAllPaymentStatuses = sp.all_orders === "1";
 
   let q = supabase
     .from("orders")
     .select(
-      "id,order_number,product_slug,consultation_type,total_amount,status,payment_status,fulfillment_status,fulfillment_assignee,entry_path,created_at,coupon_applied,coupon_code,customers(full_name,phone)",
+      "id,order_number,product_slug,consultation_type,total_amount,status,payment_status,fulfillment_status,fulfillment_assignee,entry_path,created_at,coupon_applied,coupon_code,customers(full_name,phone),order_items(product_slug)",
       { count: "exact" }
     )
     .order("created_at", { ascending: false })
@@ -57,6 +68,9 @@ export default async function AdminOrdersPage({
 
   if (sp.status)              q = q.eq("status", sp.status);
   if (sp.payment_status)      q = q.eq("payment_status", sp.payment_status);
+  else if (!showAllPaymentStatuses) {
+    q = q.eq("payment_status", "paid");
+  }
   if (sp.fulfillment_status)  q = q.eq("fulfillment_status", sp.fulfillment_status);
   if (sp.product)             q = q.eq("product_slug", sp.product);
   if (sp.entry_path)          q = q.eq("entry_path", sp.entry_path);
@@ -93,35 +107,101 @@ export default async function AdminOrdersPage({
   const processing = rows?.filter((r) => r.status === "processing").length ?? 0;
   const fulfilled  = rows?.filter((r) => r.fulfillment_status === "delivered").length ?? 0;
   const failed     = rows?.filter((r) => r.payment_status === "failed" || r.status === "cancelled").length ?? 0;
-  const fasttrack  = rows?.filter((r) => r.product_slug === "fast-track-addon").length ?? 0;
+  const fasttrack =
+    rows?.filter((r) => orderHasFastTrackSla(r.product_slug, r.order_items ?? null)).length ?? 0;
 
   const hasFilters = !!(
-    sp.q || sp.status || sp.payment_status ||
-    sp.fulfillment_status || sp.product || sp.entry_path || sp.consultation_type
+    sp.q ||
+      sp.status ||
+      sp.payment_status ||
+      sp.fulfillment_status ||
+      sp.product ||
+      sp.entry_path ||
+      sp.consultation_type ||
+      showAllPaymentStatuses
   );
+
+  const paymentSelectDefault =
+    sp.payment_status !== undefined && sp.payment_status !== ""
+      ? sp.payment_status
+      : showAllPaymentStatuses
+        ? ""
+        : "paid";
+
+  const deliveryFlash =
+    sp.delivery_status === "success" || sp.delivery_status === "failed"
+      ? {
+          kind: sp.delivery_status as "success" | "failed",
+          message: sp.delivery_msg ?? "",
+        }
+      : null;
 
   return (
     <div className="space-y-7 font-sans admin-page-enter">
 
       {/* ── Page header ──────────────────────────────────────────────── */}
-      <div className="flex items-start justify-between">
+      <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="text-[22px] font-semibold tracking-[-0.02em] text-foreground">
             Orders
           </h1>
           <p className="mt-0.5 text-[13px] text-muted-foreground">
-            Showing latest 150 · sorted by date descending
+            {showAllPaymentStatuses
+              ? "All payment statuses · latest 150 · newest first"
+              : "Paid orders only · latest 150 · newest first"}
           </p>
         </div>
-        {hasFilters && (
-          <Link
-            href="/admindeoghar/orders"
-            className="mt-1 inline-flex items-center rounded-md border border-border bg-card px-3 py-1.5 text-[12px] font-medium text-muted-foreground transition-colors hover:text-foreground"
-          >
-            Clear filters
-          </Link>
-        )}
+        <div className="flex flex-wrap items-center gap-2">
+          {showAllPaymentStatuses ? (
+            <Link
+              href={buildOrdersListHref(sp, { all_orders: null })}
+              className="inline-flex h-9 items-center rounded-md border border-border bg-card px-3 text-[12px] font-semibold text-foreground transition-colors hover:bg-muted/50"
+            >
+              Paid orders only
+            </Link>
+          ) : (
+            <Link
+              href={buildOrdersListHref(sp, { all_orders: "1" })}
+              className="inline-flex h-9 items-center rounded-md border border-amber-500/40 bg-amber-500/10 px-3 text-[12px] font-semibold text-amber-950 transition-colors hover:bg-amber-500/18 dark:text-amber-100"
+            >
+              Show all orders (failed, pending, …)
+            </Link>
+          )}
+          {hasFilters && (
+            <Link
+              href="/admindeoghar/orders"
+              className="inline-flex h-9 items-center rounded-md border border-border bg-card px-3 py-1.5 text-[12px] font-medium text-muted-foreground transition-colors hover:text-foreground"
+            >
+              Clear filters
+            </Link>
+          )}
+        </div>
       </div>
+
+      {deliveryFlash && (
+        <div
+          className={
+            deliveryFlash.kind === "success"
+              ? "rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800 dark:border-emerald-900/40 dark:bg-emerald-950/25 dark:text-emerald-300"
+              : "rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-900/40 dark:bg-red-950/25 dark:text-red-300"
+          }
+        >
+          <p className="font-semibold">
+            {deliveryFlash.kind === "success" ? "Delivery WhatsApp sent" : "Delivery WhatsApp failed"}
+          </p>
+          {deliveryFlash.message ? (
+            <p className="mt-1 text-xs opacity-90">{deliveryFlash.message}</p>
+          ) : null}
+          <p className="mt-2">
+            <Link
+              href={ordersHrefWithoutDeliveryFlash(sp)}
+              className="text-xs font-medium underline underline-offset-2 hover:opacity-80"
+            >
+              Dismiss
+            </Link>
+          </p>
+        </div>
+      )}
 
       {/* ── Stats ────────────────────────────────────────────────────── */}
       <div className="grid grid-cols-3 gap-3 lg:grid-cols-6">
@@ -167,6 +247,7 @@ export default async function AdminOrdersPage({
 
       {/* ── Filters ──────────────────────────────────────────────────── */}
       <form method="get" className="rounded-xl border border-border bg-card p-5">
+        {showAllPaymentStatuses ? <input type="hidden" name="all_orders" value="1" /> : null}
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
           {/* Search */}
           <div className="xl:col-span-2">
@@ -191,7 +272,7 @@ export default async function AdminOrdersPage({
 
           <div>
             <FilterLabel>Payment</FilterLabel>
-            <FilterSelect name="payment_status" defaultValue={sp.payment_status ?? ""}>
+            <FilterSelect name="payment_status" defaultValue={paymentSelectDefault}>
               <option value="">All</option>
               {Object.values(PAYMENT_STATUS_ORDER).map((s) => (
                 <option key={s} value={s}>{s}</option>
@@ -270,7 +351,7 @@ export default async function AdminOrdersPage({
           {hasFilters ? "filtered" : "total"} orders
         </p>
 
-        <div className="flex items-center gap-4 text-[11px] text-muted-foreground">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
           <span className="flex items-center gap-1.5">
             <span className="h-[3px] w-4 rounded-full bg-red-500" />
             Failed / Cancelled
@@ -278,6 +359,9 @@ export default async function AdminOrdersPage({
           <span className="flex items-center gap-1.5">
             <span className="h-[3px] w-4 rounded-full bg-gradient-to-r from-amber-300 to-amber-500" />
             FastTrack ⚡
+          </span>
+          <span className="text-[10px]">
+            SLA: 48h from order time, or 12h when FastTrack is on the order (including add-on on paid kundli).
           </span>
         </div>
       </div>
@@ -290,6 +374,9 @@ export default async function AdminOrdersPage({
               {/* accent bar header */}
               <th className="w-[3px] p-0" />
               <th className="px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground whitespace-nowrap">Order</th>
+              <th className="px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground whitespace-nowrap">
+                SLA timer
+              </th>
               <th className="px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Customer</th>
               <th className="px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Product</th>
               <th className="px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Mode</th>
@@ -299,7 +386,9 @@ export default async function AdminOrdersPage({
               <th className="px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Assigned</th>
               <th className="px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Entry</th>
               <th className="px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Coupon</th>
-              <th className="px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground text-right">Actions</th>
+              <th className="px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground text-right whitespace-nowrap">
+                Deliver / open
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -307,6 +396,13 @@ export default async function AdminOrdersPage({
               const c = r.customers as { full_name?: string | null; phone?: string | null } | null;
               const kind = getRowKind(r);
               const isLast = idx === (filtered?.length ?? 0) - 1;
+              const phoneDigits = (c?.phone ?? "").replace(/\D/g, "");
+              const canDeliverKundli =
+                r.payment_status === "paid" &&
+                r.product_slug === "paid-kundli" &&
+                phoneDigits.length >= 10;
+              const defaultCustomerName = (c?.full_name ?? "").trim() || "Customer";
+              const fastTrackOrder = orderHasFastTrackSla(r.product_slug, r.order_items ?? null);
 
               return (
                 <tr
@@ -332,6 +428,17 @@ export default async function AdminOrdersPage({
                     </span>
                   </td>
 
+                  <td className="px-4 py-3.5 align-top whitespace-nowrap">
+                    <OrderSlaCountdown
+                      createdAtIso={r.created_at}
+                      productSlug={r.product_slug}
+                      fulfillmentStatus={r.fulfillment_status}
+                      paymentStatus={r.payment_status}
+                      orderStatus={r.status}
+                      hasFastTrackAddon={fastTrackOrder}
+                    />
+                  </td>
+
                   {/* Customer */}
                   <td className="px-4 py-3.5 align-top">
                     <div className="text-[13px] font-medium text-foreground leading-tight">
@@ -347,10 +454,10 @@ export default async function AdminOrdersPage({
                   {/* Product */}
                   <td className="px-4 py-3.5 align-top">
                     <div className="flex items-start gap-1.5">
-                      {r.product_slug === "fast-track-addon" && (
+                      {fastTrackOrder && (
                         <span
                           className="mt-[1px] flex shrink-0 items-center justify-center rounded-[4px] bg-amber-400/15 p-[3px]"
-                          title="FastTrack order"
+                          title="FastTrack (12h SLA)"
                         >
                           <Zap size={10} className="fill-amber-500 text-amber-500" />
                         </span>
@@ -360,7 +467,7 @@ export default async function AdminOrdersPage({
                           <span className="text-[13px] font-medium text-foreground leading-tight">
                             {productLabel(r.product_slug)}
                           </span>
-                          {r.product_slug === "fast-track-addon" && (
+                          {fastTrackOrder && (
                             <span className="rounded-[4px] border border-amber-300/60 bg-amber-50 px-1 py-px text-[9px] font-bold uppercase tracking-wider text-amber-600 dark:border-amber-700/40 dark:bg-amber-950/30 dark:text-amber-400">
                               Fast
                             </span>
@@ -426,15 +533,25 @@ export default async function AdminOrdersPage({
                     )}
                   </td>
 
-                  {/* Actions */}
+                  {/* Deliver + open */}
                   <td className="px-4 py-3.5 align-top text-right">
-                    <Link
-                      href={`/admindeoghar/orders/${r.id}`}
-                      className="inline-flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-                      title="Open order"
-                    >
-                      <ArrowUpRight size={14} />
-                    </Link>
+                    <div className="inline-flex items-center justify-end gap-1.5">
+                      <OrderDeliverButton
+                        orderId={r.id}
+                        orderNumber={r.order_number}
+                        defaultCustomerName={defaultCustomerName}
+                        phone={c?.phone ?? null}
+                        canDeliver={canDeliverKundli}
+                        bunnyReady={bunnyUploadReady}
+                      />
+                      <Link
+                        href={`/admindeoghar/orders/${r.id}`}
+                        className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                        title="Open order"
+                      >
+                        <ArrowUpRight size={14} />
+                      </Link>
+                    </div>
                   </td>
                 </tr>
               );
@@ -468,7 +585,7 @@ export default async function AdminOrdersPage({
 function getRowKind(r: OrderRow): RowKind {
   if (r.payment_status === "failed")  return "failed";
   if (r.status === "cancelled")       return "cancelled";
-  if (r.product_slug === "fast-track-addon") return "fasttrack";
+  if (orderHasFastTrackSla(r.product_slug, r.order_items ?? null)) return "fasttrack";
   return "normal";
 }
 
@@ -633,4 +750,35 @@ function consultationLabel(slug: string, type: string | null | undefined): strin
   if (type === "call")       return "Call";
   if (type === "video_call") return "Video Call";
   return type;
+}
+
+/** Same query string as current filters, without one-time delivery flash params. */
+function ordersHrefWithoutDeliveryFlash(sp: Record<string, string | undefined>): string {
+  const u = new URLSearchParams();
+  for (const [key, value] of Object.entries(sp)) {
+    if (key === "delivery_status" || key === "delivery_msg") continue;
+    if (value == null || value === "") continue;
+    u.set(key, value);
+  }
+  const qs = u.toString();
+  return qs ? `/admindeoghar/orders?${qs}` : "/admindeoghar/orders";
+}
+
+/** Merge or remove query keys for orders list links. Pass `null` to drop a key. */
+function buildOrdersListHref(
+  sp: Record<string, string | undefined>,
+  patch: Record<string, string | undefined | null>
+): string {
+  const next: Record<string, string | undefined> = { ...sp };
+  for (const [k, v] of Object.entries(patch)) {
+    if (v == null || v === "") delete next[k];
+    else next[k] = v;
+  }
+  const u = new URLSearchParams();
+  for (const [key, value] of Object.entries(next)) {
+    if (value == null || value === "") continue;
+    u.set(key, value);
+  }
+  const qs = u.toString();
+  return qs ? `/admindeoghar/orders?${qs}` : "/admindeoghar/orders";
 }

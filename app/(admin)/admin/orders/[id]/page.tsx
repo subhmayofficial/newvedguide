@@ -14,6 +14,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { FULFILLMENT_STATUS } from "@/lib/constants/commerce";
 import type { Json } from "@/types/database";
 import { formatAdminDateTime } from "@/lib/admin/time";
+import { OrderSlaCountdown } from "@/components/admin/order-sla-countdown";
+import { orderHasFastTrackSla } from "@/lib/admin/order-sla-helpers";
 
 export const dynamic = "force-dynamic";
 
@@ -75,6 +77,10 @@ export default async function OrderDetailPage({
 
   const lineMerged = mergeOrderItemsForDisplay(items ?? []);
   const lineDisplay = lineMerged ?? fallbackLineFromOrder(order);
+  const hasFastTrackAddon = orderHasFastTrackSla(
+    order.product_slug,
+    (items ?? []) as { product_slug: string }[]
+  );
 
   const cust = customer as Record<string, unknown> | null;
   const notes = await listEntityNotes(supabase, ENTITY_NOTE_TYPE.ORDER, id);
@@ -106,6 +112,21 @@ export default async function OrderDetailPage({
           <Row label="Entry path" value={order.entry_path ?? "—"} />
           <Row label="Created" value={formatAdminDateTime(order.created_at)} />
           <Row label="Paid at" value={formatAdminDateTime(order.paid_at)} />
+          <div className="flex justify-between gap-4">
+            <span className="text-muted-foreground">Delivery SLA (live)</span>
+            <div className="text-right font-medium">
+              <div className="inline-block text-left">
+                <OrderSlaCountdown
+                  createdAtIso={order.created_at}
+                  productSlug={order.product_slug}
+                  fulfillmentStatus={order.fulfillment_status}
+                  paymentStatus={order.payment_status}
+                  orderStatus={order.status}
+                  hasFastTrackAddon={hasFastTrackAddon}
+                />
+              </div>
+            </div>
+          </div>
         </dl>
         {order.lead_id && (
           <p className="mt-4 text-sm">
