@@ -520,7 +520,74 @@ export interface Database {
           Database["public"]["Tables"]["admin_interakt_templates"]["Insert"]
         >;
         Relationships: [];
-      };      kundli_submissions: {
+      };
+      admin_order_delivery_settings: {
+        Row: {
+          id: number;
+          interakt_template_name: string;
+          interakt_template_language: string;
+          interakt_button_index: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: number;
+          interakt_template_name: string;
+          interakt_template_language?: string;
+          interakt_button_index?: string;
+          updated_at?: string;
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["admin_order_delivery_settings"]["Insert"]
+        >;
+        Relationships: [];
+      };
+      admin_bunny_cdn_settings: {
+        Row: {
+          id: number;
+          storage_zone_name: string;
+          storage_region: string;
+          cdn_public_base_url: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: number;
+          storage_zone_name?: string;
+          storage_region?: string;
+          cdn_public_base_url?: string;
+          updated_at?: string;
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["admin_bunny_cdn_settings"]["Insert"]
+        >;
+        Relationships: [];
+      };
+      admin_smtp_templates: {
+        Row: {
+          id: string;
+          name: string;
+          subject: string;
+          html: string;
+          notes: string | null;
+          is_active: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          subject?: string;
+          html?: string;
+          notes?: string | null;
+          is_active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["admin_smtp_templates"]["Insert"]
+        >;
+        Relationships: [];
+      };
+      kundli_submissions: {
         Row: {
           id: string;
           lead_id: string | null;

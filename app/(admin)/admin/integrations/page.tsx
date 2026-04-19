@@ -5,12 +5,18 @@ import {
 } from "@/lib/services/integration-config";
 import {
   submitInteraktSavedTemplateSendForm,
-  submitSmtpEmailTestForm,
   submitInteraktTemplateCatalogForm,
+  submitInteraktTemplateDeleteForm,
+  submitInteraktTemplateUpdateForm,
+  submitSmtpEmailTestForm,
+  submitSmtpTemplateCreateForm,
+  submitSmtpTemplateUpdateForm,
 } from "@/app/(admin)/admin/actions";
 import { formatAdminDateTime } from "@/lib/admin/time";
 import { InteraktTemplateConsole } from "@/components/admin/interakt-template-console";
+import { SmtpEmailTestForm } from "@/components/admin/smtp-email-test-form";
 import { listSavedInteraktTemplates } from "@/lib/services/interakt-template-catalog";
+import { listSavedSmtpTemplates } from "@/lib/services/smtp-template-catalog";
 
 export const dynamic = "force-dynamic";
 
@@ -45,6 +51,11 @@ export default async function AdminIntegrationsPage({
     errorCode: templatesErrorCode,
     errorMessage: templatesErrorMessage,
   } = await listSavedInteraktTemplates(supabase);
+  const {
+    data: savedSmtpTemplates,
+    errorCode: smtpTemplatesErrorCode,
+    errorMessage: smtpTemplatesErrorMessage,
+  } = await listSavedSmtpTemplates(supabase);
 
   const { data: logsRaw, error: logsError } = await supabase
     .from("integration_deliveries")
@@ -103,6 +114,44 @@ export default async function AdminIntegrationsPage({
         </section>
       )}
 
+      {(smtpTemplatesErrorCode === "42P01" || smtpTemplatesErrorCode === "42703") && (
+        <section className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900/40 dark:bg-amber-950/20 dark:text-amber-300">
+          <p className="font-semibold">SMTP HTML templates migration required.</p>
+          <p className="mt-1">
+            Run: <code>supabase/migrations/016_admin_smtp_templates.sql</code>
+          </p>
+          {smtpTemplatesErrorMessage && <p className="mt-1 text-xs">{smtpTemplatesErrorMessage}</p>}
+        </section>
+      )}
+
+      <section className="rounded-xl border border-border/60 bg-muted/15 px-4 py-3 text-sm text-muted-foreground">
+        <p className="font-semibold text-foreground">Kundli delivery template (paid-kundli)</p>
+        <p className="mt-1">
+          Auto WhatsApp after payment uses{" "}
+          <code className="rounded bg-muted px-1 font-mono text-xs">
+            {config.interakt.kundliDeliveryTemplateName}
+          </code>{" "}
+          /{" "}
+          <code className="rounded bg-muted px-1 font-mono text-xs">
+            {config.interakt.kundliDeliveryTemplateLanguage}
+          </code>
+          : body gets customer name; button index{" "}
+          <code className="rounded bg-muted px-1 font-mono text-xs">
+            {config.interakt.kundliDeliveryButtonIndex}
+          </code>{" "}
+          gets the link (
+          {config.interakt.kundliDeliveryButtonLinkTemplate ?? "default: site + /kundli-report"}).
+        </p>
+        <p className="mt-2 text-xs">
+          Override with{" "}
+          <code className="rounded bg-muted px-1 font-mono">INTERAKT_KUNDLI_*</code> in{" "}
+          <code className="rounded bg-muted px-1 font-mono">.env.local</code>. Other products still
+          use the default template above. Run migration{" "}
+          <code className="rounded bg-muted px-1 font-mono">013_seed_kundlidelivery_interakt_template.sql</code>{" "}
+          to add the same preset under &quot;Saved templates&quot; for manual tests.
+        </p>
+      </section>
+
       <section className="grid gap-4 md:grid-cols-2">
         <ConfigCard
           title="Interakt WhatsApp"
@@ -117,8 +166,15 @@ export default async function AdminIntegrationsPage({
             ["API URL", config.interakt.endpointUrl],
             ["Template list API", config.interakt.templateListApiUrl ?? "Not set"],
             ["API key", maskSecret(config.interakt.apiKey)],
-            ["Template default", config.interakt.templateName],
-            ["Language", config.interakt.languageCode],
+            ["Template default (non-kundli)", config.interakt.templateName],
+            ["Language default", config.interakt.languageCode],
+            ["Kundli template", config.interakt.kundliDeliveryTemplateName],
+            ["Kundli language", config.interakt.kundliDeliveryTemplateLanguage],
+            ["Kundli button index", config.interakt.kundliDeliveryButtonIndex],
+            [
+              "Kundli button link template",
+              config.interakt.kundliDeliveryButtonLinkTemplate ?? "(site + /kundli-report)",
+            ],
             ["Country code", config.interakt.countryCode],
             [
               "Auto delivery on payment",
@@ -153,66 +209,30 @@ export default async function AdminIntegrationsPage({
           templates={savedTemplates}
           sendAction={submitInteraktSavedTemplateSendForm}
           addTemplateAction={submitInteraktTemplateCatalogForm}
+          updateTemplateAction={submitInteraktTemplateUpdateForm}
+          deleteTemplateAction={submitInteraktTemplateDeleteForm}
           syncEndpoint="/api/admin/interakt/templates/sync"
         />
 
         <article className="rounded-2xl border border-border/60 bg-card p-5 shadow-sm">
           <h2 className="text-lg font-semibold text-foreground">SMTP email test</h2>
           <p className="mt-1 text-xs text-muted-foreground">
-            Sends payment-success style HTML email via Nodemailer SMTP and saves result in delivery logs.
+            Sends via Nodemailer and logs the attempt. Pick a saved template or custom HTML with{" "}
+            <span className="font-mono text-[11px]">{"{{var}}"}</span> placeholders—the form only asks for those
+            variables (plus recipient email). Use the default HTML path to send the built-in payment-success body
+            without placeholders.
           </p>
 
-          <form action={submitSmtpEmailTestForm} className="mt-4 grid gap-3">
-            <Field label="Full name">
-              <input name="fullName" placeholder="Sameer Kumar" className={inputCls} />
-            </Field>
-            <Field label="Email (required)">
-              <input name="email" type="email" placeholder="name@example.com" required className={inputCls} />
-            </Field>
-            <Field label="Order ID label">
-              <input name="orderIdLabel" placeholder="VG-20260415-ABCD" className={inputCls} />
-            </Field>
-            <div className="grid gap-3 sm:grid-cols-2">
-              <Field label="Product">
-                <input name="product" placeholder="Paid Kundli Report" className={inputCls} />
-              </Field>
-              <Field label="Amount">
-                <input name="amount" placeholder="399" className={inputCls} />
-              </Field>
-            </div>
-            <Field label="Delivery text">
-              <input
-                name="deliveryText"
-                placeholder="Your report delivery is in process. Typical timeline is 24-48 hours."
-                className={inputCls}
-              />
-            </Field>
-            <Field label="Support link">
-              <input name="supportLink" placeholder={config.email.supportLink} className={inputCls} />
-            </Field>
-            <Field label="Message preview note (optional)">
-              <textarea
-                name="message"
-                rows={3}
-                placeholder="(Optional) Internal note for test context"
-                className={`${inputCls} py-2`}
-              />
-            </Field>
-            <div className="grid gap-3 sm:grid-cols-2">
-              <Field label="Order ID (optional)">
-                <input name="orderId" placeholder="UUID" className={inputCls} />
-              </Field>
-              <Field label="Lead ID (optional)">
-                <input name="leadId" placeholder="UUID" className={inputCls} />
-              </Field>
-            </div>
-            <button
-              type="submit"
-              className="inline-flex h-10 items-center justify-center rounded-lg bg-brand px-4 text-sm font-semibold text-primary-foreground transition hover:bg-brand-hover"
-            >
-              Send SMTP test email
-            </button>
-          </form>
+          <SmtpEmailTestForm
+            templates={savedSmtpTemplates.map((t) => ({
+              id: t.id,
+              name: t.name,
+              subject: t.subject,
+              html: t.html,
+            }))}
+            sendAction={submitSmtpEmailTestForm}
+            supportLinkPlaceholder={config.email.supportLink}
+          />
 
           <ApiDetail
             title="API details used"
@@ -228,20 +248,123 @@ export default async function AdminIntegrationsPage({
               "replyTo: EMAIL_REPLY_TO (optional)",
             ]}
             payloadExample={{
-              subject: "Payment Successful - Your Order is Confirmed ({{order_id}})",
-              variables: {
-                name: "Customer Name",
-                order_id: "VG-20260415-ABCD",
-                product: "Paid Kundli Report",
-                amount: "399",
-                delivery_text: "Your report delivery is in process. Typical timeline is 24-48 hours.",
-                support_link: config.email.supportLink,
-              },
-              html_template:
-                "<h2>Hey {{name}},</h2><p>Payment successful!...</p>",
+              subject: "Payment Successful ({{order_id}}) or literal subject",
+              smtp_template_vars:
+                "{{name}}, {{order_id}}, … detected from subject + HTML; required inputs appear only for those",
+              legacy_test_fields_when_no_template:
+                "fullName, orderIdLabel, product, amount, deliveryText, supportLink",
+              html_example: "<h2>Hey {{name}},</h2><p>Order {{order_id}}</p>",
             }}
           />
         </article>
+      </section>
+
+      <section className="rounded-2xl border border-border/60 bg-card p-5 shadow-sm">
+        <h2 className="text-lg font-semibold text-foreground">SMTP HTML templates</h2>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Save subject + HTML with <span className="font-mono text-[11px]">{"{{snake_case}}"}</span> variables. The
+          test form detects them and shows fill fields automatically.
+        </p>
+
+        <form action={submitSmtpTemplateCreateForm} className="mt-4 grid gap-3 rounded-xl border border-border/60 p-4">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Field label="Template name">
+              <input name="templateName" required placeholder="payment_success_v1" className={inputCls} />
+            </Field>
+            <Field label="Subject">
+              <input
+                name="templateSubject"
+                placeholder="Payment Successful - Your Order is Confirmed ({{order_id}})"
+                className={inputCls}
+              />
+            </Field>
+          </div>
+          <Field label="HTML">
+            <textarea
+              name="templateHtml"
+              required
+              rows={10}
+              placeholder="<h2>Hey {{name}},</h2> ..."
+              className={`${inputCls} min-h-[200px] py-2 font-mono text-[12px]`}
+            />
+          </Field>
+          <Field label="Notes (optional)">
+            <input name="notes" placeholder="Used for payment success tests" className={inputCls} />
+          </Field>
+          <div>
+            <button
+              type="submit"
+              className="inline-flex h-10 items-center justify-center rounded-lg bg-brand px-4 text-sm font-semibold text-primary-foreground transition hover:bg-brand-hover"
+            >
+              Add template
+            </button>
+          </div>
+        </form>
+
+        {savedSmtpTemplates.length ? (
+          <div className="mt-6 border-t border-border/60 pt-4">
+            <h3 className="text-sm font-semibold text-foreground">Saved templates</h3>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Click edit to update subject / HTML.
+            </p>
+            <ul className="mt-3 divide-y divide-border/60 rounded-xl border border-border/60">
+              {savedSmtpTemplates.map((t) => (
+                <li key={t.id} className="px-3 py-3">
+                  <div className="flex flex-wrap items-start justify-between gap-2">
+                    <div>
+                      <span className="font-medium text-foreground">{t.name}</span>
+                      {t.notes ? (
+                        <span className="mt-0.5 block text-xs text-muted-foreground">{t.notes}</span>
+                      ) : null}
+                    </div>
+                    <details className="w-full sm:w-auto">
+                      <summary className="cursor-pointer rounded-lg border border-border/70 px-2.5 py-1 text-xs font-medium text-foreground transition hover:bg-muted/50">
+                        Edit
+                      </summary>
+                      <form
+                        action={submitSmtpTemplateUpdateForm}
+                        className="mt-3 grid gap-3 rounded-xl border border-border/60 bg-muted/20 p-3"
+                      >
+                        <input type="hidden" name="templateId" value={t.id} />
+                        <Field label="Template name">
+                          <input name="templateName" defaultValue={t.name} required className={inputCls} />
+                        </Field>
+                        <Field label="Subject">
+                          <input name="templateSubject" defaultValue={t.subject} className={inputCls} />
+                        </Field>
+                        <Field label="HTML">
+                          <textarea
+                            name="templateHtml"
+                            defaultValue={t.html}
+                            rows={10}
+                            className={`${inputCls} min-h-[200px] py-2 font-mono text-[12px]`}
+                          />
+                        </Field>
+                        <Field label="Notes (optional)">
+                          <input name="notes" defaultValue={t.notes ?? ""} className={inputCls} />
+                        </Field>
+                        <button
+                          type="submit"
+                          className="inline-flex h-10 items-center justify-center rounded-lg bg-brand px-4 text-sm font-semibold text-primary-foreground transition hover:bg-brand-hover"
+                        >
+                          Save changes
+                        </button>
+                      </form>
+                    </details>
+                  </div>
+                  <div className="mt-2 rounded-lg border border-border/60 bg-background/60 p-2">
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                      Subject
+                    </p>
+                    <p className="mt-1 break-all font-mono text-[11px] text-foreground/80">
+                      {t.subject || "(empty — will fallback to default subject)"}
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
       </section>
 
       <section className="rounded-2xl border border-border/60 bg-card shadow-sm">
