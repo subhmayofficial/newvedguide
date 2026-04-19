@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 type SavedTemplate = {
   id: string;
@@ -17,18 +17,31 @@ type SavedTemplate = {
 
 type ServerAction = (formData: FormData) => void | Promise<void>;
 
+function labelsToCsv(labels: string[]): string {
+  return labels.join(", ");
+}
+
+function mappingsToLines(rows: Array<{ buttonIndex: string; label: string }>): string {
+  return rows.map((r) => `${r.buttonIndex}: ${r.label}`).join("\n");
+}
+
 export function InteraktTemplateConsole({
   templates,
   sendAction,
   addTemplateAction,
+  updateTemplateAction,
+  deleteTemplateAction,
   syncEndpoint,
 }: {
   templates: SavedTemplate[];
   sendAction: ServerAction;
   addTemplateAction: ServerAction;
+  updateTemplateAction: ServerAction;
+  deleteTemplateAction: ServerAction;
   syncEndpoint: string;
 }) {
   const [selectedId, setSelectedId] = useState<string>(templates[0]?.id ?? "");
+  const [editing, setEditing] = useState<SavedTemplate | null>(null);
   const [syncState, setSyncState] = useState<{ busy: boolean; message: string | null }>({
     busy: false,
     message: null,
@@ -38,6 +51,18 @@ export function InteraktTemplateConsole({
     () => templates.find((template) => template.id === selectedId) ?? templates[0] ?? null,
     [selectedId, templates]
   );
+
+  useEffect(() => {
+    if (selectedId && !templates.some((t) => t.id === selectedId)) {
+      setSelectedId(templates[0]?.id ?? "");
+    }
+  }, [templates, selectedId]);
+
+  useEffect(() => {
+    if (editing && !templates.some((t) => t.id === editing.id)) {
+      setEditing(null);
+    }
+  }, [templates, editing]);
 
   async function handleSync() {
     setSyncState({ busy: true, message: null });
@@ -91,6 +116,9 @@ export function InteraktTemplateConsole({
             <h3 className="text-sm font-semibold text-foreground">Add template</h3>
             <p className="mt-1 text-xs text-muted-foreground">
               Use comma-separated labels. These labels will become autofilled input fields when you select the template.
+              For <span className="font-medium text-foreground">kundlidelivery_bt</span> (hi): body labels = one name field;
+              button URL = one row like <span className="font-mono">0: Report link</span> (index{" "}
+              <span className="font-mono">0</span> = first URL button unless Interakt uses another index).
             </p>
           </div>
           <div className="grid gap-3 md:grid-cols-2">
@@ -98,7 +126,7 @@ export function InteraktTemplateConsole({
               <input name="templateName" placeholder="order_paid_update" required className={inputCls} />
             </Field>
             <Field label="Language code">
-              <input name="languageCode" defaultValue="en" className={inputCls} />
+              <input name="languageCode" placeholder="en or hi" defaultValue="en" className={inputCls} />
             </Field>
             <Field label="Header variables">
               <input name="headerLabels" placeholder="Header 1, Header 2" className={inputCls} />
@@ -139,6 +167,155 @@ export function InteraktTemplateConsole({
             </button>
           </div>
         </form>
+
+        {templates.length > 0 && (
+          <div className="mt-6 border-t border-border/60 pt-4">
+            <h3 className="text-sm font-semibold text-foreground">Saved templates</h3>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Edit labels and structure, or remove a preset you no longer use.
+            </p>
+            <ul className="mt-3 divide-y divide-border/60 rounded-xl border border-border/60">
+              {templates.map((t) => (
+                <li
+                  key={t.id}
+                  className="flex flex-wrap items-center justify-between gap-2 px-3 py-2.5 text-sm"
+                >
+                  <div>
+                    <span className="font-medium text-foreground">{t.name}</span>
+                    <span className="text-muted-foreground"> · {t.languageCode}</span>
+                    {t.notes ? (
+                      <span className="mt-0.5 block text-xs text-muted-foreground">{t.notes}</span>
+                    ) : null}
+                  </div>
+                  <div className="flex shrink-0 items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setEditing(t)}
+                      className="rounded-lg border border-border/70 px-2.5 py-1 text-xs font-medium text-foreground transition hover:bg-muted/50"
+                    >
+                      Edit
+                    </button>
+                    <form
+                      action={deleteTemplateAction}
+                      className="inline"
+                      onSubmit={(e) => {
+                        if (!confirm(`Delete saved template “${t.name}”?`)) {
+                          e.preventDefault();
+                        }
+                      }}
+                    >
+                      <input type="hidden" name="templateId" value={t.id} />
+                      <button
+                        type="submit"
+                        className="rounded-lg border border-destructive/40 px-2.5 py-1 text-xs font-medium text-destructive transition hover:bg-destructive/10"
+                      >
+                        Delete
+                      </button>
+                    </form>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {editing && (
+          <form
+            key={`edit-${editing.id}`}
+            action={updateTemplateAction}
+            className="mt-6 grid gap-3 rounded-xl border border-brand/30 bg-brand/5 p-4"
+          >
+            <input type="hidden" name="templateId" value={editing.id} />
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h3 className="text-sm font-semibold text-foreground">Edit template</h3>
+              <button
+                type="button"
+                onClick={() => setEditing(null)}
+                className="text-xs font-medium text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+              >
+                Cancel
+              </button>
+            </div>
+            <div className="grid gap-3 md:grid-cols-2">
+              <Field label="Template name">
+                <input
+                  name="templateName"
+                  required
+                  defaultValue={editing.name}
+                  className={inputCls}
+                />
+              </Field>
+              <Field label="Language code">
+                <input
+                  name="languageCode"
+                  defaultValue={editing.languageCode}
+                  placeholder="en or hi"
+                  className={inputCls}
+                />
+              </Field>
+              <Field label="Header variables">
+                <input
+                  name="headerLabels"
+                  defaultValue={labelsToCsv(editing.headerLabels)}
+                  placeholder="Header 1, Header 2"
+                  className={inputCls}
+                />
+              </Field>
+              <Field label="Body variables">
+                <input
+                  name="bodyLabels"
+                  defaultValue={labelsToCsv(editing.bodyLabels)}
+                  placeholder="Customer Name"
+                  className={inputCls}
+                />
+              </Field>
+            </div>
+            <Field label="Button URL variables">
+              <textarea
+                name="buttonValueLabels"
+                rows={3}
+                defaultValue={mappingsToLines(editing.buttonValueLabels)}
+                placeholder={"0: order_id\n1: tracking_id"}
+                className={`${inputCls} min-h-[88px] py-2`}
+              />
+            </Field>
+            <Field label="Quick reply payload variables">
+              <textarea
+                name="buttonPayloadLabels"
+                rows={3}
+                defaultValue={mappingsToLines(editing.buttonPayloadLabels)}
+                placeholder={"0: confirm_payload"}
+                className={`${inputCls} min-h-[88px] py-2`}
+              />
+            </Field>
+            <Field label="Notes (optional)">
+              <input name="notes" defaultValue={editing.notes ?? ""} className={inputCls} />
+            </Field>
+            <label className="inline-flex items-center gap-2 text-xs text-muted-foreground">
+              <input
+                type="checkbox"
+                name="fileNameRequired"
+                defaultChecked={editing.fileNameRequired}
+              />
+              Requires file name input when sending
+            </label>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="submit"
+                className="inline-flex h-10 items-center justify-center rounded-lg bg-brand px-4 text-sm font-semibold text-primary-foreground transition hover:bg-brand-hover"
+              >
+                Update template
+              </button>
+              <button
+                type="button"
+                onClick={() => setEditing(null)}
+                className="inline-flex h-10 items-center justify-center rounded-lg border border-border px-4 text-sm font-medium text-foreground transition hover:bg-muted/40"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        )}
       </article>
 
       <article className="rounded-2xl border border-border/60 bg-card p-5 shadow-sm">
