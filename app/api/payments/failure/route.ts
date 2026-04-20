@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
-import { markPaymentFailure } from "@/lib/services/payment";
+import { fetchRazorpayOrder, fetchRazorpayOrderPayments } from "@/lib/razorpay";
+import { markPaymentFailure, markPaymentSuccess } from "@/lib/services/payment";
 
 interface Body {
   orderDbId: string;
@@ -17,7 +18,7 @@ export async function POST(request: Request) {
     const supabase = createServiceClient();
     const { data: payment } = await supabase
       .from("payments")
-      .select("id")
+      .select("id,status,provider_order_id,provider_payment_id")
       .eq("order_id", body.orderDbId)
       .order("created_at", { ascending: false })
       .limit(1)
@@ -25,6 +26,41 @@ export async function POST(request: Request) {
 
     if (!payment?.id) {
       return NextResponse.json({ ok: true, skipped: true });
+    }
+
+    if (payment.status === "paid" || payment.provider_payment_id) {
+      return NextResponse.json({ ok: true, skipped: true, reason: "already_paid" });
+    }
+
+    if (payment.provider_order_id) {
+      try {
+        const [gatewayOrder, orderPayments] = await Promise.all([
+          fetchRazorpayOrder(payment.provider_order_id),
+          fetchRazorpayOrderPayments(payment.provider_order_id),
+        ]);
+        const successfulPayment = orderPayments.find((p) =>
+          p.status === "captured" || p.status === "authorized"
+        );
+        const isGatewayPaid = gatewayOrder.status === "paid" || gatewayOrder.amount_paid > 0;
+
+        if (successfulPayment || isGatewayPaid) {
+          await markPaymentSuccess(supabase, {
+            orderId: body.orderDbId,
+            paymentId: payment.id,
+            providerPaymentId: successfulPayment?.id ?? payment.provider_order_id,
+            providerSignature: "reconciled_via_gateway_status",
+            rawResponse: {
+              source: "failure_route_reconcile",
+              gateway_order_status: gatewayOrder.status,
+              gateway_amount_paid: gatewayOrder.amount_paid,
+              gateway_payment_id: successfulPayment?.id ?? null,
+            },
+          });
+          return NextResponse.json({ ok: true, reconciled: true });
+        }
+      } catch (reconcileError) {
+        console.error("[payment-failure][reconcile]", reconcileError);
+      }
     }
 
     await markPaymentFailure(supabase, {

@@ -166,6 +166,17 @@ export async function markPaymentFailure(
     rawResponse?: Json;
   }
 ): Promise<void> {
+  const { data: pay } = await supabase
+    .from("payments")
+    .select("status,provider_payment_id")
+    .eq("id", input.paymentId)
+    .maybeSingle();
+
+  // Do not downgrade a successful payment due to late or duplicate failure callbacks.
+  if (pay?.status === PAYMENT_ROW_STATUS.PAID || Boolean(pay?.provider_payment_id)) {
+    return;
+  }
+
   await supabase
     .from("payments")
     .update({

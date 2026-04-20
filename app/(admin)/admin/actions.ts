@@ -19,6 +19,7 @@ import {
   sendInteraktWhatsApp,
   sendSmtpEmail,
 } from "@/lib/services/integration-delivery";
+import { fetchRazorpayOrder, fetchRazorpayOrderPayments } from "@/lib/razorpay";
 import { isValidHttpUrl } from "@/lib/services/integration-config";
 import {
   getOrderDeliverySettings,
@@ -38,6 +39,7 @@ import {
   processPaidKundliReportUpload,
   type PaidKundliReportUploadResult,
 } from "@/lib/admin/paid-kundli-report-upload";
+import { markPaymentSuccess } from "@/lib/services/payment";
 import {
   applySmtpTemplateVariables,
   collectSmtpTemplateVariableKeys,
@@ -719,6 +721,123 @@ function redirectWithOrderDeliveryResult(status: "success" | "failed", message: 
   q.set("delivery_status", status);
   q.set("delivery_msg", message);
   redirect(`/admindeoghar/orders?${q.toString()}`);
+}
+
+function redirectWithOrderPaymentResult(
+  status: "success" | "failed",
+  message: string,
+  returnTo: "orders" | "order_detail",
+  orderId?: string
+) {
+  const q = new URLSearchParams();
+  q.set("payment_reconcile_status", status);
+  q.set("payment_reconcile_msg", message);
+  if (returnTo === "order_detail" && orderId) {
+    redirect(`/admindeoghar/orders/${orderId}?${q.toString()}`);
+  }
+  redirect(`/admindeoghar/orders?${q.toString()}`);
+}
+
+export async function submitOrderPaymentReconcileForm(formData: FormData) {
+  const supabase = createServiceClient();
+  const orderIdRaw = toNullable(formData.get("orderId"));
+  const returnToRaw = toNullable(formData.get("returnTo"));
+  const returnTo: "orders" | "order_detail" =
+    returnToRaw === "order_detail" ? "order_detail" : "orders";
+
+  if (!isTemplateRowId(orderIdRaw)) {
+    redirectWithOrderPaymentResult("failed", "Invalid order id", returnTo);
+  }
+  const orderId = orderIdRaw as string;
+
+  const { data: order, error: orderErr } = await supabase
+    .from("orders")
+    .select("id,order_number,payment_status")
+    .eq("id", orderId)
+    .maybeSingle();
+
+  if (orderErr || !order) {
+    redirectWithOrderPaymentResult("failed", "Order not found", returnTo, orderId);
+  }
+
+  const { data: payment, error: payErr } = await supabase
+    .from("payments")
+    .select("id,status,provider_order_id,provider_payment_id")
+    .eq("order_id", orderId)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (payErr || !payment) {
+    redirectWithOrderPaymentResult("failed", "Payment row not found", returnTo, orderId);
+  }
+
+  if (payment.status === "paid" && payment.provider_payment_id) {
+    redirectWithOrderPaymentResult(
+      "success",
+      "Already marked paid. No changes needed.",
+      returnTo,
+      orderId
+    );
+  }
+
+  if (!payment.provider_order_id) {
+    redirectWithOrderPaymentResult(
+      "failed",
+      "No Razorpay order id found on payment row.",
+      returnTo,
+      orderId
+    );
+  }
+
+  try {
+    const [gatewayOrder, orderPayments] = await Promise.all([
+      fetchRazorpayOrder(payment.provider_order_id),
+      fetchRazorpayOrderPayments(payment.provider_order_id),
+    ]);
+    const successfulPayment = orderPayments.find((p) =>
+      p.status === "captured" || p.status === "authorized"
+    );
+    const isGatewayPaid = gatewayOrder.status === "paid" || gatewayOrder.amount_paid > 0;
+
+    if (!successfulPayment && !isGatewayPaid) {
+      redirectWithOrderPaymentResult(
+        "failed",
+        `Gateway shows unpaid (${gatewayOrder.status}). No DB update done.`,
+        returnTo,
+        orderId
+      );
+    }
+
+    await markPaymentSuccess(supabase, {
+      orderId,
+      paymentId: payment.id,
+      providerPaymentId:
+        successfulPayment?.id ??
+        payment.provider_payment_id ??
+        `reconciled_${payment.provider_order_id}`,
+      providerSignature: "admin_reconcile",
+      rawResponse: {
+        source: "admin_reconcile_action",
+        gateway_order_id: payment.provider_order_id,
+        gateway_order_status: gatewayOrder.status,
+        gateway_amount_paid: gatewayOrder.amount_paid,
+        gateway_payment_id: successfulPayment?.id ?? null,
+      },
+    });
+
+    revalidatePath("/admindeoghar/orders");
+    revalidatePath(`/admindeoghar/orders/${orderId}`);
+    redirectWithOrderPaymentResult(
+      "success",
+      `Payment reconciled for ${order.order_number}.`,
+      returnTo,
+      orderId
+    );
+  } catch (e) {
+    const msg = e instanceof Error ? e.message.slice(0, 220) : "Reconcile failed";
+    redirectWithOrderPaymentResult("failed", msg, returnTo, orderId);
+  }
 }
 
 export async function submitOrderInteraktDeliveryForm(formData: FormData) {

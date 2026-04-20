@@ -34,7 +34,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const ok = verifyRazorpayPayment({
+    const ok = await verifyRazorpayPayment({
       razorpay_order_id,
       razorpay_payment_id,
       razorpay_signature,

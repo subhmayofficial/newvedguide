@@ -8,6 +8,7 @@ import {
   submitOrderNoteForm,
   submitOrderFulfillmentForm,
   submitOrderProcessingForm,
+  submitOrderPaymentReconcileForm,
 } from "@/app/(admin)/admin/actions";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -21,10 +22,13 @@ export const dynamic = "force-dynamic";
 
 export default async function OrderDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<Record<string, string | undefined>>;
 }) {
   const { id } = await params;
+  const sp = await searchParams;
   const supabase = createServiceClient();
 
   const { data: order, error } = await supabase.from("orders").select("*").eq("id", id).single();
@@ -85,6 +89,13 @@ export default async function OrderDetailPage({
   const cust = customer as Record<string, unknown> | null;
   const notes = await listEntityNotes(supabase, ENTITY_NOTE_TYPE.ORDER, id);
   const events = await getEntityTimeline(supabase, { orderId: id, limit: 50 });
+  const paymentReconcileFlash =
+    sp.payment_reconcile_status === "success" || sp.payment_reconcile_status === "failed"
+      ? {
+          kind: sp.payment_reconcile_status as "success" | "failed",
+          message: sp.payment_reconcile_msg ?? "",
+        }
+      : null;
 
   return (
     <div className="mx-auto max-w-5xl space-y-10">
@@ -219,6 +230,26 @@ export default async function OrderDetailPage({
 
       <section className="rounded-2xl border border-border/60 bg-card p-6 shadow-sm">
         <h2 className="font-heading text-lg font-semibold">Payment</h2>
+        {paymentReconcileFlash && (
+          <div
+            className={`mt-3 rounded-lg border px-3 py-2 text-xs ${
+              paymentReconcileFlash.kind === "success"
+                ? "border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-900/40 dark:bg-emerald-950/25 dark:text-emerald-300"
+                : "border-red-200 bg-red-50 text-red-800 dark:border-red-900/40 dark:bg-red-950/25 dark:text-red-300"
+            }`}
+          >
+            {paymentReconcileFlash.message}
+          </div>
+        )}
+        <div className="mt-3">
+          <form action={submitOrderPaymentReconcileForm}>
+            <input type="hidden" name="orderId" value={id} />
+            <input type="hidden" name="returnTo" value="order_detail" />
+            <Button type="submit" size="sm" variant="outline">
+              Reconcile payment from Razorpay
+            </Button>
+          </form>
+        </div>
         {pay ? (
           <dl className="mt-4 space-y-2 text-sm">
             <Row label="Provider" value={pay.provider} />

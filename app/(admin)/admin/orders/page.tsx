@@ -9,6 +9,7 @@ import { OrderDeliverButton } from "@/components/admin/order-deliver-button";
 import { OrderSlaCountdown } from "@/components/admin/order-sla-countdown";
 import { orderHasFastTrackSla } from "@/lib/admin/order-sla-helpers";
 import { formatAdminDateTime } from "@/lib/admin/time";
+import { submitOrderPaymentReconcileForm } from "@/app/(admin)/admin/actions";
 import {
   ENTRY_PATH,
   FULFILLMENT_STATUS,
@@ -135,6 +136,13 @@ export default async function AdminOrdersPage({
           message: sp.delivery_msg ?? "",
         }
       : null;
+  const paymentReconcileFlash =
+    sp.payment_reconcile_status === "success" || sp.payment_reconcile_status === "failed"
+      ? {
+          kind: sp.payment_reconcile_status as "success" | "failed",
+          message: sp.payment_reconcile_msg ?? "",
+        }
+      : null;
 
   return (
     <div className="space-y-7 font-sans admin-page-enter">
@@ -195,6 +203,32 @@ export default async function AdminOrdersPage({
           <p className="mt-2">
             <Link
               href={ordersHrefWithoutDeliveryFlash(sp)}
+              className="text-xs font-medium underline underline-offset-2 hover:opacity-80"
+            >
+              Dismiss
+            </Link>
+          </p>
+        </div>
+      )}
+      {paymentReconcileFlash && (
+        <div
+          className={
+            paymentReconcileFlash.kind === "success"
+              ? "rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800 dark:border-emerald-900/40 dark:bg-emerald-950/25 dark:text-emerald-300"
+              : "rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-900/40 dark:bg-red-950/25 dark:text-red-300"
+          }
+        >
+          <p className="font-semibold">
+            {paymentReconcileFlash.kind === "success"
+              ? "Payment reconciled"
+              : "Payment reconcile failed"}
+          </p>
+          {paymentReconcileFlash.message ? (
+            <p className="mt-1 text-xs opacity-90">{paymentReconcileFlash.message}</p>
+          ) : null}
+          <p className="mt-2">
+            <Link
+              href={ordersHrefWithoutPaymentFlash(sp)}
               className="text-xs font-medium underline underline-offset-2 hover:opacity-80"
             >
               Dismiss
@@ -536,6 +570,17 @@ export default async function AdminOrdersPage({
                   {/* Deliver + open */}
                   <td className="px-4 py-3.5 align-top text-right">
                     <div className="inline-flex items-center justify-end gap-1.5">
+                      <form action={submitOrderPaymentReconcileForm}>
+                        <input type="hidden" name="orderId" value={r.id} />
+                        <input type="hidden" name="returnTo" value="orders" />
+                        <button
+                          type="submit"
+                          className="inline-flex h-8 origin-center items-center gap-1 rounded-md border border-blue-600/35 bg-blue-600/10 px-2.5 text-[11px] font-semibold text-blue-800 transition-[transform,box-shadow,background-color] hover:bg-blue-600/20 active:scale-[0.97] dark:border-blue-500/30 dark:bg-blue-950/40 dark:text-blue-300"
+                          title="Reconcile payment against Razorpay status"
+                        >
+                          Reconcile
+                        </button>
+                      </form>
                       <OrderDeliverButton
                         orderId={r.id}
                         orderNumber={r.order_number}
@@ -757,6 +802,17 @@ function ordersHrefWithoutDeliveryFlash(sp: Record<string, string | undefined>):
   const u = new URLSearchParams();
   for (const [key, value] of Object.entries(sp)) {
     if (key === "delivery_status" || key === "delivery_msg") continue;
+    if (value == null || value === "") continue;
+    u.set(key, value);
+  }
+  const qs = u.toString();
+  return qs ? `/admindeoghar/orders?${qs}` : "/admindeoghar/orders";
+}
+
+function ordersHrefWithoutPaymentFlash(sp: Record<string, string | undefined>): string {
+  const u = new URLSearchParams();
+  for (const [key, value] of Object.entries(sp)) {
+    if (key === "payment_reconcile_status" || key === "payment_reconcile_msg") continue;
     if (value == null || value === "") continue;
     u.set(key, value);
   }
