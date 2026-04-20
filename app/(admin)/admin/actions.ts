@@ -728,7 +728,7 @@ function redirectWithOrderPaymentResult(
   message: string,
   returnTo: "orders" | "order_detail",
   orderId?: string
-) {
+): never {
   const q = new URLSearchParams();
   q.set("payment_reconcile_status", status);
   q.set("payment_reconcile_msg", message);
