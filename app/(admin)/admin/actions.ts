@@ -9,6 +9,7 @@ import {
 import { addEntityNote } from "@/lib/services/notes";
 import { updateLeadStatus } from "@/lib/services/lead";
 import {
+  completePaidKundliDeliveryFromAdminSend,
   updateOrderFulfillmentAssignee,
   updateOrderFulfillmentStatus,
   updateOrderStatus,
@@ -39,6 +40,8 @@ import {
   processPaidKundliReportUpload,
   type PaidKundliReportUploadResult,
 } from "@/lib/admin/paid-kundli-report-upload";
+import { executePaidKundliInteraktDelivery } from "@/lib/admin/paid-kundli-interakt-delivery";
+import { formatAdminDateTime } from "@/lib/admin/time";
 import { markPaymentSuccess } from "@/lib/services/payment";
 import {
   applySmtpTemplateVariables,
@@ -117,6 +120,14 @@ export async function setOrderFulfillment(
     await updateOrderStatus(supabase, orderId, {
       status: ORDER_STATUS.FULFILLED,
     });
+    await supabase
+      .from("orders")
+      .update({
+        delivery_scheduled_at: null,
+        delivery_schedule_customer_name: null,
+        delivery_schedule_report_url: null,
+      })
+      .eq("id", orderId);
   } else if (fulfillmentStatus === FULFILLMENT_STATUS.IN_PROGRESS) {
     await updateOrderStatus(supabase, orderId, {
       status: ORDER_STATUS.PROCESSING,
@@ -716,7 +727,7 @@ export async function submitSmtpTemplateUpdateForm(formData: FormData) {
   redirectWithIntegrationResult("smtp", "success", "SMTP template updated");
 }
 
-function redirectWithOrderDeliveryResult(status: "success" | "failed", message: string) {
+function redirectWithOrderDeliveryResult(status: "success" | "failed", message: string): never {
   const q = new URLSearchParams();
   q.set("delivery_status", status);
   q.set("delivery_msg", message);
@@ -861,75 +872,78 @@ export async function submitOrderInteraktDeliveryForm(formData: FormData) {
   }
   const reportUrl = reportUrlRaw as string;
 
-  const { data: row, error } = await supabase
-    .from("orders")
-    .select(
-      "id,order_number,product_slug,payment_status,customer_id,lead_id,customers(phone,full_name)"
-    )
-    .eq("id", orderId)
-    .maybeSingle();
+  const sendTiming = toNullable(formData.get("sendTiming")) ?? "now";
 
-  if (error) {
-    redirectWithOrderDeliveryResult("failed", "Order not found");
-  }
-  if (!row) {
-    redirectWithOrderDeliveryResult("failed", "Order not found");
-  }
+  if (sendTiming === "scheduled") {
+    const scheduledAtRaw = toNullable(formData.get("scheduledAt"))?.trim() ?? "";
+    if (!scheduledAtRaw) {
+      redirectWithOrderDeliveryResult("failed", "Choose a date and time for scheduled delivery");
+    }
+    const at = new Date(scheduledAtRaw);
+    if (Number.isNaN(at.getTime())) {
+      redirectWithOrderDeliveryResult("failed", "Invalid schedule date/time");
+    }
+    if (at.getTime() < Date.now() + 60_000) {
+      redirectWithOrderDeliveryResult(
+        "failed",
+        "Schedule time must be at least 1 minute from now"
+      );
+    }
 
-  type OrderRow = {
-    id: string;
-    order_number: string;
-    product_slug: string;
-    payment_status: string;
-    customer_id: string;
-    lead_id: string | null;
-    customers: { phone: string | null; full_name: string | null } | null;
-  };
+    const { data: orderCheck, error: checkErr } = await supabase
+      .from("orders")
+      .select("id,product_slug,payment_status,fulfillment_status")
+      .eq("id", orderId)
+      .maybeSingle();
 
-  const order = row as unknown as OrderRow;
+    if (checkErr || !orderCheck) {
+      redirectWithOrderDeliveryResult("failed", "Order not found");
+    }
+    if (orderCheck.product_slug !== "paid-kundli") {
+      redirectWithOrderDeliveryResult(
+        "failed",
+        "Delivery scheduling is only for paid Kundli orders"
+      );
+    }
+    if (orderCheck.payment_status !== "paid") {
+      redirectWithOrderDeliveryResult("failed", "Order must be paid before scheduling delivery");
+    }
+    if (orderCheck.fulfillment_status === FULFILLMENT_STATUS.DELIVERED) {
+      redirectWithOrderDeliveryResult("failed", "Order is already delivered");
+    }
 
-  if (order.product_slug !== "paid-kundli") {
+    const { error: upErr } = await supabase
+      .from("orders")
+      .update({
+        delivery_scheduled_at: at.toISOString(),
+        delivery_schedule_customer_name: customerName,
+        delivery_schedule_report_url: reportUrl,
+      })
+      .eq("id", orderId);
+
+    if (upErr) {
+      redirectWithOrderDeliveryResult("failed", upErr.message.slice(0, 220));
+    }
+
+    revalidatePath("/admindeoghar/orders");
+    revalidatePath(`/admindeoghar/orders/${orderId}`);
     redirectWithOrderDeliveryResult(
-      "failed",
-      "Delivery WhatsApp is only for paid Kundli orders"
+      "success",
+      `WhatsApp delivery scheduled for ${formatAdminDateTime(at.toISOString())}`
     );
   }
-  if (order.payment_status !== "paid") {
-    redirectWithOrderDeliveryResult("failed", "Order must be paid before sending delivery WhatsApp");
-  }
 
-  const phone = order.customers?.phone ?? null;
-  const digits = phone?.replace(/\D/g, "") ?? "";
-  if (!digits || digits.length < 10 || !phone) {
-    redirectWithOrderDeliveryResult("failed", "Customer phone is missing or invalid");
-  }
-
-  const settings = await getOrderDeliverySettings(supabase);
-  const btnIdx = settings.interakt_button_index.trim() || "0";
-  const buttonValues: Record<string, string[]> = { [btnIdx]: [reportUrl] };
-
-  const result = await sendInteraktWhatsApp(supabase, {
-    eventName: "order_report_delivery",
-    triggerSource: "admin_order_deliver_button",
-    orderId: order.id,
-    leadId: order.lead_id,
-    customerId: order.customer_id,
-    fullName: customerName,
-    phone,
-    templateName: settings.interakt_template_name,
-    languageCode: settings.interakt_template_language,
-    bodyValues: [customerName],
-    buttonValues,
-    callbackData: order.order_number,
-    metadata: {
-      order_number: order.order_number,
-      report_url: reportUrl,
-    },
+  const result = await executePaidKundliInteraktDelivery(supabase, {
+    orderId,
+    customerName,
+    reportUrl,
     createdBy: await getAdminActor(),
   });
 
   if (result.ok) {
-    await setOrderFulfillment(order.id, FULFILLMENT_STATUS.DELIVERED);
+    await completePaidKundliDeliveryFromAdminSend(supabase, orderId);
+    revalidatePath(`/admindeoghar/orders/${orderId}`);
+    revalidatePath("/admindeoghar/orders");
   } else {
     revalidatePath("/admindeoghar/orders");
   }
@@ -938,6 +952,32 @@ export async function submitOrderInteraktDeliveryForm(formData: FormData) {
     result.ok ? "success" : "failed",
     result.message
   );
+}
+
+export async function clearOrderDeliveryScheduleForm(formData: FormData) {
+  const supabase = createServiceClient();
+  const orderIdRaw = toNullable(formData.get("orderId"));
+  if (!isTemplateRowId(orderIdRaw)) {
+    redirectWithOrderDeliveryResult("failed", "Invalid order id");
+  }
+  const orderId = orderIdRaw as string;
+
+  const { error } = await supabase
+    .from("orders")
+    .update({
+      delivery_scheduled_at: null,
+      delivery_schedule_customer_name: null,
+      delivery_schedule_report_url: null,
+    })
+    .eq("id", orderId);
+
+  if (error) {
+    redirectWithOrderDeliveryResult("failed", error.message.slice(0, 220));
+  }
+
+  revalidatePath("/admindeoghar/orders");
+  revalidatePath(`/admindeoghar/orders/${orderId}`);
+  redirectWithOrderDeliveryResult("success", "Scheduled delivery cleared");
 }
 
 export async function submitOrderDeliverySettingsForm(formData: FormData) {

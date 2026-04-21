@@ -16,6 +16,7 @@ import {
   ORDER_STATUS,
   PAYMENT_STATUS_ORDER,
 } from "@/lib/constants/commerce";
+import type { OrderDeliverySchedule } from "@/components/admin/order-deliver-button";
 import { Zap, ArrowUpRight } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -36,11 +37,24 @@ type OrderRow = {
   coupon_applied: boolean;
   coupon_code: string | null;
   created_at: string;
+  delivery_scheduled_at: string | null;
+  delivery_schedule_customer_name: string | null;
+  delivery_schedule_report_url: string | null;
   customers: { full_name?: string | null; phone?: string | null } | null;
   order_items?: { product_slug: string }[] | null;
 };
 
 type RowKind = "failed" | "cancelled" | "fasttrack" | "normal";
+
+function buildOrderDeliverySchedule(r: OrderRow): OrderDeliverySchedule | null {
+  if (r.fulfillment_status === FULFILLMENT_STATUS.DELIVERED) return null;
+  if (!r.delivery_scheduled_at || !r.delivery_schedule_report_url?.trim()) return null;
+  return {
+    scheduledAt: r.delivery_scheduled_at,
+    customerName: r.delivery_schedule_customer_name?.trim() ?? "",
+    reportUrl: r.delivery_schedule_report_url.trim(),
+  };
+}
 
 // ─── Page ────────────────────────────────────────────────────────────────────
 
@@ -61,7 +75,7 @@ export default async function AdminOrdersPage({
   let q = supabase
     .from("orders")
     .select(
-      "id,order_number,product_slug,consultation_type,total_amount,status,payment_status,fulfillment_status,fulfillment_assignee,entry_path,created_at,coupon_applied,coupon_code,customers(full_name,phone),order_items(product_slug)",
+      "id,order_number,product_slug,consultation_type,total_amount,status,payment_status,fulfillment_status,fulfillment_assignee,entry_path,created_at,coupon_applied,coupon_code,delivery_scheduled_at,delivery_schedule_customer_name,delivery_schedule_report_url,customers(full_name,phone),order_items(product_slug)",
       { count: "exact" }
     )
     .order("created_at", { ascending: false })
@@ -588,6 +602,7 @@ export default async function AdminOrdersPage({
                         phone={c?.phone ?? null}
                         canDeliver={canDeliverKundli}
                         bunnyReady={bunnyUploadReady}
+                        deliverySchedule={buildOrderDeliverySchedule(r)}
                       />
                       <Link
                         href={`/admindeoghar/orders/${r.id}`}

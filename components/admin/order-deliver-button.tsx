@@ -3,8 +3,18 @@
 import { useCallback, useEffect, useId, useState } from "react";
 import { createPortal } from "react-dom";
 import { useFormStatus } from "react-dom";
-import { CheckCircle2, Loader2, MessageCircle, Upload } from "lucide-react";
-import { submitOrderInteraktDeliveryForm } from "@/app/(admin)/admin/actions";
+import { CalendarClock, CheckCircle2, Loader2, MessageCircle, Upload } from "lucide-react";
+import {
+  clearOrderDeliveryScheduleForm,
+  submitOrderInteraktDeliveryForm,
+} from "@/app/(admin)/admin/actions";
+import { formatAdminDateTime } from "@/lib/admin/time";
+
+export type OrderDeliverySchedule = {
+  scheduledAt: string;
+  customerName: string;
+  reportUrl: string;
+};
 
 type Props = {
   orderId: string;
@@ -14,6 +24,8 @@ type Props = {
   canDeliver: boolean;
   /** Bunny zone + CDN configured (upload disabled with hint if false). */
   bunnyReady: boolean;
+  /** Active saved schedule (not shown once order is delivered). */
+  deliverySchedule?: OrderDeliverySchedule | null;
 };
 
 function explainUploadError(raw: string): string {
@@ -27,6 +39,30 @@ function explainUploadError(raw: string): string {
   return raw;
 }
 
+function pad2(n: number) {
+  return String(n).padStart(2, "0");
+}
+
+function toDatetimeLocalValue(d: Date): string {
+  return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}T${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+}
+
+function defaultScheduledLocal(): string {
+  return toDatetimeLocalValue(new Date(Date.now() + 2 * 60 * 60 * 1000));
+}
+
+function isoToDatetimeLocalValue(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return defaultScheduledLocal();
+  return toDatetimeLocalValue(d);
+}
+
+function isScheduledTimeValid(value: string): boolean {
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return false;
+  return d.getTime() > Date.now() + 60_000;
+}
+
 function PendingSync({ onChange }: { onChange: (pending: boolean) => void }) {
   const { pending } = useFormStatus();
   useEffect(() => {
@@ -38,9 +74,11 @@ function PendingSync({ onChange }: { onChange: (pending: boolean) => void }) {
 function DeliverFooter({
   onCancel,
   canSubmit,
+  submitLabel,
 }: {
   onCancel: () => void;
   canSubmit: boolean;
+  submitLabel: string;
 }) {
   const { pending } = useFormStatus();
 
@@ -64,10 +102,10 @@ function DeliverFooter({
         {pending ? (
           <>
             <Loader2 size={14} className="shrink-0 animate-spin" aria-hidden />
-            Sending…
+            {submitLabel === "Save schedule" ? "Saving…" : "Sending…"}
           </>
         ) : (
-          "Send"
+          submitLabel
         )}
       </button>
     </div>
@@ -81,6 +119,7 @@ export function OrderDeliverButton({
   phone,
   canDeliver,
   bunnyReady,
+  deliverySchedule = null,
 }: Props) {
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -89,10 +128,11 @@ export function OrderDeliverButton({
   const [uploadErr, setUploadErr] = useState<string | null>(null);
   const [customerName, setCustomerName] = useState(defaultCustomerName);
   const [reportUrl, setReportUrl] = useState("");
+  const [sendTiming, setSendTiming] = useState<"now" | "scheduled">("now");
+  const [scheduledAt, setScheduledAt] = useState(defaultScheduledLocal);
   const titleId = useId();
   const descId = useId();
   const fileInputId = useId();
-
   const onPendingChange = useCallback((pending: boolean) => {
     setSendPending(pending);
   }, []);
@@ -103,10 +143,25 @@ export function OrderDeliverButton({
 
   useEffect(() => {
     if (!open) return;
-    setCustomerName(defaultCustomerName.trim() ? defaultCustomerName : "Customer");
-    setReportUrl("");
+    if (deliverySchedule) {
+      setSendTiming("scheduled");
+      setScheduledAt(isoToDatetimeLocalValue(deliverySchedule.scheduledAt));
+      setCustomerName(
+        deliverySchedule.customerName.trim()
+          ? deliverySchedule.customerName.trim()
+          : defaultCustomerName.trim()
+            ? defaultCustomerName.trim()
+            : "Customer"
+      );
+      setReportUrl(deliverySchedule.reportUrl.trim());
+    } else {
+      setSendTiming("now");
+      setScheduledAt(defaultScheduledLocal());
+      setCustomerName(defaultCustomerName.trim() ? defaultCustomerName : "Customer");
+      setReportUrl("");
+    }
     setUploadErr(null);
-  }, [open, defaultCustomerName]);
+  }, [open, defaultCustomerName, deliverySchedule]);
 
   useEffect(() => {
     if (!open) return;
@@ -179,10 +234,13 @@ export function OrderDeliverButton({
   );
 
   const backdropBlocked = sendPending || uploadBusy;
-  const canSubmitSend =
+  const baseFieldsOk =
     customerName.trim().length > 0 &&
     reportUrl.trim().length > 0 &&
     /^https?:\/\//i.test(reportUrl.trim());
+  const scheduleOk = sendTiming === "now" || isScheduledTimeValid(scheduledAt);
+  const canSubmitSend = baseFieldsOk && scheduleOk;
+  const submitLabel = sendTiming === "scheduled" ? "Save schedule" : "Send";
 
   if (!canDeliver) {
     return (
@@ -232,6 +290,36 @@ export function OrderDeliverButton({
           </div>
 
           <div className="grid gap-3 px-4 py-4">
+            {deliverySchedule ? (
+              <div className="relative z-[2] rounded-xl border border-sky-500/40 bg-sky-500/10 px-3 py-3 dark:border-sky-400/30 dark:bg-sky-950/40">
+                <div className="flex items-start gap-2">
+                  <CalendarClock size={16} className="mt-0.5 shrink-0 text-sky-700 dark:text-sky-300" aria-hidden />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[11px] font-semibold text-foreground">Delivery scheduled</p>
+                    <p className="mt-0.5 text-[11px] text-muted-foreground">
+                      WhatsApp send:{" "}
+                      <span className="font-medium text-foreground">
+                        {formatAdminDateTime(deliverySchedule.scheduledAt)}
+                      </span>
+                    </p>
+                    <p className="mt-1 truncate font-mono text-[10px] text-muted-foreground" title={deliverySchedule.reportUrl}>
+                      {deliverySchedule.reportUrl}
+                    </p>
+                  </div>
+                </div>
+                <form action={clearOrderDeliveryScheduleForm} className="mt-2 inline">
+                  <input type="hidden" name="orderId" value={orderId} />
+                  <button
+                    type="submit"
+                    disabled={sendPending || uploadBusy}
+                    className="h-8 rounded-md border border-sky-600/40 bg-background px-2.5 text-[11px] font-medium text-sky-900 transition hover:bg-muted/60 disabled:pointer-events-none disabled:opacity-50 dark:border-sky-500/35 dark:text-sky-100"
+                  >
+                    Clear schedule
+                  </button>
+                </form>
+              </div>
+            ) : null}
+
             <div className="relative z-[2] rounded-xl border border-border/80 bg-muted/25 px-3 py-3">
               <p className="text-[11px] font-medium text-foreground">1. Upload report</p>
               <p className="mt-0.5 text-[10px] text-muted-foreground">
@@ -287,6 +375,59 @@ export function OrderDeliverButton({
             <form action={submitOrderInteraktDeliveryForm} className="grid gap-3">
               <PendingSync onChange={onPendingChange} />
               <input type="hidden" name="orderId" value={orderId} />
+              <input type="hidden" name="sendTiming" value={sendTiming} />
+
+              <div className="relative z-[2] rounded-xl border border-border/80 bg-muted/20 px-3 py-3">
+                <p className="text-[11px] font-medium text-foreground">When to send WhatsApp</p>
+                <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+                  <label className="inline-flex cursor-pointer items-center gap-2 text-[11px] text-foreground">
+                    <input
+                      type="radio"
+                      className="h-3.5 w-3.5 border-border text-emerald-600 focus-visible:ring-2 focus-visible:ring-ring/40"
+                      checked={sendTiming === "now"}
+                      onChange={() => setSendTiming("now")}
+                      disabled={sendPending}
+                    />
+                    Send now
+                  </label>
+                  <label className="inline-flex cursor-pointer items-center gap-2 text-[11px] text-foreground">
+                    <input
+                      type="radio"
+                      className="h-3.5 w-3.5 border-border text-emerald-600 focus-visible:ring-2 focus-visible:ring-ring/40"
+                      checked={sendTiming === "scheduled"}
+                      onChange={() => {
+                        setSendTiming("scheduled");
+                        setScheduledAt((prev) => (isScheduledTimeValid(prev) ? prev : defaultScheduledLocal()));
+                      }}
+                      disabled={sendPending}
+                    />
+                    Schedule for later
+                  </label>
+                </div>
+                {sendTiming === "scheduled" ? (
+                  <label className="relative z-[2] mt-2 grid gap-1 text-[11px] text-muted-foreground">
+                    <span className="font-medium text-foreground">Send at (local time)</span>
+                    <input
+                      type="datetime-local"
+                      name="scheduledAt"
+                      value={scheduledAt}
+                      onChange={(e) => setScheduledAt(e.target.value)}
+                      disabled={sendPending}
+                      className="h-10 rounded-lg border border-input bg-background px-3 text-sm transition-shadow disabled:opacity-60 focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
+                    />
+                    {!isScheduledTimeValid(scheduledAt) ? (
+                      <span className="text-[10px] text-amber-700 dark:text-amber-300">
+                        Pick a time at least 1 minute from now.
+                      </span>
+                    ) : (
+                      <span className="text-[10px] text-muted-foreground">
+                        Shown in admin as IST: {formatAdminDateTime(new Date(scheduledAt))}
+                      </span>
+                    )}
+                  </label>
+                ) : null}
+              </div>
+
               <label className="relative z-[2] grid gap-1 text-xs text-muted-foreground">
                 <span className="font-medium">2. Name (WhatsApp template)</span>
                 <input
@@ -313,9 +454,25 @@ export function OrderDeliverButton({
               </label>
               <p className="relative z-[2] text-[10px] text-muted-foreground">
                 Interakt template is under <span className="font-medium text-foreground">Settings</span>.
-                Send marks fulfillment <span className="font-medium text-foreground">Delivered</span>.
+                {sendTiming === "now" ? (
+                  <>
+                    {" "}
+                    Send marks fulfillment <span className="font-medium text-foreground">Delivered</span>.
+                  </>
+                ) : (
+                  <>
+                    {" "}
+                    <span className="font-medium text-foreground">Save schedule</span> stores this plan; WhatsApp
+                    sends automatically after the time if you set up the cron job (
+                    <span className="font-mono">POST /api/cron/scheduled-kundli-deliveries</span>).
+                  </>
+                )}
               </p>
-              <DeliverFooter onCancel={() => setOpen(false)} canSubmit={canSubmitSend} />
+              <DeliverFooter
+                onCancel={() => setOpen(false)}
+                canSubmit={canSubmitSend}
+                submitLabel={submitLabel}
+              />
             </form>
           </div>
         </div>
@@ -325,15 +482,25 @@ export function OrderDeliverButton({
 
   return (
     <>
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className="inline-flex h-8 origin-center items-center gap-1 rounded-md border border-emerald-600/40 bg-emerald-600/10 px-2.5 text-[11px] font-semibold text-emerald-800 transition-[transform,box-shadow,background-color] hover:bg-emerald-600/20 active:scale-[0.97] dark:border-emerald-500/30 dark:bg-emerald-950/40 dark:text-emerald-300"
-        title="Upload report and send delivery WhatsApp"
-      >
-        <MessageCircle size={12} className="shrink-0" aria-hidden />
-        Deliver
-      </button>
+      <div className="inline-flex items-center gap-1">
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className="inline-flex h-8 origin-center items-center gap-1 rounded-md border border-emerald-600/40 bg-emerald-600/10 px-2.5 text-[11px] font-semibold text-emerald-800 transition-[transform,box-shadow,background-color] hover:bg-emerald-600/20 active:scale-[0.97] dark:border-emerald-500/30 dark:bg-emerald-950/40 dark:text-emerald-300"
+          title="Upload report and send delivery WhatsApp"
+        >
+          <MessageCircle size={12} className="shrink-0" aria-hidden />
+          Deliver
+        </button>
+        {deliverySchedule ? (
+          <span
+            className="hidden rounded-md border border-sky-500/35 bg-sky-500/10 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-sky-900 sm:inline dark:border-sky-400/25 dark:bg-sky-950/50 dark:text-sky-200"
+            title={`Scheduled: ${formatAdminDateTime(deliverySchedule.scheduledAt)}`}
+          >
+            Scheduled
+          </span>
+        ) : null}
+      </div>
       {modal}
     </>
   );

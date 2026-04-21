@@ -237,6 +237,9 @@ export interface Database {
           payment_initiated_at: string | null;
           paid_at: string | null;
           notes: string | null;
+          delivery_scheduled_at: string | null;
+          delivery_schedule_customer_name: string | null;
+          delivery_schedule_report_url: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -267,6 +270,9 @@ export interface Database {
           payment_initiated_at?: string | null;
           paid_at?: string | null;
           notes?: string | null;
+          delivery_scheduled_at?: string | null;
+          delivery_schedule_customer_name?: string | null;
+          delivery_schedule_report_url?: string | null;
           created_at?: string;
           updated_at?: string;
         };

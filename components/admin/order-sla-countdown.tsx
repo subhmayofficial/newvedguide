@@ -37,9 +37,11 @@ export function OrderSlaCountdown({
     [createdAtIso, productSlug, hasFastTrackAddon]
   );
 
-  const [now, setNow] = useState(() => Date.now());
+  /** null until mount — avoids SSR vs client Date.now() hydration mismatch */
+  const [now, setNow] = useState<number | null>(null);
 
   useEffect(() => {
+    setNow(Date.now());
     const id = window.setInterval(() => setNow(Date.now()), 1000);
     return () => window.clearInterval(id);
   }, []);
@@ -59,8 +61,25 @@ export function OrderSlaCountdown({
     );
   }
 
-  const remainingSec = Math.floor((endMs - now) / 1000);
   const inactive = orderStatus === "cancelled" || paymentStatus === "failed";
+
+  if (now === null) {
+    return (
+      <div
+        className={`leading-tight tabular-nums ${inactive ? "opacity-45" : ""}`}
+        title={`${hours}h delivery window from order time`}
+      >
+        <span className="font-mono text-[12px] font-semibold text-muted-foreground/80">--:--:--</span>
+        {compact ? (
+          <span className="ml-1 text-[10px] text-muted-foreground">{hours}h</span>
+        ) : (
+          <span className="mt-0.5 block text-[10px] text-muted-foreground">left · {hours}h SLA</span>
+        )}
+      </div>
+    );
+  }
+
+  const remainingSec = Math.floor((endMs - now) / 1000);
 
   if (remainingSec > 0) {
     return (

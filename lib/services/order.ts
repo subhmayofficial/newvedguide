@@ -137,3 +137,21 @@ export async function updateOrderFulfillmentAssignee(
     .update({ fulfillment_assignee: assignee })
     .eq("id", orderId);
 }
+
+/** After a successful paid-kundli Interakt send: mark fulfilled, clear any delivery schedule snapshot. */
+export async function completePaidKundliDeliveryFromAdminSend(
+  supabase: SupabaseClient<Database>,
+  orderId: string
+): Promise<void> {
+  const { error } = await supabase
+    .from("orders")
+    .update({
+      fulfillment_status: FULFILLMENT_STATUS.DELIVERED,
+      status: ORDER_STATUS.FULFILLED,
+      delivery_scheduled_at: null,
+      delivery_schedule_customer_name: null,
+      delivery_schedule_report_url: null,
+    })
+    .eq("id", orderId);
+  if (error) throw error;
+}

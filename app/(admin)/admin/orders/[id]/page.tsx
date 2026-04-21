@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createServiceClient } from "@/lib/supabase/server";
@@ -123,6 +124,29 @@ export default async function OrderDetailPage({
           <Row label="Entry path" value={order.entry_path ?? "—"} />
           <Row label="Created" value={formatAdminDateTime(order.created_at)} />
           <Row label="Paid at" value={formatAdminDateTime(order.paid_at)} />
+          {order.delivery_scheduled_at &&
+          order.fulfillment_status !== FULFILLMENT_STATUS.DELIVERED &&
+          order.delivery_schedule_report_url ? (
+            <>
+              <Row
+                label="Delivery scheduled for"
+                value={formatAdminDateTime(order.delivery_scheduled_at)}
+              />
+              <Row
+                label="Scheduled report URL"
+                value={
+                  <a
+                    href={order.delivery_schedule_report_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-mono text-xs text-brand underline-offset-2 hover:underline break-all"
+                  >
+                    {order.delivery_schedule_report_url}
+                  </a>
+                }
+              />
+            </>
+          ) : null}
           <div className="flex justify-between gap-4">
             <span className="text-muted-foreground">Delivery SLA (live)</span>
             <div className="text-right font-medium">
@@ -325,7 +349,7 @@ export default async function OrderDetailPage({
   );
 }
 
-function Row({ label, value }: { label: string; value: string }) {
+function Row({ label, value }: { label: string; value: ReactNode }) {
   return (
     <div className="flex justify-between gap-4">
       <dt className="text-muted-foreground">{label}</dt>
