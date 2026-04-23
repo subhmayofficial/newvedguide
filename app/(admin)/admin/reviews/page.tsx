@@ -5,16 +5,11 @@ export const dynamic = "force-dynamic";
 
 type ReviewRow = {
   id: string;
-  name: string;
+  customer_name: string;
   phone: string | null;
-  rating: number;
-  most_useful_part: string;
-  personalization_feedback: string;
-  clarity_feedback: string;
-  improvement_feedback: string;
-  written_review: string | null;
-  source: string;
-  submitted_at: string;
+  rating_overall: number;
+  favorite_part: string;
+  created_at: string;
 };
 
 function ratingBadge(r: number) {
@@ -27,10 +22,8 @@ export default async function AdminReviewsPage() {
   const supabase = createServiceClient();
   const { data, error } = await supabase
     .from("kundli_reviews")
-    .select(
-      "id,name,phone,rating,most_useful_part,personalization_feedback,clarity_feedback,improvement_feedback,written_review,source,submitted_at",
-    )
-    .order("submitted_at", { ascending: false })
+    .select("id,customer_name,phone,rating_overall,favorite_part,created_at")
+    .order("created_at", { ascending: false })
     .limit(200);
 
   const rows = (data ?? []) as ReviewRow[];
@@ -44,8 +37,8 @@ export default async function AdminReviewsPage() {
   }
 
   const total = rows.length;
-  const avgRating = total === 0 ? 0 : rows.reduce((sum, r) => sum + r.rating, 0) / total;
-  const fiveStars = rows.filter((r) => r.rating === 5).length;
+  const avgRating = total === 0 ? 0 : rows.reduce((sum, r) => sum + r.rating_overall, 0) / total;
+  const fiveStars = rows.filter((r) => r.rating_overall === 5).length;
 
   return (
     <div className="space-y-6">
@@ -66,7 +59,7 @@ export default async function AdminReviewsPage() {
         <table className="w-full text-left">
           <thead>
             <tr className="border-b border-border">
-              {["Name / Phone", "Rating", "Feedback", "Written review", "Submitted"].map((h) => (
+              {["Name / Phone", "Rating", "Feedback", "Submitted"].map((h) => (
                 <th
                   key={h}
                   className="px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground"
@@ -80,43 +73,21 @@ export default async function AdminReviewsPage() {
             {rows.map((row) => (
               <tr key={row.id} className="border-b border-border/60 align-top last:border-b-0">
                 <td className="px-4 py-3">
-                  <p className="text-sm font-semibold text-foreground">{row.name}</p>
+                  <p className="text-sm font-semibold text-foreground">{row.customer_name}</p>
                   <p className="mt-0.5 text-xs text-muted-foreground">{row.phone ?? "—"}</p>
                 </td>
                 <td className="px-4 py-3">
                   <span
-                    className={`inline-flex rounded-md px-2 py-1 text-xs font-semibold ${ratingBadge(row.rating)}`}
+                    className={`inline-flex rounded-md px-2 py-1 text-xs font-semibold ${ratingBadge(row.rating_overall)}`}
                   >
-                    {"★".repeat(row.rating)}{"☆".repeat(5 - row.rating)}
+                    {"★".repeat(row.rating_overall)}{"☆".repeat(5 - row.rating_overall)}
                   </span>
                 </td>
                 <td className="px-4 py-3 text-xs text-muted-foreground">
-                  <p>
-                    <span className="font-medium text-foreground">Useful:</span>{" "}
-                    {row.most_useful_part}
-                  </p>
-                  <p className="mt-0.5">
-                    <span className="font-medium text-foreground">Personal:</span>{" "}
-                    {row.personalization_feedback}
-                  </p>
-                  <p className="mt-0.5">
-                    <span className="font-medium text-foreground">Clarity:</span>{" "}
-                    {row.clarity_feedback}
-                  </p>
-                  <p className="mt-0.5">
-                    <span className="font-medium text-foreground">Improve:</span>{" "}
-                    {row.improvement_feedback}
-                  </p>
-                </td>
-                <td className="max-w-xs px-4 py-3 text-xs text-muted-foreground">
-                  {row.written_review ? (
-                    <p className="italic">"{row.written_review}"</p>
-                  ) : (
-                    <p className="text-muted-foreground/50">—</p>
-                  )}
+                  <p>{row.favorite_part}</p>
                 </td>
                 <td className="whitespace-nowrap px-4 py-3 text-xs text-muted-foreground">
-                  {formatAdminDateTime(row.submitted_at)}
+                  {formatAdminDateTime(row.created_at)}
                 </td>
               </tr>
             ))}
