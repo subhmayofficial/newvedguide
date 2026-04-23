@@ -2,6 +2,7 @@ import Link from "next/link";
 
 export default function AdminContentHubPage() {
   const links = [
+    { href: "/admindeoghar/reviews", label: "Reviews" },
     { href: "/admindeoghar/content/pages", label: "Pages" },
     { href: "/admindeoghar/content/faqs", label: "FAQs" },
     { href: "/admindeoghar/content/testimonials", label: "Testimonials" },

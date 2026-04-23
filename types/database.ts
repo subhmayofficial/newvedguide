@@ -849,6 +849,48 @@ export interface Database {
         >;
         Relationships: [];
       };
+      kundli_reviews: {
+        Row: {
+          id: string;
+          customer_name: string;
+          phone: string | null;
+          email: string | null;
+          order_number: string | null;
+          rating_overall: number;
+          rating_accuracy: number;
+          rating_clarity: number;
+          rating_design: number;
+          favorite_part: string;
+          improvements: string | null;
+          recommend_score: number;
+          testimonial: string | null;
+          status: string;
+          source_page: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          customer_name: string;
+          phone?: string | null;
+          email?: string | null;
+          order_number?: string | null;
+          rating_overall: number;
+          rating_accuracy: number;
+          rating_clarity: number;
+          rating_design: number;
+          favorite_part: string;
+          improvements?: string | null;
+          recommend_score: number;
+          testimonial?: string | null;
+          status?: string;
+          source_page?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["kundli_reviews"]["Insert"]>;
+        Relationships: [];
+      };
       testimonials: {
         Row: {
           id: string;

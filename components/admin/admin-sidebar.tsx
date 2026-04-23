@@ -41,6 +41,7 @@ const NAV_SECTIONS = [
   {
     label: "Content",
     items: [
+      { label: "Reviews", href: "/admindeoghar/reviews" },
       { label: "Pages", href: "/admindeoghar/content/pages" },
       { label: "FAQs", href: "/admindeoghar/content/faqs" },
       { label: "Testimonials", href: "/admindeoghar/content/testimonials" },
