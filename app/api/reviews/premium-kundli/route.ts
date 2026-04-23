@@ -2,8 +2,13 @@ import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 
 type ReviewPayload = {
-  ratingOverall?: number;
-  favoritePart?: string;
+  rating?: number;
+  mostUsefulPart?: string;
+  personalizationFeedback?: string;
+  clarityFeedback?: string;
+  improvementFeedback?: string;
+  writtenReview?: string;
+  name?: string;
   phone?: string;
 };
 
@@ -22,28 +27,39 @@ export async function POST(request: Request) {
   try {
     const body: ReviewPayload = await request.json();
 
-    const ratingOverall = clampRating(body.ratingOverall);
-    const favoritePart = body.favoritePart?.trim() ?? "";
+    const rating = clampRating(body.rating);
+    const mostUsefulPart = body.mostUsefulPart?.trim() ?? "";
+    const personalizationFeedback = body.personalizationFeedback?.trim() ?? "";
+    const clarityFeedback = body.clarityFeedback?.trim() ?? "";
+    const improvementFeedback = body.improvementFeedback?.trim() ?? "";
+    const writtenReview = body.writtenReview?.trim() || null;
+    const name = body.name?.trim() ?? "";
     const phone = normalizePhone(body.phone ?? "");
 
-    if (ratingOverall === null)
+    if (rating === null)
       return NextResponse.json({ error: "Kripya apni rating dein." }, { status: 400 });
-    if (!favoritePart || favoritePart.length < 5)
-      return NextResponse.json({ error: "Kripya short feedback likhein." }, { status: 400 });
+    if (!mostUsefulPart)
+      return NextResponse.json({ error: "Kripya ek option chunein." }, { status: 400 });
+    if (!personalizationFeedback)
+      return NextResponse.json({ error: "Kripya personalization feedback dein." }, { status: 400 });
+    if (!clarityFeedback)
+      return NextResponse.json({ error: "Kripya clarity feedback dein." }, { status: 400 });
+    if (!improvementFeedback)
+      return NextResponse.json({ error: "Kripya improvement feedback dein." }, { status: 400 });
+    if (!name)
+      return NextResponse.json({ error: "Kripya apna naam likhein." }, { status: 400 });
 
     const supabase = createServiceClient();
     const { error } = await supabase.from("kundli_reviews").insert({
-      customer_name: "Anonymous",
+      rating,
+      most_useful_part: mostUsefulPart,
+      personalization_feedback: personalizationFeedback,
+      clarity_feedback: clarityFeedback,
+      improvement_feedback: improvementFeedback,
+      written_review: writtenReview,
+      name,
       phone,
-      rating_overall: ratingOverall,
-      rating_accuracy: ratingOverall,
-      rating_clarity: ratingOverall,
-      rating_design: ratingOverall,
-      favorite_part: favoritePart,
-      improvements: null,
-      recommend_score: 10,
-      testimonial: null,
-      source_page: "premium-kundli-review",
+      source: "premium_kundli_review_form",
     });
 
     if (error) throw error;
