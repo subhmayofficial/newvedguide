@@ -113,7 +113,9 @@ export default function RootLayout({
           <Suspense fallback={null}>
             <GaRouteTracker />
           </Suspense>
-          <GlobalNavigationLoader />
+          <Suspense fallback={null}>
+            <GlobalNavigationLoader />
+          </Suspense>
           {children}
         </PostHogProvider>
 

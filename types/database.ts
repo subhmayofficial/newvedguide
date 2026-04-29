@@ -875,38 +875,6 @@ export interface Database {
         >;
         Relationships: [];
       };
-      support_requests: {
-        Row: {
-          id: string;
-          full_name: string;
-          phone: string | null;
-          email: string | null;
-          order_reference: string | null;
-          subject: string;
-          message: string;
-          status: "open" | "in_progress" | "resolved";
-          resolution_notes: string | null;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          full_name: string;
-          phone?: string | null;
-          email?: string | null;
-          order_reference?: string | null;
-          subject: string;
-          message: string;
-          status?: "open" | "in_progress" | "resolved";
-          resolution_notes?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: Partial<
-          Database["public"]["Tables"]["support_requests"]["Insert"]
-        >;
-        Relationships: [];
-      };
       kundli_reviews: {
         Row: {
           id: string;
