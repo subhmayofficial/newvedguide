@@ -399,6 +399,19 @@ body[data-hide-site-header="true"] .site-header {
   will-change: transform;
 }
 
+@keyframes loader-top-progress {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(240%);
+  }
+}
+
+.loader-top-progress {
+  animation: loader-top-progress 1s ease-in-out infinite;
+}
+
 @keyframes consultation-soft-float {
   0%,
   100% {

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Sun, Moon, LogOut } from "lucide-react";
+import { Sun, Moon, LogOut, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
@@ -52,6 +52,8 @@ const NAV_SECTIONS = [
     label: "Operations",
     items: [
       { label: "Consultations", href: "/admindeoghar/consultations" },
+      { label: "Support", href: "/admindeoghar/support" },
+      { label: "Automations", href: "/admindeoghar/automations" },
       { label: "Integrations", href: "/admindeoghar/integrations" },
       { label: "Tools", href: "/admindeoghar/tools" },
       { label: "Logs", href: "/admindeoghar/logs" },
@@ -68,7 +70,13 @@ const NAV_SECTIONS = [
 
 // ─── Sidebar ───────────────────────────────────────────────────────────────
 
-export function AdminSidebar() {
+export function AdminSidebar({
+  isOpen,
+  onClose,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+}) {
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClient();
@@ -80,30 +88,53 @@ export function AdminSidebar() {
   }
 
   return (
-    <aside
-      className="flex w-[220px] shrink-0 flex-col bg-sidebar"
-      style={{ borderRight: "1px solid var(--sidebar-border)" }}
-    >
+    <>
+      <button
+        type="button"
+        aria-label="Close navigation menu"
+        onClick={onClose}
+        className={cn(
+          "fixed inset-0 z-30 bg-black/45 transition-opacity md:hidden",
+          isOpen ? "opacity-100" : "pointer-events-none opacity-0"
+        )}
+      />
+      <aside
+        className={cn(
+          "fixed inset-y-0 left-0 z-40 flex w-[270px] max-w-[88vw] shrink-0 flex-col bg-sidebar transition-transform duration-200 md:static md:z-auto md:w-[250px] md:max-w-none md:translate-x-0",
+          isOpen ? "translate-x-0" : "-translate-x-full"
+        )}
+        style={{ borderRight: "1px solid var(--sidebar-border)" }}
+      >
       {/* ── Logo ─────────────────────────────────────────────────────── */}
       <div
-        className="flex h-[52px] shrink-0 items-center px-5"
+        className="flex h-[56px] shrink-0 items-center justify-between px-5"
         style={{ borderBottom: "1px solid var(--sidebar-border)" }}
       >
-        <span
-          className="text-[15px] font-semibold tracking-[-0.01em]"
-          style={{ color: "var(--sidebar-foreground)" }}
+        <div className="flex items-center">
+          <span
+            className="text-[15px] font-semibold tracking-[-0.01em]"
+            style={{ color: "var(--sidebar-foreground)" }}
+          >
+            Vedगuide
+          </span>
+          <span
+            className="ml-2 rounded-[3px] px-[5px] py-[2px] text-[9px] font-bold uppercase tracking-[0.1em]"
+            style={{
+              background: "rgba(255,255,255,0.08)",
+              color: "rgba(255,255,255,0.35)",
+            }}
+          >
+            Admin
+          </span>
+        </div>
+        <button
+          type="button"
+          onClick={onClose}
+          className="inline-flex h-8 w-8 items-center justify-center rounded-md text-[rgba(255,255,255,0.55)] hover:bg-[rgba(255,255,255,0.07)] md:hidden"
+          aria-label="Close sidebar"
         >
-          Vedगuide
-        </span>
-        <span
-          className="ml-2 rounded-[3px] px-[5px] py-[2px] text-[9px] font-bold uppercase tracking-[0.1em]"
-          style={{
-            background: "rgba(255,255,255,0.08)",
-            color: "rgba(255,255,255,0.35)",
-          }}
-        >
-          Admin
-        </span>
+          <X size={15} />
+        </button>
       </div>
 
       {/* ── Navigation ───────────────────────────────────────────────── */}
@@ -119,7 +150,7 @@ export function AdminSidebar() {
             </p>
 
             {/* Nav items */}
-            <ul className="space-y-px">
+            <ul className="space-y-1">
               {section.items.map((item) => {
                 const isActive =
                   item.href === "/admindeoghar"
@@ -130,13 +161,20 @@ export function AdminSidebar() {
                   <li key={item.href}>
                     <Link
                       href={item.href}
+                      onClick={onClose}
                       className={cn(
-                        "flex h-[30px] items-center rounded-md px-2.5 text-[13px] font-medium transition-colors duration-100",
+                        "group flex h-[34px] items-center gap-2 rounded-lg px-2.5 text-[13px] font-medium transition-all duration-150",
                         isActive
-                          ? "bg-[rgba(255,255,255,0.09)] text-white"
-                          : "text-[rgba(255,255,255,0.45)] hover:bg-[rgba(255,255,255,0.055)] hover:text-[rgba(255,255,255,0.80)]"
+                          ? "bg-[rgba(255,255,255,0.12)] text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]"
+                          : "text-[rgba(255,255,255,0.52)] hover:bg-[rgba(255,255,255,0.055)] hover:text-[rgba(255,255,255,0.92)]"
                       )}
                     >
+                      <span
+                        className={cn(
+                          "h-1.5 w-1.5 rounded-full transition-colors",
+                          isActive ? "bg-white" : "bg-[rgba(255,255,255,0.25)] group-hover:bg-[rgba(255,255,255,0.65)]"
+                        )}
+                      />
                       {item.label}
                     </Link>
                   </li>
@@ -177,6 +215,7 @@ export function AdminSidebar() {
           Sign out
         </button>
       </div>
-    </aside>
+      </aside>
+    </>
   );
 }

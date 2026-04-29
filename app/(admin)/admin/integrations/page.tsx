@@ -13,6 +13,7 @@ import {
   submitSmtpTemplateUpdateForm,
 } from "@/app/(admin)/admin/actions";
 import { formatAdminDateTime } from "@/lib/admin/time";
+import Link from "next/link";
 import { InteraktTemplateConsole } from "@/components/admin/interakt-template-console";
 import { SmtpEmailTestForm } from "@/components/admin/smtp-email-test-form";
 import { listSavedInteraktTemplates } from "@/lib/services/interakt-template-catalog";
@@ -75,7 +76,14 @@ export default async function AdminIntegrationsPage({
           Integrations
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          WhatsApp delivery via Interakt and SMTP email delivery via Nodemailer, with full logs and test flow.
+          WhatsApp delivery via Interakt and email delivery via Resend, with template-based testing and full logs.
+        </p>
+        <p className="mt-2 text-xs text-muted-foreground">
+          Automation rules are now managed in{" "}
+          <Link href="/admindeoghar/automations" className="font-medium text-brand hover:underline">
+            Automations
+          </Link>
+          .
         </p>
       </header>
 
@@ -116,7 +124,7 @@ export default async function AdminIntegrationsPage({
 
       {(smtpTemplatesErrorCode === "42P01" || smtpTemplatesErrorCode === "42703") && (
         <section className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900/40 dark:bg-amber-950/20 dark:text-amber-300">
-          <p className="font-semibold">SMTP HTML templates migration required.</p>
+          <p className="font-semibold">Email templates migration required.</p>
           <p className="mt-1">
             Run: <code>supabase/migrations/016_admin_smtp_templates.sql</code>
           </p>
@@ -184,15 +192,11 @@ export default async function AdminIntegrationsPage({
         />
 
         <ConfigCard
-          title="SMTP Email (Nodemailer)"
+          title="Resend Email"
           status={config.email.enabled ? "Enabled" : "Disabled"}
           rows={[
-            ["SMTP host", config.email.host ?? "Not set"],
-            ["SMTP port", String(config.email.port)],
-            ["SMTP secure", config.email.secure ? "true" : "false"],
-            ["SMTP user", config.email.user ?? "Not set"],
-            ["SMTP pass", maskSecret(config.email.pass)],
-            ["From", config.email.from ?? "Not set"],
+            ["Resend API key", maskSecret(config.email.apiKey)],
+            ["From email", config.email.from ?? "Not set"],
             ["Reply-To", config.email.replyTo ?? "Not set"],
             ["Support link", config.email.supportLink],
             ["Retry count", String(config.email.retryCount)],
@@ -215,9 +219,9 @@ export default async function AdminIntegrationsPage({
         />
 
         <article className="rounded-2xl border border-border/60 bg-card p-5 shadow-sm">
-          <h2 className="text-lg font-semibold text-foreground">SMTP email test</h2>
+          <h2 className="text-lg font-semibold text-foreground">Send email (Resend)</h2>
           <p className="mt-1 text-xs text-muted-foreground">
-            Sends via Nodemailer and logs the attempt. Pick a saved template or custom HTML with{" "}
+            Send using Resend and log every attempt. Pick a saved template or custom HTML with{" "}
             <span className="font-mono text-[11px]">{"{{var}}"}</span> placeholders—the form only asks for those
             variables (plus recipient email). Use the default HTML path to send the built-in payment-success body
             without placeholders.
@@ -236,20 +240,19 @@ export default async function AdminIntegrationsPage({
 
           <ApiDetail
             title="API details used"
-            method="SMTP SEND"
-            endpoint={`smtp://${config.email.host ?? "not-set"}:${config.email.port}`}
+            method="POST"
+            endpoint="https://api.resend.com/emails"
             headers={[
-              "host: SMTP_HOST",
-              "port: SMTP_PORT",
-              "secure: SMTP_SECURE",
-              "auth.user: SMTP_USER",
-              "auth.pass: SMTP_PASS",
-              "from: EMAIL_FROM",
-              "replyTo: EMAIL_REPLY_TO (optional)",
+              "Authorization: Bearer RESEND_API_KEY",
+              "Content-Type: application/json",
+              "from: RESEND_FROM",
+              "replyTo: RESEND_REPLY_TO (optional)",
             ]}
             payloadExample={{
+              from: "VedGuide <onboarding@resend.dev>",
+              to: ["customer@example.com"],
               subject: "Payment Successful ({{order_id}}) or literal subject",
-              smtp_template_vars:
+              resend_template_vars:
                 "{{name}}, {{order_id}}, … detected from subject + HTML; required inputs appear only for those",
               legacy_test_fields_when_no_template:
                 "fullName, orderIdLabel, product, amount, deliveryText, supportLink",
@@ -260,7 +263,7 @@ export default async function AdminIntegrationsPage({
       </section>
 
       <section className="rounded-2xl border border-border/60 bg-card p-5 shadow-sm">
-        <h2 className="text-lg font-semibold text-foreground">SMTP HTML templates</h2>
+        <h2 className="text-lg font-semibold text-foreground">Email HTML templates</h2>
         <p className="mt-1 text-xs text-muted-foreground">
           Save subject + HTML with <span className="font-mono text-[11px]">{"{{snake_case}}"}</span> variables. The
           test form detects them and shows fill fields automatically.
@@ -367,9 +370,52 @@ export default async function AdminIntegrationsPage({
         ) : null}
       </section>
 
-      <section className="rounded-2xl border border-border/60 bg-card shadow-sm">
-        <div className="border-b border-border/50 px-5 py-4">
-          <h2 className="text-lg font-semibold text-foreground">Delivery logs</h2>
+      <section className="rounded-2xl border border-border/60 bg-card p-5 shadow-sm">
+        <h2 className="text-lg font-semibold text-foreground">Recent email sends</h2>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Quickly review recent email attempts from logs (success, failed, skipped) with recipient and subject.
+        </p>
+        <ul className="mt-4 divide-y divide-border/50 rounded-xl border border-border/60">
+          {logs
+            .filter((log) => log.channel === "email")
+            .slice(0, 20)
+            .map((log) => {
+              const request = (log.request_body_json ?? {}) as Record<string, unknown>;
+              const recipientRaw = request.to;
+              const recipient = Array.isArray(recipientRaw)
+                ? String(recipientRaw[0] ?? "-")
+                : String(recipientRaw ?? "-");
+              return (
+                <li key={log.id} className="px-4 py-3 text-xs">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <span className="font-medium text-foreground">{String(request.subject ?? "(no subject)")}</span>
+                    <StatusDot status={log.status} />
+                  </div>
+                  <p className="mt-1 text-muted-foreground">
+                    To: <span className="font-mono">{recipient}</span> | Provider:{" "}
+                    <span className="font-mono">{log.provider}</span> | {formatAdminDateTime(log.created_at)}
+                  </p>
+                </li>
+              );
+            })}
+          {!logs.some((log) => log.channel === "email") ? (
+            <li className="px-4 py-6 text-sm text-muted-foreground">No email sends yet.</li>
+          ) : null}
+        </ul>
+      </section>
+
+      <section className="rounded-2xl border border-border/60 bg-card p-5 shadow-sm">
+        <h2 className="text-lg font-semibold text-foreground">Best practices</h2>
+        <ul className="mt-3 list-disc space-y-1 pl-5 text-xs text-muted-foreground">
+          <li>Use one active template per campaign and keep variable names stable (snake_case).</li>
+          <li>Preview with test sends before auto-delivery flows.</li>
+          <li>Use branded sender domains in Resend for better inbox placement.</li>
+        </ul>
+      </section>
+
+      <section className="rounded-2xl border border-border/60 bg-card p-5 shadow-sm">
+        <h2 className="text-lg font-semibold text-foreground">Delivery logs</h2>
+        <div className="border-b border-border/50 px-0 pb-4">
           <p className="mt-1 text-xs text-muted-foreground">
             Outbound API attempts with request/response details. Latest 120 entries.
           </p>

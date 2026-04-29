@@ -1,6 +1,9 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/types/database";
-import { sendInteraktWhatsApp } from "@/lib/services/integration-delivery";
+import {
+  sendInteraktWhatsApp,
+  triggerKundliDeliveryCompletedEmail,
+} from "@/lib/services/integration-delivery";
 import { getOrderDeliverySettings } from "@/lib/admin/order-delivery-settings";
 import { isValidHttpUrl } from "@/lib/services/integration-config";
 import {
@@ -144,6 +147,13 @@ export async function processDueScheduledPaidKundliDeliveries(
 
     if (result.ok) {
       await completePaidKundliDeliveryFromAdminSend(supabase, r.id);
+      await triggerKundliDeliveryCompletedEmail(supabase, {
+        orderId: r.id,
+        customerName: name,
+        reportUrl: url,
+        createdBy: opts.createdBy,
+        triggerSource: "automation_kundli_delivery_completed_cron",
+      });
       sent += 1;
     } else {
       failures.push(`${r.id}: ${result.message}`);

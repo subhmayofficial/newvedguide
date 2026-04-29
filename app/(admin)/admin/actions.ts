@@ -18,7 +18,8 @@ import { createCoupon } from "@/lib/services/coupon";
 import {
   createInteraktApiCampaign,
   sendInteraktWhatsApp,
-  sendSmtpEmail,
+  sendResendEmail,
+  triggerKundliDeliveryCompletedEmail,
 } from "@/lib/services/integration-delivery";
 import { fetchRazorpayOrder, fetchRazorpayOrderPayments } from "@/lib/razorpay";
 import { isValidHttpUrl } from "@/lib/services/integration-config";
@@ -31,6 +32,7 @@ import {
   upsertSavedSmtpTemplate,
   updateSavedSmtpTemplateById,
 } from "@/lib/services/smtp-template-catalog";
+import { upsertAdminEmailAutomation } from "@/lib/services/email-automations";
 import {
   deleteSavedInteraktTemplateById,
   updateSavedInteraktTemplateById,
@@ -235,7 +237,7 @@ function toNullable(value: FormDataEntryValue | null): string | null {
 }
 
 function redirectWithIntegrationResult(
-  provider: "interakt" | "smtp",
+  provider: "interakt" | "resend",
   status: string,
   message: string
 ) {
@@ -244,6 +246,13 @@ function redirectWithIntegrationResult(
   q.set("test_status", status);
   q.set("test_message", message);
   redirect(`/admindeoghar/integrations?${q.toString()}`);
+}
+
+function redirectWithAutomationResult(status: string, message: string): never {
+  const q = new URLSearchParams();
+  q.set("automation_status", status);
+  q.set("automation_message", message);
+  redirect(`/admindeoghar/automations?${q.toString()}`);
 }
 
 export async function submitInteraktWebhookTestForm(formData: FormData) {
@@ -629,7 +638,7 @@ export async function submitSmtpEmailTestForm(formData: FormData) {
       const v = smtpVars[key];
       if (!v?.trim()) {
         redirectWithIntegrationResult(
-          "smtp",
+          "resend",
           "failed",
           `Missing value for template variable {{${key}}}`
         );
@@ -639,7 +648,7 @@ export async function submitSmtpEmailTestForm(formData: FormData) {
     html = applySmtpTemplateVariables(html, smtpVars);
   }
 
-  const result = await sendSmtpEmail(supabase, {
+  const result = await sendResendEmail(supabase, {
     eventName: "webhook_test",
     triggerSource: "admin_webhook_test",
     createdBy: await getAdminActor(),
@@ -669,7 +678,7 @@ export async function submitSmtpEmailTestForm(formData: FormData) {
   });
 
   revalidatePath("/admindeoghar/integrations");
-  redirectWithIntegrationResult("smtp", result.status, result.message);
+  redirectWithIntegrationResult("resend", result.status, result.message);
 }
 
 export async function submitSmtpTemplateCreateForm(formData: FormData) {
@@ -680,10 +689,10 @@ export async function submitSmtpTemplateCreateForm(formData: FormData) {
   const notes = toNullable(formData.get("notes"));
 
   if (!name) {
-    redirectWithIntegrationResult("smtp", "failed", "Template name is required");
+    redirectWithIntegrationResult("resend", "failed", "Template name is required");
   }
   if (!html.trim()) {
-    redirectWithIntegrationResult("smtp", "failed", "Template HTML is required");
+    redirectWithIntegrationResult("resend", "failed", "Template HTML is required");
   }
 
   await upsertSavedSmtpTemplate(supabase, {
@@ -695,7 +704,7 @@ export async function submitSmtpTemplateCreateForm(formData: FormData) {
   });
 
   revalidatePath("/admindeoghar/integrations");
-  redirectWithIntegrationResult("smtp", "success", "SMTP template saved");
+  redirectWithIntegrationResult("resend", "success", "Email template saved");
 }
 
 export async function submitSmtpTemplateUpdateForm(formData: FormData) {
@@ -707,13 +716,13 @@ export async function submitSmtpTemplateUpdateForm(formData: FormData) {
   const notes = toNullable(formData.get("notes"));
 
   if (!templateId || !isTemplateRowId(templateId)) {
-    redirectWithIntegrationResult("smtp", "failed", "Invalid template id");
+    redirectWithIntegrationResult("resend", "failed", "Invalid template id");
   }
   if (!name) {
-    redirectWithIntegrationResult("smtp", "failed", "Template name is required");
+    redirectWithIntegrationResult("resend", "failed", "Template name is required");
   }
   if (!html.trim()) {
-    redirectWithIntegrationResult("smtp", "failed", "Template HTML is required");
+    redirectWithIntegrationResult("resend", "failed", "Template HTML is required");
   }
 
   await updateSavedSmtpTemplateById(supabase, templateId as string, {
@@ -724,7 +733,114 @@ export async function submitSmtpTemplateUpdateForm(formData: FormData) {
   });
 
   revalidatePath("/admindeoghar/integrations");
-  redirectWithIntegrationResult("smtp", "success", "SMTP template updated");
+  redirectWithIntegrationResult("resend", "success", "Email template updated");
+}
+
+export async function submitEmailAutomationUpdateForm(formData: FormData) {
+  const supabase = createServiceClient();
+  const automationKey = toNullable(formData.get("automationKey"));
+  const label = toNullable(formData.get("label"));
+  const description = toNullable(formData.get("description"));
+  const templateName = toNullable(formData.get("templateName"));
+  const isEnabled = String(formData.get("isEnabled") ?? "") === "on";
+
+  if (!automationKey || !label || !templateName) {
+    redirectWithAutomationResult("failed", "Automation key, label and template name are required");
+  }
+
+  try {
+    await upsertAdminEmailAutomation(supabase, {
+      automationKey: automationKey as string,
+      label: label as string,
+      description,
+      templateName: templateName as string,
+      isEnabled,
+    });
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "Failed to update automation";
+    redirectWithAutomationResult("failed", msg.slice(0, 220));
+  }
+
+  revalidatePath("/admindeoghar/automations");
+  redirectWithAutomationResult("success", "Automation updated");
+}
+
+export async function submitEmailAutomationTestForm(formData: FormData) {
+  const supabase = createServiceClient();
+  const automationKey = toNullable(formData.get("automationKey"));
+  const testEmail = toNullable(formData.get("testEmail"));
+
+  if (!automationKey || !testEmail || !testEmail.includes("@")) {
+    redirectWithAutomationResult("failed", "Valid test email and automation key are required");
+  }
+
+  const { data: automation } = await supabase
+    .from("admin_email_automations")
+    .select("automation_key,template_name,is_enabled")
+    .eq("automation_key", automationKey as string)
+    .maybeSingle();
+
+  if (!automation) {
+    redirectWithAutomationResult("failed", "Automation not found");
+  }
+
+  const templateName = automation.template_name?.trim() || "";
+  if (!templateName) {
+    redirectWithAutomationResult("failed", "No template configured for this automation");
+  }
+
+  const { data: template } = await supabase
+    .from("admin_smtp_templates")
+    .select("subject,html")
+    .eq("name", templateName)
+    .eq("is_active", true)
+    .maybeSingle();
+
+  if (!template?.html) {
+    redirectWithAutomationResult("failed", `Template "${templateName}" not found in saved templates`);
+  }
+
+  const vars: Record<string, string> = {
+    name: "Test User",
+    full_name: "Test User",
+    email: testEmail as string,
+    phone: "9999999999",
+    order_id: "VG-TEST-AUTO-001",
+    order_number: "VG-TEST-AUTO-001",
+    product: "Paid Kundli Report",
+    amount: "399",
+    support_link: "https://wa.me/919999999999",
+    delivery_text: "This is an automation test email.",
+  };
+  const needed = collectSmtpTemplateVariableKeys(template.subject ?? "", template.html ?? "");
+  for (const key of needed) {
+    if (!(key in vars)) {
+      vars[key] = `test_${key}`;
+    }
+  }
+
+  const subject =
+    applySmtpTemplateVariables(template.subject || "Automation test email", vars).trim() ||
+    "Automation test email";
+  const html = applySmtpTemplateVariables(template.html, vars);
+
+  const result = await sendResendEmail(supabase, {
+    eventName: "automation_manual_test",
+    triggerSource: `automation_manual_test_${automation.automation_key}`,
+    createdBy: await getAdminActor(),
+    email: testEmail,
+    subject,
+    html,
+    payloadExtras: {
+      automation_key: automation.automation_key,
+      template_name: templateName,
+      is_enabled: automation.is_enabled,
+      test_vars: vars,
+    },
+  });
+
+  revalidatePath("/admindeoghar/automations");
+  redirectWithAutomationResult(result.ok ? "success" : "failed", result.message);
 }
 
 function redirectWithOrderDeliveryResult(status: "success" | "failed", message: string): never {
@@ -942,6 +1058,13 @@ export async function submitOrderInteraktDeliveryForm(formData: FormData) {
 
   if (result.ok) {
     await completePaidKundliDeliveryFromAdminSend(supabase, orderId);
+    await triggerKundliDeliveryCompletedEmail(supabase, {
+      orderId,
+      customerName,
+      reportUrl,
+      createdBy: await getAdminActor(),
+      triggerSource: "automation_kundli_delivery_completed_admin",
+    });
     revalidatePath(`/admindeoghar/orders/${orderId}`);
     revalidatePath("/admindeoghar/orders");
   } else {

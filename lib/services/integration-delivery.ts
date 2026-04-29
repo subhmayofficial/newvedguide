@@ -1,4 +1,4 @@
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database, Json } from "@/types/database";
 import {
@@ -6,11 +6,12 @@ import {
   isValidHttpUrl,
   type InteraktIntegrationConfig,
 } from "@/lib/services/integration-config";
+import { applySmtpTemplateVariables } from "@/lib/smtp-template-vars";
 
 const REQUEST_TIMEOUT_MS = 12_000;
 const MAX_RESPONSE_TEXT_LENGTH = 8_000;
 
-type DeliveryProvider = "interakt" | "smtp" | "make";
+type DeliveryProvider = "interakt" | "resend" | "make";
 type DeliveryChannel = "whatsapp" | "email" | "webhook";
 type DeliveryStatus = "success" | "failed" | "skipped";
 
@@ -54,7 +55,7 @@ export interface InteraktCreateCampaignInput {
   createdBy?: string | null;
 }
 
-export interface SmtpEmailInput extends DeliveryContext {
+export interface ResendEmailInput extends DeliveryContext {
   fullName?: string | null;
   email?: string | null;
   subject: string;
@@ -595,17 +596,26 @@ export async function createInteraktApiCampaign(
   };
 }
 
-export async function sendSmtpEmail(
+let resendClient: Resend | null = null;
+
+function getResendClient(apiKey: string): Resend {
+  if (!resendClient) {
+    resendClient = new Resend(apiKey);
+  }
+  return resendClient;
+}
+
+export async function sendResendEmail(
   supabase: SupabaseClient<Database>,
-  input: SmtpEmailInput
+  input: ResendEmailInput
 ): Promise<DeliveryAttemptResult> {
   const config = getDeliveryIntegrationsConfig().email;
   const normalizedEmail = input.email?.trim().toLowerCase() ?? "";
-  const smtpUrlLabel = config.host ? `smtp://${config.host}:${config.port}` : "smtp://unconfigured";
+  const resendUrlLabel = "https://api.resend.com/emails";
 
   if (!config.enabled) {
     await insertDeliveryLog(supabase, {
-      provider: "smtp",
+      provider: "resend",
       channel: "email",
       eventName: input.eventName,
       status: "skipped",
@@ -613,25 +623,25 @@ export async function sendSmtpEmail(
       customerId: input.customerId ?? null,
       leadId: input.leadId ?? null,
       orderId: input.orderId ?? null,
-      requestUrl: smtpUrlLabel,
-      requestMethod: "SMTP",
-      errorMessage: "SMTP email integration is disabled",
+      requestUrl: resendUrlLabel,
+      requestMethod: "POST",
+      errorMessage: "Resend email integration is disabled",
       createdBy: input.createdBy ?? null,
     });
     return {
       ok: false,
       status: "skipped",
-      provider: "smtp",
-      message: "SMTP email integration is disabled",
+      provider: "resend",
+      message: "Resend email integration is disabled",
       responseStatus: null,
       responseBody: null,
     };
   }
 
-  if (!config.host || !config.user || !config.pass || !config.from) {
-    const message = "SMTP configuration is incomplete";
+  if (!config.apiKey || !config.from) {
+    const message = "Resend configuration is incomplete";
     await insertDeliveryLog(supabase, {
-      provider: "smtp",
+      provider: "resend",
       channel: "email",
       eventName: input.eventName,
       status: "failed",
@@ -639,15 +649,15 @@ export async function sendSmtpEmail(
       customerId: input.customerId ?? null,
       leadId: input.leadId ?? null,
       orderId: input.orderId ?? null,
-      requestUrl: smtpUrlLabel,
-      requestMethod: "SMTP",
+      requestUrl: resendUrlLabel,
+      requestMethod: "POST",
       errorMessage: message,
       createdBy: input.createdBy ?? null,
     });
     return {
       ok: false,
       status: "failed",
-      provider: "smtp",
+      provider: "resend",
       message,
       responseStatus: null,
       responseBody: null,
@@ -657,7 +667,7 @@ export async function sendSmtpEmail(
   if (!normalizedEmail || !normalizedEmail.includes("@")) {
     const message = "Missing valid recipient email";
     await insertDeliveryLog(supabase, {
-      provider: "smtp",
+      provider: "resend",
       channel: "email",
       eventName: input.eventName,
       status: "skipped",
@@ -665,118 +675,99 @@ export async function sendSmtpEmail(
       customerId: input.customerId ?? null,
       leadId: input.leadId ?? null,
       orderId: input.orderId ?? null,
-      requestUrl: smtpUrlLabel,
-      requestMethod: "SMTP",
+      requestUrl: resendUrlLabel,
+      requestMethod: "POST",
       errorMessage: message,
       createdBy: input.createdBy ?? null,
     });
     return {
       ok: false,
       status: "skipped",
-      provider: "smtp",
+      provider: "resend",
       message,
       responseStatus: null,
       responseBody: null,
     };
   }
 
-  const transporter = nodemailer.createTransport({
-    host: config.host,
-    port: config.port,
-    secure: config.secure,
-    auth: {
-      user: config.user,
-      pass: config.pass,
-    },
-  });
-
-  const fromCandidates = Array.from(new Set([config.from, config.user].filter(Boolean)));
+  const client = getResendClient(config.apiKey);
+  const fromAddress = config.from;
   let lastError: string | null = null;
-  let lastFrom: string | null = null;
   let sendAttempt = 0;
 
-  for (const fromAddress of fromCandidates) {
-    for (let attempt = 1; attempt <= config.retryCount; attempt += 1) {
-      sendAttempt += 1;
-      lastFrom = fromAddress!;
+  for (let attempt = 1; attempt <= config.retryCount; attempt += 1) {
+    sendAttempt += 1;
+    const requestBody = {
+      to: [normalizedEmail],
+      from: fromAddress,
+      reply_to: config.replyTo,
+      subject: input.subject,
+      html: truncateText(input.html, 3000),
+      payload_extras: input.payloadExtras ?? null,
+    };
 
-      const requestBody = {
-        to: normalizedEmail,
+    try {
+      const { data, error } = await client.emails.send({
         from: fromAddress,
-        reply_to: config.replyTo,
+        to: [normalizedEmail],
+        replyTo: config.replyTo ?? undefined,
         subject: input.subject,
-        html: truncateText(input.html, 3000),
-        payload_extras: input.payloadExtras ?? null,
-      };
+        html: input.html,
+        text: input.text ?? toPlainTextFromHtml(input.html),
+      });
 
-      try {
-        const info = await transporter.sendMail({
-          from: fromAddress,
-          to: normalizedEmail,
-          replyTo: config.replyTo ?? undefined,
-          subject: input.subject,
-          html: input.html,
-          text: input.text ?? toPlainTextFromHtml(input.html),
-        });
-
-        await insertDeliveryLog(supabase, {
-          provider: "smtp",
-          channel: "email",
-          eventName: input.eventName,
-          status: "success",
-          triggerSource: input.triggerSource,
-          customerId: input.customerId ?? null,
-          leadId: input.leadId ?? null,
-          orderId: input.orderId ?? null,
-          requestUrl: smtpUrlLabel,
-          requestMethod: "SMTP",
-          requestHeadersJson: {
-            host: config.host,
-            port: String(config.port),
-            secure: String(config.secure),
-            user: config.user,
-            from: fromAddress,
-            reply_to: config.replyTo ?? null,
-            retries: String(config.retryCount),
-          },
-          requestBodyJson: requestBody as Json,
-          responseStatus: 250,
-          responseBody: truncateText(
-            JSON.stringify(
-              {
-                messageId: info.messageId,
-                accepted: info.accepted,
-                rejected: info.rejected,
-                response: info.response,
-                envelope: info.envelope,
-                attempt,
-                total_attempt: sendAttempt,
-                sender_used: fromAddress,
-              },
-              null,
-              2
-            )
-          ),
-          createdBy: input.createdBy ?? null,
-        });
-
-        return {
-          ok: true,
-          status: "success",
-          provider: "smtp",
-          message: `SMTP email sent on attempt ${sendAttempt} using ${fromAddress}`,
-          responseStatus: 250,
-          responseBody: info.response ?? null,
-        };
-      } catch (error) {
-        lastError = toErrorMessage(error);
+      if (error) {
+        lastError = error.message ?? "Resend API error";
+        continue;
       }
+
+      await insertDeliveryLog(supabase, {
+        provider: "resend",
+        channel: "email",
+        eventName: input.eventName,
+        status: "success",
+        triggerSource: input.triggerSource,
+        customerId: input.customerId ?? null,
+        leadId: input.leadId ?? null,
+        orderId: input.orderId ?? null,
+        requestUrl: resendUrlLabel,
+        requestMethod: "POST",
+        requestHeadersJson: {
+          authorization: "[REDACTED]",
+          content_type: "application/json",
+        },
+        requestBodyJson: requestBody as Json,
+        responseStatus: 200,
+        responseBody: truncateText(
+          JSON.stringify(
+            {
+              id: data?.id ?? null,
+              attempt,
+              total_attempt: sendAttempt,
+            },
+            null,
+            2
+          )
+        ),
+        createdBy: input.createdBy ?? null,
+      });
+
+      return {
+        ok: true,
+        status: "success",
+        provider: "resend",
+        message: `Resend email sent on attempt ${sendAttempt}`,
+        responseStatus: 200,
+        responseBody: data?.id ?? null,
+      };
+    } catch (error) {
+      lastError = toErrorMessage(error);
     }
   }
 
   const finalRequestBody = {
     to: normalizedEmail,
-    from: lastFrom ?? config.from,
+    from: fromAddress,
     reply_to: config.replyTo,
     subject: input.subject,
     html: truncateText(input.html, 3000),
@@ -784,7 +775,7 @@ export async function sendSmtpEmail(
   };
 
   await insertDeliveryLog(supabase, {
-    provider: "smtp",
+    provider: "resend",
     channel: "email",
     eventName: input.eventName,
     status: "failed",
@@ -792,30 +783,26 @@ export async function sendSmtpEmail(
     customerId: input.customerId ?? null,
     leadId: input.leadId ?? null,
     orderId: input.orderId ?? null,
-    requestUrl: smtpUrlLabel,
-    requestMethod: "SMTP",
+    requestUrl: resendUrlLabel,
+    requestMethod: "POST",
     requestHeadersJson: {
-      host: config.host,
-      port: String(config.port),
-      secure: String(config.secure),
-      user: config.user,
-      from: lastFrom ?? config.from,
+      authorization: "[REDACTED]",
+      from: fromAddress,
       reply_to: config.replyTo ?? null,
       retries: String(config.retryCount),
-      sender_fallback_enabled: "true",
     },
     requestBodyJson: finalRequestBody as Json,
     responseStatus: null,
     responseBody: null,
-    errorMessage: `SMTP send failed after ${sendAttempt} attempts: ${lastError ?? "Unknown error"}`,
+    errorMessage: `Resend send failed after ${sendAttempt} attempts: ${lastError ?? "Unknown error"}`,
     createdBy: input.createdBy ?? null,
   });
 
   return {
     ok: false,
     status: "failed",
-    provider: "smtp",
-    message: `SMTP send failed: ${lastError ?? "Unknown error"}`,
+    provider: "resend",
+    message: `Resend send failed: ${lastError ?? "Unknown error"}`,
     responseStatus: null,
     responseBody: null,
   };
@@ -846,11 +833,11 @@ function renderPaymentSuccessEmailHtml(input: PaymentSuccessEmailInput): string 
 `.trim();
 }
 
-export async function sendPaymentSuccessSmtpEmail(
+export async function sendPaymentSuccessEmail(
   supabase: SupabaseClient<Database>,
   input: PaymentSuccessEmailInput
 ): Promise<DeliveryAttemptResult> {
-  return sendSmtpEmail(supabase, {
+  return sendResendEmail(supabase, {
     ...input,
     subject: `Payment Successful - Your Order is Confirmed (${input.orderIdLabel})`,
     html: renderPaymentSuccessEmailHtml(input),
@@ -985,19 +972,174 @@ export async function triggerPaymentSuccessDeliveries(
   }
 
   if (config.email.triggerOnPaymentSuccess) {
-    await sendPaymentSuccessSmtpEmail(supabase, {
-      eventName: "payment_success",
-      triggerSource: "payment_success_auto",
-      orderId: order.id,
-      leadId: order.lead_id,
-      customerId: order.customer_id,
-      fullName,
-      email: customer?.email ?? null,
-      orderIdLabel: order.order_number,
-      product: productName,
-      amount: amountRupees,
-      deliveryText: resolveDeliveryText(order.product_slug),
-      supportLink: config.email.supportLink,
-    });
+    if (order.product_slug === "paid-kundli") {
+      const { data: automationRow } = await supabase
+        .from("admin_email_automations")
+        .select("is_enabled,template_name")
+        .eq("automation_key", "kundli_order_confirmation")
+        .maybeSingle();
+
+      const automationEnabled = automationRow?.is_enabled ?? true;
+      const automationTemplateName =
+        automationRow?.template_name?.trim() || "kundli_order_confirmation";
+
+      if (!automationEnabled) {
+        return;
+      }
+
+      const { data: templateRow } = await supabase
+        .from("admin_smtp_templates")
+        .select("subject,html")
+        .eq("name", automationTemplateName)
+        .eq("is_active", true)
+        .maybeSingle();
+
+      if (templateRow?.html) {
+        const vars = {
+          name: fullName,
+          full_name: fullName,
+          email: customer?.email ?? "",
+          phone: customer?.phone ?? "",
+          order_id: order.order_number,
+          order_number: order.order_number,
+          product: productName,
+          amount: amountRupees,
+          support_link: config.email.supportLink,
+          delivery_text: resolveDeliveryText(order.product_slug),
+        };
+        const subject =
+          applySmtpTemplateVariables(templateRow.subject || "Order confirmation", vars).trim() ||
+          `Order Confirmed (${order.order_number})`;
+        const html = applySmtpTemplateVariables(templateRow.html, vars).trim();
+        await sendResendEmail(supabase, {
+          eventName: "kundli_order_confirmation",
+          triggerSource: "automation_kundli_order_confirmation",
+          orderId: order.id,
+          leadId: order.lead_id,
+          customerId: order.customer_id,
+          fullName,
+          email: customer?.email ?? null,
+          subject,
+          html,
+          payloadExtras: {
+            automation_key: "kundli_order_confirmation",
+            automation_template_name: automationTemplateName,
+            vars,
+          },
+        });
+      } else {
+        await sendPaymentSuccessEmail(supabase, {
+          eventName: "payment_success",
+          triggerSource: "payment_success_auto_fallback",
+          orderId: order.id,
+          leadId: order.lead_id,
+          customerId: order.customer_id,
+          fullName,
+          email: customer?.email ?? null,
+          orderIdLabel: order.order_number,
+          product: productName,
+          amount: amountRupees,
+          deliveryText: resolveDeliveryText(order.product_slug),
+          supportLink: config.email.supportLink,
+        });
+      }
+    } else {
+      await sendPaymentSuccessEmail(supabase, {
+        eventName: "payment_success",
+        triggerSource: "payment_success_auto",
+        orderId: order.id,
+        leadId: order.lead_id,
+        customerId: order.customer_id,
+        fullName,
+        email: customer?.email ?? null,
+        orderIdLabel: order.order_number,
+        product: productName,
+        amount: amountRupees,
+        deliveryText: resolveDeliveryText(order.product_slug),
+        supportLink: config.email.supportLink,
+      });
+    }
   }
+}
+
+export async function triggerKundliDeliveryCompletedEmail(
+  supabase: SupabaseClient<Database>,
+  input: {
+    orderId: string;
+    customerName: string;
+    reportUrl: string;
+    createdBy?: string | null;
+    triggerSource?: string;
+  }
+): Promise<void> {
+  const config = getDeliveryIntegrationsConfig();
+  if (!config.email.enabled) return;
+
+  const { data: orderRaw } = await supabase
+    .from("orders")
+    .select("id,order_number,product_slug,total_amount,customer_id,lead_id,customers(full_name,email,phone)")
+    .eq("id", input.orderId)
+    .maybeSingle();
+  const order = orderRaw as PaidOrderDeliveryRow | null;
+  if (!order || order.product_slug !== "paid-kundli") return;
+
+  const customer = order.customers;
+  const fullName = input.customerName?.trim() || customer?.full_name || "Customer";
+  const email = customer?.email?.trim() || null;
+  if (!email) return;
+
+  const { data: automationRow } = await supabase
+    .from("admin_email_automations")
+    .select("is_enabled,template_name")
+    .eq("automation_key", "kundli_delivery_completed")
+    .maybeSingle();
+  const automationEnabled = automationRow?.is_enabled ?? true;
+  const automationTemplateName =
+    automationRow?.template_name?.trim() || "kundli_delivery_completed";
+  if (!automationEnabled) return;
+
+  const { data: templateRow } = await supabase
+    .from("admin_smtp_templates")
+    .select("subject,html")
+    .eq("name", automationTemplateName)
+    .eq("is_active", true)
+    .maybeSingle();
+  if (!templateRow?.html) return;
+
+  const amountRupees = (Number(order.total_amount) / 100).toFixed(0);
+  const vars = {
+    name: fullName,
+    full_name: fullName,
+    email,
+    phone: customer?.phone ?? "",
+    order_id: order.order_number,
+    order_number: order.order_number,
+    product: "Paid Kundli Report",
+    amount: amountRupees,
+    support_link: config.email.supportLink,
+    report_url: input.reportUrl,
+    delivery_text: "Your paid kundli report has been delivered.",
+  };
+  const subject =
+    applySmtpTemplateVariables(templateRow.subject || "Kundli report delivered", vars).trim() ||
+    `Kundli report delivered (${order.order_number})`;
+  const html = applySmtpTemplateVariables(templateRow.html, vars).trim();
+
+  await sendResendEmail(supabase, {
+    eventName: "kundli_delivery_completed",
+    triggerSource: input.triggerSource ?? "automation_kundli_delivery_completed",
+    orderId: order.id,
+    leadId: order.lead_id,
+    customerId: order.customer_id,
+    createdBy: input.createdBy ?? null,
+    fullName,
+    email,
+    subject,
+    html,
+    payloadExtras: {
+      automation_key: "kundli_delivery_completed",
+      automation_template_name: automationTemplateName,
+      vars,
+    },
+  });
 }

@@ -144,7 +144,7 @@ export function SmtpEmailTestForm({
         <textarea
           name="message"
           rows={3}
-          placeholder="(Optional) Internal note for test context"
+          placeholder="(Optional) Internal note for this send"
           className={`${inputCls} py-2`}
         />
       </Field>
@@ -162,7 +162,7 @@ export function SmtpEmailTestForm({
         type="submit"
         className="inline-flex h-10 items-center justify-center rounded-lg bg-brand px-4 text-sm font-semibold text-primary-foreground transition hover:bg-brand-hover"
       >
-        Send SMTP test email
+        Send test email
       </button>
     </form>
   );

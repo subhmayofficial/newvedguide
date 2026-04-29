@@ -593,6 +593,64 @@ export interface Database {
         >;
         Relationships: [];
       };
+      admin_email_automations: {
+        Row: {
+          id: string;
+          automation_key: string;
+          label: string;
+          description: string | null;
+          is_enabled: boolean;
+          template_name: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          automation_key: string;
+          label: string;
+          description?: string | null;
+          is_enabled?: boolean;
+          template_name: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["admin_email_automations"]["Insert"]
+        >;
+        Relationships: [];
+      };
+      support_requests: {
+        Row: {
+          id: string;
+          full_name: string;
+          email: string;
+          phone: string | null;
+          subject: string;
+          problem: string;
+          status: "new" | "in_progress" | "resolved";
+          source_page: string | null;
+          user_agent: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          full_name: string;
+          email: string;
+          phone?: string | null;
+          subject: string;
+          problem: string;
+          status?: "new" | "in_progress" | "resolved";
+          source_page?: string | null;
+          user_agent?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["support_requests"]["Insert"]
+        >;
+        Relationships: [];
+      };
       kundli_submissions: {
         Row: {
           id: string;

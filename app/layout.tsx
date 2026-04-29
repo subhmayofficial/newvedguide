@@ -6,6 +6,7 @@ import "./globals.css";
 import { Suspense } from "react";
 import { PostHogProvider } from "@/components/providers/posthog-provider";
 import { GaRouteTracker } from "@/components/analytics/ga-route-tracker";
+import { GlobalNavigationLoader } from "@/components/shared/global-navigation-loader";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -112,6 +113,7 @@ export default function RootLayout({
           <Suspense fallback={null}>
             <GaRouteTracker />
           </Suspense>
+          <GlobalNavigationLoader />
           {children}
         </PostHogProvider>
 

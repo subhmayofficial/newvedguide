@@ -19,13 +19,9 @@ export interface InteraktIntegrationConfig {
   kundliDeliveryButtonLinkTemplate: string | null;
 }
 
-export interface SmtpEmailIntegrationConfig {
+export interface ResendEmailIntegrationConfig {
   enabled: boolean;
-  host: string | null;
-  port: number;
-  secure: boolean;
-  user: string | null;
-  pass: string | null;
+  apiKey: string | null;
   from: string | null;
   replyTo: string | null;
   supportLink: string;
@@ -35,7 +31,7 @@ export interface SmtpEmailIntegrationConfig {
 
 export interface DeliveryIntegrationsConfig {
   interakt: InteraktIntegrationConfig;
-  email: SmtpEmailIntegrationConfig;
+  email: ResendEmailIntegrationConfig;
 }
 
 const INTERAKT_DEFAULT_ENDPOINT = "https://api.interakt.ai/v1/public/message/";
@@ -61,6 +57,12 @@ function readNumber(input: string | undefined, fallback: number): number {
   const parsed = Number(input);
   if (Number.isNaN(parsed) || !Number.isFinite(parsed)) return fallback;
   return parsed;
+}
+
+function normalizeResendApiKey(raw: string | null | undefined): string | null {
+  if (!raw) return null;
+  const value = raw.trim();
+  return value ? value : null;
 }
 
 /**
@@ -89,6 +91,7 @@ export function getDeliveryIntegrationsConfig(): DeliveryIntegrationsConfig {
 
   const interaktApiKey = normalizeInteraktApiKey(process.env.INTERAKT_API_KEY);
 
+  const resendApiKey = normalizeResendApiKey(process.env.RESEND_API_KEY);
   return {
     interakt: {
       enabled: readInteraktEnabled(interaktApiKey),
@@ -109,20 +112,16 @@ export function getDeliveryIntegrationsConfig(): DeliveryIntegrationsConfig {
         process.env.INTERAKT_KUNDLI_BUTTON_LINK?.trim() || null,
     },
     email: {
-      enabled: readBoolean(process.env.SMTP_EMAIL_ENABLED, false),
-      host: process.env.SMTP_HOST?.trim() || null,
-      port: readNumber(process.env.SMTP_PORT, 465),
-      secure: readBoolean(process.env.SMTP_SECURE, true),
-      user: process.env.SMTP_USER?.trim() || null,
-      pass: process.env.SMTP_PASS?.trim() || null,
-      from: process.env.EMAIL_FROM?.trim() || null,
-      replyTo: process.env.EMAIL_REPLY_TO?.trim() || null,
+      enabled: readBoolean(process.env.RESEND_ENABLED, Boolean(resendApiKey)),
+      apiKey: resendApiKey,
+      from: process.env.RESEND_FROM?.trim() || null,
+      replyTo: process.env.RESEND_REPLY_TO?.trim() || null,
       supportLink:
         process.env.EMAIL_SUPPORT_LINK?.trim() ||
         supportFromPublicEnv ||
         DEFAULT_SUPPORT_LINK,
-      retryCount: Math.max(1, Math.min(3, readNumber(process.env.SMTP_RETRY_COUNT, 2))),
-      triggerOnPaymentSuccess: readBoolean(process.env.SMTP_AUTO_DELIVERY_ON_PAYMENT, true),
+      retryCount: Math.max(1, Math.min(3, readNumber(process.env.RESEND_RETRY_COUNT, 2))),
+      triggerOnPaymentSuccess: readBoolean(process.env.RESEND_AUTO_DELIVERY_ON_PAYMENT, true),
     },
   };
 }
