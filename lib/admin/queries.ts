@@ -126,18 +126,17 @@ export async function ordersDaily(
 ) {
   const { data, error } = await supabase
     .from("orders")
-    .select("created_at,payment_status,total_amount")
+    .select("created_at,total_amount")
     .gte("created_at", range.from)
-    .lte("created_at", range.to);
+    .lte("created_at", range.to)
+    .eq("payment_status", "paid");
   if (error) throw error;
   const byDay: Record<string, { count: number; revenue: number }> = {};
   for (const row of data ?? []) {
     const day = row.created_at.slice(0, 10);
     if (!byDay[day]) byDay[day] = { count: 0, revenue: 0 };
     byDay[day].count += 1;
-    if (row.payment_status === "paid") {
-      byDay[day].revenue += Number(row.total_amount);
-    }
+    byDay[day].revenue += Number(row.total_amount);
   }
   return byDay;
 }
