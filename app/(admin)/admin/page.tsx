@@ -87,6 +87,28 @@ export default async function AdminDashboardPage({
         </p>
       </div>
 
+      <section className="rounded-2xl border border-brand/25 bg-gradient-to-r from-brand/10 via-card to-gold-light/20 p-6 shadow-sm">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-brand">
+              Live consult (new)
+            </p>
+            <h2 className="font-heading mt-1 text-xl font-bold text-foreground">
+              Astrologer chat, wallets &amp; users
+            </h2>
+            <p className="mt-1 max-w-xl text-sm text-muted-foreground">
+              Manage end-user accounts, chat sessions, astrologer replies, and wallet ledger — same admin URL, dedicated workspace.
+            </p>
+          </div>
+          <Link
+            href="/admindeoghar/live-consult"
+            className="inline-flex h-11 shrink-0 items-center justify-center rounded-xl bg-brand px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-hover"
+          >
+            Enter live consult admin
+          </Link>
+        </div>
+      </section>
+
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4">
         <Stat label="Total leads" value={String(totalLeads)} href="/admindeoghar/leads" />
         <Stat label="Qualified" value={String(qualified)} href="/admindeoghar/leads?status=qualified" />

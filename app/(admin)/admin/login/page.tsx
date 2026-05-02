@@ -80,7 +80,7 @@ export default function AdminLoginPage() {
     }
 
     // Full navigation so the browser sends fresh auth cookies to the proxy.
-    // Client-side router.push alone often fails with @supabase/ssr + middleware.
+    // Client-side router.push alone often fails with @supabase/ssr + proxy.
     window.location.assign(redirect);
   }
 

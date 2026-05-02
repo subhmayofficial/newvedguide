@@ -258,6 +258,16 @@ export const track = {
   consultationPageViewed(source?: string) {
     ph("consultation_page_viewed", { source });
   },
+
+  astrologersDirectoryViewed() {
+    ph("astrologers_directory_viewed");
+  },
+  astrologerChatCtaClicked(astrologerId: string, slug: string) {
+    ph("astrologer_chat_cta_clicked", {
+      astrologer_id: astrologerId,
+      astrologer_slug: slug,
+    });
+  },
   consultationProductSelected(productType: string) {
     ph("consultation_product_selected", { product_type: productType });
   },

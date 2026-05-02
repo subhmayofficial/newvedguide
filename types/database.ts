@@ -933,6 +933,98 @@ export interface Database {
         >;
         Relationships: [];
       };
+      user_profiles: {
+        Row: {
+          id: string;
+          display_name: string | null;
+          avatar_url: string | null;
+          wallet_balance_paise: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id: string;
+          display_name?: string | null;
+          avatar_url?: string | null;
+          wallet_balance_paise?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["user_profiles"]["Insert"]>;
+        Relationships: [];
+      };
+      wallet_ledger: {
+        Row: {
+          id: string;
+          user_id: string;
+          delta_paise: number;
+          reason: string;
+          metadata: Json | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          delta_paise: number;
+          reason: string;
+          metadata?: Json | null;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["wallet_ledger"]["Insert"]>;
+        Relationships: [];
+      };
+      chat_sessions: {
+        Row: {
+          id: string;
+          user_id: string;
+          astrologer_id: string;
+          status: string;
+          rate_inr_per_min: number | null;
+          countdown_started_at: string | null;
+          countdown_budget_seconds: number | null;
+          last_billed_at: string | null;
+          order_code: string | null;
+          closed_at: string | null;
+          total_billed_paise: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          astrologer_id: string;
+          status?: string;
+          rate_inr_per_min?: number | null;
+          countdown_started_at?: string | null;
+          countdown_budget_seconds?: number | null;
+          last_billed_at?: string | null;
+          order_code?: string | null;
+          closed_at?: string | null;
+          total_billed_paise?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["chat_sessions"]["Insert"]>;
+        Relationships: [];
+      };
+      chat_messages: {
+        Row: {
+          id: string;
+          session_id: string;
+          sender: string;
+          body: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          session_id: string;
+          sender: string;
+          body: string;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["chat_messages"]["Insert"]>;
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
