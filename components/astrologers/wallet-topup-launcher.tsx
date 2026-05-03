@@ -27,6 +27,33 @@ export function WalletTopupLauncher({
     setBalancePaise(initialBalancePaise);
   }, [initialBalancePaise]);
 
+  useEffect(() => {
+    if (!isLoggedIn || !userId) return;
+    const supabase = createClient();
+    const channel = supabase
+      .channel(`wallet-topup:${userId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "user_profiles",
+          filter: `id=eq.${userId}`,
+        },
+        (payload) => {
+          const row = payload.new as { wallet_balance_paise?: number };
+          if (typeof row.wallet_balance_paise === "number") {
+            setBalancePaise(row.wallet_balance_paise);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [isLoggedIn, userId]);
+
   const onOpen = useCallback(async () => {
     if (!isLoggedIn) return;
     const supabase = createClient();

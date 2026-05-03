@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/types/database";
-import { affordableChatSeconds } from "@/lib/chat/billing";
+import { affordableChatSeconds, MIN_CHAT_START_SECONDS } from "@/lib/chat/billing";
 import { resolveSessionRateInr } from "@/lib/chat/astrologer-display";
 
 const START_SYSTEM_MESSAGE =
@@ -57,6 +57,14 @@ export async function startConsultSessionFromWaiting(
   const rate = resolveSessionRateInr(session.rate_inr_per_min, session.astrologer_id);
   const balancePaise = profile.wallet_balance_paise ?? 0;
   const budgetSeconds = affordableChatSeconds(balancePaise, rate);
+  if (budgetSeconds < MIN_CHAT_START_SECONDS) {
+    return {
+      ok: false,
+      error:
+        "Customer needs at least 5 minutes of balance to start this chat — ask them to recharge.",
+      status: 402,
+    };
+  }
   const started = new Date().toISOString();
 
   const { data: updated, error: uErr } = await svc

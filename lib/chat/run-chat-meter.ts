@@ -6,6 +6,7 @@ import {
   remainingSecondsFromMeterAccrual,
 } from "@/lib/chat/billing";
 import { resolveSessionRateInr } from "@/lib/chat/astrologer-display";
+import { sessionHasLegacyMeterLedger } from "@/lib/chat/legacy-meter-ledger";
 import { isSupabaseUnknownColumnError } from "@/lib/supabase/schema-errors";
 
 const MAX_CATCHUP_SECONDS = 600;
@@ -35,7 +36,7 @@ export async function runChatMeter(
   const { data: session, error: sErr } = await svc
     .from("chat_sessions")
     .select(
-      "id, user_id, status, astrologer_id, rate_inr_per_min, created_at, last_billed_at"
+      "id, user_id, status, astrologer_id, rate_inr_per_min, created_at, last_billed_at, total_billed_paise"
     )
     .eq("id", trimmed)
     .eq("user_id", userId)
@@ -97,6 +98,8 @@ export async function runChatMeter(
   const accrued = paiseBurnedInInterval(deltaSec, rate);
   const charge = Math.min(balance, accrued);
 
+  const useLegacyMeterLedger = await sessionHasLegacyMeterLedger(svc, trimmed);
+
   if (charge > 0) {
     const nextBal = balance - charge;
     const { error: uErr } = await svc
@@ -111,30 +114,39 @@ export async function runChatMeter(
       return { ok: false, error: uErr.message, status: 500 };
     }
 
-    const { error: lErr } = await svc.from("wallet_ledger").insert({
-      user_id: userId,
-      delta_paise: -charge,
-      reason: "live_chat_meter",
-      metadata: { session_id: trimmed, seconds: deltaSec, rate_inr_per_min: rate },
-    });
+    if (useLegacyMeterLedger) {
+      const { error: lErr } = await svc.from("wallet_ledger").insert({
+        user_id: userId,
+        delta_paise: -charge,
+        reason: "live_chat_meter",
+        metadata: { session_id: trimmed, seconds: deltaSec, rate_inr_per_min: rate },
+      });
 
-    if (lErr) {
-      await svc
-        .from("user_profiles")
-        .update({
-          wallet_balance_paise: balance,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", userId);
-      return { ok: false, error: lErr.message, status: 500 };
+      if (lErr) {
+        await svc
+          .from("user_profiles")
+          .update({
+            wallet_balance_paise: balance,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", userId);
+        return { ok: false, error: lErr.message, status: 500 };
+      }
     }
 
     balance = nextBal;
   }
 
+  const prevBilledTotal = session.total_billed_paise ?? 0;
+  const nextBilledTotal = useLegacyMeterLedger ? prevBilledTotal : prevBilledTotal + charge;
+
   const { error: sessErr } = await svc
     .from("chat_sessions")
-    .update({ last_billed_at: newLastIso, updated_at: newLastIso })
+    .update({
+      last_billed_at: newLastIso,
+      updated_at: newLastIso,
+      ...(useLegacyMeterLedger ? {} : { total_billed_paise: nextBilledTotal }),
+    })
     .eq("id", trimmed);
 
   if (sessErr) {

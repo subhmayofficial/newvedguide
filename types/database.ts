@@ -933,6 +933,46 @@ export interface Database {
         >;
         Relationships: [];
       };
+      phone_otp_challenges: {
+        Row: {
+          id: string;
+          phone_e164: string;
+          code_hash: string;
+          expires_at: string;
+          attempt_count: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          phone_e164: string;
+          code_hash: string;
+          expires_at: string;
+          attempt_count?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["phone_otp_challenges"]["Insert"]
+        >;
+        Relationships: [];
+      };
+      phone_otp_send_log: {
+        Row: {
+          id: string;
+          phone_e164: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          phone_e164: string;
+          created_at?: string;
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["phone_otp_send_log"]["Insert"]
+        >;
+        Relationships: [];
+      };
       user_profiles: {
         Row: {
           id: string;
@@ -1027,7 +1067,12 @@ export interface Database {
       };
     };
     Views: Record<string, never>;
-    Functions: Record<string, never>;
+    Functions: {
+      auth_user_id_for_phone_otp: {
+        Args: { p_email: string; p_phone: string };
+        Returns: string | null;
+      };
+    };
     Enums: Record<string, never>;
   };
 }

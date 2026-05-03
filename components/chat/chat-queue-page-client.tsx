@@ -3,10 +3,9 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import { Loader2, PhoneOff } from "lucide-react";
+import { ArrowLeft, Wallet } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { ConsultationWaitingRoom } from "@/components/chat/consultation-waiting-room";
-import { Button } from "@/components/ui/button";
 import { formatInrFromPaise } from "@/lib/format-money";
 
 type ChatQueuePageClientProps = {
@@ -52,9 +51,7 @@ export function ChatQueuePageClient({
         }
       )
       .subscribe();
-    return () => {
-      void supabase.removeChannel(ch);
-    };
+    return () => { void supabase.removeChannel(ch); };
   }, [sessionId, goToChat]);
 
   useEffect(() => {
@@ -93,9 +90,7 @@ export function ChatQueuePageClient({
         }
       )
       .subscribe();
-    return () => {
-      void supabase.removeChannel(ch);
-    };
+    return () => { void supabase.removeChannel(ch); };
   }, [viewerUserId]);
 
   async function leaveQueue() {
@@ -106,56 +101,50 @@ export function ChatQueuePageClient({
         `/api/user/chat-sessions/${encodeURIComponent(sessionId)}/close`,
         { method: "POST", credentials: "include" }
       );
-      if (res.ok) router.replace("/astrologers/chats");
+      if (res.ok) router.replace("/astrologers");
     } finally {
       setLeaving(false);
     }
   }
 
   return (
-    <div className="mx-auto max-w-lg px-3 py-6 sm:max-w-xl sm:px-4">
-      <Link
-        href="/astrologers"
-        className="text-sm font-medium text-muted-foreground hover:text-foreground"
-      >
-        ← Astrologers
-      </Link>
-      <div className="mt-4 space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border bg-card/80 px-3 py-2 text-xs text-muted-foreground">
-          <span>
-            Balance {formatInrFromPaise(balancePaise)} · ₹{rateInrPerMin}/min after connect
-          </span>
-          <span className="flex items-center gap-1 text-[10px] font-medium text-emerald-700 dark:text-emerald-400">
-            <span className="relative flex size-2">
-              <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-60" />
-              <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
-            </span>
-            In queue
-          </span>
+    <div className="relative flex min-h-[calc(100vh-64px)] flex-col bg-background">
+      {/* Top nav bar */}
+      <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border/60 bg-background/95 px-4 py-3 backdrop-blur-md">
+        <Link
+          href="/astrologers"
+          className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition hover:text-foreground"
+        >
+          <ArrowLeft className="size-4" />
+          Astrologers
+        </Link>
+        {/* Wallet chip */}
+        <div className="flex items-center gap-1.5 rounded-full border border-border bg-muted/50 px-3 py-1.5 text-xs font-semibold text-foreground">
+          <Wallet className="size-3.5 text-brand" />
+          {formatInrFromPaise(balancePaise)}
         </div>
+      </div>
 
-        <ConsultationWaitingRoom astrologerName={astrologerName} orderCode={orderCode} />
+      {/* Main content — centred */}
+      <div className="flex flex-1 flex-col items-center justify-center px-4 py-8">
+        <div className="w-full max-w-sm">
+          <ConsultationWaitingRoom
+            astrologerName={astrologerName}
+            rateInrPerMin={rateInrPerMin}
+            orderCode={orderCode}
+          />
 
-        <p className="text-center text-[13px] text-muted-foreground">
-          When an astrologer joins, you’ll be moved into the chat automatically.
-        </p>
-
-        <div className="flex justify-center">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="rounded-xl"
-            disabled={leaving}
-            onClick={() => void leaveQueue()}
-          >
-            {leaving ? (
-              <Loader2 className="mr-1 size-3.5 animate-spin" />
-            ) : (
-              <PhoneOff className="mr-1 size-3.5" />
-            )}
-            Leave queue
-          </Button>
+          {/* Leave queue */}
+          <div className="mt-6 text-center">
+            <button
+              type="button"
+              disabled={leaving}
+              onClick={() => void leaveQueue()}
+              className="text-xs font-medium text-muted-foreground underline-offset-2 transition hover:text-destructive hover:underline disabled:opacity-50"
+            >
+              {leaving ? "Leaving…" : "Leave queue & go back"}
+            </button>
+          </div>
         </div>
       </div>
     </div>

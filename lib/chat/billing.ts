@@ -1,6 +1,22 @@
+/** Minimum affordable chat time (seconds) required to enter waiting room / start live meter. */
+export const MIN_CHAT_START_SECONDS = 5 * 60;
+
 /** INR per minute → paise charged per minute (100 paise = ₹1). */
 export function inrPerMinuteToPaisePerMinute(inrPerMin: number): number {
   return Math.max(1, Math.round(inrPerMin * 100));
+}
+
+/** Paise needed for `MIN_CHAT_START_SECONDS` at this rate (integer-safe, matches affordableChatSeconds). */
+export function minWalletPaiseForChatStart(rateInrPerMin: number): number {
+  const ppm = inrPerMinuteToPaisePerMinute(rateInrPerMin);
+  return ppm * 5;
+}
+
+export function hasMinWalletForChatStart(
+  balancePaise: number,
+  rateInrPerMin: number
+): boolean {
+  return affordableChatSeconds(balancePaise, rateInrPerMin) >= MIN_CHAT_START_SECONDS;
 }
 
 /**
@@ -73,6 +89,16 @@ export function paiseBurnedInInterval(
  * usage since `lastBilledAtIso` accrues at the per-minute rate (same formula as meter).
  * Keeps user + admin displays aligned when they use the same balance + last_billed_at.
  */
+/** Approximate chat seconds represented by a total paise charge at `rateInrPerMin`. */
+export function estimatedSecondsFromBilledPaise(
+  totalPaise: number,
+  rateInrPerMin: number
+): number {
+  if (totalPaise <= 0 || rateInrPerMin <= 0) return 0;
+  const ppm = inrPerMinuteToPaisePerMinute(rateInrPerMin);
+  return Math.floor((totalPaise / ppm) * 60);
+}
+
 export function remainingSecondsFromMeterAccrual(
   walletBalancePaise: number,
   rateInrPerMin: number,

@@ -484,7 +484,7 @@ export async function sendInteraktWhatsApp(
     requestBody.metadata = input.metadata;
   }
 
-  return postJsonWithLogging(supabase, {
+  const posted = await postJsonWithLogging(supabase, {
     provider: "interakt",
     channel: "whatsapp",
     context: input,
@@ -496,6 +496,33 @@ export async function sendInteraktWhatsApp(
     },
     requestBody,
   });
+
+  // Interakt often returns HTTP 200 with { "result": false, "message": "..." } for logical failures.
+  if (posted.ok && posted.responseBody) {
+    try {
+      const j = JSON.parse(posted.responseBody) as {
+        result?: boolean;
+        message?: string;
+        msg?: string;
+      };
+      if (j.result === false) {
+        const detail =
+          (typeof j.message === "string" && j.message) ||
+          (typeof j.msg === "string" && j.msg) ||
+          "Interakt rejected the send.";
+        return {
+          ...posted,
+          ok: false,
+          status: "failed",
+          message: `interakt: ${detail}`,
+        };
+      }
+    } catch {
+      /* non-JSON body */
+    }
+  }
+
+  return posted;
 }
 
 export async function createInteraktApiCampaign(

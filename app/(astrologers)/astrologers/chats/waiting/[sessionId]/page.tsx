@@ -26,15 +26,21 @@ export default async function ChatWaitingQueuePage({ params }: Props) {
 
   if (!user) return null;
 
-  const { data: session } = await supabase
-    .from("chat_sessions")
-    .select(
-      "id, user_id, astrologer_id, status, order_code, rate_inr_per_min"
-    )
-    .eq("id", sessionId)
-    .maybeSingle();
+  const [{ data: session }, { data: profile }] = await Promise.all([
+    supabase
+      .from("chat_sessions")
+      .select("id, user_id, astrologer_id, status, order_code, rate_inr_per_min")
+      .eq("id", sessionId)
+      .eq("user_id", user.id)
+      .maybeSingle(),
+    supabase
+      .from("user_profiles")
+      .select("wallet_balance_paise")
+      .eq("id", user.id)
+      .maybeSingle(),
+  ]);
 
-  if (!session || session.user_id !== user.id) {
+  if (!session) {
     notFound();
   }
 
@@ -45,12 +51,6 @@ export default async function ChatWaitingQueuePage({ params }: Props) {
   if (session.status === "closed") {
     redirect("/astrologers/chats");
   }
-
-  const { data: profile } = await supabase
-    .from("user_profiles")
-    .select("wallet_balance_paise")
-    .eq("id", user.id)
-    .maybeSingle();
 
   const base = getAstrologerDisplay(session.astrologer_id);
   const rateInrPerMin = resolveSessionRateInr(

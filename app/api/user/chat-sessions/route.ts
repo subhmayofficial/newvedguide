@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { LIVE_CHAT_ASTROLOGERS } from "@/lib/data/live-chat-astrologers";
-import { affordableChatSeconds } from "@/lib/chat/billing";
+import {
+  affordableChatSeconds,
+  hasMinWalletForChatStart,
+  minWalletPaiseForChatStart,
+} from "@/lib/chat/billing";
 import {
   isSupabaseTableMissingError,
   isSupabaseUnknownColumnError,
@@ -52,21 +56,35 @@ export async function POST(request: Request) {
     .eq("id", user.id)
     .maybeSingle();
   const balancePaise = prof?.wallet_balance_paise ?? 0;
-  const budgetSeconds = affordableChatSeconds(balancePaise, astro.chatRateInrPerMin);
+  const rate = astro.chatRateInrPerMin;
+  if (!hasMinWalletForChatStart(balancePaise, rate)) {
+    const needPaise = minWalletPaiseForChatStart(rate);
+    return NextResponse.json(
+      {
+        code: "INSUFFICIENT_BALANCE_FOR_CHAT" as const,
+        error:
+          "Add minimum 5 min of balance to start a chat — recharge your wallet.",
+        minPaise: needPaise,
+        rateInrPerMin: rate,
+      },
+      { status: 402 }
+    );
+  }
+  const budgetSeconds = affordableChatSeconds(balancePaise, rate);
   const started = new Date().toISOString();
 
   const insertWaiting = {
     user_id: user.id,
     astrologer_id: astrologerId,
     status: "waiting_astrologer" as const,
-    rate_inr_per_min: astro.chatRateInrPerMin,
+    rate_inr_per_min: rate,
   };
 
   const insertLiveFull = {
     user_id: user.id,
     astrologer_id: astrologerId,
     status: "open" as const,
-    rate_inr_per_min: astro.chatRateInrPerMin,
+    rate_inr_per_min: rate,
     countdown_started_at: started,
     countdown_budget_seconds: budgetSeconds,
     last_billed_at: started,
@@ -75,7 +93,7 @@ export async function POST(request: Request) {
     user_id: user.id,
     astrologer_id: astrologerId,
     status: "open" as const,
-    rate_inr_per_min: astro.chatRateInrPerMin,
+    rate_inr_per_min: rate,
     countdown_started_at: started,
     countdown_budget_seconds: budgetSeconds,
   };
@@ -83,14 +101,14 @@ export async function POST(request: Request) {
     user_id: user.id,
     astrologer_id: astrologerId,
     status: "open" as const,
-    rate_inr_per_min: astro.chatRateInrPerMin,
+    rate_inr_per_min: rate,
     last_billed_at: started,
   };
   const insertLiveRateOnly = {
     user_id: user.id,
     astrologer_id: astrologerId,
     status: "open" as const,
-    rate_inr_per_min: astro.chatRateInrPerMin,
+    rate_inr_per_min: rate,
   };
   const insertLegacy = {
     user_id: user.id,

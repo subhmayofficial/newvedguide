@@ -361,6 +361,19 @@
   background-clip: text;
 }
 
+@keyframes vg-progress-shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(400%);
+  }
+}
+
+.vg-progress-shimmer-animate {
+  animation: vg-progress-shimmer 1.35s ease-in-out infinite;
+}
+
 /* Hide scrollbar but keep scroll functionality */
 .scrollbar-hide {
   -ms-overflow-style: none;

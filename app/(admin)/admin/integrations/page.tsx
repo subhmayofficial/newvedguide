@@ -176,6 +176,22 @@ export default async function AdminIntegrationsPage({
             ["API key", maskSecret(config.interakt.apiKey)],
             ["Template default (non-kundli)", config.interakt.templateName],
             ["Language default", config.interakt.languageCode],
+            ["Login OTP template", config.interakt.otpLoginTemplateName],
+            ["Login OTP language", config.interakt.otpLoginLanguage],
+            [
+              "Login OTP body JSON",
+              config.interakt.otpLoginBodyValues?.length
+                ? JSON.stringify(config.interakt.otpLoginBodyValues)
+                : "(default: one variable = code only)",
+            ],
+            [
+              "Login OTP button",
+              config.interakt.otpLoginNoButton
+                ? "Off (no buttonValues)"
+                : config.interakt.otpLoginUrlButton
+                  ? `URL mode, index ${config.interakt.otpLoginButtonIndex} → ${config.interakt.otpLoginButtonLink ?? "missing link"}`
+                  : `Auth / copy-code: same OTP in body + button index ${config.interakt.otpLoginButtonIndex}`,
+            ],
             ["Kundli template", config.interakt.kundliDeliveryTemplateName],
             ["Kundli language", config.interakt.kundliDeliveryTemplateLanguage],
             ["Kundli button index", config.interakt.kundliDeliveryButtonIndex],

@@ -6,6 +6,27 @@ export interface InteraktIntegrationConfig {
   templateName: string;
   languageCode: string;
   countryCode: string;
+  /** Auth template for phone login OTP (default body {{1}} = code). */
+  otpLoginTemplateName: string;
+  otpLoginLanguage: string;
+  /**
+   * Optional body slot list for `otp_login`. Use `{{otp}}` and `{{brand}}` tokens.
+   * Example: `["{{otp}}"]` or `["{{brand}}","{{otp}}"]`. If unset, sends `[code]` only.
+   */
+  otpLoginBodyValues: string[] | null;
+  /**
+   * Meta Authentication / copy-code templates: same OTP in bodyValues and buttonValues (Interakt docs).
+   * Set INTERAKT_OTP_LOGIN_NO_BUTTON=true only if the template has no dynamic button.
+   */
+  otpLoginNoButton: boolean;
+  otpLoginButtonIndex: string;
+  /**
+   * If true, buttonValues use a URL (marketing-style template). Default false = auth template
+   * (button gets the same OTP string as the body).
+   */
+  otpLoginUrlButton: boolean;
+  /** Only when otpLoginUrlButton: URL for button {{1}}. Else optional / unused. */
+  otpLoginButtonLink: string | null;
   triggerOnPaymentSuccess: boolean;
   /** WhatsApp template for `paid-kundli` payment success (body {{1}} = name; button URL {{1}}). */
   kundliDeliveryTemplateName: string;
@@ -59,6 +80,23 @@ function readNumber(input: string | undefined, fallback: number): number {
   return parsed;
 }
 
+function readOtpLoginBodyTemplate(raw: string | undefined): string[] | null {
+  if (!raw?.trim()) return null;
+  try {
+    const v = JSON.parse(raw) as unknown;
+    if (!Array.isArray(v) || !v.every((x) => typeof x === "string")) return null;
+    return v as string[];
+  } catch {
+    return null;
+  }
+}
+
+function defaultOtpLoginButtonLink(): string | null {
+  const site = process.env.NEXT_PUBLIC_SITE_URL?.trim().replace(/\/$/, "");
+  if (!site) return null;
+  return `${site}/login`;
+}
+
 function normalizeResendApiKey(raw: string | null | undefined): string | null {
   if (!raw) return null;
   const value = raw.trim();
@@ -101,6 +139,18 @@ export function getDeliveryIntegrationsConfig(): DeliveryIntegrationsConfig {
       templateName: process.env.INTERAKT_TEMPLATE_NAME?.trim() || "order_paid_update",
       languageCode: process.env.INTERAKT_TEMPLATE_LANGUAGE?.trim() || "en",
       countryCode: process.env.INTERAKT_COUNTRY_CODE?.trim() || "+91",
+      otpLoginTemplateName:
+        process.env.INTERAKT_OTP_LOGIN_TEMPLATE_NAME?.trim() || "otp_login",
+      otpLoginLanguage:
+        process.env.INTERAKT_OTP_LOGIN_TEMPLATE_LANGUAGE?.trim() || "en",
+      otpLoginBodyValues: readOtpLoginBodyTemplate(
+        process.env.INTERAKT_OTP_LOGIN_BODY_VALUES_JSON
+      ),
+      otpLoginNoButton: readBoolean(process.env.INTERAKT_OTP_LOGIN_NO_BUTTON, false),
+      otpLoginButtonIndex: process.env.INTERAKT_OTP_LOGIN_BUTTON_INDEX?.trim() || "0",
+      otpLoginUrlButton: readBoolean(process.env.INTERAKT_OTP_LOGIN_URL_BUTTON, false),
+      otpLoginButtonLink:
+        process.env.INTERAKT_OTP_LOGIN_BUTTON_LINK?.trim() || defaultOtpLoginButtonLink(),
       triggerOnPaymentSuccess: readBoolean(process.env.INTERAKT_AUTO_DELIVERY_ON_PAYMENT, true),
       kundliDeliveryTemplateName:
         process.env.INTERAKT_KUNDLI_TEMPLATE_NAME?.trim() || "kundlidelivery_bt",

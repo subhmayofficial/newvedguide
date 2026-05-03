@@ -1,5 +1,14 @@
 import type { Metadata } from "next";
-import { AstrologersDirectory } from "@/components/sections/astrologers-directory";
+import dynamic from "next/dynamic";
+import { AstrologersDirectoryLoader } from "@/components/astrologers/astrologers-directory-loader";
+
+const AstrologersDirectory = dynamic(
+  () =>
+    import("@/components/sections/astrologers-directory").then(
+      (m) => m.AstrologersDirectory
+    ),
+  { loading: () => <AstrologersDirectoryLoader /> }
+);
 
 export const metadata: Metadata = {
   title: "Talk to Astrologers — Live chat rates",

@@ -1,7 +1,9 @@
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
+import { estimatedSecondsFromBilledPaise } from "@/lib/chat/billing";
 import { aggregateLiveChatMeterForSession } from "@/lib/chat/ledger-aggregate";
+import { sessionHasCloseSummaryLedger } from "@/lib/chat/legacy-meter-ledger";
 import { runChatMeter } from "@/lib/chat/run-chat-meter";
 import { isSupabaseUnknownColumnError } from "@/lib/supabase/schema-errors";
 
@@ -52,10 +54,28 @@ export async function POST(_request: Request, { params }: Params) {
     return NextResponse.json({ error: lErr.message }, { status: 500 });
   }
 
-  const { totalBilledPaise, billedSeconds } = aggregateLiveChatMeterForSession(
-    ledgerRows ?? [],
-    trimmed
-  );
+  const legacyAgg = aggregateLiveChatMeterForSession(ledgerRows ?? [], trimmed);
+
+  const { data: sessAfter, error: sessErr } = await svc
+    .from("chat_sessions")
+    .select("total_billed_paise")
+    .eq("id", trimmed)
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (sessErr) {
+    return NextResponse.json({ error: sessErr.message }, { status: 500 });
+  }
+
+  const sessionAccum = sessAfter?.total_billed_paise ?? 0;
+  const totalBilledPaise =
+    legacyAgg.totalBilledPaise > 0 ? legacyAgg.totalBilledPaise : sessionAccum;
+
+  const rate = owned.rate_inr_per_min ?? 0;
+  const billedSeconds =
+    legacyAgg.totalBilledPaise > 0
+      ? legacyAgg.billedSeconds
+      : estimatedSecondsFromBilledPaise(totalBilledPaise, rate);
 
   const minutesRounded = Math.round((billedSeconds / 60) * 100) / 100;
   const closedAt = new Date().toISOString();
@@ -93,6 +113,30 @@ export async function POST(_request: Request, { params }: Params) {
 
   if (uErr) {
     return NextResponse.json({ error: uErr.message }, { status: 500 });
+  }
+
+  const shouldAddSummaryLedger =
+    totalBilledPaise > 0 &&
+    legacyAgg.totalBilledPaise === 0 &&
+    sessionAccum > 0;
+
+  if (shouldAddSummaryLedger) {
+    const already = await sessionHasCloseSummaryLedger(svc, user.id, trimmed);
+    if (!already) {
+      const { error: sumErr } = await svc.from("wallet_ledger").insert({
+        user_id: user.id,
+        delta_paise: -totalBilledPaise,
+        reason: "live_chat_session",
+        metadata: {
+          session_id: trimmed,
+          rate_inr_per_min: rate,
+          billed_seconds: billedSeconds,
+        },
+      });
+      if (sumErr) {
+        console.error("[chat-session/close] summary ledger:", sumErr.message);
+      }
+    }
   }
 
   const { data: fresh, error: freshErr } = await svc

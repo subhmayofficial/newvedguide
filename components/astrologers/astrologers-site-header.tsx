@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { LogOut, Menu, User, Wallet } from "lucide-react";
+import { LogOut, Menu, MoreVertical, Settings, User, Wallet } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { isPhoneOtpSyntheticEmail } from "@/lib/auth/phone-login-identity";
 import { Button } from "@/components/ui/button";
 import { formatInrFromPaise } from "@/lib/format-money";
 
@@ -32,6 +33,24 @@ export function AstrologersSiteHeader({
     setBalancePaise(initialBalancePaise);
     /* eslint-enable react-hooks/set-state-in-effect */
   }, [initialUser, initialBalancePaise]);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    const poll = window.setInterval(() => {
+      void (async () => {
+        const supabase = createClient();
+        const { data } = await supabase
+          .from("user_profiles")
+          .select("wallet_balance_paise")
+          .eq("id", user.id)
+          .maybeSingle();
+        if (data && typeof data.wallet_balance_paise === "number") {
+          setBalancePaise(data.wallet_balance_paise);
+        }
+      })();
+    }, 18000);
+    return () => window.clearInterval(poll);
+  }, [user?.id]);
 
   useEffect(() => {
     if (!user?.id) return;
@@ -122,51 +141,79 @@ export function AstrologersSiteHeader({
             ))}
           </nav>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2">
             <Button
               variant="outline"
               size="sm"
-              className="hidden rounded-xl border-brand/25 bg-brand-light/20 text-brand sm:inline-flex dark:bg-brand/15"
+              className="inline-flex shrink-0 rounded-xl border-brand/25 bg-brand-light/20 px-2 text-brand sm:px-3 dark:bg-brand/15"
               nativeButton={false}
-              render={<Link href="/astrologers/wallet" />}
+              render={
+                <Link
+                  href="/astrologers/wallet"
+                  title="Wallet — add money or view activity"
+                />
+              }
             >
-              <Wallet className="size-3.5" />
-              <span className="max-w-[7rem] truncate tabular-nums">
+              <Wallet className="size-3.5 shrink-0" aria-hidden />
+              <span className="sr-only">Wallet balance </span>
+              <span className="max-w-[5.25rem] truncate tabular-nums text-xs font-semibold sm:max-w-[7rem] sm:text-sm">
                 {formatInrFromPaise(balancePaise)}
               </span>
             </Button>
 
             {user ? (
-              <details className="relative [&_summary::-webkit-details-marker]:hidden">
-                <summary
-                  className="flex cursor-pointer list-none items-center gap-2 rounded-xl border border-border bg-card px-2.5 py-1.5 text-sm font-medium"
-                  aria-label="Account menu"
+              <>
+                <Link
+                  href="/user"
+                  className="flex max-w-[10rem] cursor-pointer items-center gap-2 rounded-xl border border-border bg-card px-2.5 py-1.5 text-sm font-medium text-foreground transition hover:border-brand/35 hover:bg-muted/50"
+                  title="Your profile"
                 >
-                  <User className="size-4 text-muted-foreground" />
-                  <span className="hidden max-w-[8rem] truncate sm:inline">
-                    {user.displayName || user.email.split("@")[0]}
+                  <User className="size-4 shrink-0 text-brand" aria-hidden />
+                  <span className="hidden max-w-[7rem] truncate sm:inline">
+                    {user.displayName ||
+                      (isPhoneOtpSyntheticEmail(user.email)
+                        ? "Profile"
+                        : user.email.split("@")[0])}
                   </span>
-                </summary>
-                <div className="absolute right-0 top-[calc(100%+0.35rem)] z-50 w-52 rounded-xl border border-border bg-card py-1 shadow-lg">
-                  <p className="border-b border-border px-3 py-2 text-xs text-muted-foreground">
-                    {user.email}
-                  </p>
-                  <Link
-                    href="/users/settings"
-                    className="block px-3 py-2 text-sm hover:bg-muted"
+                  <span className="sr-only">Open profile</span>
+                </Link>
+
+                <details className="relative [&_summary::-webkit-details-marker]:hidden">
+                  <summary
+                    className="flex cursor-pointer list-none items-center justify-center rounded-xl border border-border/80 bg-card p-2 text-muted-foreground transition hover:border-brand/30 hover:bg-muted/40 hover:text-foreground"
+                    aria-label="More options"
                   >
-                    Settings
-                  </Link>
-                  <button
-                    type="button"
-                    className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-muted"
-                    onClick={signOut}
-                  >
-                    <LogOut className="size-3.5" />
-                    Sign out
-                  </button>
-                </div>
-              </details>
+                    <MoreVertical className="size-5" strokeWidth={2.25} />
+                  </summary>
+                  <div className="absolute right-0 top-[calc(100%+0.5rem)] z-50 w-[min(calc(100vw-2rem),16rem)] overflow-hidden rounded-2xl border border-border/80 bg-popover py-1 shadow-xl ring-1 ring-black/5 dark:ring-white/10">
+                    <div className="border-b border-border/60 px-3 py-2.5">
+                      <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                        Signed in as
+                      </p>
+                      <p className="mt-0.5 truncate text-sm font-medium text-foreground">
+                        {isPhoneOtpSyntheticEmail(user.email)
+                          ? "Mobile number"
+                          : user.email}
+                      </p>
+                    </div>
+                    <Link
+                      href="/users/settings"
+                      className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-foreground transition hover:bg-muted"
+                    >
+                      <Settings className="size-4 shrink-0 text-muted-foreground" />
+                      Settings
+                    </Link>
+                    <button
+                      type="button"
+                      className="flex w-full items-center gap-3 px-3 py-2.5 text-left text-sm font-medium text-foreground transition hover:bg-muted"
+                      onClick={signOut}
+                    >
+                      <LogOut className="size-4 shrink-0 text-muted-foreground" />
+                      Sign out
+                    </button>
+                  </div>
+                </details>
+              </>
             ) : (
               <Button
                 size="sm"
@@ -180,30 +227,34 @@ export function AstrologersSiteHeader({
 
             <details className="relative md:hidden [&_summary::-webkit-details-marker]:hidden">
               <summary
-                className="flex cursor-pointer list-none items-center rounded-md p-1.5 text-foreground"
-                aria-label="Menu"
+                className="flex cursor-pointer list-none items-center rounded-xl border border-transparent p-1.5 text-foreground transition hover:border-border hover:bg-muted/50"
+                aria-label="Navigation menu"
               >
-                <Menu size={22} />
+                <Menu className="size-[22px]" strokeWidth={2.25} />
               </summary>
-              <div className="absolute right-0 top-[calc(100%+0.35rem)] z-50 w-[min(92vw,18rem)] rounded-2xl border border-border bg-background p-3 shadow-lg">
+              <div className="absolute right-0 top-[calc(100%+0.5rem)] z-50 w-[min(92vw,19rem)] overflow-hidden rounded-2xl border border-border/80 bg-popover py-2 shadow-xl ring-1 ring-black/5 dark:ring-white/10">
+                <p className="px-3 pb-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                  Navigate
+                </p>
+                {navLinks.map((l) => (
+                  <Link
+                    key={l.href}
+                    href={l.href}
+                    className="mx-1 block rounded-xl px-3 py-2.5 text-sm font-medium text-foreground transition hover:bg-muted"
+                  >
+                    {l.label}
+                  </Link>
+                ))}
+                <div className="mx-2 my-2 border-t border-border/60" />
                 <Button
                   variant="outline"
-                  className="mb-2 w-full justify-start rounded-xl"
+                  className="mx-2 mb-1 w-[calc(100%-1rem)] justify-start rounded-xl border-brand/25 bg-brand-light/15 text-brand dark:bg-brand/10"
                   nativeButton={false}
                   render={<Link href="/astrologers/wallet" />}
                 >
                   <Wallet className="size-4" />
                   Wallet · {formatInrFromPaise(balancePaise)}
                 </Button>
-                {navLinks.map((l) => (
-                  <Link
-                    key={l.href}
-                    href={l.href}
-                    className="block rounded-lg px-3 py-2.5 text-sm font-medium text-foreground hover:bg-muted"
-                  >
-                    {l.label}
-                  </Link>
-                ))}
               </div>
             </details>
           </div>

@@ -12,6 +12,8 @@ const nextConfig: NextConfig = {
    * that work in-process. Prefer `npm run dev` (webpack) locally; use `dev:turbo` if needed.
    */
   experimental: {
+    /** Tree-shake lucide icon imports (smaller client bundles on chat / astrologers routes). */
+    optimizePackageImports: ["lucide-react"],
     turbopackPluginRuntimeStrategy: "workerThreads",
     /** Soft cap (~1.5 GiB) — raises pressure before the OS swaps/crashes on smaller machines */
     turbopackMemoryLimit: 1536 * 1024 * 1024,
