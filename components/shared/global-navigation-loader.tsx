@@ -1,9 +1,24 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 
 const SHOW_DELAY_MS = 150;
+
+function isSameOriginInAppNavigation(anchor: HTMLAnchorElement): boolean {
+  if (anchor.target === "_blank" || anchor.download) return false;
+  const href = anchor.getAttribute("href") ?? "";
+  if (!href || href.startsWith("#") || href.startsWith("mailto:") || href.startsWith("tel:")) {
+    return false;
+  }
+  if (href.startsWith("javascript:")) return false;
+  try {
+    const url = new URL(href, window.location.href);
+    return url.origin === window.location.origin;
+  } catch {
+    return false;
+  }
+}
 
 export function GlobalNavigationLoader() {
   const pathname = usePathname();
@@ -11,19 +26,19 @@ export function GlobalNavigationLoader() {
   const [visible, setVisible] = useState(false);
   const showTimerRef = useRef<number | null>(null);
 
-  function clearTimer() {
+  const clearTimer = useCallback(() => {
     if (showTimerRef.current != null) {
       window.clearTimeout(showTimerRef.current);
       showTimerRef.current = null;
     }
-  }
+  }, []);
 
-  function scheduleShow() {
+  const scheduleShow = useCallback(() => {
     clearTimer();
     showTimerRef.current = window.setTimeout(() => {
       setVisible(true);
     }, SHOW_DELAY_MS);
-  }
+  }, [clearTimer]);
 
   useEffect(() => {
     function onClick(event: MouseEvent) {
@@ -35,35 +50,27 @@ export function GlobalNavigationLoader() {
 
       const anchor = target.closest("a[href]") as HTMLAnchorElement | null;
       if (anchor) {
-        const href = anchor.getAttribute("href") ?? "";
-        if (!href || href.startsWith("#") || href.startsWith("mailto:") || href.startsWith("tel:")) return;
-        scheduleShow();
-        return;
-      }
-
-      const submitBtn = target.closest("button[type='submit'],input[type='submit']");
-      if (submitBtn) {
+        if (!isSameOriginInAppNavigation(anchor)) return;
         scheduleShow();
       }
-    }
-
-    function onFormSubmit() {
-      scheduleShow();
     }
 
     document.addEventListener("click", onClick, true);
-    document.addEventListener("submit", onFormSubmit, true);
     return () => {
       document.removeEventListener("click", onClick, true);
-      document.removeEventListener("submit", onFormSubmit, true);
       clearTimer();
     };
-  }, []);
+  }, [scheduleShow, clearTimer]);
 
   useEffect(() => {
     clearTimer();
-    setVisible(false);
-  }, [pathname, search]);
+    const id = requestAnimationFrame(() => {
+      setVisible(false);
+    });
+    return () => {
+      cancelAnimationFrame(id);
+    };
+  }, [pathname, search, clearTimer]);
 
   if (!visible) return null;
 
