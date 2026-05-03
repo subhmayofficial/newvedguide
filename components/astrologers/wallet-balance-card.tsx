@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Plus, TrendingDown, Wallet } from "lucide-react";
+import { TrendingDown, Wallet } from "lucide-react";
 import { WalletTopupLauncher } from "@/components/astrologers/wallet-topup-launcher";
 
 // ─── Count-up hook ─────────────────────────────────────────────────────────────
@@ -115,11 +115,12 @@ export function WalletBalanceCard({
         </div>
 
         {/* Top-up area */}
-        <div className="mt-5 rounded-2xl border border-white/15 bg-white/8 px-4 py-3.5 backdrop-blur-sm">
+        <div className="mt-5 rounded-2xl border border-white/20 bg-black/20 px-4 py-3.5 backdrop-blur-md">
           <WalletTopupLauncher
             userId={userId}
             isLoggedIn
             initialBalancePaise={balancePaise}
+            onDarkSurface
           />
         </div>
       </div>

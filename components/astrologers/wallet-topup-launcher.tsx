@@ -12,12 +12,15 @@ type WalletTopupLauncherProps = {
   userId: string;
   isLoggedIn: boolean;
   initialBalancePaise: number;
+  /** Use on purple/dark balance card: light text + high-contrast CTA (avoids white “ghost” buttons). */
+  onDarkSurface?: boolean;
 };
 
 export function WalletTopupLauncher({
   userId,
   isLoggedIn,
   initialBalancePaise,
+  onDarkSurface = false,
 }: WalletTopupLauncherProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -72,16 +75,32 @@ export function WalletTopupLauncher({
   return (
     <>
       <div className="flex flex-wrap items-center gap-3">
-        <p className="text-sm text-muted-foreground">
+        <p
+          className={
+            onDarkSurface
+              ? "text-sm text-white/80"
+              : "text-sm text-muted-foreground"
+          }
+        >
           Current balance{" "}
-          <span className="font-semibold tabular-nums text-foreground">
+          <span
+            className={
+              onDarkSurface
+                ? "font-semibold tabular-nums text-white"
+                : "font-semibold tabular-nums text-foreground"
+            }
+          >
             {formatInrFromPaise(balancePaise)}
           </span>
         </p>
         <Button
           type="button"
           size="sm"
-          className="rounded-xl bg-brand font-medium text-white hover:bg-brand-hover"
+          className={
+            onDarkSurface
+              ? "rounded-xl border-0 bg-white font-semibold text-violet-950 shadow-md hover:bg-white/90"
+              : "rounded-xl bg-brand font-medium text-white hover:bg-brand-hover"
+          }
           onClick={() => {
             void onOpen();
             setOpen(true);

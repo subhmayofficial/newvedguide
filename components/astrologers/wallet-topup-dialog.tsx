@@ -44,9 +44,16 @@ export function WalletTopupDialog({
       const res = await fetch("/api/user/wallet/test-topup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ amountPaise }),
       });
-      const data = (await res.json()) as { error?: string; balancePaise?: number };
+      let data: { error?: string; balancePaise?: number; code?: string };
+      try {
+        data = (await res.json()) as typeof data;
+      } catch {
+        setError("Unexpected response from server. Try again.");
+        return;
+      }
       if (!res.ok) {
         setError(data.error ?? "Top-up failed");
         return;
@@ -54,6 +61,8 @@ export function WalletTopupDialog({
       if (typeof data.balancePaise === "number") {
         onSuccess(data.balancePaise);
         onClose();
+      } else {
+        setError("Top-up succeeded but balance was not returned. Refresh the page.");
       }
     } finally {
       setLoading(false);
@@ -73,9 +82,9 @@ export function WalletTopupDialog({
         aria-label="Close"
         onClick={onClose}
       />
-      <div className="relative w-full max-w-md overflow-hidden rounded-2xl border border-border bg-card shadow-2xl">
-        <div className="border-b border-border bg-gradient-to-br from-brand-light/40 to-gold-light/25 px-6 py-5">
-          <h2 id="wallet-topup-title" className="font-heading text-xl font-semibold">
+      <div className="relative w-full max-w-md overflow-hidden rounded-2xl border border-border bg-card text-card-foreground shadow-2xl">
+        <div className="border-b border-border bg-gradient-to-br from-brand/15 via-brand-light/30 to-gold-light/25 px-6 py-5 dark:from-brand/25 dark:via-brand/15 dark:to-muted/40">
+          <h2 id="wallet-topup-title" className="font-heading text-xl font-semibold text-foreground">
             Wallet (test top-up)
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -114,7 +123,7 @@ export function WalletTopupDialog({
                       key={paise}
                       type="button"
                       variant="outline"
-                      className="rounded-xl text-xs"
+                      className="rounded-xl border-border/80 bg-muted/40 text-xs text-foreground hover:bg-muted"
                       disabled={loading}
                       onClick={() => topup(paise)}
                     >
@@ -135,13 +144,13 @@ export function WalletTopupDialog({
                   type="number"
                   min={1}
                   max={500000}
-                  className="mt-1.5 h-10 w-full rounded-xl border border-border bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-brand/30"
+                  className="mt-1.5 h-10 w-full rounded-xl border border-border bg-background px-3 text-sm text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-brand/30"
                   value={customRupees}
                   onChange={(e) => setCustomRupees(e.target.value)}
                 />
                 <Button
                   type="button"
-                  className="mt-3 w-full rounded-xl bg-brand font-semibold"
+                  className="mt-3 w-full rounded-xl bg-brand font-semibold text-white hover:bg-brand-hover"
                   disabled={loading}
                   onClick={() => {
                     const r = Number(customRupees);

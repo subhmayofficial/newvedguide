@@ -8,6 +8,8 @@ import {
 
 function testTopupAllowed(): boolean {
   if (process.env.ALLOW_TEST_WALLET_TOPUP === "true") return true;
+  // Vercel preview deployments are safe for test credits; production still needs the flag or local dev.
+  if (process.env.VERCEL_ENV === "preview") return true;
   if (process.env.NODE_ENV !== "production") return true;
   return false;
 }
@@ -52,11 +54,12 @@ export async function POST(request: Request) {
   }
 
   const svc = createServiceClient();
-  const { data: profile, error: readErr } = await svc
+  const { data: profileRow, error: readErr } = await svc
     .from("user_profiles")
     .select("wallet_balance_paise")
     .eq("id", user.id)
     .maybeSingle();
+  let profile = profileRow;
 
   if (readErr) {
     const msg = readErr.message ?? "";
@@ -70,13 +73,37 @@ export async function POST(request: Request) {
   }
 
   if (!profile) {
-    return NextResponse.json(
-      { error: "Profile not found. Complete sign-up or contact support." },
-      { status: 404 }
-    );
+    const meta = user.user_metadata as { display_name?: string } | undefined;
+    const displayName =
+      (typeof meta?.display_name === "string" && meta.display_name.trim()) ||
+      (user.email?.split("@")[0] ?? null);
+    const { data: created, error: insErr } = await svc
+      .from("user_profiles")
+      .insert({
+        id: user.id,
+        display_name: displayName,
+        wallet_balance_paise: 0,
+      })
+      .select("wallet_balance_paise")
+      .single();
+
+    if (insErr) {
+      const msg = insErr.message ?? "";
+      if (isSupabaseTableMissingError(msg)) {
+        return NextResponse.json(
+          { code: "SCHEMA_NOT_READY" as const, error: SCHEMA_NOT_READY_USER_MESSAGE },
+          { status: 503 }
+        );
+      }
+      return NextResponse.json(
+        { error: msg || "Could not create profile for wallet." },
+        { status: 500 }
+      );
+    }
+    profile = created;
   }
 
-  const nextBalance = profile.wallet_balance_paise + amountPaise;
+  const nextBalance = (profile.wallet_balance_paise ?? 0) + amountPaise;
 
   const { error: updErr } = await svc
     .from("user_profiles")
