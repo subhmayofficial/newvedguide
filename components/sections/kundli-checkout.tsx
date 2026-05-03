@@ -194,17 +194,19 @@ function BumpOffer({
 
 function PayButton({
   loading,
+  paymentSheetOpen,
   paymentReady,
   onPay,
   total,
 }: {
   loading: boolean;
+  paymentSheetOpen: boolean;
   paymentReady: boolean;
   onPay: () => void;
   total: number;
 }) {
   const displayTotal = `₹${total / 100}`;
-  const busy = loading || !paymentReady;
+  const busy = loading || paymentSheetOpen || !paymentReady;
   return (
     <div className="space-y-3">
       <style>{`
@@ -233,6 +235,11 @@ function PayButton({
           <span className="flex items-center justify-center gap-2">
             <Loader2 size={18} className="animate-spin" />
             Processing...
+          </span>
+        ) : paymentSheetOpen ? (
+          <span className="flex items-center justify-center gap-2">
+            <Loader2 size={18} className="animate-spin" />
+            Complete payment in Razorpay…
           </span>
         ) : !paymentReady ? (
           <span className="flex items-center justify-center gap-2">
@@ -281,17 +288,21 @@ function PayButton({
 
 function StickyPayBar({
   loading,
+  paymentSheetOpen,
   paymentReady,
   onPay,
   totalPaise,
   formComplete,
 }: {
   loading: boolean;
+  paymentSheetOpen: boolean;
   paymentReady: boolean;
   onPay: () => void;
   totalPaise: number;
   formComplete: boolean;
 }) {
+  if (paymentSheetOpen) return null;
+
   const busy = loading || !paymentReady;
   const totalLabel = `₹${totalPaise / 100}`;
   return (
@@ -382,6 +393,7 @@ export function KundliCheckout({
   });
   const [errors, setErrors] = useState<CheckoutFormErrors>({});
   const [loading, setLoading] = useState(false);
+  const [razorpayOpen, setRazorpayOpen] = useState(false);
   const [razorpayReady, setRazorpayReady] = useState(false);
   const [fastTrack, setFastTrack] = useState(false);
   const [couponInput, setCouponInput] = useState("");
@@ -664,6 +676,7 @@ export function KundliCheckout({
         theme: { color: "#B45309" },
         modal: {
           ondismiss: () => {
+            setRazorpayOpen(false);
             setLoading(false);
             track.checkoutAbandoned("paid-kundli", sourceFunnel, "payment_modal");
             void fetch("/api/payments/failure", {
@@ -678,6 +691,8 @@ export function KundliCheckout({
           razorpay_payment_id: string;
           razorpay_signature: string;
         }) => {
+          setRazorpayOpen(false);
+          setLoading(true);
           const verifyRes = await fetch("/api/payments/verify", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -742,6 +757,7 @@ export function KundliCheckout({
             body: JSON.stringify({ orderDbId: dbId, reason: "razorpay_failed" }),
           });
         }
+        setRazorpayOpen(false);
         setLoading(false);
       });
       window.dataLayer = window.dataLayer || [];
@@ -772,8 +788,11 @@ export function KundliCheckout({
         },
       });
       rzp.open();
+      setLoading(false);
+      setRazorpayOpen(true);
     } catch (err) {
       console.error(err);
+      setRazorpayOpen(false);
       setLoading(false);
       const message =
         err instanceof Error && err.message
@@ -1086,6 +1105,7 @@ export function KundliCheckout({
             <div className="hidden md:block">
               <PayButton
                 loading={loading}
+                paymentSheetOpen={razorpayOpen}
                 paymentReady={razorpayReady}
                 onPay={handlePay}
                 total={totalPaise}
@@ -1197,6 +1217,7 @@ export function KundliCheckout({
         {/* Mobile: sticky Pay now bar (same handlePay + validation as desktop) */}
         <StickyPayBar
           loading={loading}
+          paymentSheetOpen={razorpayOpen}
           paymentReady={razorpayReady}
           onPay={handlePay}
           totalPaise={totalPaise}
