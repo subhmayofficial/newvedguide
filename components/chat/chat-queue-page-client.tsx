@@ -33,62 +33,47 @@ export function ChatQueuePageClient({
     router.replace(`/astrologers/chats/${encodeURIComponent(sessionId)}`);
   }, [router, sessionId]);
 
+  // Realtime: session status change
   useEffect(() => {
     const supabase = createClient();
     const ch = supabase
       .channel(`queue-sess:${sessionId}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "UPDATE",
-          schema: "public",
-          table: "chat_sessions",
-          filter: `id=eq.${sessionId}`,
-        },
-        (payload) => {
-          const row = payload.new as { status?: string };
-          if (row.status === "open") goToChat();
-        }
-      )
+      .on("postgres_changes", {
+        event: "UPDATE", schema: "public",
+        table: "chat_sessions", filter: `id=eq.${sessionId}`,
+      }, (payload) => {
+        const row = payload.new as { status?: string };
+        if (row.status === "open") goToChat();
+      })
       .subscribe();
     return () => { void supabase.removeChannel(ch); };
   }, [sessionId, goToChat]);
 
+  // Polling fallback every 2.5s
   useEffect(() => {
     const id = window.setInterval(() => {
       void (async () => {
-        const supabase = createClient();
-        const { data } = await supabase
-          .from("chat_sessions")
-          .select("status")
-          .eq("id", sessionId)
-          .maybeSingle();
-        if (data?.status === "open") goToChat();
+        const { data } = await createClient()
+          .from("chat_sessions").select("status").eq("id", sessionId).maybeSingle();
+        if (data?.status === "open")   goToChat();
         if (data?.status === "closed") router.replace("/astrologers/chats");
       })();
     }, 2500);
     return () => window.clearInterval(id);
   }, [sessionId, goToChat, router]);
 
+  // Realtime: wallet balance
   useEffect(() => {
     const supabase = createClient();
     const ch = supabase
       .channel(`queue-wallet:${viewerUserId}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "UPDATE",
-          schema: "public",
-          table: "user_profiles",
-          filter: `id=eq.${viewerUserId}`,
-        },
-        (payload) => {
-          const row = payload.new as { wallet_balance_paise?: number };
-          if (typeof row.wallet_balance_paise === "number") {
-            setBalancePaise(row.wallet_balance_paise);
-          }
-        }
-      )
+      .on("postgres_changes", {
+        event: "UPDATE", schema: "public",
+        table: "user_profiles", filter: `id=eq.${viewerUserId}`,
+      }, (payload) => {
+        const row = payload.new as { wallet_balance_paise?: number };
+        if (typeof row.wallet_balance_paise === "number") setBalancePaise(row.wallet_balance_paise);
+      })
       .subscribe();
     return () => { void supabase.removeChannel(ch); };
   }, [viewerUserId]);
@@ -108,39 +93,43 @@ export function ChatQueuePageClient({
   }
 
   return (
-    <div className="relative flex min-h-[calc(100vh-64px)] flex-col bg-background">
-      {/* Top nav bar */}
-      <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border/60 bg-background/95 px-4 py-3 backdrop-blur-md">
+    <div className="flex min-h-[calc(100dvh-56px)] flex-col bg-[#f5f5f5]">
+      {/* Top bar */}
+      <div className="sticky top-0 z-10 flex items-center justify-between border-b border-gray-100 bg-white px-4 py-3">
         <Link
           href="/astrologers"
-          className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition hover:text-foreground"
+          className="flex items-center gap-1.5 rounded-full bg-gray-100 px-3 py-1.5 text-[13px] font-medium text-gray-600 hover:bg-gray-200 transition"
         >
           <ArrowLeft className="size-4" />
-          Astrologers
+          Back
         </Link>
         {/* Wallet chip */}
-        <div className="flex items-center gap-1.5 rounded-full border border-border bg-muted/50 px-3 py-1.5 text-xs font-semibold text-foreground">
-          <Wallet className="size-3.5 text-brand" />
-          {formatInrFromPaise(balancePaise)}
-        </div>
+        <Link
+          href="/astrologers/wallet"
+          className="flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 transition hover:bg-amber-100"
+        >
+          <Wallet className="size-3.5 text-amber-600" />
+          <span className="text-[13px] font-bold tabular-nums text-amber-700">
+            {formatInrFromPaise(balancePaise)}
+          </span>
+        </Link>
       </div>
 
-      {/* Main content — centred */}
+      {/* Main content */}
       <div className="flex flex-1 flex-col items-center justify-center px-4 py-8">
-        <div className="w-full max-w-sm">
+        <div className="w-full max-w-sm overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-sm">
           <ConsultationWaitingRoom
             astrologerName={astrologerName}
             rateInrPerMin={rateInrPerMin}
             orderCode={orderCode}
           />
-
           {/* Leave queue */}
-          <div className="mt-6 text-center">
+          <div className="border-t border-gray-50 px-6 py-4 text-center">
             <button
               type="button"
               disabled={leaving}
               onClick={() => void leaveQueue()}
-              className="text-xs font-medium text-muted-foreground underline-offset-2 transition hover:text-destructive hover:underline disabled:opacity-50"
+              className="text-[12px] font-medium text-gray-400 underline-offset-2 transition hover:text-red-500 hover:underline disabled:opacity-50"
             >
               {leaving ? "Leaving…" : "Leave queue & go back"}
             </button>

@@ -7,7 +7,7 @@ const TIPS = [
   "Most astrologers connect within 1–2 minutes. Stay on this screen.",
   "Take a quiet breath — your session is queued securely.",
   "Keep this tab open. We'll move you in automatically.",
-  "Free to share your question once the live session begins.",
+  "Feel free to share your question once the live session begins.",
 ];
 
 type ConsultationWaitingRoomProps = {
@@ -36,7 +36,7 @@ export function ConsultationWaitingRoom({
       setTimeout(() => {
         setTipIndex((i) => (i + 1) % TIPS.length);
         setTipVisible(true);
-      }, 400);
+      }, 350);
     }, 5000);
     return () => window.clearInterval(id);
   }, []);
@@ -45,105 +45,89 @@ export function ConsultationWaitingRoom({
   const ss = String(elapsed % 60).padStart(2, "0");
 
   return (
-    <div className="relative flex flex-col items-center justify-center overflow-hidden rounded-3xl px-6 py-10 text-center">
-      {/* ── Background glow orbs ── */}
-      <div className="pointer-events-none absolute inset-0 -z-10" aria-hidden>
-        <div className="absolute left-1/2 top-1/2 size-64 -translate-x-1/2 -translate-y-1/2 rounded-full bg-brand/10 blur-3xl animate-pulse" />
-        <div className="absolute right-0 top-0 size-40 rounded-full bg-amber-400/10 blur-3xl animate-pulse [animation-delay:800ms]" />
-        <div className="absolute bottom-0 left-0 size-40 rounded-full bg-violet-400/8 blur-3xl animate-pulse [animation-delay:1400ms]" />
-      </div>
-
-      {/* ── Animated chakra rings ── */}
-      <div className="relative mb-7 flex size-28 items-center justify-center">
-        {/* Outermost ping */}
-        <span className="absolute size-28 rounded-full border border-brand/15 animate-ping [animation-duration:3s]" />
-        {/* Ring 1 - slow rotate */}
-        <div
-          className="absolute size-24 rounded-full border border-dashed border-brand/25"
-          style={{ animation: "vgw-rot 12s linear infinite" }}
-        />
-        {/* Ring 2 - counter rotate */}
-        <div
-          className="absolute size-[4.5rem] rounded-full border border-dashed border-gold/35"
-          style={{ animation: "vgw-rot 8s linear infinite reverse" }}
-        />
-        {/* Dot markers on outer ring */}
-        {[0, 60, 120, 180, 240, 300].map((deg) => (
-          <div
-            key={deg}
-            className="absolute size-1.5 rounded-full bg-brand/50"
-            style={{
-              top: "50%",
-              left: "50%",
-              transform: `rotate(${deg}deg) translateX(46px) translateY(-50%)`,
-            }}
-          />
-        ))}
-        {/* Center orb */}
-        <div className="relative flex size-14 items-center justify-center rounded-full bg-gradient-to-br from-brand via-brand to-indigo-600 shadow-xl shadow-brand/30">
-          <span className="text-xl" aria-hidden>🔮</span>
-          <span className="absolute inset-0 rounded-full bg-white/10 animate-pulse" />
-        </div>
-      </div>
-
+    <div className="flex flex-col items-center text-center px-2 py-8">
       <style>{`
-        @keyframes vgw-rot { to { transform: rotate(360deg); } }
-      `}</style>
-
-      {/* ── Text ── */}
-      <h2 className="font-heading text-xl font-bold text-foreground">
-        Connecting you with
-      </h2>
-      <p className="mt-0.5 font-heading text-2xl font-bold text-brand">
-        {astrologerName}
-      </p>
-
-      {/* ── Timer ── */}
-      <div className="mt-4 flex items-center gap-2 rounded-full border border-border/60 bg-muted/50 px-4 py-1.5">
-        <span className="relative flex size-2">
-          <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-70" />
-          <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
-        </span>
-        <span className="font-mono text-sm font-semibold tabular-nums text-foreground">
-          {mm}:{ss}
-        </span>
-        <span className="text-xs text-muted-foreground">waiting</span>
-      </div>
-
-      {/* ── Rate pill ── */}
-      {rateInrPerMin ? (
-        <p className="mt-3 text-xs text-muted-foreground">
-          ₹{rateInrPerMin}/min · billing starts when they join
-        </p>
-      ) : null}
-
-      {/* ── Progress bar ── */}
-      <div className="mt-5 h-1 w-48 overflow-hidden rounded-full bg-muted/60">
-        <div
-          className="h-full rounded-full bg-gradient-to-r from-brand via-amber-400 to-brand bg-[length:200%_100%]"
-          style={{ animation: "vgw-shimmer 2s linear infinite" }}
-        />
-      </div>
-      <style>{`
+        @keyframes vgw-rot   { to { transform: rotate(360deg); } }
         @keyframes vgw-shimmer {
           0%   { background-position: 200% center; }
           100% { background-position: -200% center; }
         }
       `}</style>
 
-      {/* ── Rotating tip ── */}
+      {/* ── Animated rings ── */}
+      <div className="relative mb-8 flex size-32 items-center justify-center">
+        {/* Outer ping */}
+        <span className="absolute size-32 rounded-full border border-amber-300/40 animate-ping [animation-duration:3s]" />
+        {/* Ring 1 */}
+        <div
+          className="absolute size-[6.5rem] rounded-full border-2 border-dashed border-amber-300/50"
+          style={{ animation: "vgw-rot 12s linear infinite" }}
+        />
+        {/* Ring 2 */}
+        <div
+          className="absolute size-20 rounded-full border-2 border-dashed border-amber-400/40"
+          style={{ animation: "vgw-rot 8s linear infinite reverse" }}
+        />
+        {/* Dot markers */}
+        {[0, 60, 120, 180, 240, 300].map((deg) => (
+          <div
+            key={deg}
+            className="absolute size-1.5 rounded-full bg-amber-400/60"
+            style={{
+              top: "50%", left: "50%",
+              transform: `rotate(${deg}deg) translateX(52px) translateY(-50%)`,
+            }}
+          />
+        ))}
+        {/* Centre orb */}
+        <div className="relative flex size-16 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 to-amber-600 shadow-xl shadow-amber-400/30">
+          <span className="text-2xl" aria-hidden>🔮</span>
+          <span className="absolute inset-0 rounded-full bg-white/10 animate-pulse" />
+        </div>
+      </div>
+
+      {/* Text */}
+      <p className="text-[13px] font-medium text-gray-400 uppercase tracking-widest mb-1">
+        Connecting you with
+      </p>
+      <p className="text-[22px] font-bold text-gray-900 leading-tight">{astrologerName}</p>
+
+      {/* Timer */}
+      <div className="mt-5 flex items-center gap-2 rounded-full border border-gray-200 bg-white px-5 py-2 shadow-sm">
+        <span className="relative flex size-2">
+          <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-70" />
+          <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
+        </span>
+        <span className="font-mono text-[15px] font-bold tabular-nums text-gray-900">{mm}:{ss}</span>
+        <span className="text-[12px] text-gray-400">waiting</span>
+      </div>
+
+      {/* Rate note */}
+      {rateInrPerMin ? (
+        <p className="mt-3 text-[12px] text-gray-400">
+          ₹{rateInrPerMin}/min · billing starts when they join
+        </p>
+      ) : null}
+
+      {/* Progress shimmer bar */}
+      <div className="mt-5 h-1 w-40 overflow-hidden rounded-full bg-gray-100">
+        <div
+          className="h-full rounded-full bg-gradient-to-r from-amber-300 via-amber-500 to-amber-300 bg-[length:200%_100%]"
+          style={{ animation: "vgw-shimmer 2s linear infinite" }}
+        />
+      </div>
+
+      {/* Rotating tip */}
       <p
-        className="mt-6 max-w-xs text-sm leading-relaxed text-muted-foreground transition-opacity duration-400"
+        className="mt-6 max-w-[260px] text-[13px] leading-relaxed text-gray-500 transition-opacity duration-300"
         style={{ opacity: tipVisible ? 1 : 0 }}
       >
         {TIPS[tipIndex]}
       </p>
 
-      {/* ── Order code ── */}
+      {/* Order code */}
       {orderCode ? (
-        <p className="mt-4 font-mono text-[10px] tracking-wider text-muted-foreground/60">
-          {orderCode}
-        </p>
+        <p className="mt-5 font-mono text-[10px] tracking-widest text-gray-300">{orderCode}</p>
       ) : null}
     </div>
   );
