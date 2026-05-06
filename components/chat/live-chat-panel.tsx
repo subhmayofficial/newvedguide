@@ -145,6 +145,8 @@ export function LiveChatPanel({
   const [showEndConfirm, setShowEndConfirm] = useState(false);
   const [showRechargePopup, setShowRechargePopup] = useState(false);
   const rechargePopupShownRef = useRef(false);
+  const criticalPopupShownRef = useRef(false); // re-trigger at 2-min mark
+  const [popupEverDismissed, setPopupEverDismissed] = useState(false);
   const [closeSummary, setCloseSummary]   = useState<SessionCloseSummary | null>(null);
   const [endedByDepletion, setEndedByDepletion] = useState(false);
   const [adminJoinError, setAdminJoinError] = useState<string | null>(null);
@@ -347,16 +349,24 @@ export function LiveChatPanel({
     messageCountRef.current = 0;
     autoDepletedCloseRef.current = false;
     rechargePopupShownRef.current = false;
+    criticalPopupShownRef.current = false;
     setEndedByDepletion(false);
     setAdminJoinError(null);
     setShowRechargePopup(false);
+    setPopupEverDismissed(false);
   }, [sessionId]);
 
-  // ── Low-balance recharge popup trigger ────────────────────────────────────
+  // ── Low-balance recharge popup triggers ───────────────────────────────────
   useEffect(() => {
     if (mode !== "user" || sessionStatus !== "open") return;
+    // First trigger: below 5 min
     if (secondsLeft > 0 && secondsLeft < MIN_CHAT_START_SECONDS && !rechargePopupShownRef.current) {
       rechargePopupShownRef.current = true;
+      setShowRechargePopup(true);
+    }
+    // Second trigger: below 2 min (critical re-alert)
+    if (secondsLeft > 0 && secondsLeft < 120 && !criticalPopupShownRef.current) {
+      criticalPopupShownRef.current = true;
       setShowRechargePopup(true);
     }
   }, [mode, sessionStatus, secondsLeft]);
@@ -484,7 +494,7 @@ export function LiveChatPanel({
               <div className="pointer-events-none absolute -right-6 -top-6 size-28 rounded-full bg-white/10" aria-hidden />
               <button
                 type="button"
-                onClick={() => setShowRechargePopup(false)}
+                onClick={() => { setShowRechargePopup(false); setPopupEverDismissed(true); }}
                 className="absolute right-3 top-3 flex size-7 items-center justify-center rounded-full bg-white/20 text-white/80 hover:bg-white/30 transition"
                 aria-label="Dismiss"
               >
@@ -525,7 +535,7 @@ export function LiveChatPanel({
               </Link>
               <button
                 type="button"
-                onClick={() => setShowRechargePopup(false)}
+                onClick={() => { setShowRechargePopup(false); setPopupEverDismissed(true); }}
                 className="w-full text-center text-[12px] font-medium text-gray-400 underline-offset-2 hover:text-gray-600 hover:underline transition"
               >
                 Continue chatting (balance may run out)
@@ -691,6 +701,33 @@ export function LiveChatPanel({
           )}
         </div>
       </header>
+
+      {/* ── Persistent low-balance strip (shown after popup dismissed, or when popup isn't active) ── */}
+      {countdownBelowMinReserve && !showRechargePopup && (
+        <div className={`shrink-0 flex items-center gap-2 px-3 py-2 border-b ${
+          countdownLow
+            ? "bg-red-50 border-red-200"
+            : "bg-amber-50 border-amber-200"
+        }`}>
+          <span className="relative flex size-2 shrink-0">
+            <span className={`absolute inline-flex size-full animate-ping rounded-full opacity-70 ${countdownLow ? "bg-red-400" : "bg-amber-400"}`} />
+            <span className={`relative inline-flex size-2 rounded-full ${countdownLow ? "bg-red-500" : "bg-amber-500"}`} />
+          </span>
+          <p className={`flex-1 text-[12px] font-semibold ${countdownLow ? "text-red-800" : "text-amber-900"}`}>
+            {countdownLow ? "⚠️ Critical — " : "Low balance — "}
+            <span className="tabular-nums font-black">{formatCountdownMmSs(secondsLeft)}</span>
+            {" left · chat will end soon"}
+          </p>
+          <Link
+            href="/astrologers/wallet"
+            className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-black text-gray-900 transition ${
+              countdownLow ? "bg-red-400 hover:bg-red-500" : "bg-amber-400 hover:bg-amber-500"
+            }`}
+          >
+            Recharge
+          </Link>
+        </div>
+      )}
 
       {/* ── Messages ── */}
       <div
