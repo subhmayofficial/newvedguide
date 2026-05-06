@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { AppBottomNav } from "@/components/shared/app-bottom-nav";
 import {
   ArrowLeft,
   Edit2,
@@ -114,7 +115,7 @@ export function ProfileClient({
   const balanceRupees = Math.floor(balancePaise / 100);
 
   return (
-    <div className="min-h-screen bg-[#f5f5f5] pb-10">
+    <div className="min-h-screen bg-[#f5f5f5] pb-24">
       {/* Sticky header */}
       <div className="sticky top-0 z-10 bg-white border-b border-gray-100 px-4 py-3.5 flex items-center gap-3">
         <Link
@@ -253,6 +254,8 @@ export function ProfileClient({
           redirectTo="/login"
         />
       </div>
+
+      <AppBottomNav />
     </div>
   );
 }

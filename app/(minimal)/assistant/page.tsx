@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { AppBottomNav } from "@/components/shared/app-bottom-nav";
 import { ArrowLeft, Bot } from "lucide-react";
 
 export const metadata: Metadata = { title: "Assistant Chat · VedGuide" };
 
 export default function AssistantPage() {
   return (
-    <div className="min-h-screen bg-[#f5f5f5]">
+    <div className="min-h-screen bg-[#f5f5f5] pb-24">
       <div className="sticky top-0 z-10 bg-white border-b border-gray-100 px-4 py-3.5 flex items-center gap-3">
         <Link
           href="/profile"
@@ -36,6 +37,7 @@ export default function AssistantPage() {
           Back to Profile
         </Link>
       </div>
+      <AppBottomNav />
     </div>
   );
 }

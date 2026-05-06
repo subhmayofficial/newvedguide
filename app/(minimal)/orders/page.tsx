@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { AppBottomNav } from "@/components/shared/app-bottom-nav";
 import {
   ArrowLeft,
   Package,
@@ -101,7 +102,7 @@ export default async function MyOrdersPage() {
     : { data: [] };
 
   return (
-    <div className="min-h-screen bg-[#f5f5f5]">
+    <div className="min-h-screen bg-[#f5f5f5] pb-24">
       {/* Header */}
       <div className="sticky top-0 z-10 bg-white border-b border-gray-100 px-4 py-3.5 flex items-center gap-3">
         <Link
@@ -183,6 +184,7 @@ export default async function MyOrdersPage() {
           </div>
         )}
       </div>
+      <AppBottomNav />
     </div>
   );
 }

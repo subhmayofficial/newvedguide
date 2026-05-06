@@ -15,6 +15,7 @@ import {
   User,
 } from "lucide-react";
 import { AccountSignOutButton } from "@/components/account/account-sign-out-button";
+import { AppBottomNav } from "@/components/shared/app-bottom-nav";
 import { createClient } from "@/lib/supabase/client";
 import { isPhoneOtpSyntheticEmail } from "@/lib/auth/phone-login-identity";
 
@@ -319,7 +320,7 @@ export default function UserSettingsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f5f5f5] pb-12">
+    <div className="min-h-screen bg-[#f5f5f5] pb-24">
 
       {/* ── Sticky header ── */}
       <div className="sticky top-0 z-10 flex items-center gap-3 border-b border-gray-100 bg-white px-4 py-3.5">
@@ -467,6 +468,8 @@ export default function UserSettingsPage() {
         </div>
 
       </div>
+
+      <AppBottomNav />
     </div>
   );
 }
