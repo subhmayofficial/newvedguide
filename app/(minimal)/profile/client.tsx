@@ -11,11 +11,7 @@ import {
   MessageSquare,
   Home,
   LayoutGrid,
-  Flame,
-  Users,
-  Bot,
   Gift,
-  ShoppingBag,
   ChevronRight,
 } from "lucide-react";
 import { AccountSignOutButton } from "@/components/account/account-sign-out-button";
@@ -224,26 +220,14 @@ export function ProfileClient({
             icon={LayoutGrid}
             label="Free Services"
           />
-          <SectionItem href="/pooja" icon={Flame} label="Book a Pooja" />
         </Section>
 
         {/* ACCOUNT */}
         <Section title="Account">
-          <SectionItem href="/following" icon={Users} label="My following" />
-          <SectionItem href="/assistant" icon={Bot} label="Assistant Chat" />
           <SectionItem
             href="/gift-card"
             icon={Gift}
             label="Redeem Gift Card"
-          />
-        </Section>
-
-        {/* SERVICES */}
-        <Section title="Services">
-          <SectionItem
-            href="/remedy"
-            icon={ShoppingBag}
-            label="AstroRemedy"
           />
         </Section>
 
