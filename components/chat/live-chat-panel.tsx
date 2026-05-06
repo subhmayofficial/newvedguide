@@ -17,6 +17,7 @@ import { createClient } from "@/lib/supabase/client";
 import type { AstrologerDisplay } from "@/lib/chat/astrologer-display";
 import {
   affordableChatSeconds,
+  coerceWalletPaise,
   formatCountdownMmSs,
   MIN_CHAT_START_SECONDS,
   remainingSecondsFromMeterAccrual,
@@ -58,6 +59,10 @@ type LiveChatPanelProps = {
   meterAnchorIso: string;
   initialSessionStatus?: string;
   viewerUserId?: string;
+  /** When set in admin mode, shows a back control (e.g. mobile inbox list). */
+  onAdminNavigateBack?: () => void;
+  /** Admin embedded in a flex parent: fill height instead of fixed 75dvh (keeps composer in view). */
+  fillParent?: boolean;
 };
 
 function timeLabel(iso: string) {
@@ -110,7 +115,7 @@ function MessageBubble({
             : "rounded-bl-sm border border-gray-100 bg-white text-gray-900 shadow-sm"
         }`}
       >
-        <p className="whitespace-pre-wrap text-[13.5px] leading-snug">{m.body}</p>
+        <p className="break-words whitespace-pre-wrap text-[13.5px] leading-snug">{m.body}</p>
         <p className={`mt-1 text-[10px] tabular-nums ${isOwn ? "text-amber-700/60" : "text-gray-400"}`}>
           {timeLabel(m.created_at)}
         </p>
@@ -127,14 +132,19 @@ export function LiveChatPanel({
   customerGradient = "from-sky-600 to-indigo-900",
   initialBalancePaise, meterAnchorIso,
   initialSessionStatus = "open", viewerUserId,
+  onAdminNavigateBack,
+  fillParent = false,
 }: LiveChatPanelProps) {
   const router = useRouter();
+  const adminPrevStatusRef = useRef(initialSessionStatus);
   const [messages, setMessages]           = useState<ChatMessage[]>([]);
   const [animatedIds, setAnimatedIds]     = useState<Set<string>>(new Set());
   const [loading, setLoading]             = useState(true);
   const [sending, setSending]             = useState(false);
   const [ending, setEnding]               = useState(false);
   const [showEndConfirm, setShowEndConfirm] = useState(false);
+  const [showRechargePopup, setShowRechargePopup] = useState(false);
+  const rechargePopupShownRef = useRef(false);
   const [closeSummary, setCloseSummary]   = useState<SessionCloseSummary | null>(null);
   const [endedByDepletion, setEndedByDepletion] = useState(false);
   const [adminJoinError, setAdminJoinError] = useState<string | null>(null);
@@ -161,6 +171,7 @@ export function LiveChatPanel({
 
   // ── Sync props ─────────────────────────────────────────────────────────────
   useEffect(() => {
+    adminPrevStatusRef.current = initialSessionStatus;
     setSessionStatus(initialSessionStatus);
     if (initialSessionStatus === "waiting_astrologer") { setMeterAnchor(""); setSecondsLeft(0); }
     else { setMeterAnchor(meterAnchorIso); setSecondsLeft(remainingSecondsFromMeterAccrual(initialBalancePaise, astrologer.rateInrPerMin, meterAnchorIso)); }
@@ -184,9 +195,23 @@ export function LiveChatPanel({
   const runMeter = useCallback(async () => {
     const res = await fetch(`/api/user/chat-sessions/${encodeURIComponent(sessionId)}/meter`, { method: "POST", credentials: "include" });
     if (!res.ok) return;
-    const j = (await res.json()) as { balancePaise?: number; last_billed_at?: string; remainingSeconds?: number };
-    if (typeof j.balancePaise === "number")    setBalancePaise(j.balancePaise);
-    if (typeof j.last_billed_at === "string")  setMeterAnchor(j.last_billed_at);
+    const j = (await res.json()) as {
+      balancePaise?: number;
+      last_billed_at?: string;
+      remainingSeconds?: number;
+      sessionClosed?: boolean;
+      summary?: SessionCloseSummary;
+    };
+    if (j.sessionClosed && j.summary) {
+      setSessionStatus("closed");
+      setEndedByDepletion(true);
+      setCloseSummary(j.summary);
+      setSecondsLeft(0);
+      if (typeof j.balancePaise === "number") setBalancePaise(j.balancePaise);
+      return;
+    }
+    if (typeof j.balancePaise === "number") setBalancePaise(j.balancePaise);
+    if (typeof j.last_billed_at === "string") setMeterAnchor(j.last_billed_at);
     if (typeof j.remainingSeconds === "number") setSecondsLeft(j.remainingSeconds);
   }, [sessionId]);
 
@@ -210,15 +235,22 @@ export function LiveChatPanel({
     if (!res.ok) return null;
     const json = (await res.json()) as { messages?: ChatMessage[]; session?: { status?: string; last_billed_at?: string | null; created_at?: string }; wallet?: { balancePaise?: number }; rateInrPerMin?: number };
     if (json.messages) setMessages((prev) => mergeMessagesById(prev, json.messages!));
-    if (json.session?.status) setSessionStatus(json.session.status);
+    if (json.session?.status) {
+      const next = json.session.status;
+      if (mode === "admin" && next === "closed" && adminPrevStatusRef.current !== "closed") {
+        router.refresh();
+      }
+      adminPrevStatusRef.current = next;
+      setSessionStatus(next);
+    }
     if (json.session?.status === "waiting_astrologer") { setMeterAnchor(""); setSecondsLeft(0); }
     else {
       const anchor = json.session?.last_billed_at?.trim() ? json.session.last_billed_at : json.session?.created_at;
       if (anchor) setMeterAnchor(anchor);
     }
     if (typeof json.rateInrPerMin === "number" && json.rateInrPerMin > 0) setRateInrPerMin(json.rateInrPerMin);
-    setBalancePaise(json.wallet?.balancePaise ?? 0);
-  }, [sessionId]);
+    setBalancePaise(coerceWalletPaise(json.wallet?.balancePaise));
+  }, [sessionId, mode, router]);
 
   useEffect(() => { if (mode === "user") void refreshBalanceUser(); }, [mode, refreshBalanceUser]);
 
@@ -241,22 +273,27 @@ export function LiveChatPanel({
 
   // ── Realtime messages (user) ───────────────────────────────────────────────
   useEffect(() => {
-    if (mode !== "user") return;
     let alive = true;
     const supabase = createClient();
     const channel = supabase
-      .channel(`lc:${sessionId}`)
+      .channel(`${mode === "admin" ? "admin-lc" : "lc"}:${sessionId}`)
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "chat_messages", filter: `session_id=eq.${sessionId}` }, (payload) => {
         const row = payload.new as ChatMessage;
-        setMessages((prev) => prev.some((m) => m.id === row.id) ? prev : [...prev, row]);
+        setMessages((prev) => (prev.some((m) => m.id === row.id) ? prev : [...prev, row]));
         setTimeout(() => setAnimatedIds((s) => new Set([...s, row.id])), 50);
       })
       .subscribe((status, err) => {
         if (!alive) return;
-        if (status === "SUBSCRIBED") setLiveStatus("live");
-        if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") { setLiveStatus("polling"); console.warn("[live-chat] realtime:", status, err?.message ?? ""); }
+        if (mode === "user" && status === "SUBSCRIBED") setLiveStatus("live");
+        if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+          if (mode === "user") setLiveStatus("polling");
+          console.warn("[live-chat] realtime:", status, err?.message ?? "");
+        }
       });
-    return () => { alive = false; void supabase.removeChannel(channel); };
+    return () => {
+      alive = false;
+      void supabase.removeChannel(channel);
+    };
   }, [mode, sessionId]);
 
   useEffect(() => { if (mode === "user") setLiveStatus("connecting"); }, [mode, sessionId]);
@@ -268,10 +305,18 @@ export function LiveChatPanel({
     const ch = supabase.channel(`wallet:${viewerUserId}`)
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "user_profiles", filter: `id=eq.${viewerUserId}` }, (payload) => {
         const row = payload.new as { wallet_balance_paise?: number };
-        if (typeof row.wallet_balance_paise === "number") setBalancePaise(row.wallet_balance_paise);
+        if (typeof row.wallet_balance_paise === "number") {
+          setBalancePaise(row.wallet_balance_paise);
+          if (row.wallet_balance_paise <= 0) {
+            void fetch(`/api/user/chat-sessions/${encodeURIComponent(sessionId)}/meter`, {
+              method: "POST",
+              credentials: "include",
+            });
+          }
+        }
       }).subscribe();
     return () => { void supabase.removeChannel(ch); };
-  }, [mode, viewerUserId]);
+  }, [mode, viewerUserId, sessionId]);
 
   // ── Polling fallbacks ──────────────────────────────────────────────────────
   useEffect(() => {
@@ -301,9 +346,20 @@ export function LiveChatPanel({
   useEffect(() => {
     messageCountRef.current = 0;
     autoDepletedCloseRef.current = false;
+    rechargePopupShownRef.current = false;
     setEndedByDepletion(false);
     setAdminJoinError(null);
+    setShowRechargePopup(false);
   }, [sessionId]);
+
+  // ── Low-balance recharge popup trigger ────────────────────────────────────
+  useEffect(() => {
+    if (mode !== "user" || sessionStatus !== "open") return;
+    if (secondsLeft > 0 && secondsLeft < MIN_CHAT_START_SECONDS && !rechargePopupShownRef.current) {
+      rechargePopupShownRef.current = true;
+      setShowRechargePopup(true);
+    }
+  }, [mode, sessionStatus, secondsLeft]);
 
   // ── Auto-end on wallet depletion ───────────────────────────────────────────
   useEffect(() => {
@@ -400,22 +456,80 @@ export function LiveChatPanel({
     ? { name: astrologer.name, subtitle: `₹${rateInrPerMin}/min`, avatarUrl: astrologer.imageSrc, initials: astrologer.initials, gradient: astrologer.avatarGradient }
     : { name: customerName, subtitle: `₹${rateInrPerMin}/min · ${astrologer.name}`, avatarUrl: customerAvatarUrl, initials: customerInitials, gradient: customerGradient };
 
-  return (
-    <div className="flex h-[calc(100dvh-56px)] flex-col bg-[#f0f2f5]">
+  /* User: subtract astrologers header (h-14) + bottom nav (60px) + home indicator. Admin: fixed height unless fillParent (inbox). */
+  const shellHeightClass =
+    mode === "user"
+      ? "h-[calc(100dvh-3.5rem-60px-env(safe-area-inset-bottom,0px))] max-h-[calc(100dvh-3.5rem-60px-env(safe-area-inset-bottom,0px))]"
+      : fillParent
+        ? "h-full min-h-0 min-h-[240px] w-full flex-1"
+        : "h-[min(75dvh,720px)] min-h-[320px] w-full sm:min-h-[400px]";
 
-      {/* ── Low-balance banner ── */}
-      {countdownBelowMinReserve && (
-        <div className="shrink-0 z-30 border-b-2 border-red-400 bg-red-50 px-3 py-2.5">
-          <div className="mx-auto flex max-w-lg flex-wrap items-center justify-between gap-2">
-            <div>
-              <p className="text-[13px] font-bold text-red-700">Low balance</p>
-              <p className="text-[11px] text-red-600/90">Less than 5 min left — recharge or chat will end.</p>
+  return (
+    <div
+      className={`relative flex min-h-0 flex-col overflow-x-hidden overflow-y-hidden bg-[#f0f2f5] ${shellHeightClass}`}
+    >
+
+      {/* ── Low-balance recharge popup ── */}
+      {showRechargePopup && (
+        <div
+          className="absolute inset-0 z-40 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
+          onClick={() => setShowRechargePopup(false)}
+        >
+          <div
+            className="w-full max-w-sm overflow-hidden rounded-3xl bg-white shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header gradient */}
+            <div className="relative overflow-hidden bg-gradient-to-br from-red-500 via-orange-500 to-amber-500 px-5 pt-5 pb-4 text-white">
+              <div className="pointer-events-none absolute -right-6 -top-6 size-28 rounded-full bg-white/10" aria-hidden />
+              <button
+                type="button"
+                onClick={() => setShowRechargePopup(false)}
+                className="absolute right-3 top-3 flex size-7 items-center justify-center rounded-full bg-white/20 text-white/80 hover:bg-white/30 transition"
+                aria-label="Dismiss"
+              >
+                <X className="size-3.5" />
+              </button>
+              <div className="flex items-center gap-3">
+                <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-white/20 text-2xl">
+                  ⚡
+                </div>
+                <div>
+                  <p className="text-[11px] font-bold uppercase tracking-widest text-white/70">Low balance</p>
+                  <p className="text-[20px] font-black leading-tight">Recharge to keep chatting</p>
+                </div>
+              </div>
+              {/* Countdown */}
+              <div className="mt-3 flex items-center gap-2 rounded-2xl bg-white/15 px-4 py-2.5">
+                <span className="relative flex size-2">
+                  <span className="absolute inline-flex size-full animate-ping rounded-full bg-red-200 opacity-75" />
+                  <span className="relative inline-flex size-2 rounded-full bg-white" />
+                </span>
+                <span className="text-[15px] font-black tabular-nums">{formatCountdownMmSs(secondsLeft)} left</span>
+                <span className="ml-auto text-[11px] text-white/70">Chat ends when 0:00</span>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="min-w-[3.5rem] text-center text-xl font-black tabular-nums tracking-tight text-red-600">{formatCountdownMmSs(secondsLeft)}</span>
-              <Link href="/astrologers/wallet" className="rounded-full bg-red-600 px-3 py-1.5 text-[12px] font-bold text-white shadow-sm hover:bg-red-700 transition">
-                Recharge
+
+            {/* Body */}
+            <div className="px-5 py-4 space-y-3">
+              <div className="rounded-2xl bg-amber-50 border border-amber-200 px-4 py-3">
+                <p className="text-[13px] font-bold text-amber-900">🎁 100% Cashback active right now!</p>
+                <p className="text-[12px] text-amber-700/80 mt-0.5">Recharge now and get double your balance instantly.</p>
+              </div>
+              <Link
+                href="/astrologers/wallet"
+                className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-amber-400 to-orange-400 py-3.5 text-[15px] font-black text-gray-900 shadow-sm shadow-amber-200 hover:from-amber-500 hover:to-orange-500 transition active:scale-[0.98]"
+              >
+                <Wallet className="size-4" />
+                Recharge Wallet
               </Link>
+              <button
+                type="button"
+                onClick={() => setShowRechargePopup(false)}
+                className="w-full text-center text-[12px] font-medium text-gray-400 underline-offset-2 hover:text-gray-600 hover:underline transition"
+              >
+                Continue chatting (balance may run out)
+              </button>
             </div>
           </div>
         </div>
@@ -485,6 +599,16 @@ export function LiveChatPanel({
             <Link href="/astrologers/chats" className="flex shrink-0 size-9 items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 transition" aria-label="Back">
               <ArrowLeft className="size-5" />
             </Link>
+          )}
+          {mode === "admin" && onAdminNavigateBack && (
+            <button
+              type="button"
+              onClick={onAdminNavigateBack}
+              className="flex shrink-0 size-9 items-center justify-center rounded-full bg-gray-100 text-gray-600 transition hover:bg-gray-200 lg:hidden"
+              aria-label="Back to chat list"
+            >
+              <ArrowLeft className="size-5" />
+            </button>
           )}
           <ChatAvatar src={headerPeer.avatarUrl} alt={headerPeer.name} initials={headerPeer.initials} gradientClass={headerPeer.gradient} size={42} />
           <div className="min-w-0 flex-1">
@@ -571,7 +695,7 @@ export function LiveChatPanel({
       {/* ── Messages ── */}
       <div
         ref={messagesScrollRef}
-        className="flex-1 space-y-2 overflow-y-auto overscroll-contain px-3 py-4"
+        className="min-h-0 flex-1 space-y-2 overflow-y-auto overflow-x-hidden overscroll-contain px-3 py-4"
       >
         {loading ? (
           <div className="flex flex-col items-center gap-3 py-16">
@@ -602,15 +726,18 @@ export function LiveChatPanel({
                 customerInitials={customerInitials}
                 customerGradient={customerGradient}
                 mode={mode}
-                animateIn={animatedIds.has(m.id)}
+                animateIn={mode === "admin" || animatedIds.has(m.id)}
               />
             );
           })
         )}
       </div>
 
-      {/* ── Input ── */}
-      <div className="shrink-0 border-t border-gray-100 bg-white px-3 py-2.5">
+      {/* ── Input (text-base on small screens prevents iOS Safari zoom-on-focus) ── */}
+      <div
+        className="shrink-0 border-t border-gray-100 bg-white px-3 py-2.5"
+        style={{ paddingBottom: "max(0.625rem, env(safe-area-inset-bottom, 0px))" }}
+      >
         {sessionEnded ? (
           <div className="flex items-center justify-center gap-3 py-2">
             <p className="text-[12px] text-gray-400">Session ended.</p>
@@ -622,7 +749,9 @@ export function LiveChatPanel({
           <div className="flex items-end gap-2">
             <textarea
               ref={textareaRef}
-              className="max-h-[120px] min-h-[44px] flex-1 resize-none rounded-2xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-[14px] text-gray-900 outline-none placeholder:text-gray-400 focus:border-amber-300 focus:bg-white focus:ring-2 focus:ring-amber-200/50 transition disabled:opacity-50"
+              enterKeyHint="send"
+              inputMode="text"
+              className="max-h-[120px] min-h-[44px] flex-1 resize-none rounded-2xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-base leading-snug text-gray-900 outline-none placeholder:text-gray-400 focus:border-amber-300 focus:bg-white focus:ring-2 focus:ring-amber-200/50 transition disabled:opacity-50 sm:text-[14px] sm:leading-snug"
               placeholder={
                 mode === "user"
                   ? secondsLeft <= 0 || balancePaise <= 0 ? "Top up wallet to continue…" : "Message…"

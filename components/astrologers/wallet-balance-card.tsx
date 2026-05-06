@@ -7,22 +7,40 @@ import { WalletTopupLauncher } from "@/components/astrologers/wallet-topup-launc
 // ─── Count-up hook ─────────────────────────────────────────────────────────────
 
 function useCountUp(target: number, duration = 900) {
-  const [val, setVal] = useState(0);
+  const [val, setVal] = useState(target);
   const raf = useRef<number | null>(null);
-  const start = useRef<number | null>(null);
+  const valRef = useRef(val);
+  valRef.current = val;
+  const settledRef = useRef<number | null>(null);
 
   useEffect(() => {
+    if (settledRef.current === null) {
+      settledRef.current = target;
+      setVal(target);
+      return;
+    }
+    if (target === settledRef.current) return;
     if (raf.current) cancelAnimationFrame(raf.current);
-    start.current = null;
+    const from = valRef.current;
+    let startTime: number | null = null;
+
     function step(ts: number) {
-      if (!start.current) start.current = ts;
-      const p = Math.min((ts - start.current) / duration, 1);
+      if (startTime === null) startTime = ts;
+      const p = Math.min((ts - startTime) / duration, 1);
       const eased = 1 - Math.pow(1 - p, 3);
-      setVal(Math.round(target * eased));
-      if (p < 1) raf.current = requestAnimationFrame(step);
+      const next = Math.round(from + (target - from) * eased);
+      setVal(next);
+      if (p < 1) {
+        raf.current = requestAnimationFrame(step);
+      } else {
+        settledRef.current = target;
+        raf.current = null;
+      }
     }
     raf.current = requestAnimationFrame(step);
-    return () => { if (raf.current) cancelAnimationFrame(raf.current); };
+    return () => {
+      if (raf.current) cancelAnimationFrame(raf.current);
+    };
   }, [target, duration]);
 
   return val;

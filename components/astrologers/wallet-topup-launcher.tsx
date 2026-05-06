@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import { Plus } from "lucide-react";
+import { Zap } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { formatInrFromPaise } from "@/lib/format-money";
@@ -74,41 +74,51 @@ export function WalletTopupLauncher({
 
   return (
     <>
-      <div className="flex flex-wrap items-center gap-3">
-        <p
-          className={
+      <div className="flex flex-col gap-2.5">
+        {/* 100% cashback offer strip */}
+        <div
+          className={`flex items-center gap-2 rounded-xl px-3 py-2 ${
             onDarkSurface
-              ? "text-sm text-amber-100/80"
-              : "text-sm text-gray-500"
-          }
+              ? "bg-amber-400/20 border border-amber-300/30"
+              : "bg-emerald-50 border border-emerald-200"
+          }`}
         >
-          Current balance{" "}
-          <span
+          <span className="text-base">🎁</span>
+          <div className="flex-1 min-w-0">
+            <p className={`text-[12px] font-black uppercase tracking-wide ${onDarkSurface ? "text-amber-200" : "text-emerald-800"}`}>
+              100% Cashback Offer
+            </p>
+            <p className={`text-[10px] leading-tight ${onDarkSurface ? "text-amber-300/80" : "text-emerald-700/80"}`}>
+              Recharge now &amp; get double the balance free!
+            </p>
+          </div>
+          <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-black ${onDarkSurface ? "bg-amber-300 text-amber-950" : "bg-emerald-500 text-white"}`}>
+            LIMITED
+          </span>
+        </div>
+
+        {/* Balance + CTA row */}
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className={onDarkSurface ? "text-sm text-amber-100/80" : "text-sm text-gray-500"}>
+            Balance{" "}
+            <span className={onDarkSurface ? "font-bold tabular-nums text-white" : "font-bold tabular-nums text-gray-900"}>
+              {formatInrFromPaise(balancePaise)}
+            </span>
+          </p>
+          <Button
+            type="button"
+            size="sm"
             className={
               onDarkSurface
-                ? "font-semibold tabular-nums text-white"
-                : "font-semibold tabular-nums text-gray-900"
+                ? "rounded-xl border-0 bg-amber-300 font-bold text-amber-950 shadow-md hover:bg-amber-200"
+                : "rounded-xl bg-amber-400 font-bold text-gray-900 hover:bg-amber-500"
             }
+            onClick={() => setOpen(true)}
           >
-            {formatInrFromPaise(balancePaise)}
-          </span>
-        </p>
-        <Button
-          type="button"
-          size="sm"
-          className={
-            onDarkSurface
-              ? "rounded-xl border-0 bg-amber-300 font-semibold text-amber-950 shadow-md hover:bg-amber-200"
-              : "rounded-xl bg-brand font-medium text-white hover:bg-brand-hover"
-          }
-          onClick={() => {
-            void onOpen();
-            setOpen(true);
-          }}
-        >
-          <Plus className="size-3.5" />
-          Add test funds
-        </Button>
+            <Zap className="size-3.5" />
+            Recharge Wallet
+          </Button>
+        </div>
       </div>
       <WalletTopupDialog
         open={open}
