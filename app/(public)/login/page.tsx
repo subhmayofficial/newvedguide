@@ -3,23 +3,38 @@
 export const dynamic = "force-dynamic";
 
 import Link from "next/link";
-import { useMemo, useCallback, useEffect, useRef, useState, Suspense } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { safeAuthRedirect } from "@/lib/auth/safe-redirect";
-import { signInErrorMessage } from "@/lib/auth/sign-in-errors";
-import { isPhoneOtpSyntheticEmail } from "@/lib/auth/phone-login-identity";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
-import { Eye, EyeOff, MessageSquare, Mail, ArrowLeft, CheckCircle2 } from "lucide-react";
+import { CheckCircle2, ArrowLeft } from "lucide-react";
 
-type AuthMode = "email" | "phone";
-type PhoneStep = "send" | "code";
+// ─── Google icon SVG ──────────────────────────────────────────────────────────
+function GoogleIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+        fill="#4285F4"
+      />
+      <path
+        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+        fill="#34A853"
+      />
+      <path
+        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"
+        fill="#FBBC05"
+      />
+      <path
+        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+        fill="#EA4335"
+      />
+    </svg>
+  );
+}
 
-// ─── OTP Box Input ─────────────────────────────────────────────────────────────
-
+// ─── OTP Box Input ────────────────────────────────────────────────────────────
 function OtpBoxInput({
   value,
   onChange,
@@ -34,9 +49,7 @@ function OtpBoxInput({
   }
 
   function handleKey(i: number, e: React.KeyboardEvent<HTMLInputElement>) {
-    if (e.key === "Backspace" && !value[i] && i > 0) {
-      getInput(i - 1)?.focus();
-    }
+    if (e.key === "Backspace" && !value[i] && i > 0) getInput(i - 1)?.focus();
   }
 
   function handleChange(i: number, char: string) {
@@ -52,8 +65,7 @@ function OtpBoxInput({
     e.preventDefault();
     const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
     onChange(pasted);
-    const lastIdx = Math.min(pasted.length, 5);
-    setTimeout(() => getInput(lastIdx)?.focus(), 0);
+    setTimeout(() => getInput(Math.min(pasted.length, 5))?.focus(), 0);
   }
 
   return (
@@ -68,10 +80,10 @@ function OtpBoxInput({
           onChange={(e) => handleChange(i, e.target.value)}
           onKeyDown={(e) => handleKey(i, e)}
           className={cn(
-            "size-11 rounded-xl border text-center text-lg font-bold tabular-nums outline-none transition-all duration-150",
-            "border-border bg-muted/40 text-foreground",
-            "focus:border-brand focus:bg-background focus:ring-2 focus:ring-brand/20",
-            (value[i] ?? "").trim() ? "border-brand/50 bg-brand/5" : ""
+            "size-12 rounded-xl border-2 text-center text-lg font-bold tabular-nums outline-none transition-all",
+            "bg-gray-50 text-gray-900",
+            "focus:border-brand focus:bg-white focus:ring-4 focus:ring-brand/10",
+            (value[i] ?? "").trim() ? "border-brand/60 bg-white" : "border-gray-200"
           )}
           aria-label={`OTP digit ${i + 1}`}
           autoComplete={i === 0 ? "one-time-code" : "off"}
@@ -81,8 +93,7 @@ function OtpBoxInput({
   );
 }
 
-// ─── Resend OTP Button ─────────────────────────────────────────────────────────
-
+// ─── Resend Button ────────────────────────────────────────────────────────────
 function ResendButton({ onResend }: { onResend: () => Promise<void> }) {
   const [countdown, setCountdown] = useState(30);
   const [resending, setResending] = useState(false);
@@ -102,9 +113,9 @@ function ResendButton({ onResend }: { onResend: () => Promise<void> }) {
 
   if (countdown > 0) {
     return (
-      <p className="text-center text-xs text-muted-foreground">
+      <p className="text-center text-sm text-gray-400">
         Resend code in{" "}
-        <span className="font-semibold tabular-nums text-foreground">{countdown}s</span>
+        <span className="font-semibold tabular-nums text-gray-700">{countdown}s</span>
       </p>
     );
   }
@@ -114,14 +125,15 @@ function ResendButton({ onResend }: { onResend: () => Promise<void> }) {
       type="button"
       disabled={resending}
       onClick={handleResend}
-      className="w-full text-center text-sm font-medium text-brand underline-offset-2 hover:underline disabled:opacity-60"
+      className="w-full text-center text-sm font-semibold text-brand underline-offset-2 hover:underline disabled:opacity-50"
     >
       {resending ? "Sending…" : "Resend code"}
     </button>
   );
 }
 
-// ─── Main Form ─────────────────────────────────────────────────────────────────
+// ─── Main Form ────────────────────────────────────────────────────────────────
+type PhoneStep = "send" | "code";
 
 function LoginForm() {
   const searchParams = useSearchParams();
@@ -129,65 +141,49 @@ function LoginForm() {
     () => safeAuthRedirect(searchParams.get("redirect")),
     [searchParams]
   );
+  const oauthError = searchParams.get("error") === "oauth";
 
-  const [mode, setMode] = useState<AuthMode>("email");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
-  const [errorHint, setErrorHint] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [suggestPhone, setSuggestPhone] = useState(false);
+  // ── Auth guard: redirect if already logged in ──────────────
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) window.location.assign(redirect);
+    });
+  }, [redirect]);
 
+  // ── State ──────────────────────────────────────────────────
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
   const [phoneDisplayName, setPhoneDisplayName] = useState("");
   const [phoneStep, setPhoneStep] = useState<PhoneStep>("send");
-  const [phoneLoading, setPhoneLoading] = useState(false);
   const [whatsappConsent, setWhatsappConsent] = useState(false);
+  const [phoneLoading, setPhoneLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const [error, setError] = useState(
+    oauthError ? "Google sign-in failed. Please try again." : ""
+  );
 
-  function switchMode(m: AuthMode) {
-    setMode(m);
+  // ── Google OAuth ───────────────────────────────────────────
+  async function handleGoogleLogin() {
+    setGoogleLoading(true);
     setError("");
-    setErrorHint("");
-    setSuggestPhone(false);
-    if (m === "phone") {
-      setPhoneStep("send");
-      setWhatsappConsent(false);
-      setOtp("");
-    }
-  }
-
-  async function handleEmailSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setError("");
-    setErrorHint("");
-    setSuggestPhone(false);
-    setLoading(true);
     const supabase = createClient();
-    const { error: authError } = await supabase.auth.signInWithPassword({
-      email: email.trim(),
-      password,
+    const { error: oauthErr } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirect)}`,
+      },
     });
-    if (authError) {
-      const msg = signInErrorMessage(authError);
-      setError(msg);
-      // Hint if user may have registered via phone OTP
-      if (
-        (authError.message ?? "").toLowerCase().includes("invalid") &&
-        !isPhoneOtpSyntheticEmail(email)
-      ) {
-        setSuggestPhone(true);
-      }
-      setLoading(false);
-      return;
+    if (oauthErr) {
+      setError("Could not start Google sign-in. Please try again.");
+      setGoogleLoading(false);
     }
-    window.location.assign(redirect);
+    // Browser navigates away on success — loading stays true intentionally
   }
 
+  // ── Phone OTP: send ────────────────────────────────────────
   const sendOtp = useCallback(async () => {
     setError("");
-    setErrorHint("");
     setPhoneLoading(true);
     try {
       const res = await fetch("/api/auth/phone-otp/send", {
@@ -200,8 +196,7 @@ function LoginForm() {
         hint?: string;
       };
       if (!res.ok) {
-        setError(data.error || "Could not send WhatsApp code.");
-        setErrorHint(data.hint ?? "");
+        setError(data.error || "Could not send code. Please try again.");
         return;
       }
       setPhoneStep("code");
@@ -220,10 +215,10 @@ function LoginForm() {
     await sendOtp();
   }
 
+  // ── Phone OTP: verify ──────────────────────────────────────
   async function handleVerifyOtp(e: React.FormEvent) {
     e.preventDefault();
     setError("");
-    setErrorHint("");
     setPhoneLoading(true);
     try {
       const res = await fetch("/api/auth/phone-otp/verify", {
@@ -238,7 +233,7 @@ function LoginForm() {
       });
       const data = (await res.json().catch(() => ({}))) as { error?: string };
       if (!res.ok) {
-        setError(data.error || "Could not sign you in.");
+        setError(data.error || "Incorrect code. Please try again.");
         return;
       }
       window.location.assign(redirect);
@@ -247,301 +242,261 @@ function LoginForm() {
     }
   }
 
-  return (
-    <div className="relative min-h-screen overflow-hidden bg-background">
-      {/* Subtle astrology background */}
-      <div className="pointer-events-none absolute inset-0 opacity-[0.03]"
-        style={{
-          backgroundImage: "radial-gradient(circle at 2px 2px, currentColor 1px, transparent 0)",
-          backgroundSize: "24px 24px",
-        }}
-      />
-      <div className="pointer-events-none absolute -top-32 right-[-10%] size-72 rounded-full bg-brand/8 blur-3xl" />
-      <div className="pointer-events-none absolute bottom-0 left-[-5%] size-64 rounded-full bg-gold/6 blur-3xl" />
+  const phoneDigits = phone.replace(/\D/g, "");
+  const phoneValid = phoneDigits.length === 10;
 
-      <div className="relative mx-auto flex min-h-screen w-full max-w-sm flex-col justify-center px-5 py-12">
-        {/* Brand mark */}
-        <div className="mb-8 text-center">
-          <div className="mx-auto mb-3 flex size-14 items-center justify-center rounded-2xl bg-gradient-to-br from-brand to-brand-hover shadow-lg shadow-brand/20">
-            <span className="text-2xl" aria-hidden>🔮</span>
+  // ═══════════════════════════════════════════════════════════
+  // OTP verify screen
+  // ═══════════════════════════════════════════════════════════
+  if (phoneStep === "code") {
+    return (
+      <div className="min-h-screen bg-white flex flex-col px-6 pt-6 pb-10">
+        <button
+          type="button"
+          className="mb-8 flex w-fit items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-800 transition-colors"
+          onClick={() => { setPhoneStep("send"); setError(""); setOtp(""); }}
+        >
+          <ArrowLeft className="size-4" />
+          Back
+        </button>
+
+        <div className="flex flex-1 flex-col justify-center max-w-sm mx-auto w-full">
+          <div className="mb-8 text-center">
+            <div className="mx-auto mb-4 size-16 rounded-full bg-green-50 flex items-center justify-center">
+              <span className="text-3xl">💬</span>
+            </div>
+            <h2 className="text-xl font-bold text-gray-900">Enter OTP</h2>
+            <p className="mt-1.5 text-sm text-gray-400">
+              Sent via WhatsApp to{" "}
+              <span className="font-semibold text-gray-700">
+                +91 {phoneDigits.slice(-10).replace(/(\d{5})(\d{5})/, "$1 $2")}
+              </span>
+            </p>
           </div>
-          <h1 className="font-heading text-2xl font-bold text-foreground">
-            Welcome back
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Sign in to continue your journey
-          </p>
-        </div>
 
-        {/* Mode toggle */}
-        <div className="mb-5 flex gap-1 rounded-2xl border border-border bg-muted/40 p-1">
-          <button
-            type="button"
-            className={cn(
-              "flex flex-1 items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-medium transition-all duration-200",
-              mode === "email"
-                ? "bg-card text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
-            )}
-            onClick={() => switchMode("email")}
-          >
-            <Mail className="size-3.5" />
-            Email
-          </button>
-          <button
-            type="button"
-            className={cn(
-              "flex flex-1 items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-medium transition-all duration-200",
-              mode === "phone"
-                ? "bg-card text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
-            )}
-            onClick={() => switchMode("phone")}
-          >
-            <MessageSquare className="size-3.5" />
-            Mobile OTP
-          </button>
-        </div>
+          {error && (
+            <div className="mb-4 rounded-xl bg-red-50 border border-red-100 px-4 py-3 text-sm text-red-600">
+              {error}
+            </div>
+          )}
 
-        {/* ── Email form ── */}
-        {mode === "email" && (
-          <div className="space-y-4 rounded-2xl border border-border bg-card p-5 shadow-sm">
-            {error && (
-              <div className="rounded-xl border border-destructive/30 bg-destructive/8 px-3.5 py-3 text-sm text-destructive">
-                <p>{error}</p>
-                {suggestPhone && (
-                  <p className="mt-2 text-xs text-destructive/80">
-                    Registered with your mobile?{" "}
-                    <button
-                      type="button"
-                      className="font-semibold underline underline-offset-2"
-                      onClick={() => switchMode("phone")}
-                    >
-                      Use Mobile OTP instead
-                    </button>
-                  </p>
-                )}
-              </div>
-            )}
-            <form onSubmit={handleEmailSubmit} className="space-y-4">
-              <div className="space-y-1.5">
-                <Label htmlFor="login-email" className="text-sm font-medium">Email address</Label>
-                <Input
-                  id="login-email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  placeholder="you@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="h-11 rounded-xl"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="login-password" className="text-sm font-medium">Password</Label>
-                  <Link
-                    href="/forgot-password"
-                    className="text-xs font-medium text-brand underline-offset-2 hover:underline"
-                  >
-                    Forgot password?
-                  </Link>
-                </div>
-                <div className="relative">
-                  <Input
-                    id="login-password"
-                    type={showPassword ? "text" : "password"}
-                    autoComplete="current-password"
-                    required
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="h-11 rounded-xl pr-10"
-                  />
-                  <button
-                    type="button"
-                    tabIndex={-1}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                    onClick={() => setShowPassword((p) => !p)}
-                    aria-label={showPassword ? "Hide password" : "Show password"}
-                  >
-                    {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-                  </button>
-                </div>
-              </div>
-              <Button
-                type="submit"
-                className="h-11 w-full rounded-xl bg-brand text-sm font-semibold shadow-sm shadow-brand/20 hover:bg-brand-hover"
-                disabled={loading}
-              >
-                {loading ? "Signing in…" : "Sign in"}
-              </Button>
-            </form>
-          </div>
-        )}
+          <form onSubmit={handleVerifyOtp} className="space-y-5">
+            <OtpBoxInput value={otp} onChange={setOtp} />
 
-        {/* ── Phone: send OTP ── */}
-        {mode === "phone" && phoneStep === "send" && (
-          <div className="space-y-4 rounded-2xl border border-border bg-card p-5 shadow-sm">
-            {error && (
-              <div className="rounded-xl border border-destructive/30 bg-destructive/8 px-3.5 py-3 text-sm text-destructive">
-                <p>{error}</p>
-                {errorHint && (
-                  <p className="mt-1.5 border-t border-destructive/20 pt-1.5 text-xs text-destructive/80">
-                    {errorHint}
-                  </p>
-                )}
-              </div>
-            )}
-            <form onSubmit={handleSendOtp} className="space-y-4">
-              <div className="space-y-1.5">
-                <Label htmlFor="login-phone" className="text-sm font-medium">
-                  Mobile number
-                </Label>
-                <div className="relative flex">
-                  <div className="flex h-11 shrink-0 items-center justify-center rounded-l-xl border border-r-0 border-border bg-muted px-3 text-sm font-medium text-foreground">
-                    🇮🇳 +91
-                  </div>
-                  <Input
-                    id="login-phone"
-                    type="tel"
-                    inputMode="numeric"
-                    autoComplete="tel"
-                    placeholder="98765 43210"
-                    required
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    className="h-11 flex-1 rounded-l-none rounded-r-xl"
-                  />
-                </div>
-                <p className="text-[11px] text-muted-foreground">
-                  We&apos;ll send a 6-digit code via WhatsApp
-                </p>
-              </div>
-
-              {/* Compact consent */}
-              <label className="flex cursor-pointer items-start gap-2.5">
-                <div className="relative mt-0.5 shrink-0">
-                  <input
-                    type="checkbox"
-                    className="peer sr-only"
-                    checked={whatsappConsent}
-                    onChange={(e) => setWhatsappConsent(e.target.checked)}
-                  />
-                  <div className={cn(
-                    "flex size-5 items-center justify-center rounded-md border-2 transition-all duration-150",
-                    whatsappConsent
-                      ? "border-brand bg-brand"
-                      : "border-muted-foreground/40 bg-background"
-                  )}>
-                    {whatsappConsent && <CheckCircle2 className="size-3.5 text-white" />}
-                  </div>
-                </div>
-                <span className="text-[12px] leading-relaxed text-muted-foreground">
-                  I agree to receive my VedGuide login code on WhatsApp.{" "}
-                  <span className="text-foreground/70">Message rates may apply.</span>
-                </span>
+            <div>
+              <label className="block text-xs font-medium text-gray-400 mb-1.5">
+                Your name{" "}
+                <span className="text-gray-300">(optional — for new accounts)</span>
               </label>
-
-              <Button
-                type="submit"
-                className="h-11 w-full rounded-xl bg-brand text-sm font-semibold shadow-sm shadow-brand/20 hover:bg-brand-hover disabled:opacity-60"
-                disabled={phoneLoading || !whatsappConsent}
-              >
-                {phoneLoading ? "Sending…" : "Send code on WhatsApp"}
-              </Button>
-            </form>
-          </div>
-        )}
-
-        {/* ── Phone: verify OTP ── */}
-        {mode === "phone" && phoneStep === "code" && (
-          <div className="space-y-5 rounded-2xl border border-border bg-card p-5 shadow-sm">
-            <div className="text-center">
-              <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-full bg-emerald-500/10">
-                <MessageSquare className="size-5 text-emerald-600" />
-              </div>
-              <p className="font-medium text-foreground text-sm">Code sent to WhatsApp</p>
-              <p className="mt-0.5 text-xs text-muted-foreground">
-                Enter the 6-digit code sent to +91 {phone.replace(/\D/g, "").slice(-10)}
-              </p>
+              <input
+                type="text"
+                autoComplete="name"
+                placeholder="e.g. Rahul"
+                value={phoneDisplayName}
+                onChange={(e) => setPhoneDisplayName(e.target.value)}
+                className="w-full h-12 rounded-xl border border-gray-200 bg-gray-50 px-4 text-sm text-gray-900 outline-none transition-all focus:border-brand focus:bg-white focus:ring-4 focus:ring-brand/10 placeholder:text-gray-400"
+              />
             </div>
 
-            {error && (
-              <div className="rounded-xl border border-destructive/30 bg-destructive/8 px-3.5 py-3 text-sm text-destructive">
-                {error}
-              </div>
-            )}
-
-            <form onSubmit={handleVerifyOtp} className="space-y-4">
-              <OtpBoxInput value={otp} onChange={setOtp} />
-
-              {/* New account display name */}
-              <div className="space-y-1.5">
-                <Label htmlFor="login-phone-name" className="text-xs font-medium text-muted-foreground">
-                  Your name (optional — for new accounts)
-                </Label>
-                <Input
-                  id="login-phone-name"
-                  type="text"
-                  autoComplete="name"
-                  placeholder="e.g. Rahul"
-                  value={phoneDisplayName}
-                  onChange={(e) => setPhoneDisplayName(e.target.value)}
-                  className="h-10 rounded-xl text-sm"
-                />
-              </div>
-
-              <Button
-                type="submit"
-                className="h-11 w-full rounded-xl bg-brand text-sm font-semibold shadow-sm shadow-brand/20 hover:bg-brand-hover disabled:opacity-60"
-                disabled={phoneLoading || otp.length !== 6}
-              >
-                {phoneLoading ? "Verifying…" : "Verify & sign in"}
-              </Button>
-            </form>
-
-            <ResendButton onResend={sendOtp} />
-
             <button
-              type="button"
-              className="flex w-full items-center justify-center gap-1.5 text-xs text-muted-foreground hover:text-foreground"
-              onClick={() => {
-                setPhoneStep("send");
-                setError("");
-                setOtp("");
-              }}
+              type="submit"
+              disabled={phoneLoading || otp.length !== 6}
+              className={cn(
+                "w-full h-14 rounded-2xl text-sm font-semibold transition-all",
+                otp.length === 6
+                  ? "bg-brand text-white shadow-md shadow-brand/20 hover:bg-brand-hover active:scale-[0.98]"
+                  : "bg-gray-100 text-gray-400 cursor-not-allowed"
+              )}
             >
-              <ArrowLeft className="size-3" />
-              Use a different number
+              {phoneLoading ? "Verifying…" : "Verify & Continue"}
             </button>
+          </form>
+
+          <div className="mt-5">
+            <ResendButton onResend={sendOtp} />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  // Main login screen
+  // ═══════════════════════════════════════════════════════════
+  return (
+    <div className="min-h-screen bg-white flex flex-col px-6 pt-6 pb-10">
+      <div className="flex flex-1 flex-col justify-center max-w-sm mx-auto w-full">
+
+        {/* ── Logo + Brand ─────────────────────────────────── */}
+        <div className="mb-8 text-center">
+          {/* Yellow circle — orbital sun logo matching reference screenshot */}
+          <div
+            className="mx-auto mb-5 size-[96px] rounded-full flex items-center justify-center"
+            style={{ background: "#FDD835" }}
+          >
+            <svg viewBox="0 0 80 80" className="size-14" aria-hidden="true">
+              {/* Outer orbit */}
+              <circle cx="40" cy="40" r="32" fill="none" stroke="#111" strokeWidth="1.6" />
+              {/* Inner orbit */}
+              <circle cx="40" cy="40" r="18" fill="none" stroke="#111" strokeWidth="1.6" />
+              {/* Sun core */}
+              <circle cx="40" cy="40" r="9" fill="#111" />
+              {/* Sun rays */}
+              {[0, 45, 90, 135, 180, 225, 270, 315].map((deg, i) => {
+                const rad = (deg * Math.PI) / 180;
+                return (
+                  <line
+                    key={i}
+                    x1={40 + 11 * Math.cos(rad)} y1={40 + 11 * Math.sin(rad)}
+                    x2={40 + 15 * Math.cos(rad)} y2={40 + 15 * Math.sin(rad)}
+                    stroke="#111" strokeWidth="2" strokeLinecap="round"
+                  />
+                );
+              })}
+              {/* Orbital dots */}
+              <circle cx="40" cy="8"  r="3.5" fill="#111" />
+              <circle cx="72" cy="40" r="3.5" fill="#111" />
+              <circle cx="40" cy="72" r="3.5" fill="#111" />
+              <circle cx="8"  cy="40" r="3.5" fill="#111" />
+              {/* Small dot on inner orbit */}
+              <circle cx="40" cy="22" r="2.2" fill="#111" />
+            </svg>
+          </div>
+
+          <h1 className="text-[2rem] font-bold tracking-tight text-gray-900 leading-none">
+            VedGuide
+          </h1>
+        </div>
+
+        {/* ── Login / sign up divider ───────────────────────── */}
+        <div className="flex items-center gap-3 mb-6">
+          <div className="flex-1 h-px bg-gray-200" />
+          <span className="text-sm text-gray-500 whitespace-nowrap select-none">
+            Login or sign up
+          </span>
+          <div className="flex-1 h-px bg-gray-200" />
+        </div>
+
+        {/* ── Error banner ──────────────────────────────────── */}
+        {error && (
+          <div className="mb-4 rounded-xl bg-red-50 border border-red-100 px-4 py-3 text-sm text-red-600">
+            {error}
           </div>
         )}
 
-        {/* ── Footer links ── */}
-        <div className="mt-6 space-y-3 text-center">
-          <p className="text-sm text-muted-foreground">
-            No account?{" "}
-            <Link
-              href={`/signup?redirect=${encodeURIComponent(redirect)}`}
-              className="font-semibold text-brand underline-offset-2 hover:underline"
+        {/* ── Phone input + Continue ────────────────────────── */}
+        <form onSubmit={handleSendOtp} className="space-y-3 mb-3">
+          {/* Phone input */}
+          <div
+            className={cn(
+              "flex h-14 rounded-2xl border bg-white overflow-hidden transition-all",
+              "border-gray-200 focus-within:border-gray-400 focus-within:ring-4 focus-within:ring-gray-100"
+            )}
+          >
+            {/* Country dropdown — static +91 */}
+            <button
+              type="button"
+              className="flex shrink-0 items-center gap-1 border-r border-gray-200 px-3.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+              aria-label="Select country code"
             >
-              Create one free
-            </Link>
-          </p>
-          {mode === "email" && (
-            <p className="text-xs text-muted-foreground">
-              Signed up with mobile?{" "}
-              <button
-                type="button"
-                className="font-medium text-brand underline-offset-2 hover:underline"
-                onClick={() => switchMode("phone")}
-              >
-                Use OTP login
-              </button>
-            </p>
+              🇮🇳
+              <svg className="size-3 text-gray-400 mt-0.5" viewBox="0 0 12 12" fill="currentColor">
+                <path d="M6 8L1 3h10L6 8z" />
+              </svg>
+            </button>
+            <div className="flex flex-1 items-center gap-2 px-3.5">
+              <span className="text-sm font-medium text-gray-500 shrink-0">+91</span>
+              <input
+                type="tel"
+                inputMode="numeric"
+                autoComplete="tel"
+                placeholder="Enter Phone number"
+                value={phone}
+                onChange={(e) =>
+                  setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))
+                }
+                className="flex-1 bg-transparent text-sm text-gray-900 placeholder:text-gray-400 outline-none"
+              />
+            </div>
+          </div>
+
+          {/* WhatsApp consent — fades in when phone is valid */}
+          {phoneValid && (
+            <label className="flex cursor-pointer items-start gap-2.5 px-0.5">
+              <div className="relative mt-0.5 shrink-0">
+                <input
+                  type="checkbox"
+                  className="peer sr-only"
+                  checked={whatsappConsent}
+                  onChange={(e) => setWhatsappConsent(e.target.checked)}
+                />
+                <div
+                  className={cn(
+                    "flex size-5 items-center justify-center rounded-md border-2 transition-all",
+                    whatsappConsent
+                      ? "border-brand bg-brand"
+                      : "border-gray-300 bg-white"
+                  )}
+                >
+                  {whatsappConsent && (
+                    <CheckCircle2 className="size-3.5 text-white" />
+                  )}
+                </div>
+              </div>
+              <span className="text-xs leading-relaxed text-gray-400">
+                I agree to receive my login code on{" "}
+                <span className="font-medium text-gray-600">WhatsApp</span>.
+              </span>
+            </label>
           )}
+
+          {/* Continue button */}
+          <button
+            type="submit"
+            disabled={phoneLoading || !phoneValid}
+            className={cn(
+              "w-full h-14 rounded-2xl text-sm font-semibold transition-all",
+              phoneValid
+                ? "bg-brand text-white shadow-md shadow-brand/20 hover:bg-brand-hover active:scale-[0.98]"
+                : "bg-gray-100 text-gray-400 cursor-not-allowed"
+            )}
+          >
+            {phoneLoading ? "Sending…" : "Continue"}
+          </button>
+        </form>
+
+        {/* ── or divider ────────────────────────────────────── */}
+        <div className="flex items-center gap-3 my-3">
+          <div className="flex-1 h-px bg-gray-200" />
+          <span className="text-xs text-gray-400 select-none">or</span>
+          <div className="flex-1 h-px bg-gray-200" />
         </div>
+
+        {/* ── Google button ─────────────────────────────────── */}
+        <button
+          type="button"
+          onClick={handleGoogleLogin}
+          disabled={googleLoading}
+          className="w-full h-14 flex items-center justify-center gap-3 rounded-2xl border-2 border-gray-200 bg-white text-sm font-semibold text-gray-700 transition-all hover:border-gray-300 hover:bg-gray-50 active:scale-[0.98] disabled:opacity-60"
+        >
+          {googleLoading ? (
+            <div className="size-5 rounded-full border-2 border-gray-200 border-t-gray-500 animate-spin" />
+          ) : (
+            <GoogleIcon className="size-5 shrink-0" />
+          )}
+          {googleLoading ? "Redirecting to Google…" : "Google"}
+        </button>
+
+        {/* ── Terms ─────────────────────────────────────────── */}
+        <p className="mt-8 text-center text-xs leading-relaxed text-gray-400">
+          By signing up, you agree to our{" "}
+          <Link
+            href="/terms"
+            className="text-gray-500 underline underline-offset-2 hover:text-gray-800 transition-colors"
+          >
+            Terms of Use &amp; Privacy Policy
+          </Link>
+        </p>
       </div>
     </div>
   );
@@ -549,14 +504,13 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="relative size-14">
-          <div className="absolute inset-0 rounded-full border-2 border-brand/20 border-t-brand animate-spin" />
-          <div className="absolute inset-3 rounded-full bg-brand/10 animate-pulse" />
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-white">
+          <div className="size-10 rounded-full border-2 border-gray-100 border-t-brand animate-spin" />
         </div>
-      </div>
-    }>
+      }
+    >
       <LoginForm />
     </Suspense>
   );
