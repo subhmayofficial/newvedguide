@@ -78,8 +78,8 @@ export function WalletTopupLauncher({
         <p
           className={
             onDarkSurface
-              ? "text-sm text-white/80"
-              : "text-sm text-muted-foreground"
+              ? "text-sm text-amber-100/80"
+              : "text-sm text-gray-500"
           }
         >
           Current balance{" "}
@@ -87,7 +87,7 @@ export function WalletTopupLauncher({
             className={
               onDarkSurface
                 ? "font-semibold tabular-nums text-white"
-                : "font-semibold tabular-nums text-foreground"
+                : "font-semibold tabular-nums text-gray-900"
             }
           >
             {formatInrFromPaise(balancePaise)}
@@ -98,7 +98,7 @@ export function WalletTopupLauncher({
           size="sm"
           className={
             onDarkSurface
-              ? "rounded-xl border-0 bg-white font-semibold text-violet-950 shadow-md hover:bg-white/90"
+              ? "rounded-xl border-0 bg-amber-300 font-semibold text-amber-950 shadow-md hover:bg-amber-200"
               : "rounded-xl bg-brand font-medium text-white hover:bg-brand-hover"
           }
           onClick={() => {

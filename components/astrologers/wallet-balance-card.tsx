@@ -55,7 +55,7 @@ export function WalletBalanceCard({
     <div
       className="relative overflow-hidden rounded-3xl text-white shadow-2xl transition-all duration-500"
       style={{
-        background: "linear-gradient(135deg, oklch(0.40 0.19 262) 0%, oklch(0.30 0.22 278) 50%, oklch(0.24 0.16 300) 100%)",
+        background: "linear-gradient(135deg, #3d1a00 0%, #78350f 45%, #92400e 100%)",
         opacity: visible ? 1 : 0,
         transform: visible ? "translateY(0) scale(1)" : "translateY(16px) scale(0.97)",
       }}
@@ -64,14 +64,16 @@ export function WalletBalanceCard({
       <div
         className="pointer-events-none absolute inset-0"
         style={{
-          backgroundImage: "radial-gradient(circle at 1.5px 1.5px, rgba(255,255,255,0.07) 1px, transparent 0)",
+          backgroundImage: "radial-gradient(circle at 1.5px 1.5px, rgba(255,255,255,0.06) 1px, transparent 0)",
           backgroundSize: "26px 26px",
         }}
         aria-hidden
       />
       {/* Glow orbs */}
-      <div className="pointer-events-none absolute -right-16 -top-16 size-56 rounded-full bg-white/5 blur-3xl" aria-hidden />
-      <div className="pointer-events-none absolute bottom-0 left-0 size-40 rounded-full bg-indigo-400/10 blur-2xl" aria-hidden />
+      <div className="pointer-events-none absolute -right-16 -top-16 size-56 rounded-full bg-amber-400/10 blur-3xl" aria-hidden />
+      <div className="pointer-events-none absolute bottom-0 left-0 size-40 rounded-full bg-orange-400/10 blur-2xl" aria-hidden />
+      {/* Gold shimmer line */}
+      <div className="pointer-events-none absolute left-0 right-0 top-0 h-px bg-gradient-to-r from-transparent via-amber-300/40 to-transparent" aria-hidden />
 
       <div className="relative px-6 pb-6 pt-7">
         {/* Header row */}

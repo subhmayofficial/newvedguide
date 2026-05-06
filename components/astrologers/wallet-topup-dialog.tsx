@@ -82,12 +82,12 @@ export function WalletTopupDialog({
         aria-label="Close"
         onClick={onClose}
       />
-      <div className="relative w-full max-w-md overflow-hidden rounded-2xl border border-border bg-card text-card-foreground shadow-2xl">
-        <div className="border-b border-border bg-gradient-to-br from-brand/15 via-brand-light/30 to-gold-light/25 px-6 py-5 dark:from-brand/25 dark:via-brand/15 dark:to-muted/40">
-          <h2 id="wallet-topup-title" className="font-heading text-xl font-semibold text-foreground">
-            Wallet (test top-up)
+      <div className="relative w-full max-w-md overflow-hidden rounded-2xl border border-gray-100 bg-white text-gray-900 shadow-2xl">
+        <div className="border-b border-gray-100 bg-gradient-to-br from-amber-50 via-orange-50/60 to-white px-6 py-5">
+          <h2 id="wallet-topup-title" className="font-heading text-xl font-semibold text-gray-900">
+            Add Balance
           </h2>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <p className="mt-1 text-sm text-gray-500">
             No real payment — for development only. Balance is stored in paise on
             the server.
           </p>
@@ -95,11 +95,11 @@ export function WalletTopupDialog({
         <div className="space-y-4 px-6 py-5">
           {!isLoggedIn ? (
             <div className="space-y-3 text-sm">
-              <p className="text-muted-foreground">
-                Sign in to add test balance to your wallet.
+              <p className="text-gray-500">
+                Sign in to add balance to your wallet.
               </p>
               <Button
-                className="w-full rounded-xl bg-brand font-semibold"
+                className="w-full rounded-xl bg-amber-400 font-semibold text-gray-900 hover:bg-amber-500"
                 nativeButton={false}
                 render={<Link href="/login?redirect=/astrologers" />}
               >
@@ -109,12 +109,12 @@ export function WalletTopupDialog({
           ) : (
             <>
               {error && (
-                <p className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600">
                   {error}
                 </p>
               )}
               <div>
-                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
                   Quick add
                 </p>
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
@@ -123,7 +123,7 @@ export function WalletTopupDialog({
                       key={paise}
                       type="button"
                       variant="outline"
-                      className="rounded-xl border-border/80 bg-muted/40 text-xs text-foreground hover:bg-muted"
+                      className="rounded-xl border-gray-200 bg-amber-50 text-xs font-semibold text-amber-800 hover:bg-amber-100 hover:border-amber-300"
                       disabled={loading}
                       onClick={() => topup(paise)}
                     >
@@ -135,7 +135,7 @@ export function WalletTopupDialog({
               <div>
                 <label
                   htmlFor="custom-rupees"
-                  className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+                  className="text-xs font-semibold uppercase tracking-wide text-gray-400"
                 >
                   Custom amount (₹)
                 </label>
@@ -144,13 +144,13 @@ export function WalletTopupDialog({
                   type="number"
                   min={1}
                   max={500000}
-                  className="mt-1.5 h-10 w-full rounded-xl border border-border bg-background px-3 text-sm text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-brand/30"
+                  className="mt-1.5 h-10 w-full rounded-xl border border-gray-200 bg-gray-50 px-3 text-sm text-gray-900 outline-none placeholder:text-gray-400 focus-visible:ring-2 focus-visible:ring-amber-400/40"
                   value={customRupees}
                   onChange={(e) => setCustomRupees(e.target.value)}
                 />
                 <Button
                   type="button"
-                  className="mt-3 w-full rounded-xl bg-brand font-semibold text-white hover:bg-brand-hover"
+                  className="mt-3 w-full rounded-xl bg-amber-400 font-semibold text-gray-900 hover:bg-amber-500"
                   disabled={loading}
                   onClick={() => {
                     const r = Number(customRupees);
@@ -173,7 +173,7 @@ export function WalletTopupDialog({
               </div>
             </>
           )}
-          <Button type="button" variant="ghost" className="w-full" onClick={onClose}>
+          <Button type="button" variant="ghost" className="w-full text-gray-500 hover:text-gray-700" onClick={onClose}>
             Close
           </Button>
         </div>
