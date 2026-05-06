@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { useState } from "react";
 
 export function ChatAvatar({
   src,
@@ -14,14 +15,20 @@ export function ChatAvatar({
   size?: number;
 }) {
   const px = `${size}px`;
-  if (src) {
+  const [imageFailed, setImageFailed] = useState(false);
+  if (src && !imageFailed) {
     return (
       <div
         className="relative shrink-0 overflow-hidden rounded-full ring-2 ring-white/80 shadow-sm"
         style={{ width: px, height: px }}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={src} alt={alt} className="size-full object-cover" />
+        <img
+          src={src}
+          alt={alt}
+          className="size-full object-cover"
+          onError={() => setImageFailed(true)}
+        />
       </div>
     );
   }

@@ -93,7 +93,7 @@ export default async function AstrologersWalletPage() {
       <div className="sticky top-0 z-10 border-b border-border/60 bg-background/95 px-4 py-3 backdrop-blur-md">
         <div className="flex items-center gap-3">
           <Link
-            href="/user"
+            href="/profile"
             className="flex items-center justify-center rounded-xl p-1.5 text-muted-foreground transition hover:bg-muted hover:text-foreground"
           >
             <ArrowLeft className="size-5" />

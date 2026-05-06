@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { LIVE_CHAT_ASTROLOGERS } from "@/lib/data/live-chat-astrologers";
 import { formatInrFromPaisePrecise } from "@/lib/format-money";
 import { ArrowLeft, MessageCircle, Plus } from "lucide-react";
+import { ChatAvatar } from "@/components/chat/chat-avatar";
 
 export const metadata: Metadata = {
   title: "My chats",
@@ -12,7 +13,12 @@ export const metadata: Metadata = {
 
 function astrologerData(id: string) {
   const a = LIVE_CHAT_ASTROLOGERS.find((x) => x.id === id);
-  return { name: a?.name ?? id, initials: a?.initials ?? id.slice(0, 2).toUpperCase(), gradient: a?.avatarGradient ?? "from-brand to-indigo-700" };
+  return {
+    name: a?.name ?? id,
+    initials: a?.initials ?? id.slice(0, 2).toUpperCase(),
+    gradient: a?.avatarGradient ?? "from-brand to-indigo-700",
+    imageSrc: a?.imageSrc,
+  };
 }
 
 function statusConfig(status: string) {
@@ -97,9 +103,13 @@ export default async function AstrologerChatsListPage() {
                     className="flex items-center gap-3 rounded-2xl border border-border/70 bg-card p-3.5 shadow-sm transition hover:border-brand/30 hover:shadow-md active:scale-[0.99]"
                   >
                     {/* Avatar */}
-                    <div className={`flex size-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br ${astro.gradient} text-sm font-bold text-white shadow-inner`}>
-                      {astro.initials}
-                    </div>
+                    <ChatAvatar
+                      src={astro.imageSrc}
+                      alt={astro.name}
+                      initials={astro.initials}
+                      gradientClass={astro.gradient}
+                      size={48}
+                    />
                     <div className="min-w-0 flex-1">
                       <p className="truncate font-semibold text-foreground">{astro.name}</p>
                       <p className="mt-0.5 font-mono text-[10px] text-muted-foreground/70">
@@ -136,9 +146,13 @@ export default async function AstrologerChatsListPage() {
                     href={`/astrologers/chats/${s.id}`}
                     className="flex items-center gap-3 rounded-2xl border border-border/50 bg-card/60 p-3.5 transition hover:border-border hover:bg-card active:scale-[0.99]"
                   >
-                    <div className={`flex size-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br ${astro.gradient} text-sm font-bold text-white/80 opacity-70`}>
-                      {astro.initials}
-                    </div>
+                    <ChatAvatar
+                      src={astro.imageSrc}
+                      alt={astro.name}
+                      initials={astro.initials}
+                      gradientClass={astro.gradient}
+                      size={48}
+                    />
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-medium text-foreground/80">{astro.name}</p>
                       <p className="mt-0.5 text-xs text-muted-foreground">
