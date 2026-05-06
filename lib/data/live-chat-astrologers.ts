@@ -22,6 +22,10 @@ export type LiveChatAstrologer = {
   initials: string;
   /** Optional portrait — must match `next.config` remotePatterns */
   imageSrc?: string;
+  /** Optional badge shown on avatar corner e.g. "Rising Star", "Celebrity" */
+  badge?: string;
+  /** Approximate wait time in minutes (shown below Chat button) */
+  waitMinutes?: number;
 };
 
 export const LIVE_CHAT_CATEGORIES = [
@@ -55,6 +59,8 @@ export const LIVE_CHAT_ASTROLOGERS: LiveChatAstrologer[] = [
     initials: "AA",
     imageSrc:
       "https://primedit-cdn.b-cdn.net/shubhmay-lp-kundli/FINAL__1__11zon__1_-removebg-preview.png",
+    badge: "Celebrity",
+    waitMinutes: 9,
   },
   {
     id: "priya",
@@ -72,6 +78,7 @@ export const LIVE_CHAT_ASTROLOGERS: LiveChatAstrologer[] = [
     isOnline: true,
     avatarGradient: "from-rose-700/85 to-rose-950/90",
     initials: "PS",
+    badge: "Rising Star",
   },
   {
     id: "vikram",
@@ -123,6 +130,7 @@ export const LIVE_CHAT_ASTROLOGERS: LiveChatAstrologer[] = [
     isOnline: true,
     avatarGradient: "from-amber-900/80 to-stone-950/95",
     initials: "RT",
+    waitMinutes: 5,
   },
   {
     id: "kavita",

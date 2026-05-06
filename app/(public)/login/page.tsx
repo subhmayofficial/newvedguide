@@ -8,7 +8,7 @@ import { useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { safeAuthRedirect } from "@/lib/auth/safe-redirect";
 import { cn } from "@/lib/utils";
-import { CheckCircle2, ArrowLeft } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 
 // ─── Google icon SVG ──────────────────────────────────────────────────────────
 function GoogleIcon({ className }: { className?: string }) {
@@ -156,7 +156,6 @@ function LoginForm() {
   const [otp, setOtp] = useState("");
   const [phoneDisplayName, setPhoneDisplayName] = useState("");
   const [phoneStep, setPhoneStep] = useState<PhoneStep>("send");
-  const [whatsappConsent, setWhatsappConsent] = useState(false);
   const [phoneLoading, setPhoneLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState(
@@ -181,22 +180,17 @@ function LoginForm() {
     // Browser navigates away on success — loading stays true intentionally
   }
 
-  // ── Phone OTP: send ────────────────────────────────────────
+  // ── Phone OTP: send (Supabase native SMS) ─────────────────
   const sendOtp = useCallback(async () => {
     setError("");
     setPhoneLoading(true);
     try {
-      const res = await fetch("/api/auth/phone-otp/send", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone, consent: true }),
+      const supabase = createClient();
+      const { error: otpErr } = await supabase.auth.signInWithOtp({
+        phone: `+91${phone.replace(/\D/g, "").slice(-10)}`,
       });
-      const data = (await res.json().catch(() => ({}))) as {
-        error?: string;
-        hint?: string;
-      };
-      if (!res.ok) {
-        setError(data.error || "Could not send code. Please try again.");
+      if (otpErr) {
+        setError(otpErr.message || "Could not send code. Please try again.");
         return;
       }
       setPhoneStep("code");
@@ -208,10 +202,6 @@ function LoginForm() {
 
   async function handleSendOtp(e: React.FormEvent) {
     e.preventDefault();
-    if (!whatsappConsent) {
-      setError("Please agree to receive your login code on WhatsApp.");
-      return;
-    }
     await sendOtp();
   }
 
@@ -221,19 +211,14 @@ function LoginForm() {
     setError("");
     setPhoneLoading(true);
     try {
-      const res = await fetch("/api/auth/phone-otp/verify", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "same-origin",
-        body: JSON.stringify({
-          phone,
-          code: otp.replace(/\D/g, ""),
-          displayName: phoneDisplayName.trim() || undefined,
-        }),
+      const supabase = createClient();
+      const { error: verifyErr } = await supabase.auth.verifyOtp({
+        phone: `+91${phone.replace(/\D/g, "").slice(-10)}`,
+        token: otp.replace(/\D/g, ""),
+        type: "sms",
       });
-      const data = (await res.json().catch(() => ({}))) as { error?: string };
-      if (!res.ok) {
-        setError(data.error || "Incorrect code. Please try again.");
+      if (verifyErr) {
+        setError(verifyErr.message || "Incorrect code. Please try again.");
         return;
       }
       window.location.assign(redirect);
@@ -420,36 +405,6 @@ function LoginForm() {
             </div>
           </div>
 
-          {/* WhatsApp consent — fades in when phone is valid */}
-          {phoneValid && (
-            <label className="flex cursor-pointer items-start gap-2.5 px-0.5">
-              <div className="relative mt-0.5 shrink-0">
-                <input
-                  type="checkbox"
-                  className="peer sr-only"
-                  checked={whatsappConsent}
-                  onChange={(e) => setWhatsappConsent(e.target.checked)}
-                />
-                <div
-                  className={cn(
-                    "flex size-5 items-center justify-center rounded-md border-2 transition-all",
-                    whatsappConsent
-                      ? "border-brand bg-brand"
-                      : "border-gray-300 bg-white"
-                  )}
-                >
-                  {whatsappConsent && (
-                    <CheckCircle2 className="size-3.5 text-white" />
-                  )}
-                </div>
-              </div>
-              <span className="text-xs leading-relaxed text-gray-400">
-                I agree to receive my login code on{" "}
-                <span className="font-medium text-gray-600">WhatsApp</span>.
-              </span>
-            </label>
-          )}
-
           {/* Continue button */}
           <button
             type="submit"
@@ -461,7 +416,7 @@ function LoginForm() {
                 : "bg-gray-100 text-gray-400 cursor-not-allowed"
             )}
           >
-            {phoneLoading ? "Sending…" : "Continue"}
+            {phoneLoading ? "Sending OTP…" : "Continue"}
           </button>
         </form>
 
