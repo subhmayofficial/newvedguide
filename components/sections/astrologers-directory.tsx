@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { CheckCircle2, Search, SlidersHorizontal, X } from "lucide-react";
+import { CheckCircle2, Search, SlidersHorizontal, Wallet, X, Zap } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { track } from "@/lib/analytics/events";
 import {
@@ -379,22 +379,78 @@ export function AstrologersDirectory() {
           <BannerCarousel />
         </div>
 
-        {/* ── Error ── */}
-        {chatError && (
-          <div className={`mx-4 mb-3 flex gap-3 rounded-2xl border px-4 py-3 text-sm ${
-            chatErrorWalletHint ? "border-red-200 bg-red-50 text-red-700" : "border-amber-200 bg-amber-50 text-amber-800"
-          }`} role="alert">
-            <div className="flex-1">
-              <p>{chatError}</p>
-              {chatErrorWalletHint && (
-                <Link href="/astrologers/wallet" className="mt-2 inline-flex rounded-lg bg-red-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-red-700">
-                  Recharge wallet
-                </Link>
-              )}
-            </div>
-            <button type="button" onClick={() => { setChatError(null); setChatErrorWalletHint(false); }} aria-label="Dismiss">
+        {/* ── Generic (non-wallet) error toast ── */}
+        {chatError && !chatErrorWalletHint && (
+          <div className="mx-4 mb-3 flex gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800" role="alert">
+            <p className="flex-1">{chatError}</p>
+            <button type="button" onClick={() => setChatError(null)} aria-label="Dismiss">
               <X className="size-4 text-gray-400" />
             </button>
+          </div>
+        )}
+
+        {/* ── Insufficient balance popup ── */}
+        {chatErrorWalletHint && chatError && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+            onClick={() => { setChatError(null); setChatErrorWalletHint(false); }}
+          >
+            <div
+              className="w-full max-w-sm overflow-hidden rounded-3xl bg-white shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div className="relative overflow-hidden bg-gradient-to-br from-amber-500 via-orange-500 to-red-500 px-5 pt-5 pb-4 text-white">
+                <div className="pointer-events-none absolute -right-6 -top-6 size-28 rounded-full bg-white/10" aria-hidden />
+                <button
+                  type="button"
+                  onClick={() => { setChatError(null); setChatErrorWalletHint(false); }}
+                  className="absolute right-3 top-3 flex size-7 items-center justify-center rounded-full bg-white/20 text-white/80 hover:bg-white/30 transition"
+                  aria-label="Close"
+                >
+                  <X className="size-3.5" />
+                </button>
+                <div className="flex items-center gap-3">
+                  <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-white/20 text-2xl">
+                    <Wallet className="size-6 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-[11px] font-bold uppercase tracking-widest text-white/70">Balance Required</p>
+                    <p className="text-[20px] font-black leading-tight">Add min. 5 min balance</p>
+                  </div>
+                </div>
+                <p className="mt-2.5 rounded-xl bg-white/15 px-3 py-2 text-[12px] leading-relaxed text-white/90">
+                  {chatError}
+                </p>
+              </div>
+
+              {/* Body */}
+              <div className="px-5 py-4 space-y-3">
+                {/* 100% cashback offer */}
+                <div className="flex items-center gap-3 rounded-2xl bg-emerald-50 border border-emerald-200 px-4 py-3">
+                  <span className="text-xl">🎁</span>
+                  <div>
+                    <p className="text-[13px] font-black text-emerald-900">100% Cashback on ₹100+</p>
+                    <p className="text-[11px] text-emerald-700/80">Recharge ₹100 — get ₹200 balance!</p>
+                  </div>
+                </div>
+                <Link
+                  href="/astrologers/wallet"
+                  className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-amber-400 to-orange-400 py-3.5 text-[15px] font-black text-gray-900 shadow-sm hover:from-amber-500 hover:to-orange-500 transition active:scale-[0.98]"
+                  onClick={() => { setChatError(null); setChatErrorWalletHint(false); }}
+                >
+                  <Zap className="size-4" />
+                  Recharge Wallet Now
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => { setChatError(null); setChatErrorWalletHint(false); }}
+                  className="w-full text-center text-[12px] font-medium text-gray-400 underline-offset-2 hover:text-gray-600 hover:underline transition"
+                >
+                  Maybe later
+                </button>
+              </div>
+            </div>
           </div>
         )}
 

@@ -14,6 +14,8 @@ type TopupInfo = {
   minRupees: number;
   cashbackEnabled: boolean;
   cashbackPercent: number;
+  cashbackMinEligiblePaise?: number;
+  cashbackMinEligibleRupees?: number;
 };
 
 const PRESETS_PAISE_BASE = [10_000, 50_000, 100_000, 500_000]; // ₹100 … ₹5000
@@ -87,8 +89,12 @@ export function WalletTopupDialog({
     return list.slice(0, 4);
   })();
 
+  const cashbackMinPaise = info?.cashbackMinEligiblePaise ?? 9_900; // > ₹99
+  const cashbackMinRupees = info?.cashbackMinEligibleRupees ?? 99;
+
   function previewCashback(principalPaise: number): number {
     if (!info?.cashbackEnabled || !info.cashbackPercent) return 0;
+    if (principalPaise <= cashbackMinPaise) return 0; // only on amounts > ₹99
     return Math.floor((principalPaise * info.cashbackPercent) / 100);
   }
 
@@ -166,12 +172,12 @@ export function WalletTopupDialog({
               </div>
               <p className="mt-0.5 text-[13px] font-medium text-white/90">
                 {infoLoading
-                  ? "Recharge now & get double the balance free"
+                  ? `On recharge above ₹${cashbackMinRupees}`
                   : info?.cashbackEnabled && info.cashbackPercent === 100
-                    ? "Recharge now — we'll double it instantly! 🚀"
+                    ? `Recharge above ₹${cashbackMinRupees} — we'll double it instantly! 🚀`
                     : info?.cashbackEnabled && (info.cashbackPercent ?? 0) > 0
-                      ? `Recharge now & get ${info.cashbackPercent}% extra balance free!`
-                      : "Recharge now & get double the balance free!"}
+                      ? `Get ${info.cashbackPercent}% extra on recharge above ₹${cashbackMinRupees}`
+                      : `Get 100% extra balance on recharge above ₹${cashbackMinRupees}`}
               </p>
             </div>
           </div>
@@ -251,11 +257,18 @@ export function WalletTopupDialog({
                   const r = Number(customRupees);
                   if (!Number.isFinite(r) || r < minRupees) return null;
                   const paise = Math.floor(r * 100);
+                  if (paise <= cashbackMinPaise) {
+                    return (
+                      <p className="mt-1.5 text-[11px] text-gray-400">
+                        Add ₹{cashbackMinRupees + 1}+ to unlock 100% cashback bonus
+                      </p>
+                    );
+                  }
                   const b = previewCashback(paise);
                   if (b <= 0) return null;
                   return (
-                    <p className="mt-1.5 text-[12px] font-medium text-emerald-700">
-                      You will receive +{formatInrFromPaise(b)} cashback (₹{r} + bonus).
+                    <p className="mt-1.5 text-[12px] font-bold text-emerald-700">
+                      🎁 You&apos;ll get +{formatInrFromPaise(b)} cashback free! (₹{r} + ₹{b / 100} bonus)
                     </p>
                   );
                 })()}
