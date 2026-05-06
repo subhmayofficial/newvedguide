@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
+import { safeAuthRedirect } from "@/lib/auth/safe-redirect";
 import { isAdminUser } from "@/lib/admin/admin-auth";
 
 function isAdminPath(pathname: string): boolean {
@@ -110,6 +111,14 @@ export async function proxy(request: NextRequest) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  if (
+    user &&
+    (pathname === "/login" || pathname === "/signup")
+  ) {
+    const dest = safeAuthRedirect(request.nextUrl.searchParams.get("redirect"));
+    return NextResponse.redirect(new URL(dest, request.url));
+  }
 
   if (isProtectedCustomerPath(pathname) && !user) {
     const loginUrl = new URL("/login", request.url);
