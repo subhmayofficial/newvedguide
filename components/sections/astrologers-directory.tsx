@@ -132,7 +132,8 @@ function AstrologerCard({
                 alt={a.name}
                 width={160}
                 height={160}
-                className={`rounded-full object-cover object-top ${featured ? "size-[80px]" : "size-[72px]"}`}
+                className={`rounded-full object-cover ${featured ? "size-[80px]" : "size-[72px]"}`}
+                style={{ objectPosition: "center 25%" }}
                 onError={() => setImageFailed(true)}
               />
             ) : (

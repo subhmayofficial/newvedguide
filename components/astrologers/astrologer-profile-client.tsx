@@ -146,6 +146,7 @@ export function AstrologerProfileClient({ astrologer: a, isLoggedIn, balancePais
               initials={a.initials}
               gradientClass={a.avatarGradient}
               size={88}
+              objectPosition={a.imageSrc ? "center 25%" : "center"}
             />
           </div>
 

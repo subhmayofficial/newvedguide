@@ -9,12 +9,15 @@ export function ChatAvatar({
   initials,
   gradientClass,
   size = 40,
+  objectPosition = "center",
 }: {
   src?: string | null;
   alt: string;
   initials: string;
   gradientClass: string;
   size?: number;
+  /** CSS object-position value, e.g. "center 25%" to shift crop window */
+  objectPosition?: string;
 }) {
   const px = `${size}px`;
   const [imageFailed, setImageFailed] = useState(false);
@@ -29,6 +32,7 @@ export function ChatAvatar({
           src={src}
           alt={alt}
           className="size-full object-cover"
+          style={{ objectPosition }}
           onError={() => setImageFailed(true)}
         />
       </div>
