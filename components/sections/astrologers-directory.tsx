@@ -119,8 +119,7 @@ function AstrologerCard({
         <div className="flex shrink-0 flex-col items-center gap-1">
           {/* Avatar */}
           <div className="relative mb-2" style={{ width: featured ? 80 : 72, height: featured ? 80 : 72 }}>
-            {/* Badge pill shown only on non-featured cards (featured header strip covers this) */}
-            {a.badge && !featured && <BadgePill label={a.badge} />}
+            {a.badge && <BadgePill label={a.badge} />}
             <div className={`absolute inset-0 rounded-full ${featured ? "ring-[3px] ring-amber-400 ring-offset-[3px] ring-offset-white" : "ring-2 ring-amber-400 ring-offset-[2.5px] ring-offset-white"}`} />
             {featured && (
               <div className="absolute inset-0 rounded-full ring-[6px] ring-amber-200/40 ring-offset-0" />
