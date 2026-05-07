@@ -60,7 +60,7 @@ export const LIVE_CHAT_ASTROLOGERS: LiveChatAstrologer[] = [
     avatarGradient: "from-amber-700/90 to-amber-950/95",
     initials: "AA",
     imageSrc: "https://primedit-cdn.b-cdn.net/ashutoshji.jpg",
-    badge: "Celebrity",
+    badge: "Expert",
     waitMinutes: 9,
     featured: true,
   },

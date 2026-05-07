@@ -55,13 +55,11 @@ function StarRow({ rating }: { rating: number }) {
   );
 }
 
-// ─── Badge ribbon ─────────────────────────────────────────────────────────────
-function BadgeRibbon({ label }: { label: string }) {
+// ─── Badge pill (bottom-center of avatar) ────────────────────────────────────
+function BadgePill({ label }: { label: string }) {
   return (
-    <div className="absolute left-0 top-3 z-10 w-[80px] overflow-hidden">
-      <div className="bg-gray-900 text-white text-[7.5px] font-bold py-[3.5px] text-center tracking-wide shadow-sm rotate-[-38deg] -translate-x-5 translate-y-0 w-full">
-        {label}
-      </div>
+    <div className="absolute -bottom-2 left-1/2 z-10 -translate-x-1/2 whitespace-nowrap rounded-full border border-amber-300 bg-amber-400 px-2 py-[2px] text-[8.5px] font-black uppercase tracking-wide text-amber-950 shadow-sm">
+      {label}
     </div>
   );
 }
@@ -120,8 +118,9 @@ function AstrologerCard({
         {/* ── Left col: avatar + stars + orders ─────────────── */}
         <div className="flex shrink-0 flex-col items-center gap-1">
           {/* Avatar */}
-          <div className="relative" style={{ width: featured ? 80 : 72, height: featured ? 80 : 72 }}>
-            {a.badge && <BadgeRibbon label={a.badge} />}
+          <div className="relative mb-2" style={{ width: featured ? 80 : 72, height: featured ? 80 : 72 }}>
+            {/* Badge pill shown only on non-featured cards (featured header strip covers this) */}
+            {a.badge && !featured && <BadgePill label={a.badge} />}
             <div className={`absolute inset-0 rounded-full ${featured ? "ring-[3px] ring-amber-400 ring-offset-[3px] ring-offset-white" : "ring-2 ring-amber-400 ring-offset-[2.5px] ring-offset-white"}`} />
             {featured && (
               <div className="absolute inset-0 rounded-full ring-[6px] ring-amber-200/40 ring-offset-0" />
