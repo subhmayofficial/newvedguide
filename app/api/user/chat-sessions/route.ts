@@ -50,13 +50,14 @@ export async function POST(request: Request) {
   }
 
   const svc = createServiceClient();
-  const { data: prof } = await svc
-    .from("user_profiles")
-    .select("wallet_balance_paise")
-    .eq("id", user.id)
-    .maybeSingle();
+  // Fetch wallet balance + DB rate override in parallel
+  const [{ data: prof }, { data: astroConfig }] = await Promise.all([
+    svc.from("user_profiles").select("wallet_balance_paise").eq("id", user.id).maybeSingle(),
+    svc.from("astrologer_configs").select("rate_inr_per_min").eq("id", astrologerId).maybeSingle(),
+  ]);
   const balancePaise = prof?.wallet_balance_paise ?? 0;
-  const rate = astro.chatRateInrPerMin;
+  // DB rate takes precedence over static fallback
+  const rate = astroConfig?.rate_inr_per_min ?? astro.chatRateInrPerMin;
   if (!hasMinWalletForChatStart(balancePaise, rate)) {
     const needPaise = minWalletPaiseForChatStart(rate);
     return NextResponse.json(

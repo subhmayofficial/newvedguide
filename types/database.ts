@@ -567,6 +567,40 @@ export interface Database {
         >;
         Relationships: [];
       };
+      astrologer_configs: {
+        Row: {
+          id: string;
+          rate_inr_per_min: number;
+          is_online: boolean;
+          updated_at: string;
+        };
+        Insert: {
+          id: string;
+          rate_inr_per_min?: number;
+          is_online?: boolean;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["astrologer_configs"]["Insert"]>;
+        Relationships: [];
+      };
+      admin_wallet_cashback_settings: {
+        Row: {
+          id: number;
+          cashback_enabled: boolean;
+          cashback_percent: number;
+          updated_at: string;
+        };
+        Insert: {
+          id?: number;
+          cashback_enabled?: boolean;
+          cashback_percent?: number;
+          updated_at?: string;
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["admin_wallet_cashback_settings"]["Insert"]
+        >;
+        Relationships: [];
+      };
       admin_smtp_templates: {
         Row: {
           id: string;
