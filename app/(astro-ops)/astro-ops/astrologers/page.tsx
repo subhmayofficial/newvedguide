@@ -1,5 +1,3 @@
-"use server";
-
 import { revalidatePath } from "next/cache";
 import { createServiceClient } from "@/lib/supabase/server";
 import { LIVE_CHAT_ASTROLOGERS } from "@/lib/data/live-chat-astrologers";
