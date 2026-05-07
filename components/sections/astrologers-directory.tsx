@@ -77,6 +77,7 @@ function AstrologerCard({
   onChat: () => void;
 }) {
   const [imageFailed, setImageFailed] = useState(false);
+  const featured = !!a.featured;
 
   const ordersLabel =
     a.reviewCount >= 10000
@@ -86,89 +87,126 @@ function AstrologerCard({
         : `${a.reviewCount}`;
 
   return (
-    <div className="relative flex gap-3.5 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm transition-transform active:scale-[0.99]">
-      {/* ── Left col: avatar + stars + orders ─────────────── */}
-      <div className="flex shrink-0 flex-col items-center gap-1">
-        {/* Avatar */}
-        <div className="relative" style={{ width: 72, height: 72 }}>
-          {a.badge && <BadgeRibbon label={a.badge} />}
-          <div className="absolute inset-0 rounded-full ring-2 ring-amber-400 ring-offset-[2.5px] ring-offset-white" />
-          {a.imageSrc && !imageFailed ? (
-            <Image
-              src={a.imageSrc}
-              alt={a.name}
-              width={144}
-              height={144}
-              className="size-[72px] rounded-full object-cover object-top"
-              onError={() => setImageFailed(true)}
-            />
-          ) : (
-            <div
-              className={`flex size-[72px] items-center justify-center rounded-full bg-gradient-to-br ${a.avatarGradient} text-base font-bold text-white`}
-            >
-              {a.initials}
-            </div>
-          )}
-        </div>
-
-        <StarRow rating={a.rating} />
-        <span className="text-[10px] text-gray-500 whitespace-nowrap">{ordersLabel} orders</span>
-      </div>
-
-      {/* ── Right col: info + CTA ──────────────────────────── */}
-      <div className="flex min-w-0 flex-1 flex-col justify-between">
-        <div>
-          {/* Name + verified */}
+    <div
+      className={`relative overflow-hidden flex flex-col rounded-2xl transition-transform active:scale-[0.99] ${
+        featured
+          ? "border-2 border-amber-400 bg-white shadow-lg shadow-amber-100"
+          : "border border-gray-100 bg-white shadow-sm"
+      }`}
+    >
+      {/* ── Featured gold header strip ── */}
+      {featured && (
+        <div
+          className="flex items-center justify-between px-4 py-2"
+          style={{ background: "linear-gradient(90deg,#78350f 0%,#b45309 40%,#d97706 70%,#f59e0b 100%)" }}
+        >
+          <div className="flex items-center gap-1.5">
+            <span className="text-[13px]">👑</span>
+            <span className="text-[11px] font-black uppercase tracking-widest text-amber-100">Top Expert · Featured</span>
+          </div>
           <div className="flex items-center gap-1">
-            <Link
-              href={`/astrologers/${a.slug}`}
-              className="truncate text-[15px] font-bold leading-tight text-gray-900 hover:text-amber-700 transition"
-            >
-              {a.name}
-            </Link>
-            <CheckCircle2
-              className="size-[14px] shrink-0 text-green-500"
-              aria-label="Verified"
-            />
+            <span className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="text-[10px] font-bold text-emerald-300">Online</span>
+          </div>
+        </div>
+      )}
+
+      {/* Subtle golden shimmer line */}
+      {featured && (
+        <div className="pointer-events-none h-px w-full bg-gradient-to-r from-transparent via-amber-300/60 to-transparent" aria-hidden />
+      )}
+
+      <div className={`flex gap-3.5 ${featured ? "p-4 pt-3.5 bg-gradient-to-b from-amber-50/50 to-white" : "p-4"}`}>
+        {/* ── Left col: avatar + stars + orders ─────────────── */}
+        <div className="flex shrink-0 flex-col items-center gap-1">
+          {/* Avatar */}
+          <div className="relative" style={{ width: featured ? 80 : 72, height: featured ? 80 : 72 }}>
+            {a.badge && <BadgeRibbon label={a.badge} />}
+            <div className={`absolute inset-0 rounded-full ${featured ? "ring-[3px] ring-amber-400 ring-offset-[3px] ring-offset-white" : "ring-2 ring-amber-400 ring-offset-[2.5px] ring-offset-white"}`} />
+            {featured && (
+              <div className="absolute inset-0 rounded-full ring-[6px] ring-amber-200/40 ring-offset-0" />
+            )}
+            {a.imageSrc && !imageFailed ? (
+              <Image
+                src={a.imageSrc}
+                alt={a.name}
+                width={160}
+                height={160}
+                className={`rounded-full object-cover object-top ${featured ? "size-[80px]" : "size-[72px]"}`}
+                onError={() => setImageFailed(true)}
+              />
+            ) : (
+              <div
+                className={`flex items-center justify-center rounded-full bg-gradient-to-br ${a.avatarGradient} text-base font-bold text-white ${featured ? "size-[80px]" : "size-[72px]"}`}
+              >
+                {a.initials}
+              </div>
+            )}
           </div>
 
-          <p className="mt-0.5 truncate text-[12px] text-gray-500">{a.specialties.slice(0, 3).join(", ")}</p>
-          <p className="text-[12px] text-gray-500">{a.languages.join(", ")}</p>
-          <p className="text-[12px] text-gray-500">Exp- {a.experienceYears} Years</p>
+          <StarRow rating={a.rating} />
+          <span className={`whitespace-nowrap ${featured ? "text-[10px] font-semibold text-amber-700" : "text-[10px] text-gray-500"}`}>{ordersLabel} orders</span>
         </div>
 
-        {/* Price + Chat */}
-        <div className="mt-2 flex items-center justify-between">
-          <span className="text-[14px] font-bold text-gray-900">
-            ₹ {a.chatRateInrPerMin}
-            <span className="text-[11px] font-normal text-gray-400">/min</span>
-          </span>
+        {/* ── Right col: info + CTA ──────────────────────────── */}
+        <div className="flex min-w-0 flex-1 flex-col justify-between">
+          <div>
+            {/* Name + verified */}
+            <div className="flex items-center gap-1">
+              <Link
+                href={`/astrologers/${a.slug}`}
+                className={`truncate font-bold leading-tight transition ${featured ? "text-[16px] text-amber-900 hover:text-amber-700" : "text-[15px] text-gray-900 hover:text-amber-700"}`}
+              >
+                {a.name}
+              </Link>
+              <CheckCircle2
+                className={`size-[14px] shrink-0 ${featured ? "text-amber-500" : "text-green-500"}`}
+                aria-label="Verified"
+              />
+            </div>
 
-          <div className="flex flex-col items-end gap-0.5">
-            <button
-              type="button"
-              disabled={isStarting}
-              onClick={onChat}
-              className={`min-w-[72px] rounded-full border px-4 py-1.5 text-[13px] font-semibold transition active:scale-95 disabled:opacity-60 ${
-                a.waitMinutes
-                  ? "border-red-400 text-red-500 hover:bg-red-50"
-                  : "border-green-500 text-green-600 hover:bg-green-50"
-              }`}
-            >
-              {isStarting ? (
-                <span className="flex items-center justify-center gap-1">
-                  <svg className="size-3.5 animate-spin" viewBox="0 0 24 24" fill="none">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-                  </svg>
+            <p className="mt-0.5 truncate text-[12px] text-gray-500">{a.specialties.slice(0, 3).join(", ")}</p>
+            <p className="text-[12px] text-gray-500">{a.languages.join(", ")}</p>
+            <p className="text-[12px] text-gray-500">Exp- {a.experienceYears} Years</p>
+          </div>
+
+          {/* Price + Chat */}
+          <div className="mt-2 flex items-center justify-between">
+            <span className={`font-bold ${featured ? "text-[15px] text-amber-900" : "text-[14px] text-gray-900"}`}>
+              ₹ {a.chatRateInrPerMin}
+              <span className="text-[11px] font-normal text-gray-400">/min</span>
+            </span>
+
+            <div className="flex flex-col items-end gap-0.5">
+              <button
+                type="button"
+                disabled={isStarting}
+                onClick={onChat}
+                className={`min-w-[72px] rounded-full px-4 py-1.5 text-[13px] font-semibold transition active:scale-95 disabled:opacity-60 ${
+                  featured
+                    ? "bg-amber-400 text-gray-900 hover:bg-amber-500 shadow-sm shadow-amber-200"
+                    : a.waitMinutes
+                      ? "border border-red-400 text-red-500 hover:bg-red-50"
+                      : "border border-green-500 text-green-600 hover:bg-green-50"
+                }`}
+              >
+                {isStarting ? (
+                  <span className="flex items-center justify-center gap-1">
+                    <svg className="size-3.5 animate-spin" viewBox="0 0 24 24" fill="none">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                    </svg>
+                  </span>
+                ) : featured ? "Chat Now" : "Chat"}
+              </button>
+              {a.waitMinutes ? (
+                <span className="text-[10px] text-red-400">wait ~ {a.waitMinutes}m</span>
+              ) : a.isOnline ? (
+                <span className={`text-[10px] ${featured ? "font-semibold text-amber-600" : "text-green-500"}`}>
+                  {featured ? "🟢 Available" : "Available"}
                 </span>
-              ) : "Chat"}
-            </button>
-            {a.waitMinutes ? (
-              <span className="text-[10px] text-red-400">wait ~ {a.waitMinutes}m</span>
-            ) : a.isOnline ? (
-              <span className="text-[10px] text-green-500">Available</span>
-            ) : null}
+              ) : null}
+            </div>
           </div>
         </div>
       </div>
@@ -390,6 +428,8 @@ const CAT_LABEL: Record<string, string> = {
 
 function sortAstrologers(list: LiveChatAstrologer[]): LiveChatAstrologer[] {
   return [...list].sort((a, b) => {
+    // Featured always pin to top
+    if (a.featured !== b.featured) return a.featured ? -1 : 1;
     if (a.isOnline !== b.isOnline) return a.isOnline ? -1 : 1;
     if (b.rating !== a.rating) return b.rating - a.rating;
     return a.chatRateInrPerMin - b.chatRateInrPerMin;

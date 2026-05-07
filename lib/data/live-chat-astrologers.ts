@@ -26,6 +26,8 @@ export type LiveChatAstrologer = {
   badge?: string;
   /** Approximate wait time in minutes (shown below Chat button) */
   waitMinutes?: number;
+  /** Pin to top with golden highlight in the directory */
+  featured?: boolean;
 };
 
 export const LIVE_CHAT_CATEGORIES = [
@@ -61,6 +63,7 @@ export const LIVE_CHAT_ASTROLOGERS: LiveChatAstrologer[] = [
       "https://primedit-cdn.b-cdn.net/shubhmay-lp-kundli/FINAL__1__11zon__1_-removebg-preview.png",
     badge: "Celebrity",
     waitMinutes: 9,
+    featured: true,
   },
   {
     id: "priya",
