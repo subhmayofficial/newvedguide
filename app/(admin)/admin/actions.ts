@@ -29,6 +29,9 @@ import {
 } from "@/lib/admin/order-delivery-settings";
 import { saveBunnyCdnSettings } from "@/lib/admin/bunny-cdn-settings";
 import {
+  saveWalletCashbackSettings,
+} from "@/lib/admin/wallet-cashback-settings";
+import {
   upsertSavedSmtpTemplate,
   updateSavedSmtpTemplateById,
 } from "@/lib/services/smtp-template-catalog";
@@ -1128,6 +1131,28 @@ export async function submitOrderDeliverySettingsForm(formData: FormData) {
   revalidatePath("/admindeoghar/settings");
   revalidatePath("/admindeoghar/orders");
   redirect("/admindeoghar/settings?settings_saved=1");
+}
+
+export async function submitWalletCashbackSettingsForm(formData: FormData) {
+  const supabase = createServiceClient();
+  const cashback_enabled = formData.get("cashback_enabled") === "on";
+  const pctRaw = Number(formData.get("cashback_percent"));
+  const cashback_percent = Number.isFinite(pctRaw) ? pctRaw : 0;
+
+  try {
+    await saveWalletCashbackSettings(supabase, {
+      cashback_enabled,
+      cashback_percent,
+    });
+  } catch (e) {
+    const msg =
+      e instanceof Error ? encodeURIComponent(e.message.slice(0, 400)) : "save_failed";
+    redirect(`/astro-ops/settings?wallet_err=${msg}`);
+  }
+
+  revalidatePath("/astro-ops/settings");
+  revalidatePath("/astrologers/wallet");
+  redirect("/astro-ops/settings?wallet_saved=1");
 }
 
 export async function submitBunnyCdnSettingsForm(formData: FormData) {

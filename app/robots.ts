@@ -13,6 +13,8 @@ export default function robots(): MetadataRoute.Robots {
           "/admindeoghar/*",
           "/admin",
           "/admin/*",
+          "/astro-ops",
+          "/astro-ops/*",
           "/checkout/*",
           "/thank-you/*",
         ],

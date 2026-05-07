@@ -1,4 +1,5 @@
 import { revalidatePath } from "next/cache";
+import { revalidateAstroOpsChat } from "@/lib/admin/revalidate-astro-ops";
 import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { isAdminUser } from "@/lib/admin/admin-auth";
@@ -39,10 +40,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: result.error }, { status: result.status });
   }
 
-  revalidatePath("/admindeoghar/live-consult/inbox");
-  revalidatePath("/admindeoghar/live-consult/sessions");
-  revalidatePath(`/admindeoghar/live-consult/sessions/${sessionId}`);
-  revalidatePath("/admindeoghar/live-consult");
+  revalidateAstroOpsChat(sessionId);
   revalidatePath("/astrologers/chats");
   revalidatePath(`/astrologers/chats/${sessionId}`);
   revalidatePath(`/astrologers/chats/waiting/${sessionId}`);

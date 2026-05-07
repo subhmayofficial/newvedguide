@@ -49,13 +49,12 @@ const NAV_SECTIONS = [
     ],
   },
   {
-    label: "Live consult",
+    label: "Live astrology",
     items: [
-      { label: "Hub", href: "/admindeoghar/live-consult" },
-      { label: "Chat inbox", href: "/admindeoghar/live-consult/inbox" },
-      { label: "Users", href: "/admindeoghar/live-consult/users" },
-      { label: "Chat sessions", href: "/admindeoghar/live-consult/sessions" },
-      { label: "Wallet ledger", href: "/admindeoghar/live-consult/wallet-ledger" },
+      {
+        label: "Ops console (chat & wallets)",
+        href: "/astro-ops",
+      },
     ],
   },
   {

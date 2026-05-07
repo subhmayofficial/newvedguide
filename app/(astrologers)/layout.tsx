@@ -34,7 +34,7 @@ export default async function AstrologersLayout({
         initialBalancePaise={balancePaise}
       />
       {/* pb-20 so content clears the fixed bottom nav */}
-      <main className="flex flex-1 flex-col pb-20">{children}</main>
+      <main className="flex min-h-0 flex-1 flex-col overflow-x-hidden pb-20">{children}</main>
       <AppBottomNav />
     </>
   );

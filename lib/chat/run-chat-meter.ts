@@ -2,11 +2,17 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/types/database";
 import {
   affordableChatSeconds,
+  coerceWalletPaise,
+  hasMinWalletForChatStart,
   paiseBurnedInInterval,
   remainingSecondsFromMeterAccrual,
 } from "@/lib/chat/billing";
 import { resolveSessionRateInr } from "@/lib/chat/astrologer-display";
 import { sessionHasLegacyMeterLedger } from "@/lib/chat/legacy-meter-ledger";
+import {
+  finalizeUserChatSessionClose,
+  type UserChatCloseSummary,
+} from "@/lib/chat/finalize-user-chat-session-close";
 import { isSupabaseUnknownColumnError } from "@/lib/supabase/schema-errors";
 
 const MAX_CATCHUP_SECONDS = 600;
@@ -17,6 +23,9 @@ export type RunChatMeterOk = {
   last_billed_at: string;
   remainingSeconds: number;
   skipped?: boolean;
+  /** Set when wallet hit zero during this meter run and the session was finalized server-side. */
+  sessionClosed?: boolean;
+  summary?: UserChatCloseSummary;
 };
 
 export type RunChatMeterErr = {
@@ -57,6 +66,7 @@ export async function runChatMeter(
     return { ok: false, error: "Session not found", status: 404 };
   }
 
+  const wasOpen = session.status === "open";
   const rate = resolveSessionRateInr(session.rate_inr_per_min, session.astrologer_id);
   const anchorIso = session.last_billed_at ?? session.created_at;
 
@@ -74,8 +84,55 @@ export async function runChatMeter(
     };
   }
 
-  let balance = profile.wallet_balance_paise;
+  let balance = coerceWalletPaise(profile.wallet_balance_paise);
   const newLastIso = new Date().toISOString();
+
+  /**
+   * Wallet empty, or only “dust” left (UI shows ₹0 but paise > 0) — cannot fund more chat.
+   * Also covers manual wallet adjustments while session stayed `open`.
+   */
+  if (session.status === "open" && affordableChatSeconds(balance, rate) <= 0) {
+    const fin = await finalizeUserChatSessionClose(svc, trimmed, userId, {
+      astrologer_id: session.astrologer_id,
+      rate_inr_per_min: session.rate_inr_per_min,
+    });
+    if (!fin.ok) {
+      return { ok: false, error: fin.error, status: fin.status };
+    }
+    return {
+      ok: true,
+      balancePaise: balance,
+      last_billed_at: session.last_billed_at ?? session.created_at,
+      remainingSeconds: 0,
+      sessionClosed: true,
+      summary: fin.summary,
+    };
+  }
+
+  /**
+   * Queue: user can’t meet minimum wallet for a live consult — don’t leave them “waiting” forever
+   * (e.g. balance hit 0 while still in queue; meter used to return `skipped` and never close).
+   */
+  if (
+    session.status === "waiting_astrologer" &&
+    !hasMinWalletForChatStart(balance, rate)
+  ) {
+    const fin = await finalizeUserChatSessionClose(svc, trimmed, userId, {
+      astrologer_id: session.astrologer_id,
+      rate_inr_per_min: session.rate_inr_per_min,
+    });
+    if (!fin.ok) {
+      return { ok: false, error: fin.error, status: fin.status };
+    }
+    return {
+      ok: true,
+      balancePaise: balance,
+      last_billed_at: session.last_billed_at ?? session.created_at,
+      remainingSeconds: 0,
+      sessionClosed: true,
+      summary: fin.summary,
+    };
+  }
 
   if (session.status !== "open") {
     const remainingSeconds =
@@ -158,6 +215,24 @@ export async function runChatMeter(
       };
     }
     return { ok: false, error: sessErr.message, status: 500 };
+  }
+
+  if (wasOpen && affordableChatSeconds(balance, rate) <= 0) {
+    const fin = await finalizeUserChatSessionClose(svc, trimmed, userId, {
+      astrologer_id: session.astrologer_id,
+      rate_inr_per_min: session.rate_inr_per_min,
+    });
+    if (!fin.ok) {
+      return { ok: false, error: fin.error, status: fin.status };
+    }
+    return {
+      ok: true,
+      balancePaise: balance,
+      last_billed_at: newLastIso,
+      remainingSeconds: 0,
+      sessionClosed: true,
+      summary: fin.summary,
+    };
   }
 
   return {

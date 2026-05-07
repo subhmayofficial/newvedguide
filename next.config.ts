@@ -57,6 +57,16 @@ const nextConfig: NextConfig = {
         destination: "/admindeoghar/:path*",
         permanent: false,
       },
+      {
+        source: "/admindeoghar/live-consult",
+        destination: "/astro-ops",
+        permanent: false,
+      },
+      {
+        source: "/admindeoghar/live-consult/:path*",
+        destination: "/astro-ops/:path*",
+        permanent: false,
+      },
     ];
   },
   async rewrites() {

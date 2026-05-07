@@ -19,6 +19,14 @@ export function hasMinWalletForChatStart(
   return affordableChatSeconds(balancePaise, rateInrPerMin) >= MIN_CHAT_START_SECONDS;
 }
 
+/** DB/JSON sometimes returns wallet as string — normalise for comparisons. */
+export function coerceWalletPaise(raw: unknown): number {
+  if (raw == null) return 0;
+  const n = typeof raw === "number" ? raw : Number(raw);
+  if (!Number.isFinite(n)) return 0;
+  return Math.trunc(n);
+}
+
 /**
  * Whole seconds of chat affordable at flat per-minute rate (no partial-minute rounding).
  * Formula: (balancePaise / paisePerMinute) * 60

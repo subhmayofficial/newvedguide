@@ -6,7 +6,9 @@ import { isAdminUser } from "@/lib/admin/admin-auth";
 
 function isAdminPath(pathname: string): boolean {
   return (
-    pathname.startsWith("/admin") || pathname.startsWith("/admindeoghar")
+    pathname.startsWith("/admin") ||
+    pathname.startsWith("/admindeoghar") ||
+    pathname.startsWith("/astro-ops")
   );
 }
 

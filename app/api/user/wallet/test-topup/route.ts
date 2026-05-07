@@ -2,13 +2,20 @@ import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import {
+  computeTopupCashbackPaise,
+  getWalletCashbackSettings,
+} from "@/lib/admin/wallet-cashback-settings";
+import {
   isSupabaseTableMissingError,
   SCHEMA_NOT_READY_USER_MESSAGE,
 } from "@/lib/supabase/schema-errors";
+import {
+  MAX_WALLET_TOPUP_PAISE,
+  MIN_WALLET_TOPUP_PAISE,
+} from "@/lib/wallet/topup-rules";
 
 function testTopupAllowed(): boolean {
   if (process.env.ALLOW_TEST_WALLET_TOPUP === "true") return true;
-  // Vercel preview deployments are safe for test credits; production still needs the flag or local dev.
   if (process.env.VERCEL_ENV === "preview") return true;
   if (process.env.NODE_ENV !== "production") return true;
   return false;
@@ -46,14 +53,25 @@ export async function POST(request: Request) {
       ? Math.floor((body as { amountPaise: number }).amountPaise)
       : NaN;
 
-  if (!Number.isFinite(amountPaise) || amountPaise < 100 || amountPaise > 50_000_000) {
+  if (
+    !Number.isFinite(amountPaise) ||
+    amountPaise < MIN_WALLET_TOPUP_PAISE ||
+    amountPaise > MAX_WALLET_TOPUP_PAISE
+  ) {
     return NextResponse.json(
-      { error: "amountPaise must be between 100 and 50000000 (paise)." },
+      {
+        error: `Amount must be between ₹${MIN_WALLET_TOPUP_PAISE / 100} and ₹${MAX_WALLET_TOPUP_PAISE / 100} (whole rupees as paise).`,
+        minPaise: MIN_WALLET_TOPUP_PAISE,
+      },
       { status: 400 }
     );
   }
 
   const svc = createServiceClient();
+  const cashbackSettings = await getWalletCashbackSettings(svc);
+  const cashbackPaise = computeTopupCashbackPaise(amountPaise, cashbackSettings);
+  const totalCreditPaise = amountPaise + cashbackPaise;
+
   const { data: profileRow, error: readErr } = await svc
     .from("user_profiles")
     .select("wallet_balance_paise")
@@ -103,7 +121,7 @@ export async function POST(request: Request) {
     profile = created;
   }
 
-  const nextBalance = (profile.wallet_balance_paise ?? 0) + amountPaise;
+  const nextBalance = (profile.wallet_balance_paise ?? 0) + totalCreditPaise;
 
   const { error: updErr } = await svc
     .from("user_profiles")
@@ -128,7 +146,14 @@ export async function POST(request: Request) {
     user_id: user.id,
     delta_paise: amountPaise,
     reason: "test_topup",
-    metadata: { source: "api_test_topup" },
+    metadata: {
+      source: "api_test_topup",
+      principal_paise: amountPaise,
+      cashback_paise: cashbackPaise,
+      cashback_percent_applied: cashbackSettings.cashback_enabled
+        ? cashbackSettings.cashback_percent
+        : 0,
+    },
   });
 
   if (ledErr) {
@@ -142,8 +167,31 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: msg }, { status: 500 });
   }
 
+  if (cashbackPaise > 0) {
+    const { error: cbErr } = await svc.from("wallet_ledger").insert({
+      user_id: user.id,
+      delta_paise: cashbackPaise,
+      reason: "wallet_cashback",
+      metadata: {
+        source: "wallet_topup_cashback",
+        base_topup_paise: amountPaise,
+        cashback_percent: cashbackSettings.cashback_percent,
+      },
+    });
+    if (cbErr) {
+      console.error("[test-topup] cashback ledger insert:", cbErr.message);
+    }
+  }
+
   revalidatePath("/astrologers/wallet");
   revalidatePath("/astrologers");
 
-  return NextResponse.json({ balancePaise: nextBalance });
+  return NextResponse.json({
+    balancePaise: nextBalance,
+    principalPaise: amountPaise,
+    cashbackPaise,
+    cashbackPercentApplied: cashbackSettings.cashback_enabled
+      ? cashbackSettings.cashback_percent
+      : 0,
+  });
 }

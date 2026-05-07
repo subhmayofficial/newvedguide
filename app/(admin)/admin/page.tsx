@@ -91,20 +91,20 @@ export default async function AdminDashboardPage({
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-wider text-brand">
-              Live consult (new)
+              Live Astrology Ops
             </p>
             <h2 className="font-heading mt-1 text-xl font-bold text-foreground">
               Astrologer chat, wallets &amp; users
             </h2>
             <p className="mt-1 max-w-xl text-sm text-muted-foreground">
-              Manage end-user accounts, chat sessions, astrologer replies, and wallet ledger — same admin URL, dedicated workspace.
+              Dedicated ops console at <span className="font-mono text-xs">/astro-ops</span> — chat inbox, sessions, users, and wallet ledger.
             </p>
           </div>
           <Link
-            href="/admindeoghar/live-consult"
+            href="/astro-ops"
             className="inline-flex h-11 shrink-0 items-center justify-center rounded-xl bg-brand px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-hover"
           >
-            Enter live consult admin
+            Open Live Astrology Ops
           </Link>
         </div>
       </section>

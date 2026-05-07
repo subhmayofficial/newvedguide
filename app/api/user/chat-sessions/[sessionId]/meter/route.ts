@@ -26,6 +26,12 @@ export async function POST(_request: Request, { params }: Params) {
     return NextResponse.json({ error: result.error }, { status: result.status });
   }
 
-  const { skipped, ...rest } = result;
-  return NextResponse.json(skipped ? { ...rest, skipped: true } : rest);
+  const { skipped, sessionClosed, summary, ...rest } = result;
+  const payload: Record<string, unknown> = { ...rest };
+  if (skipped) payload.skipped = true;
+  if (sessionClosed) {
+    payload.sessionClosed = true;
+    if (summary) payload.summary = summary;
+  }
+  return NextResponse.json(payload);
 }
