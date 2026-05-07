@@ -171,7 +171,7 @@ export function AstrologerProfileClient({ astrologer: a, isLoggedIn, balancePais
       </div>
 
       {/* ── Content ── */}
-      <div className="mx-auto max-w-lg px-4 py-4 space-y-3 pb-28">
+      <div className="mx-auto max-w-lg px-4 py-4 space-y-3 pb-44">
 
         {/* Error */}
         {error && (
@@ -283,10 +283,9 @@ export function AstrologerProfileClient({ astrologer: a, isLoggedIn, balancePais
         </div>
       </div>
 
-      {/* ── Sticky CTA ── */}
+      {/* ── Sticky CTA — sits above the 60px AppBottomNav ── */}
       <div
-        className="fixed bottom-0 left-0 right-0 z-50 border-t border-gray-100 bg-white/95 px-4 py-3 backdrop-blur-sm"
-        style={{ paddingBottom: "calc(0.75rem + env(safe-area-inset-bottom,0px))" }}
+        className="fixed bottom-[60px] left-0 right-0 z-50 border-t border-gray-100 bg-white/95 px-4 py-3 backdrop-blur-sm"
       >
         <div className="mx-auto max-w-lg">
           <button
