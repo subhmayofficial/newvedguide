@@ -57,6 +57,7 @@ import {
   ENTITY_NOTE_TYPE,
   FULFILLMENT_STATUS,
   LEAD_STATUS,
+  ORDER_POST_UPSELL_STATUS,
   ORDER_FULFILLMENT_ASSIGNEES,
   ORDER_STATUS,
 } from "@/lib/constants/commerce";
@@ -133,6 +134,7 @@ export async function setOrderFulfillment(
         delivery_schedule_report_url: null,
       })
       .eq("id", orderId);
+    await ensurePostUpsellFlowStarted(supabase, orderId);
   } else if (fulfillmentStatus === FULFILLMENT_STATUS.IN_PROGRESS) {
     await updateOrderStatus(supabase, orderId, {
       status: ORDER_STATUS.PROCESSING,
@@ -200,6 +202,7 @@ export async function submitCouponCreateForm(formData: FormData) {
 
 const ALLOWED_FULFILLMENT = new Set<string>(Object.values(FULFILLMENT_STATUS));
 const ALLOWED_ASSIGNEES = new Set<string>(ORDER_FULFILLMENT_ASSIGNEES);
+const ALLOWED_POST_UPSELL_STATUS = new Set<string>(Object.values(ORDER_POST_UPSELL_STATUS));
 
 export async function updateOrderFulfillmentFromList(
   orderId: string,
@@ -219,6 +222,148 @@ export async function updateOrderAssigneeFromList(orderId: string, assignee: str
   await updateOrderFulfillmentAssignee(supabase, orderId, value);
   revalidatePath("/admindeoghar/orders");
   revalidatePath(`/admindeoghar/orders/${orderId}`);
+}
+
+async function upsertOrderPostUpsell(
+  orderId: string,
+  patch: Record<string, string | null>
+) {
+  const supabase = createServiceClient();
+  const { error } = await supabase
+    .from("admin_order_post_upsell")
+    .upsert(
+      {
+        order_id: orderId,
+        ...patch,
+      },
+      { onConflict: "order_id" }
+    );
+  if (error) throw new Error(error.message);
+}
+
+async function ensurePostUpsellFlowStarted(
+  supabase: ReturnType<typeof createServiceClient>,
+  orderId: string
+): Promise<string | null> {
+  const { data: existing } = await supabase
+    .from("admin_order_post_upsell")
+    .select("flow_started_at")
+    .eq("order_id", orderId)
+    .maybeSingle();
+  if (existing?.flow_started_at) return existing.flow_started_at;
+
+  const { data: order } = await supabase
+    .from("orders")
+    .select("fulfillment_status,updated_at")
+    .eq("id", orderId)
+    .maybeSingle();
+  if (!order || order.fulfillment_status !== FULFILLMENT_STATUS.DELIVERED) return null;
+
+  const flowStartedAt = order.updated_at ?? new Date().toISOString();
+  const { error } = await supabase.from("admin_order_post_upsell").upsert(
+    {
+      order_id: orderId,
+      flow_started_at: flowStartedAt,
+    },
+    { onConflict: "order_id" }
+  );
+  if (error) throw new Error(error.message);
+  return flowStartedAt;
+}
+
+export async function updateOrderPostUpsellPoints(
+  orderId: string,
+  points: string
+): Promise<{ flowStartedAt: string | null }> {
+  if (!orderId) return { flowStartedAt: null };
+  const trimmed = points.trim();
+  const supabase = createServiceClient();
+  let flowStartedAt: string | null = null;
+  if (trimmed) {
+    flowStartedAt = await ensurePostUpsellFlowStarted(supabase, orderId);
+  }
+  await upsertOrderPostUpsell(orderId, {
+    kundli_points: trimmed || null,
+    status: trimmed ? ORDER_POST_UPSELL_STATUS.STEP_1_DONE : ORDER_POST_UPSELL_STATUS.PENDING,
+  });
+  revalidatePath("/admindeoghar/orders");
+  revalidatePath("/admindeoghar/post-upsell");
+  revalidatePath(`/admindeoghar/orders/${orderId}`);
+  return { flowStartedAt };
+}
+
+export async function updateOrderPostUpsellStatus(orderId: string, status: string) {
+  if (!orderId || !ALLOWED_POST_UPSELL_STATUS.has(status)) return;
+  await upsertOrderPostUpsell(orderId, { status });
+  revalidatePath("/admindeoghar/orders");
+  revalidatePath("/admindeoghar/post-upsell");
+  revalidatePath(`/admindeoghar/orders/${orderId}`);
+}
+
+export async function markOrderPostUpsellMessageSent(
+  orderId: string,
+  messageKey: "message_1" | "message_2"
+) {
+  if (!orderId) return;
+  const supabase = createServiceClient();
+  const nowIso = new Date().toISOString();
+  const flowStartedAt = await ensurePostUpsellFlowStarted(supabase, orderId);
+  if (!flowStartedAt) {
+    throw new Error("Upsell timer starts only after kundli delivery.");
+  }
+
+  const { data: current } = await supabase
+    .from("admin_order_post_upsell")
+    .select("status,message_1_sent_at,flow_started_at")
+    .eq("order_id", orderId)
+    .maybeSingle();
+
+  if (messageKey === "message_1") {
+    const flowStart = new Date(current?.flow_started_at ?? flowStartedAt);
+    if (Number.isNaN(flowStart.getTime())) {
+      throw new Error("Invalid delivery start time.");
+    }
+    if (Date.now() - flowStart.getTime() < 6 * 60 * 60 * 1000) {
+      throw new Error("Message 1 can be tagged only after 6 hours from delivery.");
+    }
+    await upsertOrderPostUpsell(orderId, {
+      status: ORDER_POST_UPSELL_STATUS.MESSAGE_1_SENT,
+      message_1_sent_at: nowIso,
+    });
+  } else {
+    if ((current?.status ?? "") !== ORDER_POST_UPSELL_STATUS.MESSAGE_1_SENT) {
+      throw new Error("Tag Message 1 sent first.");
+    }
+    const m1SentAt = current?.message_1_sent_at ? new Date(current.message_1_sent_at) : null;
+    if (!m1SentAt || Number.isNaN(m1SentAt.getTime())) {
+      throw new Error("Message 1 sent time missing.");
+    }
+    const diffMs = Date.now() - m1SentAt.getTime();
+    if (diffMs < 24 * 60 * 60 * 1000) {
+      throw new Error("Message 2 can be tagged only after 24 hours.");
+    }
+    await upsertOrderPostUpsell(orderId, {
+      status: ORDER_POST_UPSELL_STATUS.MESSAGE_2_SENT,
+      message_2_sent_at: nowIso,
+    });
+  }
+  revalidatePath("/admindeoghar/post-upsell");
+  revalidatePath("/admindeoghar/orders");
+  revalidatePath(`/admindeoghar/orders/${orderId}`);
+}
+
+export async function savePostUpsellMessageTemplates(message1: string, message2: string) {
+  const supabase = createServiceClient();
+  const { error } = await supabase.from("admin_post_upsell_settings").upsert(
+    {
+      id: 1,
+      message_1_template: message1.trim(),
+      message_2_template: message2.trim(),
+    },
+    { onConflict: "id" }
+  );
+  if (error) throw new Error(error.message);
+  revalidatePath("/admindeoghar/post-upsell");
 }
 
 async function getAdminActor(): Promise<string | null> {

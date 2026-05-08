@@ -25,6 +25,8 @@ export function GlobalNavigationLoader() {
   const search = useSearchParams();
   const [visible, setVisible] = useState(false);
   const showTimerRef = useRef<number | null>(null);
+  const isAdminArea =
+    pathname?.startsWith("/admindeoghar") || pathname?.startsWith("/astro-ops");
 
   const clearTimer = useCallback(() => {
     if (showTimerRef.current != null) {
@@ -79,12 +81,21 @@ export function GlobalNavigationLoader() {
       <div className="pointer-events-none fixed inset-x-0 top-0 z-[120] h-1 overflow-hidden bg-transparent">
         <div className="loader-top-progress h-full w-1/2 bg-brand" />
       </div>
-      <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/30 backdrop-blur-[1px]">
-        <div className="rounded-2xl border border-white/30 bg-background/95 px-6 py-5 shadow-xl">
-          <div className="mx-auto h-11 w-11 rounded-full border-2 border-muted border-t-brand animate-spin" />
-          <p className="mt-3 text-center text-sm font-medium text-foreground">Loading...</p>
+      {isAdminArea ? (
+        <div className="pointer-events-none fixed right-4 top-4 z-[110]">
+          <div className="inline-flex items-center gap-2 rounded-full border border-border bg-background/95 px-3 py-1.5 shadow-sm backdrop-blur">
+            <span className="h-3.5 w-3.5 rounded-full border-2 border-muted border-t-brand animate-spin" />
+            <span className="text-xs font-medium text-foreground">Opening section...</span>
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/30 backdrop-blur-[1px]">
+          <div className="rounded-2xl border border-white/30 bg-background/95 px-6 py-5 shadow-xl">
+            <div className="mx-auto h-11 w-11 rounded-full border-2 border-muted border-t-brand animate-spin" />
+            <p className="mt-3 text-center text-sm font-medium text-foreground">Loading...</p>
+          </div>
+        </div>
+      )}
     </>
   );
 }

@@ -6,6 +6,7 @@ import { Sun, Moon, LogOut, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
+import { useMemo } from "react";
 import { useAdminTheme } from "@/components/admin/admin-theme-context";
 
 // ─── Navigation structure ──────────────────────────────────────────────────
@@ -22,6 +23,7 @@ const NAV_SECTIONS = [
     items: [
       { label: "Leads", href: "/admindeoghar/leads" },
       { label: "Orders", href: "/admindeoghar/orders" },
+      { label: "Post Upsell", href: "/admindeoghar/post-upsell" },
       { label: "Analytics", href: "/admindeoghar/analytics" },
     ],
   },
@@ -90,6 +92,16 @@ export function AdminSidebar({
   const router = useRouter();
   const supabase = createClient();
   const { theme, toggle } = useAdminTheme();
+  const sectionLinks = useMemo(
+    () => NAV_SECTIONS.flatMap((section) => section.items.map((item) => item.href)),
+    []
+  );
+
+  function prefetchAdminLinks() {
+    for (const href of sectionLinks) {
+      router.prefetch(href);
+    }
+  }
 
   async function handleSignOut() {
     await supabase.auth.signOut();
@@ -170,7 +182,10 @@ export function AdminSidebar({
                   <li key={item.href}>
                     <Link
                       href={item.href}
+                      prefetch
                       onClick={onClose}
+                      onMouseEnter={prefetchAdminLinks}
+                      onFocus={prefetchAdminLinks}
                       className={cn(
                         "group flex h-[34px] items-center gap-2 rounded-lg px-2.5 text-[13px] font-medium transition-all duration-150",
                         isActive

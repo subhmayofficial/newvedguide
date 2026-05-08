@@ -42,6 +42,14 @@ type OrderRow = {
   delivery_schedule_report_url: string | null;
   customers: { full_name?: string | null; phone?: string | null } | null;
   order_items?: { product_slug: string }[] | null;
+  admin_order_post_upsell:
+    | {
+        kundli_points: string | null;
+        status: string | null;
+        message_1_sent_at: string | null;
+        message_2_sent_at: string | null;
+      }[]
+    | null;
 };
 
 type RowKind = "failed" | "cancelled" | "fasttrack" | "normal";
@@ -75,7 +83,7 @@ export default async function AdminOrdersPage({
   let q = supabase
     .from("orders")
     .select(
-      "id,order_number,product_slug,consultation_type,total_amount,status,payment_status,fulfillment_status,fulfillment_assignee,entry_path,created_at,coupon_applied,coupon_code,delivery_scheduled_at,delivery_schedule_customer_name,delivery_schedule_report_url,customers(full_name,phone),order_items(product_slug)",
+      "id,order_number,product_slug,consultation_type,total_amount,status,payment_status,fulfillment_status,fulfillment_assignee,entry_path,created_at,coupon_applied,coupon_code,delivery_scheduled_at,delivery_schedule_customer_name,delivery_schedule_report_url,customers(full_name,phone),order_items(product_slug),admin_order_post_upsell(kundli_points,status,message_1_sent_at,message_2_sent_at)",
       { count: "exact" }
     )
     .order("created_at", { ascending: false })
@@ -434,6 +442,7 @@ export default async function AdminOrdersPage({
               <th className="px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Assigned</th>
               <th className="px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Entry</th>
               <th className="px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Coupon</th>
+              <th className="px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Post upsell</th>
               <th className="px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground text-right whitespace-nowrap">
                 Deliver / open
               </th>
@@ -451,6 +460,7 @@ export default async function AdminOrdersPage({
                 phoneDigits.length >= 10;
               const defaultCustomerName = (c?.full_name ?? "").trim() || "Customer";
               const fastTrackOrder = orderHasFastTrackSla(r.product_slug, r.order_items ?? null);
+              const upsell = r.admin_order_post_upsell?.[0] ?? null;
 
               return (
                 <tr
@@ -579,6 +589,22 @@ export default async function AdminOrdersPage({
                     ) : (
                       <span className="text-[11px] text-muted-foreground/30">—</span>
                     )}
+                  </td>
+
+                  <td className="px-4 py-3.5 align-top">
+                    <div className="space-y-1">
+                      <span className="inline-flex rounded-md border border-border bg-muted/40 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                        {upsell?.status ?? "pending"}
+                      </span>
+                      <div>
+                        <Link
+                          href="/admindeoghar/post-upsell"
+                          className="text-[11px] font-medium text-foreground underline underline-offset-2 hover:opacity-70"
+                        >
+                          Manage
+                        </Link>
+                      </div>
+                    </div>
                   </td>
 
                   {/* Deliver + open */}

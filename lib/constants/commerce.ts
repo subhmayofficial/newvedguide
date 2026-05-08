@@ -55,6 +55,13 @@ export const FULFILLMENT_STATUS = {
   DELIVERED: "delivered",
 } as const;
 
+export const ORDER_POST_UPSELL_STATUS = {
+  PENDING: "pending",
+  STEP_1_DONE: "step_1_done",
+  MESSAGE_1_SENT: "message_1_sent",
+  MESSAGE_2_SENT: "message_2_sent",
+} as const;
+
 /** Admin order list — who fulfils (stored in orders.fulfillment_assignee) */
 export const ORDER_FULFILLMENT_ASSIGNEES = ["Ashu", "Roshan"] as const;
 export type OrderFulfillmentAssignee = (typeof ORDER_FULFILLMENT_ASSIGNEES)[number];

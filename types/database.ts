@@ -653,6 +653,60 @@ export interface Database {
         >;
         Relationships: [];
       };
+      admin_order_post_upsell: {
+        Row: {
+          id: string;
+          order_id: string;
+          flow_started_at: string | null;
+          kundli_points: string | null;
+          status: string;
+          message_1_text: string | null;
+          message_1_scheduled_for: string | null;
+          message_1_sent_at: string | null;
+          message_2_text: string | null;
+          message_2_scheduled_for: string | null;
+          message_2_sent_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          order_id: string;
+          flow_started_at?: string | null;
+          kundli_points?: string | null;
+          status?: string;
+          message_1_text?: string | null;
+          message_1_scheduled_for?: string | null;
+          message_1_sent_at?: string | null;
+          message_2_text?: string | null;
+          message_2_scheduled_for?: string | null;
+          message_2_sent_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["admin_order_post_upsell"]["Insert"]
+        >;
+        Relationships: [];
+      };
+      admin_post_upsell_settings: {
+        Row: {
+          id: number;
+          message_1_template: string;
+          message_2_template: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: number;
+          message_1_template?: string;
+          message_2_template?: string;
+          updated_at?: string;
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["admin_post_upsell_settings"]["Insert"]
+        >;
+        Relationships: [];
+      };
       support_requests: {
         Row: {
           id: string;
