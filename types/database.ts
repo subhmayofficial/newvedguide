@@ -1101,6 +1101,32 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["wallet_ledger"]["Insert"]>;
         Relationships: [];
       };
+      wallet_recharge_intents: {
+        Row: {
+          id: string;
+          user_id: string;
+          principal_paise: number;
+          razorpay_order_id: string;
+          status: string;
+          razorpay_payment_id: string | null;
+          last_error: string | null;
+          created_at: string;
+          credited_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          principal_paise: number;
+          razorpay_order_id: string;
+          status?: string;
+          razorpay_payment_id?: string | null;
+          last_error?: string | null;
+          created_at?: string;
+          credited_at?: string | null;
+        };
+        Update: Partial<Database["public"]["Tables"]["wallet_recharge_intents"]["Insert"]>;
+        Relationships: [];
+      };
       chat_sessions: {
         Row: {
           id: string;

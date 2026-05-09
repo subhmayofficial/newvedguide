@@ -19,13 +19,6 @@ import { Label } from "@/components/ui/label";
 import { track } from "@/lib/analytics/events";
 import { getOrCreateSessionId } from "@/lib/analytics/session";
 
-declare global {
-  interface Window {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    Razorpay: any;
-  }
-}
-
 interface KundliSessionData {
   submissionId?: string;
   name?: string;

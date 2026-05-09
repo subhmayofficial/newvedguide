@@ -1,10 +1,5 @@
-import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
-import {
-  computeTopupCashbackPaise,
-  getWalletCashbackSettings,
-} from "@/lib/admin/wallet-cashback-settings";
 import {
   isSupabaseTableMissingError,
   SCHEMA_NOT_READY_USER_MESSAGE,
@@ -13,6 +8,7 @@ import {
   MAX_WALLET_TOPUP_PAISE,
   MIN_WALLET_TOPUP_PAISE,
 } from "@/lib/wallet/topup-rules";
+import { creditWalletTopup } from "@/lib/wallet/credit-topup";
 
 function testTopupAllowed(): boolean {
   if (process.env.ALLOW_TEST_WALLET_TOPUP === "true") return true;
@@ -68,9 +64,6 @@ export async function POST(request: Request) {
   }
 
   const svc = createServiceClient();
-  const cashbackSettings = await getWalletCashbackSettings(svc);
-  const cashbackPaise = computeTopupCashbackPaise(amountPaise, cashbackSettings);
-  const totalCreditPaise = amountPaise + cashbackPaise;
 
   const { data: profileRow, error: readErr } = await svc
     .from("user_profiles")
@@ -121,77 +114,24 @@ export async function POST(request: Request) {
     profile = created;
   }
 
-  const nextBalance = (profile.wallet_balance_paise ?? 0) + totalCreditPaise;
-
-  const { error: updErr } = await svc
-    .from("user_profiles")
-    .update({
-      wallet_balance_paise: nextBalance,
-      updated_at: new Date().toISOString(),
-    })
-    .eq("id", user.id);
-
-  if (updErr) {
-    const msg = updErr.message ?? "";
-    if (isSupabaseTableMissingError(msg)) {
-      return NextResponse.json(
-        { code: "SCHEMA_NOT_READY" as const, error: SCHEMA_NOT_READY_USER_MESSAGE },
-        { status: 503 }
-      );
-    }
-    return NextResponse.json({ error: msg }, { status: 500 });
-  }
-
-  const { error: ledErr } = await svc.from("wallet_ledger").insert({
-    user_id: user.id,
-    delta_paise: amountPaise,
-    reason: "test_topup",
-    metadata: {
-      source: "api_test_topup",
-      principal_paise: amountPaise,
-      cashback_paise: cashbackPaise,
-      cashback_percent_applied: cashbackSettings.cashback_enabled
-        ? cashbackSettings.cashback_percent
-        : 0,
-    },
+  const credited = await creditWalletTopup(svc, user.id, amountPaise, "test_topup", {
+    source: "api_test_topup",
   });
 
-  if (ledErr) {
-    const msg = ledErr.message ?? "";
-    if (isSupabaseTableMissingError(msg)) {
+  if (!credited.ok) {
+    if (credited.code === "SCHEMA_NOT_READY") {
       return NextResponse.json(
-        { code: "SCHEMA_NOT_READY" as const, error: SCHEMA_NOT_READY_USER_MESSAGE },
-        { status: 503 }
+        { code: credited.code, error: credited.error },
+        { status: credited.status }
       );
     }
-    return NextResponse.json({ error: msg }, { status: 500 });
+    return NextResponse.json({ error: credited.error }, { status: credited.status });
   }
-
-  if (cashbackPaise > 0) {
-    const { error: cbErr } = await svc.from("wallet_ledger").insert({
-      user_id: user.id,
-      delta_paise: cashbackPaise,
-      reason: "wallet_cashback",
-      metadata: {
-        source: "wallet_topup_cashback",
-        base_topup_paise: amountPaise,
-        cashback_percent: cashbackSettings.cashback_percent,
-      },
-    });
-    if (cbErr) {
-      console.error("[test-topup] cashback ledger insert:", cbErr.message);
-    }
-  }
-
-  revalidatePath("/astrologers/wallet");
-  revalidatePath("/astrologers");
 
   return NextResponse.json({
-    balancePaise: nextBalance,
-    principalPaise: amountPaise,
-    cashbackPaise,
-    cashbackPercentApplied: cashbackSettings.cashback_enabled
-      ? cashbackSettings.cashback_percent
-      : 0,
+    balancePaise: credited.data.balancePaise,
+    principalPaise: credited.data.principalPaise,
+    cashbackPaise: credited.data.cashbackPaise,
+    cashbackPercentApplied: credited.data.cashbackPercentApplied,
   });
 }

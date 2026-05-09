@@ -15,6 +15,7 @@ const REASONS = [
   { value: "live_chat_meter",   label: "Chat charge" },
   { value: "live_chat_session", label: "Chat session" },
   { value: "test_topup",        label: "Test top-up" },
+  { value: "wallet_recharge",   label: "Wallet recharge (Razorpay)" },
   { value: "admin_topup",       label: "Admin top-up" },
   { value: "admin_adjustment",  label: "Admin adjustment" },
 ];

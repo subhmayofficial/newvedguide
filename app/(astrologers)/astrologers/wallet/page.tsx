@@ -33,7 +33,8 @@ function ledgerLabel(reason: string) {
   switch (reason) {
     case "live_chat_meter":   return "Chat charge";
     case "live_chat_session": return "Chat session";
-    case "test_topup":        return "Wallet top-up";
+    case "test_topup":        return "Wallet top-up (test)";
+    case "wallet_recharge":   return "Wallet recharge";
     case "wallet_cashback":   return "Cashback";
     default: return reason.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
   }

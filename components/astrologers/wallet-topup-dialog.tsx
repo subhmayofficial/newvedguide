@@ -16,6 +16,8 @@ type TopupInfo = {
   cashbackPercent: number;
   cashbackMinEligiblePaise?: number;
   cashbackMinEligibleRupees?: number;
+  useTestTopup?: boolean;
+  razorpayKeyId?: string | null;
 };
 
 const PRESETS_PAISE_BASE = [10_000, 50_000, 100_000, 500_000]; // ₹100 … ₹5000
@@ -43,6 +45,7 @@ export function WalletTopupDialog({
   const [info, setInfo] = useState<TopupInfo | null>(null);
   const [infoLoading, setInfoLoading] = useState(false);
   const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null);
+  const [razorpayReady, setRazorpayReady] = useState(false);
 
   useLayoutEffect(() => {
     setPortalTarget(document.body);
@@ -80,6 +83,39 @@ export function WalletTopupDialog({
     // eslint-disable-next-line react-hooks/exhaustive-deps -- refresh once per open
   }, [open]);
 
+  useEffect(() => {
+    if (!open || !info || info.useTestTopup) {
+      setRazorpayReady(false);
+      return;
+    }
+
+    let cancelled = false;
+
+    function markReady() {
+      if (!cancelled && typeof window !== "undefined" && window.Razorpay) {
+        setRazorpayReady(true);
+      }
+    }
+
+    const existing = document.querySelector<HTMLScriptElement>(
+      'script[src="https://checkout.razorpay.com/v1/checkout.js"]'
+    );
+    if (existing) {
+      if (window.Razorpay) markReady();
+      else existing.addEventListener("load", markReady, { once: true });
+    } else {
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.async = true;
+      script.addEventListener("load", markReady, { once: true });
+      document.head.appendChild(script);
+    }
+
+    return () => {
+      cancelled = true;
+    };
+  }, [open, info]);
+
   if (!open || !portalTarget) return null;
 
   const presets = (() => {
@@ -91,49 +127,160 @@ export function WalletTopupDialog({
 
   const cashbackMinPaise = info?.cashbackMinEligiblePaise ?? 9_900; // > ₹99
   const cashbackMinRupees = info?.cashbackMinEligibleRupees ?? 99;
+  const useTestTopup = info?.useTestTopup !== false;
 
   function previewCashback(principalPaise: number): number {
     if (!info?.cashbackEnabled || !info.cashbackPercent) return 0;
-    if (principalPaise <= cashbackMinPaise) return 0; // only on amounts > ₹99
+    if (principalPaise <= cashbackMinPaise) return 0;
     return Math.floor((principalPaise * info.cashbackPercent) / 100);
+  }
+
+  async function testTopupRequest(amountPaise: number) {
+    const res = await fetch("/api/user/wallet/test-topup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ amountPaise }),
+    });
+    let data: {
+      error?: string;
+      balancePaise?: number;
+    };
+    try {
+      data = (await res.json()) as typeof data;
+    } catch {
+      setError("Unexpected response from server. Try again.");
+      return;
+    }
+    if (!res.ok) {
+      setError(data.error ?? "Top-up failed");
+      return;
+    }
+    if (typeof data.balancePaise === "number") {
+      onSuccess(data.balancePaise);
+      onClose();
+    } else {
+      setError("Top-up succeeded but balance was not returned. Refresh the page.");
+    }
+  }
+
+  async function razorpayTopup(amountPaise: number) {
+    const key =
+      info?.razorpayKeyId?.trim() ||
+      (typeof process !== "undefined"
+        ? process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID
+        : undefined);
+    if (!key || key.includes("your_razorpay")) {
+      setError("Razorpay is not configured. Add NEXT_PUBLIC_RAZORPAY_KEY_ID and server keys.");
+      return;
+    }
+    if (!razorpayReady || !window.Razorpay) {
+      setError("Payment form is still loading. Try again in a second.");
+      return;
+    }
+
+    const res = await fetch("/api/user/wallet/create-recharge-order", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ amountPaise }),
+    });
+    let payload: {
+      error?: string;
+      intentId?: string;
+      razorpayOrderId?: string;
+      amountPaise?: number;
+      keyId?: string;
+      prefill?: { name?: string; email?: string; contact?: string };
+    };
+    try {
+      payload = (await res.json()) as typeof payload;
+    } catch {
+      setError("Could not start payment. Try again.");
+      return;
+    }
+    if (!res.ok) {
+      setError(payload.error ?? "Could not start payment.");
+      return;
+    }
+    const orderId = payload.razorpayOrderId;
+    const intentId = payload.intentId;
+    const payPaise = payload.amountPaise ?? amountPaise;
+    if (!orderId || !intentId) {
+      setError("Invalid payment session. Refresh and try again.");
+      return;
+    }
+
+    const rzpKey = payload.keyId ?? key;
+
+    const rzp = new window.Razorpay({
+      key: rzpKey,
+      amount: payPaise,
+      currency: "INR",
+      order_id: orderId,
+      name: "VedGuide",
+      description: "Wallet recharge",
+      prefill: payload.prefill ?? {},
+      theme: { color: "#059669" },
+      modal: {
+        ondismiss: () => {
+          setLoading(false);
+        },
+      },
+      handler: async (response: {
+        razorpay_order_id: string;
+        razorpay_payment_id: string;
+        razorpay_signature: string;
+      }) => {
+        setLoading(true);
+        try {
+          const verifyRes = await fetch("/api/user/wallet/verify-recharge", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              intentId,
+            }),
+          });
+          const v = (await verifyRes.json()) as {
+            error?: string;
+            success?: boolean;
+            balancePaise?: number;
+          };
+          if (!verifyRes.ok || !v.success || typeof v.balancePaise !== "number") {
+            setError(v.error ?? "Payment verification failed. If money was debited, contact support with your payment ID.");
+            return;
+          }
+          onSuccess(v.balancePaise);
+          onClose();
+        } finally {
+          setLoading(false);
+        }
+      },
+    });
+
+    setLoading(false);
+    rzp.open();
   }
 
   async function topup(amountPaise: number) {
     setError("");
     setLoading(true);
     try {
-      const res = await fetch("/api/user/wallet/test-topup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ amountPaise }),
-      });
-      let data: {
-        error?: string;
-        balancePaise?: number;
-        cashbackPaise?: number;
-        principalPaise?: number;
-      };
-      try {
-        data = (await res.json()) as typeof data;
-      } catch {
-        setError("Unexpected response from server. Try again.");
-        return;
-      }
-      if (!res.ok) {
-        setError(data.error ?? "Top-up failed");
-        return;
-      }
-      if (typeof data.balancePaise === "number") {
-        onSuccess(data.balancePaise);
-        onClose();
+      if (useTestTopup) {
+        await testTopupRequest(amountPaise);
       } else {
-        setError("Top-up succeeded but balance was not returned. Refresh the page.");
+        await razorpayTopup(amountPaise);
       }
     } finally {
       setLoading(false);
     }
   }
+
+  const payConfigured = useTestTopup || Boolean(info?.razorpayKeyId && !info.razorpayKeyId.includes("your_razorpay"));
 
   const modal = (
     <div
@@ -181,8 +328,10 @@ export function WalletTopupDialog({
               </p>
             </div>
           </div>
-          {/* Min recharge note */}
-          <p className="mt-3 text-[11px] text-white/60">Minimum recharge ₹{minRupees} · Dev mode only</p>
+          <p className="mt-3 text-[11px] text-white/60">
+            Minimum recharge ₹{minRupees}
+            {useTestTopup ? " · Test mode (instant balance)" : " · Secured by Razorpay"}
+          </p>
         </div>
 
         <div className="space-y-4 px-6 py-5">
@@ -202,6 +351,16 @@ export function WalletTopupDialog({
               {infoLoading && (
                 <div className="h-1.5 w-24 animate-pulse rounded-full bg-gray-200" />
               )}
+              {!infoLoading && !useTestTopup && !payConfigured && (
+                <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+                  Razorpay keys missing. Set <span className="font-mono">NEXT_PUBLIC_RAZORPAY_KEY_ID</span>,{" "}
+                  <span className="font-mono">RAZORPAY_KEY_ID</span>, and{" "}
+                  <span className="font-mono">RAZORPAY_KEY_SECRET</span> on the server.
+                </p>
+              )}
+              {!infoLoading && !useTestTopup && payConfigured && !razorpayReady && (
+                <p className="text-xs text-gray-500">Loading secure checkout…</p>
+              )}
               {error && (
                 <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600">
                   {error}
@@ -214,14 +373,15 @@ export function WalletTopupDialog({
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                   {presets.map((paise) => {
                     const bonus = previewCashback(paise);
+                    const payBusy = loading || (!useTestTopup && (!razorpayReady || !payConfigured));
                     return (
                       <Button
                         key={paise}
                         type="button"
                         variant="outline"
                         className="rounded-xl border-gray-200 bg-amber-50 text-xs font-semibold text-amber-800 hover:border-amber-300 hover:bg-amber-100"
-                        disabled={loading}
-                        onClick={() => topup(paise)}
+                        disabled={payBusy}
+                        onClick={() => void topup(paise)}
                       >
                         <span className="flex flex-col items-center gap-0.5">
                           <span>+{formatInrFromPaise(paise)}</span>
@@ -275,14 +435,14 @@ export function WalletTopupDialog({
                 <Button
                   type="button"
                   className="mt-3 w-full rounded-xl bg-amber-400 font-semibold text-gray-900 hover:bg-amber-500"
-                  disabled={loading}
+                  disabled={loading || (!useTestTopup && (!razorpayReady || !payConfigured))}
                   onClick={() => {
                     const r = Number(customRupees);
                     if (!Number.isFinite(r) || r < minRupees) {
                       setError(`Enter at least ₹${minRupees}`);
                       return;
                     }
-                    topup(Math.floor(r * 100));
+                    void topup(Math.floor(r * 100));
                   }}
                 >
                   {loading ? (

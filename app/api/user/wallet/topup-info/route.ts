@@ -6,6 +6,13 @@ import {
   MIN_WALLET_TOPUP_PAISE,
 } from "@/lib/wallet/topup-rules";
 
+function testTopupAllowed(): boolean {
+  if (process.env.ALLOW_TEST_WALLET_TOPUP === "true") return true;
+  if (process.env.VERCEL_ENV === "preview") return true;
+  if (process.env.NODE_ENV !== "production") return true;
+  return false;
+}
+
 export async function GET() {
   const supabase = await createClient();
   const {
@@ -19,6 +26,9 @@ export async function GET() {
   const svc = createServiceClient();
   const settings = await getWalletCashbackSettings(svc);
 
+  const useTestTopup = testTopupAllowed();
+  const keyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID?.trim() ?? null;
+
   return NextResponse.json({
     minPaise: MIN_WALLET_TOPUP_PAISE,
     maxPaise: MAX_WALLET_TOPUP_PAISE,
@@ -27,5 +37,7 @@ export async function GET() {
     cashbackPercent: settings.cashback_percent,
     cashbackMinEligiblePaise: CASHBACK_MIN_ELIGIBLE_PAISE,
     cashbackMinEligibleRupees: CASHBACK_MIN_ELIGIBLE_PAISE / 100,
+    useTestTopup,
+    razorpayKeyId: useTestTopup ? null : keyId,
   });
 }

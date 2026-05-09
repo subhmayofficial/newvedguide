@@ -20,13 +20,6 @@ import { track } from "@/lib/analytics/events";
 import { getOrCreateSessionId } from "@/lib/analytics/session";
 import { getWhatsAppHref } from "@/lib/constants/contact";
 
-declare global {
-  interface Window {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    Razorpay: any;
-  }
-}
-
 // ─── Packages ─────────────────────────────────────────────────────────────────
 
 const PACKAGES = {
