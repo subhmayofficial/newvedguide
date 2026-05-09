@@ -1,12 +1,15 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { formatInrFromPaise } from "@/lib/format-money";
-import { MIN_WALLET_TOPUP_PAISE } from "@/lib/wallet/topup-rules";
+import {
+  MAX_WALLET_TOPUP_PAISE,
+  MIN_WALLET_TOPUP_PAISE,
+} from "@/lib/wallet/topup-rules";
 
 type TopupInfo = {
   minPaise: number;
@@ -20,7 +23,22 @@ type TopupInfo = {
   razorpayKeyId?: string | null;
 };
 
-const PRESETS_PAISE_BASE = [10_000, 50_000, 100_000, 500_000]; // ₹100 … ₹5000
+function buildSuggestionRupees(typedRupees: number, minR: number, maxR: number): number[] {
+  const anchors = [100, 200, 500, 1000, 2000, 5000, 10_000, 25_000, 50_000].filter(
+    (x) => x >= minR && x <= maxR
+  );
+  const t = Number.isFinite(typedRupees) ? typedRupees : minR;
+  const clamped = Math.min(maxR, Math.max(minR, t));
+  const dynamic = [
+    minR,
+    Math.ceil(clamped / 10) * 10,
+    Math.ceil(clamped / 50) * 50,
+    Math.ceil(clamped / 100) * 100,
+  ].filter((x) => x >= minR && x <= maxR);
+
+  const set = new Set<number>([...dynamic, ...anchors]);
+  return [...set].sort((a, b) => a - b).slice(0, 8);
+}
 
 type WalletTopupDialogProps = {
   open: boolean;
@@ -116,18 +134,26 @@ export function WalletTopupDialog({
     };
   }, [open, info]);
 
-  if (!open || !portalTarget) return null;
+  const minRupeesEffective = info?.minRupees ?? MIN_WALLET_TOPUP_PAISE / 100;
+  const maxRupeesEffective = info?.maxPaise
+    ? info.maxPaise / 100
+    : MAX_WALLET_TOPUP_PAISE / 100;
+  const typedRupeesNum = Number(customRupees);
+  const suggestionRupees = useMemo(
+    () =>
+      buildSuggestionRupees(
+        Number.isFinite(typedRupeesNum) ? typedRupeesNum : minRupeesEffective,
+        minRupeesEffective,
+        maxRupeesEffective
+      ),
+    [typedRupeesNum, minRupeesEffective, maxRupeesEffective]
+  );
 
-  const presets = (() => {
-    const min = info?.minPaise ?? MIN_WALLET_TOPUP_PAISE;
-    const list = PRESETS_PAISE_BASE.filter((p) => p >= min);
-    if (!list.includes(min)) return [min, ...list].slice(0, 4);
-    return list.slice(0, 4);
-  })();
+  if (!open || !portalTarget) return null;
 
   const cashbackMinPaise = info?.cashbackMinEligiblePaise ?? 9_900; // > ₹99
   const cashbackMinRupees = info?.cashbackMinEligibleRupees ?? 99;
-  const useTestTopup = info?.useTestTopup !== false;
+  const useTestTopup = info?.useTestTopup === true;
 
   function previewCashback(principalPaise: number): number {
     if (!info?.cashbackEnabled || !info.cashbackPercent) return 0;
@@ -165,13 +191,9 @@ export function WalletTopupDialog({
   }
 
   async function razorpayTopup(amountPaise: number) {
-    const key =
-      info?.razorpayKeyId?.trim() ||
-      (typeof process !== "undefined"
-        ? process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID
-        : undefined);
+    const key = info?.razorpayKeyId?.trim();
     if (!key || key.includes("your_razorpay")) {
-      setError("Razorpay is not configured. Add NEXT_PUBLIC_RAZORPAY_KEY_ID and server keys.");
+      setError("Razorpay is not configured. Set RAZORPAY_KEY_ID + RAZORPAY_KEY_SECRET (same mode for order + checkout).");
       return;
     }
     if (!razorpayReady || !window.Razorpay) {
@@ -280,7 +302,22 @@ export function WalletTopupDialog({
     }
   }
 
-  const payConfigured = useTestTopup || Boolean(info?.razorpayKeyId && !info.razorpayKeyId.includes("your_razorpay"));
+  const payConfigured =
+    useTestTopup ||
+    Boolean(info?.razorpayKeyId && !info.razorpayKeyId.includes("your_razorpay"));
+
+  function rechargeFromInput() {
+    const r = Number(customRupees);
+    if (!Number.isFinite(r) || r < minRupeesEffective) {
+      setError(`Enter at least ₹${minRupeesEffective}`);
+      return;
+    }
+    if (r > maxRupeesEffective) {
+      setError(`Maximum ₹${maxRupeesEffective.toLocaleString("en-IN")} per recharge`);
+      return;
+    }
+    void topup(Math.floor(r * 100));
+  }
 
   const modal = (
     <div
@@ -329,8 +366,8 @@ export function WalletTopupDialog({
             </div>
           </div>
           <p className="mt-3 text-[11px] text-white/60">
-            Minimum recharge ₹{minRupees}
-            {useTestTopup ? " · Test mode (instant balance)" : " · Secured by Razorpay"}
+            Minimum ₹{minRupeesEffective}
+            {useTestTopup ? " · Test mode (instant)" : " · Razorpay secure checkout"}
           </p>
         </div>
 
@@ -366,92 +403,106 @@ export function WalletTopupDialog({
                   {error}
                 </p>
               )}
-              <div>
-                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
-                  Quick add
-                </p>
-                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-                  {presets.map((paise) => {
-                    const bonus = previewCashback(paise);
-                    const payBusy = loading || (!useTestTopup && (!razorpayReady || !payConfigured));
-                    return (
-                      <Button
-                        key={paise}
-                        type="button"
-                        variant="outline"
-                        className="rounded-xl border-gray-200 bg-amber-50 text-xs font-semibold text-amber-800 hover:border-amber-300 hover:bg-amber-100"
-                        disabled={payBusy}
-                        onClick={() => void topup(paise)}
-                      >
-                        <span className="flex flex-col items-center gap-0.5">
-                          <span>+{formatInrFromPaise(paise)}</span>
-                          {bonus > 0 && (
-                            <span className="text-[10px] font-bold text-emerald-700">
-                              +{formatInrFromPaise(bonus)} bonus
-                            </span>
-                          )}
-                        </span>
-                      </Button>
-                    );
-                  })}
-                </div>
-              </div>
-              <div>
+              <div className="space-y-2">
                 <label
                   htmlFor="custom-rupees"
                   className="text-xs font-semibold uppercase tracking-wide text-gray-400"
                 >
-                  Custom amount (₹)
+                  Amount (₹)
                 </label>
+                {!infoLoading && suggestionRupees.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {suggestionRupees.map((rupees) => {
+                      const paise = rupees * 100;
+                      const bonus = previewCashback(paise);
+                      const active =
+                        Number.isFinite(typedRupeesNum) &&
+                        Math.floor(typedRupeesNum * 100) === paise;
+                      return (
+                        <button
+                          key={rupees}
+                          type="button"
+                          disabled={loading}
+                          onClick={() => {
+                            setError("");
+                            setCustomRupees(String(rupees));
+                          }}
+                          className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${
+                            active
+                              ? "border-amber-500 bg-amber-100 text-amber-900"
+                              : "border-gray-200 bg-white text-gray-800 hover:border-amber-300 hover:bg-amber-50"
+                          }`}
+                        >
+                          ₹{rupees.toLocaleString("en-IN")}
+                          {bonus > 0 && (
+                            <span className="ml-1 text-[10px] font-bold text-emerald-700">
+                              +{formatInrFromPaise(bonus)}
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
                 <input
                   id="custom-rupees"
                   type="number"
-                  min={minRupees}
-                  max={500000}
+                  min={minRupeesEffective}
+                  max={maxRupeesEffective}
                   step={1}
-                  className="mt-1.5 h-10 w-full rounded-xl border border-gray-200 bg-gray-50 px-3 text-sm text-gray-900 outline-none placeholder:text-gray-400 focus-visible:ring-2 focus-visible:ring-amber-400/40"
+                  inputMode="decimal"
+                  placeholder={`e.g. ${minRupeesEffective}`}
+                  className="h-12 w-full rounded-xl border border-gray-200 bg-gray-50 px-3 text-base font-semibold text-gray-900 outline-none placeholder:text-gray-400 focus-visible:ring-2 focus-visible:ring-amber-400/40"
                   value={customRupees}
-                  onChange={(e) => setCustomRupees(e.target.value)}
+                  onChange={(e) => {
+                    setError("");
+                    setCustomRupees(e.target.value);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      rechargeFromInput();
+                    }
+                  }}
                 />
                 {(() => {
                   const r = Number(customRupees);
-                  if (!Number.isFinite(r) || r < minRupees) return null;
+                  if (!Number.isFinite(r) || r < minRupeesEffective) return null;
                   const paise = Math.floor(r * 100);
                   if (paise <= cashbackMinPaise) {
                     return (
-                      <p className="mt-1.5 text-[11px] text-gray-400">
-                        Add ₹{cashbackMinRupees + 1}+ to unlock 100% cashback bonus
+                      <p className="text-[11px] text-gray-400">
+                        Add ₹{cashbackMinRupees + 1}+ to unlock cashback bonus
                       </p>
                     );
                   }
                   const b = previewCashback(paise);
                   if (b <= 0) return null;
                   return (
-                    <p className="mt-1.5 text-[12px] font-bold text-emerald-700">
-                      🎁 You&apos;ll get +{formatInrFromPaise(b)} cashback free! (₹{r} + ₹{b / 100} bonus)
+                    <p className="text-[12px] font-bold text-emerald-700">
+                      🎁 +{formatInrFromPaise(b)} cashback (₹{r} + ₹{b / 100} bonus)
                     </p>
                   );
                 })()}
                 <Button
                   type="button"
-                  className="mt-3 w-full rounded-xl bg-amber-400 font-semibold text-gray-900 hover:bg-amber-500"
-                  disabled={loading || (!useTestTopup && (!razorpayReady || !payConfigured))}
-                  onClick={() => {
-                    const r = Number(customRupees);
-                    if (!Number.isFinite(r) || r < minRupees) {
-                      setError(`Enter at least ₹${minRupees}`);
-                      return;
-                    }
-                    void topup(Math.floor(r * 100));
-                  }}
+                  className="mt-1 w-full rounded-xl bg-amber-400 py-6 text-base font-bold text-gray-900 hover:bg-amber-500"
+                  disabled={
+                    loading ||
+                    infoLoading ||
+                    (!useTestTopup && (!razorpayReady || !payConfigured))
+                  }
+                  onClick={rechargeFromInput}
                 >
                   {loading ? (
                     <>
-                      <Loader2 className="size-4 animate-spin" />
+                      <Loader2 className="size-5 animate-spin" />
                       Processing…
                     </>
+                  ) : useTestTopup ? (
+                    "Add test balance"
                   ) : (
-                    "⚡ Recharge Now"
+                    "Recharge with Razorpay"
                   )}
                 </Button>
               </div>

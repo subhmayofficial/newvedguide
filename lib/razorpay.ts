@@ -1,4 +1,5 @@
 import crypto from "crypto";
+import { resolveRazorpayKeyId, resolveRazorpayKeySecret } from "@/lib/razorpay-config";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -40,12 +41,12 @@ export interface RazorpayVerifyPayload {
 }
 
 function getRazorpayCredentials() {
-  const keyId = process.env.RAZORPAY_KEY_ID?.trim();
-  const keySecret = process.env.RAZORPAY_KEY_SECRET?.trim();
+  const keyId = resolveRazorpayKeyId();
+  const keySecret = resolveRazorpayKeySecret();
 
   if (!keyId || !keySecret) {
     throw new Error(
-      "Razorpay credentials missing. Set RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET in .env.local and restart dev server."
+      "Razorpay credentials missing. Set RAZORPAY_KEY_ID + RAZORPAY_KEY_SECRET, or RAZORPAY_USE_LIVE=true with RAZORPAY_LIVE_KEY_ID + RAZORPAY_LIVE_KEY_SECRET."
     );
   }
 

@@ -6,6 +6,7 @@ import "./globals.css";
 import { Suspense } from "react";
 import { GaRouteTracker } from "@/components/analytics/ga-route-tracker";
 import { GlobalNavigationLoader } from "@/components/shared/global-navigation-loader";
+import { getSiteUrl } from "@/lib/site-url";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -20,7 +21,7 @@ const cormorant = Cormorant_Garamond({
   display: "swap",
 });
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://vedguide.in";
+const siteUrl = getSiteUrl();
 
 export const metadata: Metadata = {
   title: {

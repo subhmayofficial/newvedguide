@@ -10,27 +10,15 @@ import {
   MAX_WALLET_TOPUP_PAISE,
   MIN_WALLET_TOPUP_PAISE,
 } from "@/lib/wallet/topup-rules";
-
-function testTopupAllowed(): boolean {
-  if (process.env.ALLOW_TEST_WALLET_TOPUP === "true") return true;
-  if (process.env.VERCEL_ENV === "preview") return true;
-  if (process.env.NODE_ENV !== "production") return true;
-  return false;
-}
-
-/** Production / real recharge: Razorpay when test top-up is not the active path. */
-function razorpayWalletRechargeEnabled(): boolean {
-  if (testTopupAllowed()) return false;
-  const pub = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID?.trim();
-  return Boolean(pub && !pub.includes("your_razorpay"));
-}
+import { resolveRazorpayKeyId } from "@/lib/razorpay-config";
+import { razorpayWalletRechargeEnabled } from "@/lib/wallet/topup-mode";
 
 export async function POST(request: Request) {
   if (!razorpayWalletRechargeEnabled()) {
     return NextResponse.json(
       {
         error:
-          "Razorpay wallet recharge is not enabled. Use test top-up in dev, or deploy without ALLOW_TEST_WALLET_TOPUP and set Razorpay keys.",
+          "Razorpay wallet recharge is off. Unset ALLOW_TEST_WALLET_TOPUP and set RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET, NEXT_PUBLIC_RAZORPAY_KEY_ID.",
       },
       { status: 403 }
     );
@@ -175,7 +163,7 @@ export async function POST(request: Request) {
     intentId,
     razorpayOrderId: razorpayOrder.id,
     amountPaise,
-    keyId: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+    keyId: resolveRazorpayKeyId(),
     prefill: {
       name: displayName,
       email: user.email ?? undefined,

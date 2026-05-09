@@ -9,16 +9,10 @@ import {
   MIN_WALLET_TOPUP_PAISE,
 } from "@/lib/wallet/topup-rules";
 import { creditWalletTopup } from "@/lib/wallet/credit-topup";
-
-function testTopupAllowed(): boolean {
-  if (process.env.ALLOW_TEST_WALLET_TOPUP === "true") return true;
-  if (process.env.VERCEL_ENV === "preview") return true;
-  if (process.env.NODE_ENV !== "production") return true;
-  return false;
-}
+import { useTestWalletTopup } from "@/lib/wallet/topup-mode";
 
 export async function POST(request: Request) {
-  if (!testTopupAllowed()) {
+  if (!useTestWalletTopup()) {
     return NextResponse.json(
       { error: "Test wallet top-up is disabled in this environment." },
       { status: 403 }

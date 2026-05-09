@@ -6,19 +6,7 @@ import {
   SCHEMA_NOT_READY_USER_MESSAGE,
 } from "@/lib/supabase/schema-errors";
 import { creditWalletTopup } from "@/lib/wallet/credit-topup";
-
-function testTopupAllowed(): boolean {
-  if (process.env.ALLOW_TEST_WALLET_TOPUP === "true") return true;
-  if (process.env.VERCEL_ENV === "preview") return true;
-  if (process.env.NODE_ENV !== "production") return true;
-  return false;
-}
-
-function razorpayWalletRechargeEnabled(): boolean {
-  if (testTopupAllowed()) return false;
-  const pub = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID?.trim();
-  return Boolean(pub && !pub.includes("your_razorpay"));
-}
+import { razorpayWalletRechargeEnabled } from "@/lib/wallet/topup-mode";
 
 export async function POST(request: Request) {
   if (!razorpayWalletRechargeEnabled()) {
