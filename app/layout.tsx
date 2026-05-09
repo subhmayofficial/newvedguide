@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import { Cormorant_Garamond } from "next/font/google";
 import Script from "next/script";
@@ -22,6 +22,11 @@ const cormorant = Cormorant_Garamond({
 });
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://vedguide.in";
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+};
 
 export const metadata: Metadata = {
   title: {

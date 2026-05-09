@@ -2,6 +2,7 @@
 
 export const dynamic = "force-dynamic";
 
+import Image from "next/image";
 import Link from "next/link";
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
@@ -276,25 +277,15 @@ function LoginForm() {
 
         {/* ── Logo ─────────────────────────────────────────── */}
         <div className="mb-8 text-center">
-          <div className="mx-auto mb-5 size-24 rounded-full flex items-center justify-center"
-            style={{ background: "#FDD835" }}>
-            <svg viewBox="0 0 80 80" className="size-14" aria-hidden="true">
-              <circle cx="40" cy="40" r="32" fill="none" stroke="#111" strokeWidth="1.6"/>
-              <circle cx="40" cy="40" r="18" fill="none" stroke="#111" strokeWidth="1.6"/>
-              <circle cx="40" cy="40" r="9" fill="#111"/>
-              {[0,45,90,135,180,225,270,315].map((deg,i) => {
-                const r = (deg * Math.PI) / 180;
-                return <line key={i}
-                  x1={40+11*Math.cos(r)} y1={40+11*Math.sin(r)}
-                  x2={40+15*Math.cos(r)} y2={40+15*Math.sin(r)}
-                  stroke="#111" strokeWidth="2" strokeLinecap="round"/>;
-              })}
-              <circle cx="40" cy="8"  r="3.5" fill="#111"/>
-              <circle cx="72" cy="40" r="3.5" fill="#111"/>
-              <circle cx="40" cy="72" r="3.5" fill="#111"/>
-              <circle cx="8"  cy="40" r="3.5" fill="#111"/>
-              <circle cx="40" cy="22" r="2.2" fill="#111"/>
-            </svg>
+          <div className="mx-auto mb-5 size-24 rounded-full overflow-hidden flex items-center justify-center">
+            <Image
+              src="/assets/logo.webp"
+              alt="VedGuide"
+              width={96}
+              height={96}
+              className="size-full object-cover"
+              priority
+            />
           </div>
           <h1 className="text-[2rem] font-bold tracking-tight text-gray-900 leading-none">
             VedGuide
@@ -399,7 +390,12 @@ function LoginForm() {
           By signing up, you agree to our{" "}
           <Link href="/terms"
             className="text-gray-500 underline underline-offset-2 hover:text-gray-800 transition-colors">
-            Terms of Use &amp; Privacy Policy
+            Terms of Use
+          </Link>
+          {" "}&amp;{" "}
+          <Link href="/privacy"
+            className="text-gray-500 underline underline-offset-2 hover:text-gray-800 transition-colors">
+            Privacy Policy
           </Link>
         </p>
       </div>

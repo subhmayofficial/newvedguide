@@ -342,6 +342,10 @@
     font-family: var(--font-heading);
     letter-spacing: -0.01em;
   }
+  /* iOS Safari zooms when focused input font-size < 16px — clamp to 16px minimum */
+  input, textarea, select {
+    font-size: max(16px, 1em);
+  }
 }
 
 /* Utility: heading font */
