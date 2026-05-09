@@ -28,14 +28,44 @@ function extFromName(name: string): string {
   return name.slice(i).toLowerCase();
 }
 
+const REGION_ALIASES: Record<string, string> = {
+  singapore: "sg",
+  stockholm: "se",
+  "new york": "ny",
+  newyork: "ny",
+  losangeles: "la",
+  "los angeles": "la",
+  "united kingdom": "uk",
+  london: "uk",
+  germany: "de",
+  falkenstein: "de",
+};
+
 /**
- * Must match the storage zone’s “FTP & HTTP API” hostname (e.g. `sg` → `sg.storage.bunnycdn.com`).
- * Empty region defaults to Falkenstein (`storage.bunnycdn.com`) — wrong endpoint often yields 401 for other regions.
+ * Accepts region code (`sg`), full hostname (`sg.storage.bunnycdn.com`), or
+ * URL (`https://sg.storage.bunnycdn.com`). Falls back to global host.
  */
-function bunnyStorageHost(region: string): string {
-  const r = region.trim().toLowerCase();
-  if (!r) return "storage.bunnycdn.com";
-  return `${r}.storage.bunnycdn.com`;
+function bunnyStorageHost(input: string): string {
+  const raw = input.trim().toLowerCase();
+  if (!raw) return "storage.bunnycdn.com";
+
+  const cleaned = raw.replace(/^https?:\/\//, "").replace(/\/+$/, "");
+  if (cleaned.endsWith(".storage.bunnycdn.com")) {
+    return cleaned;
+  }
+
+  const normalized = cleaned.replace(/[_-]+/g, " ").replace(/\s+/g, " ").trim();
+  const alias = REGION_ALIASES[normalized];
+  if (alias) {
+    return `${alias}.storage.bunnycdn.com`;
+  }
+
+  // Already a short region code.
+  if (/^[a-z0-9]{2,6}$/.test(cleaned)) {
+    return `${cleaned}.storage.bunnycdn.com`;
+  }
+
+  return "storage.bunnycdn.com";
 }
 
 function encodeStoragePath(path: string): string {

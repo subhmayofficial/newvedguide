@@ -48,6 +48,9 @@ export async function POST(
     const result = await processPaidKundliReportUpload(supabase, orderId, file);
 
     if (!result.ok) {
+      console.error(
+        `[kundli-report-upload] order=${orderId} error="${result.error}"`
+      );
       const status =
         result.error === "Order not found"
           ? 404
@@ -60,6 +63,7 @@ export async function POST(
     return NextResponse.json({ ok: true as const, url: result.url });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
+    console.error("[kundli-report-upload] unhandled", message);
     return jsonError(500, message.slice(0, 500));
   }
 }

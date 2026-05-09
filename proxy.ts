@@ -25,8 +25,17 @@ function isProtectedCustomerPath(pathname: string): boolean {
   return false;
 }
 
+/** Multipart upload route: avoid proxy auth round-trip to prevent request body parse failures. */
+function shouldBypassProxy(pathname: string): boolean {
+  return /^\/api\/admin\/orders\/[^/]+\/kundli-report-upload$/.test(pathname);
+}
+
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  if (shouldBypassProxy(pathname)) {
+    return NextResponse.next({ request });
+  }
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim();

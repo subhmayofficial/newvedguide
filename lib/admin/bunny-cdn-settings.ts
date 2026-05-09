@@ -9,8 +9,8 @@ export type BunnyCdnSettings = {
 
 export const DEFAULT_BUNNY_CDN_SETTINGS: BunnyCdnSettings = {
   storage_zone_name: "",
-  /** Empty falls back to Falkenstein API host — set `sg` if FTP hostname is sg.storage.bunnycdn.com */
-  storage_region: "sg",
+  /** Empty falls back to Bunny global storage host. */
+  storage_region: "",
   cdn_public_base_url: "https://vedguide.b-cdn.net",
 };
 

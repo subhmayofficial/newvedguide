@@ -14,6 +14,8 @@ const nextConfig: NextConfig = {
   experimental: {
     /** Tree-shake lucide icon imports (smaller client bundles on chat / astrologers routes). */
     optimizePackageImports: ["lucide-react"],
+    /** Large multipart uploads can stall/fail before Route Handler when proxy is enabled. */
+    proxyClientMaxBodySize: "50mb",
     turbopackPluginRuntimeStrategy: "workerThreads",
     /** Soft cap (~1.5 GiB) — raises pressure before the OS swaps/crashes on smaller machines */
     turbopackMemoryLimit: 1536 * 1024 * 1024,

@@ -11,8 +11,7 @@ import { track } from "@/lib/analytics/events";
 
 // ─── Assets ───────────────────────────────────────────────────────────────────
 
-const ASTRO_IMG =
-  "https://primedit-cdn.b-cdn.net/shubhmay-lp-kundli/FINAL__1__11zon__1_-removebg-preview.png";
+const ASTRO_IMG = "https://primedit-cdn.b-cdn.net/ashutoshji.jpg";
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 

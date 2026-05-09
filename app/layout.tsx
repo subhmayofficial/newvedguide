@@ -4,7 +4,6 @@ import { Cormorant_Garamond } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import { Suspense } from "react";
-import { PostHogProvider } from "@/components/providers/posthog-provider";
 import { GaRouteTracker } from "@/components/analytics/ga-route-tracker";
 import { GlobalNavigationLoader } from "@/components/shared/global-navigation-loader";
 
@@ -86,7 +85,6 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const gtmId = "GTM-WJHMJ92W";
-  const clarityId = process.env.NEXT_PUBLIC_CLARITY_ID;
   const gaId = process.env.NEXT_PUBLIC_GA_ID;
 
   return (
@@ -109,15 +107,13 @@ export default function RootLayout({
           />
         </noscript>
         {/* End Google Tag Manager (noscript) */}
-        <PostHogProvider>
-          <Suspense fallback={null}>
-            <GaRouteTracker />
-          </Suspense>
-          <Suspense fallback={null}>
-            <GlobalNavigationLoader />
-          </Suspense>
-          {children}
-        </PostHogProvider>
+        <Suspense fallback={null}>
+          <GaRouteTracker />
+        </Suspense>
+        <Suspense fallback={null}>
+          <GlobalNavigationLoader />
+        </Suspense>
+        {children}
 
         {/* GTM: load after app is interactive to reduce render blocking */}
         <Script
@@ -131,21 +127,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','${gtmId}');`,
           }}
         />
-
-        {/* Clarity: idle-priority since it's non-critical for rendering */}
-        {clarityId && (
-          <Script
-            id="clarity-base"
-            strategy="lazyOnload"
-            dangerouslySetInnerHTML={{
-              __html: `(function(c,l,a,r,i,t,y){
-                c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-                t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-                y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-              })(window, document, "clarity", "script", "${clarityId}");`,
-            }}
-          />
-        )}
 
         {/* GA: idle-priority */}
         {gaId && (

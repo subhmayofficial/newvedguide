@@ -4,8 +4,7 @@ import { ArrowRight, Star, ChevronRight, Shield, Zap, Lock } from "lucide-react"
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const ASTRO_IMG =
-  "https://primedit-cdn.b-cdn.net/shubhmay-lp-kundli/FINAL__1__11zon__1_-removebg-preview.png";
+const ASTRO_IMG = "https://primedit-cdn.b-cdn.net/ashutoshji.jpg";
 
 const TRUST_PILLS = [
   { icon: "📊", text: "2,400+ Kundli Analysis" },

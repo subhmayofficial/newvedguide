@@ -2,6 +2,7 @@
 
 export const dynamic = "force-dynamic";
 
+import Image from "next/image";
 import Link from "next/link";
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
@@ -276,25 +277,15 @@ function LoginForm() {
 
         {/* ── Logo ─────────────────────────────────────────── */}
         <div className="mb-8 text-center">
-          <div className="mx-auto mb-5 size-24 rounded-full flex items-center justify-center"
-            style={{ background: "#FDD835" }}>
-            <svg viewBox="0 0 80 80" className="size-14" aria-hidden="true">
-              <circle cx="40" cy="40" r="32" fill="none" stroke="#111" strokeWidth="1.6"/>
-              <circle cx="40" cy="40" r="18" fill="none" stroke="#111" strokeWidth="1.6"/>
-              <circle cx="40" cy="40" r="9" fill="#111"/>
-              {[0,45,90,135,180,225,270,315].map((deg,i) => {
-                const r = (deg * Math.PI) / 180;
-                return <line key={i}
-                  x1={40+11*Math.cos(r)} y1={40+11*Math.sin(r)}
-                  x2={40+15*Math.cos(r)} y2={40+15*Math.sin(r)}
-                  stroke="#111" strokeWidth="2" strokeLinecap="round"/>;
-              })}
-              <circle cx="40" cy="8"  r="3.5" fill="#111"/>
-              <circle cx="72" cy="40" r="3.5" fill="#111"/>
-              <circle cx="40" cy="72" r="3.5" fill="#111"/>
-              <circle cx="8"  cy="40" r="3.5" fill="#111"/>
-              <circle cx="40" cy="22" r="2.2" fill="#111"/>
-            </svg>
+          <div className="relative mx-auto mb-5 flex h-44 w-full max-w-[min(100%,20rem)] items-center justify-center sm:h-52 sm:max-w-[24rem]">
+            <Image
+              src="/IMG_5674.webp"
+              alt="VedGuide"
+              fill
+              className="object-contain object-center"
+              sizes="(max-width: 640px) min(100vw, 320px), 384px"
+              priority
+            />
           </div>
           <h1 className="text-[2rem] font-bold tracking-tight text-gray-900 leading-none">
             VedGuide
