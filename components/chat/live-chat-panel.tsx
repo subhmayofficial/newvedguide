@@ -151,6 +151,7 @@ export function LiveChatPanel({
   const [endedByDepletion, setEndedByDepletion] = useState(false);
   const [adminJoinError, setAdminJoinError] = useState<string | null>(null);
   const [startingConsult, setStartingConsult] = useState(false);
+  const [reconnecting, setReconnecting] = useState(false);
   const [body, setBody]                   = useState("");
   const [balancePaise, setBalancePaise]   = useState(initialBalancePaise);
   const [rateInrPerMin, setRateInrPerMin] = useState(() => astrologer.rateInrPerMin);
@@ -450,6 +451,29 @@ export function LiveChatPanel({
       if (res.ok) await refreshAdminBundle();
       else setAdminJoinError(j.error ?? "Failed to start");
     } finally { setStartingConsult(false); }
+  }
+
+  async function reconnectSession() {
+    if (mode !== "user" || reconnecting) return;
+    setReconnecting(true);
+    try {
+      const res = await fetch("/api/user/chat-sessions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ astrologerId: astrologer.id }),
+      });
+      const data = (await res.json()) as { sessionId?: string };
+      if (res.ok && data.sessionId) {
+        router.push(`/astrologers/chats/waiting/${encodeURIComponent(data.sessionId)}`);
+        return;
+      }
+      router.push("/astrologers");
+    } catch {
+      router.push("/astrologers");
+    } finally {
+      setReconnecting(false);
+    }
   }
 
   // ── Derived state ──────────────────────────────────────────────────────────
@@ -778,6 +802,16 @@ export function LiveChatPanel({
         {sessionEnded ? (
           <div className="flex items-center justify-center gap-3 py-2">
             <p className="text-[12px] text-gray-400">Session ended.</p>
+            {mode === "user" ? (
+              <button
+                type="button"
+                onClick={() => void reconnectSession()}
+                disabled={reconnecting}
+                className="rounded-full border border-amber-300 bg-white px-4 py-1.5 text-[12px] font-semibold text-amber-700 transition hover:bg-amber-50 disabled:cursor-not-allowed disabled:opacity-70"
+              >
+                {reconnecting ? "Reconnecting..." : "Reconnect"}
+              </button>
+            ) : null}
             <Link href="/astrologers" className="rounded-full bg-amber-400 px-4 py-1.5 text-[12px] font-semibold text-gray-900 hover:bg-amber-500 transition">
               Find an astrologer
             </Link>

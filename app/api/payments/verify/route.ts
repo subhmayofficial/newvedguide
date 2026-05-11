@@ -52,7 +52,7 @@ export async function POST(request: Request) {
 
     const { data: payment } = await supabase
       .from("payments")
-      .select("id,status,provider_payment_id")
+      .select("id,status,provider_order_id,provider_payment_id")
       .eq("order_id", orderDbId)
       .order("created_at", { ascending: false })
       .limit(1)
@@ -62,6 +62,15 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { success: false, error: "Payment record not found" },
         { status: 404 }
+      );
+    }
+
+    // Guard against cross-order replay: the verified Razorpay order id must
+    // match the payment attempt attached to this DB order.
+    if (!payment.provider_order_id || payment.provider_order_id !== razorpay_order_id) {
+      return NextResponse.json(
+        { success: false, error: "Razorpay order mismatch for this order" },
+        { status: 400 }
       );
     }
 

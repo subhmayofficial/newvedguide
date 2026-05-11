@@ -1,11 +1,5 @@
-import { HomeView } from "@/components/sections/home-view";
-import { HomePageTracker } from "@/components/analytics/home-page-tracker";
+import { redirect } from "next/navigation";
 
 export default function HomePage() {
-  return (
-    <>
-      <HomePageTracker />
-      <HomeView />
-    </>
-  );
+  redirect("/astrologers");
 }

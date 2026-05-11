@@ -23,8 +23,11 @@ type TopupInfo = {
   razorpayKeyId?: string | null;
 };
 
+/** UI cap: quick amounts and input only up to ₹2,000. */
+const MAX_RECHARGE_RUPEES_UI = 2000;
+
 function buildSuggestionRupees(typedRupees: number, minR: number, maxR: number): number[] {
-  const anchors = [100, 200, 500, 1000, 2000, 5000, 10_000, 25_000, 50_000].filter(
+  const anchors = [49, 100, 200, 500, 1000, 2000].filter(
     (x) => x >= minR && x <= maxR
   );
   const t = Number.isFinite(typedRupees) ? typedRupees : minR;
@@ -138,15 +141,16 @@ export function WalletTopupDialog({
   const maxRupeesEffective = info?.maxPaise
     ? info.maxPaise / 100
     : MAX_WALLET_TOPUP_PAISE / 100;
+  const maxRupeesUi = Math.min(maxRupeesEffective, MAX_RECHARGE_RUPEES_UI);
   const typedRupeesNum = Number(customRupees);
   const suggestionRupees = useMemo(
     () =>
       buildSuggestionRupees(
         Number.isFinite(typedRupeesNum) ? typedRupeesNum : minRupeesEffective,
         minRupeesEffective,
-        maxRupeesEffective
+        maxRupeesUi
       ),
-    [typedRupeesNum, minRupeesEffective, maxRupeesEffective]
+    [typedRupeesNum, minRupeesEffective, maxRupeesUi]
   );
 
   if (!open || !portalTarget) return null;
@@ -312,8 +316,8 @@ export function WalletTopupDialog({
       setError(`Enter at least ₹${minRupeesEffective}`);
       return;
     }
-    if (r > maxRupeesEffective) {
-      setError(`Maximum ₹${maxRupeesEffective.toLocaleString("en-IN")} per recharge`);
+    if (r > maxRupeesUi) {
+      setError(`Maximum ₹${maxRupeesUi.toLocaleString("en-IN")} per recharge`);
       return;
     }
     void topup(Math.floor(r * 100));
@@ -448,7 +452,7 @@ export function WalletTopupDialog({
                   id="custom-rupees"
                   type="number"
                   min={minRupeesEffective}
-                  max={maxRupeesEffective}
+                  max={maxRupeesUi}
                   step={1}
                   inputMode="decimal"
                   placeholder={`e.g. ${minRupeesEffective}`}

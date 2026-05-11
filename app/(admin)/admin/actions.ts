@@ -148,6 +148,7 @@ export async function setOrderProcessing(orderId: string) {
   const supabase = createServiceClient();
   await updateOrderStatus(supabase, orderId, {
     status: ORDER_STATUS.PROCESSING,
+    fulfillment_status: FULFILLMENT_STATUS.IN_PROGRESS,
   });
   revalidatePath(`/admindeoghar/orders/${orderId}`);
   revalidatePath("/admindeoghar/orders");
