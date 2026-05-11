@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useAstrologerWaitEstimates } from "@/components/astrologers/use-wait-estimates";
 import {
   ArrowLeft,
   Clock,
@@ -57,6 +58,8 @@ function StarRow({ rating, small }: { rating: number; small?: boolean }) {
 }
 
 export function AstrologerProfileClient({ astrologer: a, isLoggedIn, balancePaise }: Props) {
+  const waitEstimates = useAstrologerWaitEstimates(30_000);
+  const waitLive = waitEstimates === null ? null : (waitEstimates[a.id] ?? 0);
   const router = useRouter();
   const [starting, setStarting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -165,7 +168,7 @@ export function AstrologerProfileClient({ astrologer: a, isLoggedIn, balancePais
             <span className={`size-2 rounded-full ${a.isOnline ? "bg-emerald-400 animate-pulse" : "bg-gray-400"}`} />
             <span className="text-[12px] font-semibold text-white/80">
               {a.isOnline ? "Online now" : "Offline"}
-              {a.waitMinutes ? ` · ~${a.waitMinutes}m wait` : ""}
+              {waitLive !== null && waitLive > 0 ? ` · ~${waitLive}m wait` : ""}
             </span>
           </div>
         </div>

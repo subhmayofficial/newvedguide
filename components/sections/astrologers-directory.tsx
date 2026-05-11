@@ -13,6 +13,7 @@ import {
   type LiveChatAstrologer,
   type LiveChatCategory,
 } from "@/lib/data/live-chat-astrologers";
+import { useAstrologerWaitEstimates } from "@/components/astrologers/use-wait-estimates";
 
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
 function SkeletonCard() {
@@ -69,10 +70,13 @@ function AstrologerCard({
   a,
   isStarting,
   onChat,
+  waitLive,
 }: {
   a: LiveChatAstrologer;
   isStarting: boolean;
   onChat: () => void;
+  /** `null` = still loading; `0` = no queue; `>0` = estimated minutes */
+  waitLive: number | null;
 }) {
   const [imageFailed, setImageFailed] = useState(false);
   const featured = !!a.featured;
@@ -184,7 +188,7 @@ function AstrologerCard({
                 className={`min-w-[72px] rounded-full px-4 py-1.5 text-[13px] font-semibold transition active:scale-95 disabled:opacity-60 ${
                   featured
                     ? "bg-amber-400 text-gray-900 hover:bg-amber-500 shadow-sm shadow-amber-200"
-                    : a.waitMinutes
+                    : waitLive != null && waitLive > 0
                       ? "border border-red-400 text-red-500 hover:bg-red-50"
                       : "border border-green-500 text-green-600 hover:bg-green-50"
                 }`}
@@ -198,8 +202,10 @@ function AstrologerCard({
                   </span>
                 ) : featured ? "Chat Now" : "Chat"}
               </button>
-              {a.waitMinutes ? (
-                <span className="text-[10px] text-red-400">wait ~ {a.waitMinutes}m</span>
+              {waitLive === null ? (
+                <span className="text-[10px] text-gray-400 tabular-nums">wait …</span>
+              ) : waitLive > 0 ? (
+                <span className="text-[10px] text-red-400 tabular-nums">wait ~ {waitLive}m</span>
               ) : a.isOnline ? (
                 <span className={`text-[10px] ${featured ? "font-semibold text-amber-600" : "text-green-500"}`}>
                   {featured ? "🟢 Available" : "Available"}
@@ -437,6 +443,7 @@ function sortAstrologers(list: LiveChatAstrologer[]): LiveChatAstrologer[] {
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 export function AstrologersDirectory() {
+  const waitEstimates = useAstrologerWaitEstimates(30_000);
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [showSearch, setShowSearch] = useState(false);
@@ -676,7 +683,12 @@ export function AstrologersDirectory() {
             </div>
           ) : filtered.map((a, i) => (
             <div key={a.id} style={{ animation: `fadeUp 0.3s ease ${i * 35}ms both` }}>
-              <AstrologerCard a={a} isStarting={startingId === a.id} onChat={() => void startChat(a)} />
+              <AstrologerCard
+                a={a}
+                isStarting={startingId === a.id}
+                onChat={() => void startChat(a)}
+                waitLive={waitEstimates === null ? null : (waitEstimates[a.id] ?? 0)}
+              />
             </div>
           ))}
         </div>

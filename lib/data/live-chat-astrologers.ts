@@ -61,7 +61,6 @@ export const LIVE_CHAT_ASTROLOGERS: LiveChatAstrologer[] = [
     initials: "AA",
     imageSrc: "https://primedit-cdn.b-cdn.net/ashutoshji.jpg",
     badge: "Expert",
-    waitMinutes: 9,
     featured: true,
   },
   {
@@ -132,7 +131,6 @@ export const LIVE_CHAT_ASTROLOGERS: LiveChatAstrologer[] = [
     isOnline: true,
     avatarGradient: "from-amber-900/80 to-stone-950/95",
     initials: "RT",
-    waitMinutes: 5,
   },
   {
     id: "kavita",
