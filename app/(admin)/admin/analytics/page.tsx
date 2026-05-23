@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createServiceClient } from "@/lib/supabase/server";
+import { adminPath } from "@/lib/admin/admin-paths";
 import {
   countLeadsByStatus,
   countOrdersKpis,
@@ -73,7 +74,7 @@ export default async function AnalyticsPage({
           </p>
         </div>
         <Link
-          href="/admindeoghar/analytics/funnels/kfp"
+          href={adminPath("/analytics/funnels/kfp")}
           className="text-sm font-medium text-brand hover:underline"
         >
           KFP funnel detail →

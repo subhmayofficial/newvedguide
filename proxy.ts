@@ -3,20 +3,17 @@ import type { NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { safeAuthRedirect } from "@/lib/auth/safe-redirect";
 import { isAdminUser } from "@/lib/admin/admin-auth";
-
-function isAdminPath(pathname: string): boolean {
-  return (
-    pathname.startsWith("/admin") ||
-    pathname.startsWith("/admindeoghar") ||
-    pathname.startsWith("/astro-ops")
-  );
-}
-
-function isAdminLoginPath(pathname: string): boolean {
-  return (
-    pathname === "/admin/login" || pathname === "/admindeoghar/login"
-  );
-}
+import {
+  adminPath,
+  isAdminPanelLoginPath,
+  isAdminPanelPath,
+  isLegacyAdminPath,
+} from "@/lib/admin/admin-paths";
+import {
+  ASTRO_OPS_BASE,
+  isAnyAstroOpsPath,
+  isLegacyAstroOpsPath,
+} from "@/lib/admin/astro-ops-paths";
 
 function isProtectedCustomerPath(pathname: string): boolean {
   if (pathname === "/user" || pathname.startsWith("/user/")) return true;
@@ -30,6 +27,10 @@ function shouldBypassProxy(pathname: string): boolean {
   return /^\/api\/admin\/orders\/[^/]+\/kundli-report-upload$/.test(pathname);
 }
 
+function isSecuredStaffPath(pathname: string): boolean {
+  return isAdminPanelPath(pathname) || isAnyAstroOpsPath(pathname);
+}
+
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -37,10 +38,20 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next({ request });
   }
 
+  // Block scanners hitting old /admin and /admindeoghar URLs
+  if (isLegacyAdminPath(pathname)) {
+    return NextResponse.redirect(new URL("/", request.url));
+  }
+
+  if (isLegacyAstroOpsPath(pathname)) {
+    const dest = pathname.replace(/^\/astro-ops/, ASTRO_OPS_BASE);
+    return NextResponse.redirect(new URL(dest, request.url));
+  }
+
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim();
 
-  if (isAdminPath(pathname)) {
+  if (isSecuredStaffPath(pathname)) {
     const reqHeaders = new Headers(request.headers);
     reqHeaders.set("x-admin-pathname", pathname);
 
@@ -49,12 +60,12 @@ export async function proxy(request: NextRequest) {
         request: { headers: reqHeaders },
       });
 
-    if (isAdminLoginPath(pathname)) {
+    if (isAdminPanelLoginPath(pathname)) {
       return nextWithAdminHeaders();
     }
 
     if (!supabaseUrl || !supabaseAnonKey) {
-      const loginUrl = new URL("/admindeoghar/login", request.url);
+      const loginUrl = new URL(adminPath("/login"), request.url);
       loginUrl.searchParams.set("error", "config");
       loginUrl.searchParams.set("redirect", pathname);
       return NextResponse.redirect(loginUrl);
@@ -84,7 +95,7 @@ export async function proxy(request: NextRequest) {
     } = await supabase.auth.getUser();
 
     if (!user) {
-      const loginUrl = new URL("/admindeoghar/login", request.url);
+      const loginUrl = new URL(adminPath("/login"), request.url);
       loginUrl.searchParams.set("redirect", pathname);
       return NextResponse.redirect(loginUrl);
     }
@@ -123,10 +134,7 @@ export async function proxy(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (
-    user &&
-    (pathname === "/login" || pathname === "/signup")
-  ) {
+  if (user && (pathname === "/login" || pathname === "/signup")) {
     const dest = safeAuthRedirect(request.nextUrl.searchParams.get("redirect"));
     return NextResponse.redirect(new URL(dest, request.url));
   }

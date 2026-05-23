@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
+import { adminPath } from "@/lib/admin/admin-paths";
 import { useCallback, useTransition } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -25,7 +26,7 @@ export function LeadsFilters() {
         const n = new URLSearchParams(sp.toString());
         if (value === null || value === "") n.delete(key);
         else n.set(key, value);
-        router.push(`/admindeoghar/leads?${n.toString()}`);
+        router.push(`${adminPath("/leads")}?${n.toString()}`);
       });
     },
     [router, sp]

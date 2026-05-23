@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { createServiceClient } from "@/lib/supabase/server";
 import { processDueScheduledPaidKundliDeliveries } from "@/lib/admin/paid-kundli-interakt-delivery";
+import { adminPath, ADMIN_PANEL_BASE } from "@/lib/admin/admin-paths";
 
 /**
  * Run due scheduled paid-kundli WhatsApp deliveries.
@@ -28,7 +29,7 @@ export async function POST(req: Request) {
   });
 
   if (out.sent > 0) {
-    revalidatePath("/admindeoghar/orders");
+    revalidatePath(adminPath("/orders"));
   }
 
   return NextResponse.json({

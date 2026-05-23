@@ -8,6 +8,8 @@ import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { useMemo } from "react";
 import { useAdminTheme } from "@/components/admin/admin-theme-context";
+import { adminPath, ADMIN_PANEL_BASE } from "@/lib/admin/admin-paths";
+import { ASTRO_OPS_BASE } from "@/lib/admin/astro-ops-paths";
 
 // ─── Navigation structure ──────────────────────────────────────────────────
 
@@ -15,39 +17,39 @@ const NAV_SECTIONS = [
   {
     label: "Workspace",
     items: [
-      { label: "Dashboard", href: "/admindeoghar" },
+      { label: "Dashboard", href: ADMIN_PANEL_BASE },
     ],
   },
   {
     label: "Commerce",
     items: [
-      { label: "Leads", href: "/admindeoghar/leads" },
-      { label: "Orders", href: "/admindeoghar/orders" },
-      { label: "Post Upsell", href: "/admindeoghar/post-upsell" },
-      { label: "Analytics", href: "/admindeoghar/analytics" },
+      { label: "Leads", href: adminPath("/leads") },
+      { label: "Orders", href: adminPath("/orders") },
+      { label: "Post Upsell", href: adminPath("/post-upsell") },
+      { label: "Analytics", href: adminPath("/analytics") },
     ],
   },
   {
     label: "Catalog",
     items: [
-      { label: "Products", href: "/admindeoghar/products" },
+      { label: "Products", href: adminPath("/products") },
     ],
   },
   {
     label: "Finance",
     items: [
-      { label: "Payments", href: "/admindeoghar/payments" },
-      { label: "Coupons", href: "/admindeoghar/coupons" },
+      { label: "Payments", href: adminPath("/payments") },
+      { label: "Coupons", href: adminPath("/coupons") },
     ],
   },
   {
     label: "Content",
     items: [
-      { label: "Reviews", href: "/admindeoghar/reviews" },
-      { label: "Pages", href: "/admindeoghar/content/pages" },
-      { label: "FAQs", href: "/admindeoghar/content/faqs" },
-      { label: "Testimonials", href: "/admindeoghar/content/testimonials" },
-      { label: "Banners", href: "/admindeoghar/content/banners" },
+      { label: "Reviews", href: adminPath("/reviews") },
+      { label: "Pages", href: adminPath("/content/pages") },
+      { label: "FAQs", href: adminPath("/content/faqs") },
+      { label: "Testimonials", href: adminPath("/content/testimonials") },
+      { label: "Banners", href: adminPath("/content/banners") },
     ],
   },
   {
@@ -55,26 +57,26 @@ const NAV_SECTIONS = [
     items: [
       {
         label: "Ops console (chat & wallets)",
-        href: "/astro-ops",
+        href: ASTRO_OPS_BASE,
       },
     ],
   },
   {
     label: "Operations",
     items: [
-      { label: "Consultations", href: "/admindeoghar/consultations" },
-      { label: "Support", href: "/admindeoghar/support" },
-      { label: "Automations", href: "/admindeoghar/automations" },
-      { label: "Integrations", href: "/admindeoghar/integrations" },
-      { label: "Tools", href: "/admindeoghar/tools" },
-      { label: "Logs", href: "/admindeoghar/logs" },
+      { label: "Consultations", href: adminPath("/consultations") },
+      { label: "Support", href: adminPath("/support") },
+      { label: "Automations", href: adminPath("/automations") },
+      { label: "Integrations", href: adminPath("/integrations") },
+      { label: "Tools", href: adminPath("/tools") },
+      { label: "Logs", href: adminPath("/logs") },
     ],
   },
   {
     label: "System",
     items: [
-      { label: "Team", href: "/admindeoghar/team" },
-      { label: "Settings", href: "/admindeoghar/settings" },
+      { label: "Team", href: adminPath("/team") },
+      { label: "Settings", href: adminPath("/settings") },
     ],
   },
 ] as const;
@@ -105,7 +107,7 @@ export function AdminSidebar({
 
   async function handleSignOut() {
     await supabase.auth.signOut();
-    router.push("/admindeoghar/login");
+    router.push(adminPath("/login"));
   }
 
   return (
@@ -174,8 +176,8 @@ export function AdminSidebar({
             <ul className="space-y-1">
               {section.items.map((item) => {
                 const isActive =
-                  item.href === "/admindeoghar"
-                    ? pathname === "/admindeoghar"
+                  item.href === ADMIN_PANEL_BASE
+                    ? pathname === ADMIN_PANEL_BASE
                     : pathname === item.href || pathname.startsWith(`${item.href}/`);
 
                 return (

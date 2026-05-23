@@ -5,6 +5,29 @@ import type { NextConfig } from "next";
 /** Resolves reliably even when the config path contains spaces (see `__dirname` quirks). */
 const projectRoot = path.dirname(fileURLToPath(import.meta.url));
 
+const SEGMENT_RE = /^[a-z0-9][a-z0-9-]{2,62}$/i;
+
+function panelSegment(fallback: string): string {
+  const raw =
+    process.env.NEXT_PUBLIC_ADMIN_PANEL_PATH?.trim() ??
+    process.env.ADMIN_PANEL_PATH?.trim() ??
+    "";
+  const seg = raw.replace(/^\/+|\/+$/g, "");
+  return seg && SEGMENT_RE.test(seg) ? seg : fallback;
+}
+
+function astroSegment(): string {
+  const raw =
+    process.env.NEXT_PUBLIC_ASTRO_OPS_PATH?.trim() ??
+    process.env.ASTRO_OPS_PATH?.trim() ??
+    "";
+  const seg = raw.replace(/^\/+|\/+$/g, "");
+  return seg && SEGMENT_RE.test(seg) ? seg : "vg-astral-9m4q1x";
+}
+
+const adminPanelSegment = panelSegment("vg-console-8f3k2p");
+const astroOpsSegment = astroSegment();
+
 const nextConfig: NextConfig = {
   /**
    * Turbopack defaults to spawning many **child processes** for plugin work on Windows,
@@ -49,24 +72,33 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
+      // Legacy guessable admin URLs → home (do not reveal new path)
+      { source: "/admin", destination: "/", permanent: false },
+      { source: "/admin/:path*", destination: "/", permanent: false },
+      { source: "/admindeoghar", destination: "/", permanent: false },
+      { source: "/admindeoghar/:path*", destination: "/", permanent: false },
+      // Legacy astro-ops URL
+      { source: "/astro-ops", destination: `/${astroOpsSegment}`, permanent: false },
+      { source: "/astro-ops/:path*", destination: `/${astroOpsSegment}/:path*`, permanent: false },
+      // Live consult moved under astro-ops
       {
-        source: "/admin",
-        destination: "/admindeoghar",
+        source: `/${adminPanelSegment}/live-consult`,
+        destination: `/${astroOpsSegment}`,
         permanent: false,
       },
       {
-        source: "/admin/:path*",
-        destination: "/admindeoghar/:path*",
+        source: `/${adminPanelSegment}/live-consult/:path*`,
+        destination: `/${astroOpsSegment}/:path*`,
         permanent: false,
       },
       {
         source: "/admindeoghar/live-consult",
-        destination: "/astro-ops",
+        destination: `/${astroOpsSegment}`,
         permanent: false,
       },
       {
         source: "/admindeoghar/live-consult/:path*",
-        destination: "/astro-ops/:path*",
+        destination: `/${astroOpsSegment}/:path*`,
         permanent: false,
       },
     ];
@@ -74,12 +106,20 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return [
       {
-        source: "/admindeoghar",
+        source: `/${adminPanelSegment}`,
         destination: "/admin",
       },
       {
-        source: "/admindeoghar/:path*",
+        source: `/${adminPanelSegment}/:path*`,
         destination: "/admin/:path*",
+      },
+      {
+        source: `/${astroOpsSegment}`,
+        destination: "/astro-ops",
+      },
+      {
+        source: `/${astroOpsSegment}/:path*`,
+        destination: "/astro-ops/:path*",
       },
     ];
   },

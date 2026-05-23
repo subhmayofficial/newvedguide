@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createServiceClient } from "@/lib/supabase/server";
 import { LeadsFilters } from "@/components/admin/leads-filters";
 import { formatAdminDateTime, startOfTodayIstIso } from "@/lib/admin/time";
+import { adminPath, ADMIN_PANEL_BASE } from "@/lib/admin/admin-paths";
 
 export const dynamic = "force-dynamic";
 
@@ -147,7 +148,7 @@ export default async function AdminLeadsPage({
               return (
                 <tr key={r.id} className="hover:bg-muted/20">
                   <td className="px-4 py-3 font-medium">
-                    <Link href={`/admindeoghar/leads/${r.id}`} className="hover:underline">
+                    <Link href={`${adminPath("/leads/")}${r.id}`} className="hover:underline">
                       {c?.full_name ?? "—"}
                     </Link>
                     <p className="text-[11px] text-muted-foreground font-mono">{r.id.slice(0, 8)}…</p>
@@ -166,7 +167,7 @@ export default async function AdminLeadsPage({
                   <td className="px-4 py-3 text-xs">{r.entry_path ?? "—"}</td>
                   <td className="px-4 py-3 text-xs">
                     {r.linked_order_id ? (
-                      <Link href={`/admindeoghar/orders/${r.linked_order_id}`} className="text-brand hover:underline font-mono">
+                      <Link href={`${adminPath("/orders/")}${r.linked_order_id}`} className="text-brand hover:underline font-mono">
                         {String(r.linked_order_id).slice(0, 8)}…
                       </Link>
                     ) : (
@@ -178,7 +179,7 @@ export default async function AdminLeadsPage({
                   </td>
                   <td className="px-4 py-3 text-right">
                     <Link
-                      href={`/admindeoghar/leads/${r.id}`}
+                      href={`${adminPath("/leads/")}${r.id}`}
                       className="text-sm font-medium text-brand hover:underline"
                     >
                       View

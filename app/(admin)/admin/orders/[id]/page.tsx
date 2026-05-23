@@ -5,6 +5,7 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { listEntityNotes } from "@/lib/services/notes";
 import { getEntityTimeline } from "@/lib/services/event";
 import { ENTITY_NOTE_TYPE } from "@/lib/constants/commerce";
+import { adminPath } from "@/lib/admin/admin-paths";
 import {
   submitOrderNoteForm,
   submitOrderFulfillmentForm,
@@ -166,7 +167,7 @@ export default async function OrderDetailPage({
         {order.lead_id && (
           <p className="mt-4 text-sm">
             Linked lead:{" "}
-            <Link href={`/admindeoghar/leads/${order.lead_id}`} className="font-medium text-brand hover:underline">
+            <Link href={`${adminPath("/leads/")}${order.lead_id}`} className="font-medium text-brand hover:underline">
               {order.lead_id}
             </Link>
           </p>

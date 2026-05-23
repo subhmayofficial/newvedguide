@@ -3,6 +3,7 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { formatAdminDateTime } from "@/lib/admin/time";
 import { OrderPostUpsellControls } from "@/components/admin/order-post-upsell-controls";
 import { PostUpsellMessageTemplates } from "@/components/admin/post-upsell-message-templates";
+import { adminPath, ADMIN_PANEL_BASE } from "@/lib/admin/admin-paths";
 
 export const dynamic = "force-dynamic";
 
@@ -60,7 +61,7 @@ export default async function AdminPostUpsellPage() {
           </p>
         </div>
         <Link
-          href="/admindeoghar/orders"
+          href={adminPath("/orders")}
           className="inline-flex h-9 items-center rounded-md border border-border bg-card px-3 text-[12px] font-semibold text-foreground"
         >
           Back to orders
@@ -81,7 +82,7 @@ export default async function AdminPostUpsellPage() {
               {/* Order header */}
               <div className="flex flex-wrap items-center gap-x-4 gap-y-1 border-b border-border/60 px-4 py-2.5">
                 <Link
-                  href={`/admindeoghar/orders/${row.id}`}
+                  href={`${adminPath("/orders/")}${row.id}`}
                   className="font-mono text-[12px] font-semibold text-foreground hover:underline"
                 >
                   {row.order_number}

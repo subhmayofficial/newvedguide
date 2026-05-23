@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createServiceClient } from "@/lib/supabase/server";
+import { adminPath } from "@/lib/admin/admin-paths";
 import {
   countLeadsByStatus,
   countOrdersKpis,
@@ -110,14 +111,14 @@ export default async function AdminDashboardPage({
       </section>
 
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4">
-        <Stat label="Total leads" value={String(totalLeads)} href="/admindeoghar/leads" />
-        <Stat label="Qualified" value={String(qualified)} href="/admindeoghar/leads?status=qualified" />
-        <Stat label="Converted" value={String(converted)} href="/admindeoghar/leads?status=converted" />
-        <Stat label="Lost" value={String(lost)} href="/admindeoghar/leads?status=lost" />
-        <Stat label="Paid orders" value={String(orderKpis.paid)} href="/admindeoghar/orders?payment_status=paid" />
-        <Stat label="Paid share %" value={`${paidShare}%`} href="/admindeoghar/orders" />
-        <Stat label="Revenue (₹)" value={revenueRupees.toFixed(0)} href="/admindeoghar/analytics" />
-        <Stat label="AOV (₹)" value={aovRupees.toFixed(0)} href="/admindeoghar/analytics" />
+        <Stat label="Total leads" value={String(totalLeads)} href={adminPath("/leads")} />
+        <Stat label="Qualified" value={String(qualified)} href={adminPath("/leads?status=qualified")} />
+        <Stat label="Converted" value={String(converted)} href={adminPath("/leads?status=converted")} />
+        <Stat label="Lost" value={String(lost)} href={adminPath("/leads?status=lost")} />
+        <Stat label="Paid orders" value={String(orderKpis.paid)} href={adminPath("/orders?payment_status=paid")} />
+        <Stat label="Paid share %" value={`${paidShare}%`} href={adminPath("/orders")} />
+        <Stat label="Revenue (₹)" value={revenueRupees.toFixed(0)} href={adminPath("/analytics")} />
+        <Stat label="AOV (₹)" value={aovRupees.toFixed(0)} href={adminPath("/analytics")} />
       </section>
 
       <section className="space-y-6">
@@ -145,7 +146,7 @@ export default async function AdminDashboardPage({
         <div className="rounded-2xl border border-border/60 bg-card p-6 shadow-sm">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="font-heading text-lg font-semibold">Recent leads</h2>
-            <Link href="/admindeoghar/leads" className="text-sm font-medium text-brand hover:underline">
+            <Link href={adminPath("/leads")} className="text-sm font-medium text-brand hover:underline">
               View all
             </Link>
           </div>
@@ -159,7 +160,7 @@ export default async function AdminDashboardPage({
               return (
                 <li key={row.id} className="flex items-center justify-between gap-3 py-3 text-sm">
                   <div>
-                    <Link href={`/admindeoghar/leads/${row.id}`} className="font-medium hover:underline">
+                    <Link href={`${adminPath("/leads/")}${row.id}`} className="font-medium hover:underline">
                       {c?.full_name ?? "—"}
                     </Link>
                     <p className="text-xs text-muted-foreground">{c?.phone ?? "—"}</p>
@@ -175,7 +176,7 @@ export default async function AdminDashboardPage({
         <div className="rounded-2xl border border-border/60 bg-card p-6 shadow-sm">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="font-heading text-lg font-semibold">Recent orders</h2>
-            <Link href="/admindeoghar/orders" className="text-sm font-medium text-brand hover:underline">
+            <Link href={adminPath("/orders")} className="text-sm font-medium text-brand hover:underline">
               View all
             </Link>
           </div>
@@ -200,7 +201,7 @@ export default async function AdminDashboardPage({
                   className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 py-3 text-sm"
                 >
                   <div className="min-w-0 flex-1">
-                    <Link href={`/admindeoghar/orders/${row.id}`} className="font-medium hover:underline">
+                    <Link href={`${adminPath("/orders/")}${row.id}`} className="font-medium hover:underline">
                       {row.order_number}
                     </Link>
                     <p className="text-xs text-muted-foreground">{c?.full_name ?? "—"}</p>

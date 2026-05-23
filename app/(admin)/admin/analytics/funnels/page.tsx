@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { adminPath, ADMIN_PANEL_BASE } from "@/lib/admin/admin-paths";
 
 export const dynamic = "force-dynamic";
 
@@ -10,7 +11,7 @@ export default function FunnelsIndexPage() {
         Named funnel analytics from internal events.
       </p>
       <Link
-        href="/admindeoghar/analytics/funnels/kfp"
+        href={adminPath("/analytics/funnels/kfp")}
         className="inline-flex rounded-xl border border-border/60 bg-card px-5 py-4 text-sm font-medium shadow-sm hover:border-brand/40"
       >
         KFP funnel (Free Kundli path) →

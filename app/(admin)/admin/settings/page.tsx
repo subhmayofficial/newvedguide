@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createServiceClient } from "@/lib/supabase/server";
 import { getBunnyCdnSettings } from "@/lib/admin/bunny-cdn-settings";
 import { getOrderDeliverySettings } from "@/lib/admin/order-delivery-settings";
+import { adminPath } from "@/lib/admin/admin-paths";
 import {
   submitBunnyCdnSettingsForm,
   submitOrderDeliverySettingsForm,
@@ -208,7 +209,7 @@ export default async function AdminSettingsPage({
       </section>
 
       <p className="text-center text-xs text-muted-foreground">
-        <Link href="/admindeoghar/integrations" className="font-medium text-brand hover:underline">
+        <Link href={adminPath("/integrations")} className="font-medium text-brand hover:underline">
           Integrations
         </Link>{" "}
         · API keys &amp; test sends

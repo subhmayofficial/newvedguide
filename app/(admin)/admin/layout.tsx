@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import { createServiceClient } from "@/lib/supabase/server";
 import { commerceSchemaReady } from "@/lib/admin/schema-status";
 import { SchemaMigrationRequired } from "@/components/admin/schema-migration-required";
+import { isAdminPanelLoginPath } from "@/lib/admin/admin-paths";
 
 export default async function AdminAppLayout({
   children,
@@ -11,7 +12,7 @@ export default async function AdminAppLayout({
   const h = await headers();
   const path = h.get("x-admin-pathname");
 
-  if (path === "/admindeoghar/login" || path === "/admin/login") {
+  if (path && isAdminPanelLoginPath(path)) {
     return <>{children}</>;
   }
 

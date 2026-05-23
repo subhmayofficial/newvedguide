@@ -1,5 +1,7 @@
 "use server";
 
+import { adminPath } from "@/lib/admin/admin-paths";
+
 import { revalidatePath } from "next/cache";
 import { createServiceClient } from "@/lib/supabase/server";
 
@@ -34,5 +36,5 @@ export async function upsertProduct(formData: FormData) {
   } else {
     await supabase.from("products").insert(row);
   }
-  revalidatePath("/admindeoghar/products");
+  revalidatePath(adminPath("/products"));
 }

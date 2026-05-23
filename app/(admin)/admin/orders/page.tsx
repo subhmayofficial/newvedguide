@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createServiceClient } from "@/lib/supabase/server";
+import { adminPath } from "@/lib/admin/admin-paths";
 import {
   AdminOrderRowAssigneeSelect,
   AdminOrderRowFulfillmentSelect,
@@ -199,7 +200,7 @@ export default async function AdminOrdersPage({
           )}
           {hasFilters && (
             <Link
-              href="/admindeoghar/orders"
+              href={adminPath("/orders")}
               className="inline-flex h-9 items-center rounded-md border border-border bg-card px-3 py-1.5 text-[12px] font-medium text-muted-foreground transition-colors hover:text-foreground"
             >
               Clear filters
@@ -275,27 +276,27 @@ export default async function AdminOrdersPage({
           Quick
         </span>
         <QuickChip
-          href="/admindeoghar/orders?payment_status=failed"
+          href={adminPath("/orders?payment_status=failed")}
           label="Failed payments"
           active={sp.payment_status === "failed" && !sp.status}
         />
         <QuickChip
-          href="/admindeoghar/orders?status=cancelled"
+          href={adminPath("/orders?status=cancelled")}
           label="Cancelled"
           active={sp.status === "cancelled"}
         />
         <QuickChip
-          href="/admindeoghar/orders?product=fast-track-addon"
+          href={adminPath("/orders?product=fast-track-addon")}
           label="⚡ FastTrack only"
           active={sp.product === "fast-track-addon"}
         />
         <QuickChip
-          href="/admindeoghar/orders?payment_status=paid&fulfillment_status=unfulfilled"
+          href={adminPath("/orders?payment_status=paid&fulfillment_status=unfulfilled")}
           label="Paid · pending fulfillment"
           active={sp.payment_status === "paid" && sp.fulfillment_status === "unfulfilled"}
         />
         <QuickChip
-          href="/admindeoghar/orders?payment_status=pending"
+          href={adminPath("/orders?payment_status=pending")}
           label="Awaiting payment"
           active={sp.payment_status === "pending" && !sp.status}
         />
@@ -383,7 +384,7 @@ export default async function AdminOrdersPage({
 
           <div className="flex items-center gap-2">
             <Link
-              href="/admindeoghar/orders"
+              href={adminPath("/orders")}
               className="inline-flex h-9 items-center rounded-md border border-border px-4 text-[13px] font-medium text-muted-foreground transition-colors hover:border-foreground/20 hover:text-foreground"
             >
               Reset
@@ -476,7 +477,7 @@ export default async function AdminOrdersPage({
                   {/* Order # + date */}
                   <td className="px-4 py-3.5 align-top">
                     <Link
-                      href={`/admindeoghar/orders/${r.id}`}
+                      href={`${adminPath("/orders/")}${r.id}`}
                       className="block font-mono text-[12px] font-semibold text-foreground hover:underline underline-offset-2"
                     >
                       {r.order_number}
@@ -598,7 +599,7 @@ export default async function AdminOrdersPage({
                       </span>
                       <div>
                         <Link
-                          href="/admindeoghar/post-upsell"
+                          href={adminPath("/post-upsell")}
                           className="text-[11px] font-medium text-foreground underline underline-offset-2 hover:opacity-70"
                         >
                           Manage
@@ -631,7 +632,7 @@ export default async function AdminOrdersPage({
                         deliverySchedule={buildOrderDeliverySchedule(r)}
                       />
                       <Link
-                        href={`/admindeoghar/orders/${r.id}`}
+                        href={`${adminPath("/orders/")}${r.id}`}
                         className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                         title="Open order"
                       >
@@ -653,7 +654,7 @@ export default async function AdminOrdersPage({
             </p>
             {hasFilters && (
               <Link
-                href="/admindeoghar/orders"
+                href={adminPath("/orders")}
                 className="mt-3 text-[12px] font-medium text-foreground underline underline-offset-2 hover:opacity-70"
               >
                 Clear all filters
@@ -847,7 +848,7 @@ function ordersHrefWithoutDeliveryFlash(sp: Record<string, string | undefined>):
     u.set(key, value);
   }
   const qs = u.toString();
-  return qs ? `/admindeoghar/orders?${qs}` : "/admindeoghar/orders";
+  return qs ? `${adminPath("/orders")}?${qs}` : adminPath("/orders");
 }
 
 function ordersHrefWithoutPaymentFlash(sp: Record<string, string | undefined>): string {
@@ -858,7 +859,7 @@ function ordersHrefWithoutPaymentFlash(sp: Record<string, string | undefined>): 
     u.set(key, value);
   }
   const qs = u.toString();
-  return qs ? `/admindeoghar/orders?${qs}` : "/admindeoghar/orders";
+  return qs ? `${adminPath("/orders")}?${qs}` : adminPath("/orders");
 }
 
 /** Merge or remove query keys for orders list links. Pass `null` to drop a key. */
@@ -877,5 +878,5 @@ function buildOrdersListHref(
     u.set(key, value);
   }
   const qs = u.toString();
-  return qs ? `/admindeoghar/orders?${qs}` : "/admindeoghar/orders";
+  return qs ? `${adminPath("/orders")}?${qs}` : adminPath("/orders");
 }

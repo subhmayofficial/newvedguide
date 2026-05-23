@@ -1,4 +1,5 @@
 import { createServiceClient } from "@/lib/supabase/server";
+import { adminPath } from "@/lib/admin/admin-paths";
 import {
   getDeliveryIntegrationsConfig,
   maskSecret,
@@ -80,7 +81,7 @@ export default async function AdminIntegrationsPage({
         </p>
         <p className="mt-2 text-xs text-muted-foreground">
           Automation rules are now managed in{" "}
-          <Link href="/admindeoghar/automations" className="font-medium text-brand hover:underline">
+          <Link href={adminPath("/automations")} className="font-medium text-brand hover:underline">
             Automations
           </Link>
           .

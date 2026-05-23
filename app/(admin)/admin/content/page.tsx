@@ -1,12 +1,13 @@
 import Link from "next/link";
+import { adminPath, ADMIN_PANEL_BASE } from "@/lib/admin/admin-paths";
 
 export default function AdminContentHubPage() {
   const links = [
-    { href: "/admindeoghar/reviews", label: "Reviews" },
-    { href: "/admindeoghar/content/pages", label: "Pages" },
-    { href: "/admindeoghar/content/faqs", label: "FAQs" },
-    { href: "/admindeoghar/content/testimonials", label: "Testimonials" },
-    { href: "/admindeoghar/content/banners", label: "Banners" },
+    { href: adminPath("/reviews"), label: "Reviews" },
+    { href: adminPath("/content/pages"), label: "Pages" },
+    { href: adminPath("/content/faqs"), label: "FAQs" },
+    { href: adminPath("/content/testimonials"), label: "Testimonials" },
+    { href: adminPath("/content/banners"), label: "Banners" },
   ];
   return (
     <div className="space-y-6">

@@ -1,5 +1,7 @@
 "use server";
 
+import { adminPath } from "@/lib/admin/admin-paths";
+
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import {
@@ -69,8 +71,8 @@ export async function addLeadNote(leadId: string, note: string) {
     entityId: leadId,
     note,
   });
-  revalidatePath(`/admindeoghar/leads/${leadId}`);
-  revalidatePath("/admindeoghar/leads");
+  revalidatePath(`${adminPath("/leads/")}${leadId}`);
+  revalidatePath(adminPath("/leads"));
 }
 
 export async function submitLeadNoteForm(formData: FormData) {
@@ -94,8 +96,8 @@ async function markLeadLost(leadId: string, reason: string) {
     status: LEAD_STATUS.LOST,
     lostReason: reason,
   });
-  revalidatePath(`/admindeoghar/leads/${leadId}`);
-  revalidatePath("/admindeoghar/leads");
+  revalidatePath(`${adminPath("/leads/")}${leadId}`);
+  revalidatePath(adminPath("/leads"));
 }
 
 export async function addOrderNote(orderId: string, note: string) {
@@ -105,8 +107,8 @@ export async function addOrderNote(orderId: string, note: string) {
     entityId: orderId,
     note,
   });
-  revalidatePath(`/admindeoghar/orders/${orderId}`);
-  revalidatePath("/admindeoghar/orders");
+  revalidatePath(`${adminPath("/orders/")}${orderId}`);
+  revalidatePath(adminPath("/orders"));
 }
 
 export async function submitOrderNoteForm(formData: FormData) {
@@ -140,8 +142,8 @@ export async function setOrderFulfillment(
       status: ORDER_STATUS.PROCESSING,
     });
   }
-  revalidatePath(`/admindeoghar/orders/${orderId}`);
-  revalidatePath("/admindeoghar/orders");
+  revalidatePath(`${adminPath("/orders/")}${orderId}`);
+  revalidatePath(adminPath("/orders"));
 }
 
 export async function setOrderProcessing(orderId: string) {
@@ -150,8 +152,8 @@ export async function setOrderProcessing(orderId: string) {
     status: ORDER_STATUS.PROCESSING,
     fulfillment_status: FULFILLMENT_STATUS.IN_PROGRESS,
   });
-  revalidatePath(`/admindeoghar/orders/${orderId}`);
-  revalidatePath("/admindeoghar/orders");
+  revalidatePath(`${adminPath("/orders/")}${orderId}`);
+  revalidatePath(adminPath("/orders"));
 }
 
 export async function submitOrderProcessingForm(formData: FormData) {
@@ -198,7 +200,7 @@ export async function submitCouponCreateForm(formData: FormData) {
     isActive,
   });
 
-  revalidatePath("/admindeoghar/coupons");
+  revalidatePath(adminPath("/coupons"));
 }
 
 const ALLOWED_FULFILLMENT = new Set<string>(Object.values(FULFILLMENT_STATUS));
@@ -221,8 +223,8 @@ export async function updateOrderAssigneeFromList(orderId: string, assignee: str
   if (trimmed !== "" && value === null) return;
   const supabase = createServiceClient();
   await updateOrderFulfillmentAssignee(supabase, orderId, value);
-  revalidatePath("/admindeoghar/orders");
-  revalidatePath(`/admindeoghar/orders/${orderId}`);
+  revalidatePath(adminPath("/orders"));
+  revalidatePath(`${adminPath("/orders/")}${orderId}`);
 }
 
 async function upsertOrderPostUpsell(
@@ -287,18 +289,18 @@ export async function updateOrderPostUpsellPoints(
     kundli_points: trimmed || null,
     status: trimmed ? ORDER_POST_UPSELL_STATUS.STEP_1_DONE : ORDER_POST_UPSELL_STATUS.PENDING,
   });
-  revalidatePath("/admindeoghar/orders");
-  revalidatePath("/admindeoghar/post-upsell");
-  revalidatePath(`/admindeoghar/orders/${orderId}`);
+  revalidatePath(adminPath("/orders"));
+  revalidatePath(adminPath("/post-upsell"));
+  revalidatePath(`${adminPath("/orders/")}${orderId}`);
   return { flowStartedAt };
 }
 
 export async function updateOrderPostUpsellStatus(orderId: string, status: string) {
   if (!orderId || !ALLOWED_POST_UPSELL_STATUS.has(status)) return;
   await upsertOrderPostUpsell(orderId, { status });
-  revalidatePath("/admindeoghar/orders");
-  revalidatePath("/admindeoghar/post-upsell");
-  revalidatePath(`/admindeoghar/orders/${orderId}`);
+  revalidatePath(adminPath("/orders"));
+  revalidatePath(adminPath("/post-upsell"));
+  revalidatePath(`${adminPath("/orders/")}${orderId}`);
 }
 
 export async function markOrderPostUpsellMessageSent(
@@ -348,9 +350,9 @@ export async function markOrderPostUpsellMessageSent(
       message_2_sent_at: nowIso,
     });
   }
-  revalidatePath("/admindeoghar/post-upsell");
-  revalidatePath("/admindeoghar/orders");
-  revalidatePath(`/admindeoghar/orders/${orderId}`);
+  revalidatePath(adminPath("/post-upsell"));
+  revalidatePath(adminPath("/orders"));
+  revalidatePath(`${adminPath("/orders/")}${orderId}`);
 }
 
 export async function savePostUpsellMessageTemplates(message1: string, message2: string) {
@@ -364,7 +366,7 @@ export async function savePostUpsellMessageTemplates(message1: string, message2:
     { onConflict: "id" }
   );
   if (error) throw new Error(error.message);
-  revalidatePath("/admindeoghar/post-upsell");
+  revalidatePath(adminPath("/post-upsell"));
 }
 
 async function getAdminActor(): Promise<string | null> {
@@ -394,14 +396,14 @@ function redirectWithIntegrationResult(
   q.set("provider", provider);
   q.set("test_status", status);
   q.set("test_message", message);
-  redirect(`/admindeoghar/integrations?${q.toString()}`);
+  redirect(`${adminPath("/integrations")}?${q.toString()}`);
 }
 
 function redirectWithAutomationResult(status: string, message: string): never {
   const q = new URLSearchParams();
   q.set("automation_status", status);
   q.set("automation_message", message);
-  redirect(`/admindeoghar/automations?${q.toString()}`);
+  redirect(`${adminPath("/automations")}?${q.toString()}`);
 }
 
 export async function submitInteraktWebhookTestForm(formData: FormData) {
@@ -429,7 +431,7 @@ export async function submitInteraktWebhookTestForm(formData: FormData) {
     },
   });
 
-  revalidatePath("/admindeoghar/integrations");
+  revalidatePath(adminPath("/integrations"));
   redirectWithIntegrationResult("interakt", result.status, result.message);
 }
 
@@ -513,7 +515,7 @@ export async function submitInteraktAdvancedTemplateForm(formData: FormData) {
     },
   });
 
-  revalidatePath("/admindeoghar/integrations");
+  revalidatePath(adminPath("/integrations"));
   redirectWithIntegrationResult("interakt", result.status, result.message);
 }
 
@@ -538,7 +540,7 @@ export async function submitInteraktCreateCampaignForm(formData: FormData) {
     createdBy: await getAdminActor(),
   });
 
-  revalidatePath("/admindeoghar/integrations");
+  revalidatePath(adminPath("/integrations"));
   redirectWithIntegrationResult(
     "interakt",
     result.ok ? "success" : "failed",
@@ -626,7 +628,7 @@ export async function submitInteraktTemplateCatalogForm(formData: FormData) {
     isActive: true,
   });
 
-  revalidatePath("/admindeoghar/integrations");
+  revalidatePath(adminPath("/integrations"));
   redirectWithIntegrationResult("interakt", "success", `${name} saved`);
 }
 
@@ -660,11 +662,11 @@ export async function submitInteraktTemplateUpdateForm(formData: FormData) {
     });
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
-    revalidatePath("/admindeoghar/integrations");
+    revalidatePath(adminPath("/integrations"));
     return redirectWithIntegrationResult("interakt", "failed", msg);
   }
 
-  revalidatePath("/admindeoghar/integrations");
+  revalidatePath(adminPath("/integrations"));
   redirectWithIntegrationResult("interakt", "success", `${name} updated`);
 }
 
@@ -679,11 +681,11 @@ export async function submitInteraktTemplateDeleteForm(formData: FormData) {
     await deleteSavedInteraktTemplateById(supabase, id);
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
-    revalidatePath("/admindeoghar/integrations");
+    revalidatePath(adminPath("/integrations"));
     return redirectWithIntegrationResult("interakt", "failed", msg);
   }
 
-  revalidatePath("/admindeoghar/integrations");
+  revalidatePath(adminPath("/integrations"));
   redirectWithIntegrationResult("interakt", "success", "Template deleted");
 }
 
@@ -723,7 +725,7 @@ export async function submitInteraktSavedTemplateSendForm(formData: FormData) {
     },
   });
 
-  revalidatePath("/admindeoghar/integrations");
+  revalidatePath(adminPath("/integrations"));
   redirectWithIntegrationResult("interakt", result.status, result.message);
 }
 
@@ -826,7 +828,7 @@ export async function submitSmtpEmailTestForm(formData: FormData) {
     },
   });
 
-  revalidatePath("/admindeoghar/integrations");
+  revalidatePath(adminPath("/integrations"));
   redirectWithIntegrationResult("resend", result.status, result.message);
 }
 
@@ -852,7 +854,7 @@ export async function submitSmtpTemplateCreateForm(formData: FormData) {
     isActive: true,
   });
 
-  revalidatePath("/admindeoghar/integrations");
+  revalidatePath(adminPath("/integrations"));
   redirectWithIntegrationResult("resend", "success", "Email template saved");
 }
 
@@ -881,7 +883,7 @@ export async function submitSmtpTemplateUpdateForm(formData: FormData) {
     notes,
   });
 
-  revalidatePath("/admindeoghar/integrations");
+  revalidatePath(adminPath("/integrations"));
   redirectWithIntegrationResult("resend", "success", "Email template updated");
 }
 
@@ -910,7 +912,7 @@ export async function submitEmailAutomationUpdateForm(formData: FormData) {
     redirectWithAutomationResult("failed", msg.slice(0, 220));
   }
 
-  revalidatePath("/admindeoghar/automations");
+  revalidatePath(adminPath("/automations"));
   redirectWithAutomationResult("success", "Automation updated");
 }
 
@@ -988,7 +990,7 @@ export async function submitEmailAutomationTestForm(formData: FormData) {
     },
   });
 
-  revalidatePath("/admindeoghar/automations");
+  revalidatePath(adminPath("/automations"));
   redirectWithAutomationResult(result.ok ? "success" : "failed", result.message);
 }
 
@@ -996,7 +998,7 @@ function redirectWithOrderDeliveryResult(status: "success" | "failed", message: 
   const q = new URLSearchParams();
   q.set("delivery_status", status);
   q.set("delivery_msg", message);
-  redirect(`/admindeoghar/orders?${q.toString()}`);
+  redirect(`${adminPath("/orders")}?${q.toString()}`);
 }
 
 function redirectWithOrderPaymentResult(
@@ -1009,9 +1011,9 @@ function redirectWithOrderPaymentResult(
   q.set("payment_reconcile_status", status);
   q.set("payment_reconcile_msg", message);
   if (returnTo === "order_detail" && orderId) {
-    redirect(`/admindeoghar/orders/${orderId}?${q.toString()}`);
+    redirect(`${adminPath(`/orders/${orderId}`)}?${q.toString()}`);
   }
-  redirect(`/admindeoghar/orders?${q.toString()}`);
+  redirect(`${adminPath("/orders")}?${q.toString()}`);
 }
 
 export async function submitOrderPaymentReconcileForm(formData: FormData) {
@@ -1102,8 +1104,8 @@ export async function submitOrderPaymentReconcileForm(formData: FormData) {
       },
     });
 
-    revalidatePath("/admindeoghar/orders");
-    revalidatePath(`/admindeoghar/orders/${orderId}`);
+    revalidatePath(adminPath("/orders"));
+    revalidatePath(`${adminPath("/orders/")}${orderId}`);
     redirectWithOrderPaymentResult(
       "success",
       `Payment reconciled for ${order.order_number}.`,
@@ -1190,8 +1192,8 @@ export async function submitOrderInteraktDeliveryForm(formData: FormData) {
       redirectWithOrderDeliveryResult("failed", upErr.message.slice(0, 220));
     }
 
-    revalidatePath("/admindeoghar/orders");
-    revalidatePath(`/admindeoghar/orders/${orderId}`);
+    revalidatePath(adminPath("/orders"));
+    revalidatePath(`${adminPath("/orders/")}${orderId}`);
     redirectWithOrderDeliveryResult(
       "success",
       `WhatsApp delivery scheduled for ${formatAdminDateTime(at.toISOString())}`
@@ -1214,10 +1216,10 @@ export async function submitOrderInteraktDeliveryForm(formData: FormData) {
       createdBy: await getAdminActor(),
       triggerSource: "automation_kundli_delivery_completed_admin",
     });
-    revalidatePath(`/admindeoghar/orders/${orderId}`);
-    revalidatePath("/admindeoghar/orders");
+    revalidatePath(`${adminPath("/orders/")}${orderId}`);
+    revalidatePath(adminPath("/orders"));
   } else {
-    revalidatePath("/admindeoghar/orders");
+    revalidatePath(adminPath("/orders"));
   }
 
   redirectWithOrderDeliveryResult(
@@ -1247,8 +1249,8 @@ export async function clearOrderDeliveryScheduleForm(formData: FormData) {
     redirectWithOrderDeliveryResult("failed", error.message.slice(0, 220));
   }
 
-  revalidatePath("/admindeoghar/orders");
-  revalidatePath(`/admindeoghar/orders/${orderId}`);
+  revalidatePath(adminPath("/orders"));
+  revalidatePath(`${adminPath("/orders/")}${orderId}`);
   redirectWithOrderDeliveryResult("success", "Scheduled delivery cleared");
 }
 
@@ -1260,7 +1262,7 @@ export async function submitOrderDeliverySettingsForm(formData: FormData) {
   const interakt_button_index = toNullable(formData.get("interakt_button_index")) ?? "0";
 
   if (!interakt_template_name) {
-    redirect("/admindeoghar/settings?settings_err=template_name_required");
+    redirect(adminPath("/settings?settings_err=template_name_required"));
   }
 
   try {
@@ -1271,12 +1273,12 @@ export async function submitOrderDeliverySettingsForm(formData: FormData) {
     });
   } catch (e) {
     const msg = e instanceof Error ? encodeURIComponent(e.message.slice(0, 400)) : "save_failed";
-    redirect(`/admindeoghar/settings?settings_err=${msg}`);
+    redirect(`${adminPath("/settings")}?settings_err=${msg}`);
   }
 
-  revalidatePath("/admindeoghar/settings");
-  revalidatePath("/admindeoghar/orders");
-  redirect("/admindeoghar/settings?settings_saved=1");
+  revalidatePath(adminPath("/settings"));
+  revalidatePath(adminPath("/orders"));
+  redirect(adminPath("/settings?settings_saved=1"));
 }
 
 export async function submitWalletCashbackSettingsForm(formData: FormData) {
@@ -1310,7 +1312,7 @@ export async function submitBunnyCdnSettingsForm(formData: FormData) {
     .replace(/\/+$/, "");
 
   if (cdnRaw && !isValidHttpUrl(cdnRaw)) {
-    redirect("/admindeoghar/settings?bunny_err=invalid_cdn_url");
+    redirect(adminPath("/settings?bunny_err=invalid_cdn_url"));
   }
 
   try {
@@ -1322,11 +1324,11 @@ export async function submitBunnyCdnSettingsForm(formData: FormData) {
   } catch (e) {
     const msg =
       e instanceof Error ? encodeURIComponent(e.message.slice(0, 400)) : "save_failed";
-    redirect(`/admindeoghar/settings?bunny_err=${msg}`);
+    redirect(`${adminPath("/settings")}?bunny_err=${msg}`);
   }
 
-  revalidatePath("/admindeoghar/settings");
-  redirect("/admindeoghar/settings?bunny_saved=1");
+  revalidatePath(adminPath("/settings"));
+  redirect(adminPath("/settings?bunny_saved=1"));
 }
 
 export type UploadPaidKundliReportResult = PaidKundliReportUploadResult;

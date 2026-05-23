@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
+import { ADMIN_PANEL_BASE } from "@/lib/admin/admin-paths";
+import { ASTRO_OPS_BASE } from "@/lib/admin/astro-ops-paths";
 
 const SHOW_DELAY_MS = 150;
 
@@ -26,7 +28,7 @@ export function GlobalNavigationLoader() {
   const [visible, setVisible] = useState(false);
   const showTimerRef = useRef<number | null>(null);
   const isAdminArea =
-    pathname?.startsWith("/admindeoghar") || pathname?.startsWith("/astro-ops");
+    pathname?.startsWith(ADMIN_PANEL_BASE) || pathname?.startsWith(ASTRO_OPS_BASE);
 
   const clearTimer = useCallback(() => {
     if (showTimerRef.current != null) {

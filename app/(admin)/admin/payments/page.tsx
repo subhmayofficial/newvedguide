@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createServiceClient } from "@/lib/supabase/server";
 import { formatAdminDateTime } from "@/lib/admin/time";
+import { adminPath, ADMIN_PANEL_BASE } from "@/lib/admin/admin-paths";
 
 export const dynamic = "force-dynamic";
 
@@ -67,7 +68,7 @@ export default async function AdminPaymentsPage() {
                   <td className="px-4 py-3 font-mono text-xs">{p.id.slice(0, 8)}…</td>
                   <td className="px-4 py-3">
                     {o?.order_number && o?.id ? (
-                      <Link href={`/admindeoghar/orders/${o.id}`} className="hover:underline">
+                      <Link href={`${adminPath("/orders/")}${o.id}`} className="hover:underline">
                         {o.order_number}
                       </Link>
                     ) : (

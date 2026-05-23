@@ -3,6 +3,7 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { submitWalletCashbackSettingsForm } from "@/app/(admin)/admin/actions";
 import { getWalletCashbackSettings } from "@/lib/admin/wallet-cashback-settings";
 import { ASTRO_OPS_BASE } from "@/lib/admin/astro-ops-paths";
+import { adminPath, ADMIN_PANEL_BASE } from "@/lib/admin/admin-paths";
 
 export const dynamic = "force-dynamic";
 
@@ -24,7 +25,7 @@ export default async function AstroOpsSettingsPage({
         <h1 className="mt-1 text-[22px] font-semibold tracking-tight text-foreground">Wallet promo</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Cashback on in-app wallet top-ups (test / preview flows). Commerce and delivery settings stay in{" "}
-          <Link href="/admindeoghar/settings" className="font-medium text-brand hover:underline">
+          <Link href={adminPath("/settings")} className="font-medium text-brand hover:underline">
             main admin → Settings
           </Link>
           .

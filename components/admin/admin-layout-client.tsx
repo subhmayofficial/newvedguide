@@ -5,13 +5,14 @@ import { usePathname } from "next/navigation";
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
 import { AdminThemeProvider } from "@/components/admin/admin-theme-context";
 import { AdminToastProvider } from "@/components/admin/admin-toast-provider";
+import { isAdminPanelLoginPath } from "@/lib/admin/admin-paths";
 import { Menu } from "lucide-react";
 
 export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  if (pathname === "/admindeoghar/login" || pathname === "/admin/login") {
+  if (pathname && isAdminPanelLoginPath(pathname)) {
     return <>{children}</>;
   }
 

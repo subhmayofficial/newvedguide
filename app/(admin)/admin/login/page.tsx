@@ -9,23 +9,15 @@ import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  ADMIN_PANEL_BASE,
+  safeAdminRedirect as safeAdminRedirectPath,
+} from "@/lib/admin/admin-paths";
 
-const DEFAULT_ADMIN_PATH = "/admindeoghar";
+const DEFAULT_ADMIN_PATH = ADMIN_PANEL_BASE;
 
-/** Only same-site admin paths — blocks open redirects via ?redirect= */
 function safeAdminRedirect(raw: string | null): string {
-  if (!raw) return DEFAULT_ADMIN_PATH;
-  let path = raw.trim();
-  try {
-    path = decodeURIComponent(path);
-  } catch {
-    return DEFAULT_ADMIN_PATH;
-  }
-  if (!path.startsWith("/") || path.startsWith("//")) return DEFAULT_ADMIN_PATH;
-  if (!path.startsWith("/admin") && !path.startsWith("/admindeoghar")) {
-    return DEFAULT_ADMIN_PATH;
-  }
-  return path;
+  return safeAdminRedirectPath(raw);
 }
 
 function signInErrorMessage(authError: AuthError): string {

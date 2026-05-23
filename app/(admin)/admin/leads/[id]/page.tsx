@@ -8,6 +8,7 @@ import { submitLeadLostForm, submitLeadNoteForm } from "@/app/(admin)/admin/acti
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { formatAdminDateTime } from "@/lib/admin/time";
+import { adminPath, ADMIN_PANEL_BASE } from "@/lib/admin/admin-paths";
 
 export const dynamic = "force-dynamic";
 
@@ -55,7 +56,7 @@ export default async function LeadDetailPage({
         </div>
         <div className="flex gap-2">
           {lead.linked_order_id && (
-            <Button variant="outline" render={<Link href={`/admindeoghar/orders/${lead.linked_order_id}`} />}>
+            <Button variant="outline" render={<Link href={`${adminPath("/orders/")}${lead.linked_order_id}`} />}>
               Open order
             </Button>
           )}
