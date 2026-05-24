@@ -27,7 +27,7 @@ const KADA_IMAGE_CDN_BASE =
 const WHATSAPP_NUMBER = "919999999999";
 
 function kadaImageUrl(folder: number, img: number) {
-  return `${KADA_IMAGE_CDN_BASE}/${folder}/${img}.png`;
+  return `${KADA_IMAGE_CDN_BASE}/${folder}/${img}.webp`;
 }
 
 function WhatsAppIcon({ size = 18 }: { size?: number }) {
