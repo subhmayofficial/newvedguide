@@ -294,7 +294,6 @@ export function KadaProductPage() {
       variant,
       design: designId,
       size: size.split(" ")[0],
-      siddha: String(siddha),
     });
     router.push(`/checkout/kada?${params.toString()}`);
   };
@@ -600,52 +599,47 @@ export function KadaProductPage() {
                 onClick={() => setVariant("plated")}
                 onKeyDown={(e) => e.key === "Enter" && setVariant("plated")}
                 className={cn(
-                  "flex flex-col rounded-3xl border-2 overflow-hidden transition-all duration-200 cursor-pointer",
+                  "flex flex-col rounded-3xl border-2 overflow-hidden bg-white transition-all duration-200 cursor-pointer",
                   variant === "plated"
                     ? "border-amber-500 shadow-xl shadow-amber-100"
-                    : "border-stone-200 bg-white hover:border-amber-300 hover:shadow-md"
+                    : "border-stone-200 hover:border-amber-300 hover:shadow-md"
                 )}
               >
-                {/* Card header */}
+                {/* Header */}
                 <div className={cn(
                   "flex items-center justify-between px-5 py-4 transition-colors",
-                  variant === "plated" ? "bg-amber-500" : "bg-stone-50"
+                  variant === "plated" ? "bg-amber-600" : "bg-stone-100"
                 )}>
                   <div>
                     <p className={cn(
-                      "font-heading text-lg font-bold leading-tight",
-                      variant === "plated" ? "text-white" : "text-foreground"
+                      "font-heading text-xl font-bold leading-tight",
+                      variant === "plated" ? "text-white" : "text-stone-800"
                     )}>
                       Silver Plated Kada
                     </p>
                     <p className={cn(
-                      "text-[11px] font-medium",
-                      variant === "plated" ? "text-amber-100" : "text-muted-foreground"
+                      "text-xs font-medium mt-0.5",
+                      variant === "plated" ? "text-amber-100" : "text-stone-500"
                     )}>
                       Daily Wear Spiritual Kada
                     </p>
                   </div>
                   <div className={cn(
                     "flex size-6 items-center justify-center rounded-full border-2 shrink-0 transition-all",
-                    variant === "plated" ? "border-white bg-white" : "border-stone-300 bg-white"
+                    variant === "plated" ? "border-white bg-white" : "border-stone-400 bg-white"
                   )}>
-                    {variant === "plated" && <Check size={13} className="text-amber-500 stroke-[3]" />}
+                    {variant === "plated" && <Check size={13} className="text-amber-600 stroke-[3]" />}
                   </div>
                 </div>
 
                 {/* Body */}
-                <div className={cn(
-                  "flex flex-col flex-1 px-5 py-4 transition-colors",
-                  variant === "plated" ? "bg-amber-50/60" : "bg-white"
-                )}>
-                  <p className="mb-1 text-[10px] font-bold uppercase tracking-widest text-amber-600">
-                    Best for
-                  </p>
-                  <p className="mb-4 text-xs font-medium text-foreground">
+                <div className="flex flex-col flex-1 px-5 py-5">
+                  <p className="mb-1 text-[11px] font-bold uppercase tracking-widest text-amber-600">Best for</p>
+                  <p className="mb-4 text-sm font-semibold text-stone-700">
                     Beginners, gifting, and daily spiritual wear.
                   </p>
 
-                  <ul className="mb-4 space-y-2">
+                  <ul className="mb-4 space-y-2.5">
                     {[
                       "Silver-look finish",
                       "Budget-friendly option",
@@ -653,31 +647,31 @@ export function KadaProductPage() {
                       "Lightweight and easy to wear",
                       "Ideal for first-time buyers",
                     ].map((f) => (
-                      <li key={f} className="flex items-start gap-2 text-xs text-foreground">
-                        <Check size={12} className="mt-0.5 shrink-0 text-amber-500 stroke-[2.5]" />
+                      <li key={f} className="flex items-start gap-2.5 text-sm text-stone-700">
+                        <Check size={14} className="mt-0.5 shrink-0 text-amber-500 stroke-[2.5]" />
                         {f}
                       </li>
                     ))}
                   </ul>
 
-                  <p className="mb-5 text-[11px] leading-relaxed text-muted-foreground">
+                  <p className="mb-5 text-xs leading-relaxed text-stone-500">
                     Made for people who want the sacred Vedic design in an affordable daily-wear form. A good choice for beginners, gifting, or trying the kada before upgrading to pure silver.
                   </p>
 
                   <div className="mt-auto">
                     <div className="mb-3 flex items-baseline gap-2">
                       <span className="text-2xl font-black text-amber-700">₹699</span>
-                      <span className="text-sm text-muted-foreground line-through">₹1,499</span>
+                      <span className="text-sm text-stone-400 line-through">₹1,499</span>
                       <span className="rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-bold text-green-700">53% OFF</span>
                     </div>
                     <button
                       type="button"
                       onClick={(e) => { e.stopPropagation(); setVariant("plated"); }}
                       className={cn(
-                        "w-full rounded-2xl py-3 text-sm font-bold transition-all",
+                        "w-full rounded-2xl py-3.5 text-sm font-bold transition-all",
                         variant === "plated"
-                          ? "bg-amber-700 text-white hover:bg-amber-800"
-                          : "border-2 border-amber-400 bg-white text-amber-700 hover:bg-amber-50"
+                          ? "bg-amber-600 text-white hover:bg-amber-700"
+                          : "border-2 border-amber-500 bg-white text-amber-700 hover:bg-amber-50"
                       )}
                     >
                       Choose Silver Plated
@@ -693,51 +687,52 @@ export function KadaProductPage() {
                 onClick={() => setVariant("silver")}
                 onKeyDown={(e) => e.key === "Enter" && setVariant("silver")}
                 className={cn(
-                  "flex flex-col rounded-3xl border-2 overflow-hidden transition-all duration-200 cursor-pointer",
+                  "flex flex-col rounded-3xl border-2 overflow-hidden bg-white transition-all duration-200 cursor-pointer",
                   variant === "silver"
                     ? "border-amber-500 shadow-xl shadow-amber-100"
-                    : "border-stone-200 bg-white hover:border-amber-300 hover:shadow-md"
+                    : "border-stone-200 hover:border-amber-300 hover:shadow-md"
                 )}
               >
                 {/* Recommended badge */}
-                <div className="bg-amber-700 px-5 py-2 flex items-center justify-between">
-                  <span className="text-[11px] font-black uppercase tracking-widest text-amber-200">
+                <div className="flex items-center justify-between bg-amber-700 px-5 py-2.5">
+                  <span className="text-xs font-black uppercase tracking-widest text-white">
                     ⭐ Most Recommended
                   </span>
                   <div className={cn(
                     "flex size-6 items-center justify-center rounded-full border-2 shrink-0 transition-all",
-                    variant === "silver" ? "border-white bg-white" : "border-amber-400 bg-amber-800/30"
+                    variant === "silver" ? "border-white bg-white" : "border-amber-400 bg-amber-800/40"
                   )}>
                     {variant === "silver" && <Check size={13} className="text-amber-700 stroke-[3]" />}
                   </div>
                 </div>
 
-                {/* Card header */}
+                {/* Header */}
                 <div className={cn(
                   "px-5 py-4 transition-colors",
-                  variant === "silver" ? "bg-amber-50" : "bg-white"
+                  variant === "silver" ? "bg-amber-600" : "bg-stone-100"
                 )}>
-                  <p className="font-heading text-lg font-bold leading-tight text-foreground">
+                  <p className={cn(
+                    "font-heading text-xl font-bold leading-tight",
+                    variant === "silver" ? "text-white" : "text-stone-800"
+                  )}>
                     Pure Silver Kada
                   </p>
-                  <p className="text-[11px] font-medium text-amber-600">
+                  <p className={cn(
+                    "text-xs font-medium mt-0.5",
+                    variant === "silver" ? "text-amber-100" : "text-stone-500"
+                  )}>
                     Original Silver Premium Kada
                   </p>
                 </div>
 
                 {/* Body */}
-                <div className={cn(
-                  "flex flex-col flex-1 px-5 pb-5 transition-colors",
-                  variant === "silver" ? "bg-amber-50/60" : "bg-white"
-                )}>
-                  <p className="mb-1 text-[10px] font-bold uppercase tracking-widest text-amber-600">
-                    Best for
-                  </p>
-                  <p className="mb-4 text-xs font-medium text-foreground">
+                <div className="flex flex-col flex-1 px-5 py-5">
+                  <p className="mb-1 text-[11px] font-bold uppercase tracking-widest text-amber-600">Best for</p>
+                  <p className="mb-4 text-sm font-semibold text-stone-700">
                     Serious spiritual use, long-term wearing, and premium gifting.
                   </p>
 
-                  <ul className="mb-4 space-y-2">
+                  <ul className="mb-4 space-y-2.5">
                     {[
                       "Made with original silver",
                       "Premium shine and feel",
@@ -745,27 +740,27 @@ export function KadaProductPage() {
                       "Higher perceived spiritual value",
                       "Ideal for personal use and premium gifting",
                     ].map((f) => (
-                      <li key={f} className="flex items-start gap-2 text-xs text-foreground">
-                        <Check size={12} className="mt-0.5 shrink-0 text-amber-500 stroke-[2.5]" />
+                      <li key={f} className="flex items-start gap-2.5 text-sm text-stone-700">
+                        <Check size={14} className="mt-0.5 shrink-0 text-amber-500 stroke-[2.5]" />
                         {f}
                       </li>
                     ))}
                   </ul>
 
-                  <p className="mb-5 text-[11px] leading-relaxed text-muted-foreground">
+                  <p className="mb-5 text-xs leading-relaxed text-stone-500">
                     Crafted in original silver for those who want a premium, long-lasting Vedic kada with real metal value. This is the better choice if you plan to wear it regularly or buy it for a serious spiritual purpose.
                   </p>
 
                   <div className="mt-auto">
                     <div className="mb-3 flex items-baseline gap-2">
                       <span className="text-2xl font-black text-amber-700">₹4,499</span>
-                      <span className="text-sm text-muted-foreground line-through">₹7,999</span>
+                      <span className="text-sm text-stone-400 line-through">₹7,999</span>
                       <span className="rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-bold text-green-700">43% OFF</span>
                     </div>
                     <button
                       type="button"
                       onClick={(e) => { e.stopPropagation(); setVariant("silver"); }}
-                      className="w-full rounded-2xl bg-amber-700 py-3 text-sm font-bold text-white transition-all hover:bg-amber-800"
+                      className="w-full rounded-2xl bg-amber-700 py-3.5 text-sm font-bold text-white transition-all hover:bg-amber-800"
                     >
                       Choose Pure Silver
                     </button>
@@ -847,63 +842,15 @@ export function KadaProductPage() {
               )}
             </div>
 
-            {/* Siddha upsell */}
-            <div
-              role="checkbox"
-              aria-checked={siddha}
-              onClick={() => setSiddha((v) => !v)}
-              className={cn(
-                "mb-6 flex cursor-pointer items-start gap-3 rounded-2xl border px-5 py-4 transition-all",
-                siddha
-                  ? "border-amber-400 bg-amber-50 shadow-md"
-                  : "border-dashed border-amber-200 bg-amber-50/40 hover:border-amber-300 hover:bg-amber-50"
-              )}
+            {/* CTA */}
+            <button
+              type="button"
+              onClick={goToCheckout}
+              className="kada-glow-btn w-full rounded-3xl bg-amber-700 py-5 text-lg font-black text-white shadow-xl transition-all hover:bg-amber-800 active:scale-[0.98]"
             >
-              <div className={cn(
-                "mt-0.5 flex size-5 flex-shrink-0 items-center justify-center rounded border-2 transition-all",
-                siddha ? "border-amber-500 bg-amber-500" : "border-amber-300 bg-white"
-              )}>
-                {siddha && <Check size={11} className="text-white stroke-[3]" />}
-              </div>
-              <div className="flex-1">
-                <div className="flex flex-wrap items-start justify-between gap-1">
-                  <p className="text-sm font-semibold text-foreground">
-                    Add Vedic Energisation — Siddh Kiya Hua
-                  </p>
-                  <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-black text-amber-700">
-                    +₹299
-                  </span>
-                </div>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Your kada is activated through Vedic mantras, Gangajal, and an auspicious muhurat — consecrated in your name. Includes a Puja certificate.
-                </p>
-                {siddha && (
-                  <p className="mt-2 text-xs font-semibold text-amber-700">
-                    ✓ Siddh Energisation added to your order
-                  </p>
-                )}
-              </div>
-            </div>
-
-            {/* CTAs */}
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                onClick={goToCheckout}
-                className="kada-glow-btn flex flex-col items-center justify-center rounded-3xl bg-amber-700 py-4 text-base font-black text-white shadow-xl transition-all hover:bg-amber-800 active:scale-[0.98]"
-              >
-                Buy Now 🛒
-                <span className="mt-0.5 text-xs font-normal opacity-85">COD Available</span>
-              </button>
-              <button
-                type="button"
-                onClick={goToCheckout}
-                className="flex flex-col items-center justify-center rounded-3xl border-2 border-amber-500 bg-amber-50 py-4 text-base font-bold text-amber-700 transition-all hover:bg-amber-100 active:scale-[0.98]"
-              >
-                Checkout →
-                <span className="mt-0.5 text-xs font-normal text-amber-500">Secure Payment</span>
-              </button>
-            </div>
+              Proceed to Checkout →
+              <p className="mt-1 text-sm font-normal opacity-85">Secure · Free Shipping · COD Available</p>
+            </button>
 
             <p className="mt-3 text-center text-xs text-muted-foreground">
               💳 ₹50 off on prepaid &nbsp;|&nbsp; 🔒 100% Secure Checkout
@@ -1315,8 +1262,7 @@ export function KadaProductPage() {
               </div>
               <p className="truncate text-[11px] text-amber-600">
                 {activeDesign.name} ·{" "}
-                {variant === "silver" ? "Pure Silver" : "Silver Plated"}{" "}
-                {siddha && "· Siddh"} · {size}
+                {variant === "silver" ? "Pure Silver" : "Silver Plated"} · {size}
               </p>
             </div>
             <div className="flex shrink-0 items-center gap-2">
