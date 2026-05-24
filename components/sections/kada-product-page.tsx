@@ -342,6 +342,23 @@ export function KadaProductPage() {
           0%, 100% { opacity: 1; }
           50% { opacity: 0.35; }
         }
+        @keyframes kada-silver-shimmer {
+          0% { background-position: -200% center; }
+          100% { background-position: 200% center; }
+        }
+        .kada-silver-price-area {
+          background: linear-gradient(160deg, #f0f4f8 0%, #dce5ee 12%, #edf2f7 25%, #c8d6e0 38%, #e2eaf2 52%, #d4dfe8 65%, #eaf0f6 78%, #ccd8e4 90%, #e8f0f6 100%);
+          position: relative;
+        }
+        .kada-silver-price-area::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.45) 50%, transparent 70%);
+          background-size: 200% 100%;
+          animation: kada-silver-shimmer 3s ease-in-out infinite;
+          pointer-events: none;
+        }
         .kada-float { animation: kada-float 5s ease-in-out infinite; }
         .kada-shimmer-text {
           background: linear-gradient(90deg, #92400e 0%, #d97706 30%, #fbbf24 50%, #d97706 70%, #92400e 100%);
@@ -421,13 +438,16 @@ export function KadaProductPage() {
             {/* Title — sits above image on mobile, above 2-col grid on desktop */}
             <h1 className="font-heading mb-6 text-center text-3xl font-bold leading-[1.15] md:mb-8 md:text-4xl lg:text-[2.8rem]">
               Control Your Emotions & Attract{" "}
-              <span className="kada-shimmer-text">Positive Energy</span>{" "}
-              with an Astrological Vedic Kada
+              <span className="kada-shimmer-text">Positive Energy</span>
+              <br className="hidden sm:block" />
+              {" "}with an <strong>Astrological Vedic Kada</strong>
             </h1>
 
             <div className="mx-auto max-w-md">
               {/* Product Image */}
               <div className="relative mx-auto max-w-[340px]">
+                {/* Golden glow halo */}
+                <div className="pointer-events-none absolute inset-0 rounded-[2.5rem]" style={{ background: "radial-gradient(ellipse at center, rgba(251,191,36,0.18) 0%, transparent 70%)", transform: "scale(1.15)" }} />
                 <div className="kada-float relative aspect-square w-full overflow-hidden rounded-[2.5rem] border border-amber-100 bg-white shadow-2xl">
                   <Image
                     key={`${designId}-${safeActiveImage}`}
@@ -477,8 +497,15 @@ export function KadaProductPage() {
                 ))}
               </div>
 
+              {/* Divider before design variants */}
+              <div className="mt-5 flex items-center gap-3">
+                <div className="h-px flex-1 bg-amber-100" />
+                <span className="text-[10px] font-bold uppercase tracking-widest text-amber-400">Choose Design</span>
+                <div className="h-px flex-1 bg-amber-100" />
+              </div>
+
               {/* Design variants */}
-              <div className="mt-5">
+              <div className="mt-4">
                 <p className="mb-3 text-center text-sm text-foreground">
                   <span className="text-muted-foreground">Design: </span>
                   <span className="font-semibold">{activeDesign.name}</span>
@@ -535,7 +562,14 @@ export function KadaProductPage() {
                     <span className="font-bold text-foreground">{viewersCount} people</span> viewing right now
                   </span>
                 </div>
-                <div className="mb-4 flex flex-wrap justify-center gap-1.5">
+
+                {/* Price indicator */}
+                <div className="mb-4 flex items-baseline justify-center gap-3">
+                  <span className="font-heading text-4xl font-black text-amber-600">From ₹699</span>
+                  <span className="text-base font-medium text-stone-400 line-through">₹1,499</span>
+                </div>
+
+                <div className="mb-4 flex flex-wrap justify-center gap-2">
                   {[
                     { Icon: Shield, text: "Secure" },
                     { Icon: Truck, text: "COD Available" },
@@ -544,7 +578,7 @@ export function KadaProductPage() {
                   ].map(({ Icon, text }) => (
                     <span
                       key={text}
-                      className="inline-flex items-center gap-1.5 rounded-full border border-amber-100 bg-white/80 px-3 py-1 text-[11px] font-medium text-amber-800 shadow-sm"
+                      className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3.5 py-1.5 text-[11px] font-semibold text-amber-800 shadow-sm"
                     >
                       <Icon size={11} />
                       {text}
@@ -590,11 +624,21 @@ export function KadaProductPage() {
         >
           <div className="mx-auto max-w-3xl">
             {/* Stock urgency */}
-            <div className="mb-8 flex items-center justify-center gap-2.5 rounded-2xl border border-orange-200 bg-orange-50 px-4 py-3">
-              <span className="kada-pulse-dot inline-block size-2 shrink-0 rounded-full bg-orange-500" />
-              <p className="text-sm font-semibold text-orange-800">
-                ⚡ Only <span className="font-black">14 pieces</span> left at this discounted price
-              </p>
+            <div className="mb-8 rounded-2xl border border-orange-200 bg-orange-50 px-4 py-3.5">
+              <div className="flex items-center justify-center gap-2.5">
+                <span className="kada-pulse-dot inline-block size-2.5 shrink-0 rounded-full bg-red-500" />
+                <p className="text-sm font-black text-orange-900">
+                  ⚡ Only <span className="text-red-600">14 pieces</span> left at this price — offer ends soon
+                </p>
+              </div>
+              {/* Stock bar */}
+              <div className="mt-2.5 h-2 w-full overflow-hidden rounded-full bg-orange-200">
+                <div className="h-full w-[22%] rounded-full bg-gradient-to-r from-red-500 to-orange-400" />
+              </div>
+              <div className="mt-1 flex justify-between text-[10px] font-semibold text-orange-600">
+                <span>14 remaining</span>
+                <span>86 sold</span>
+              </div>
             </div>
 
             <div className="mb-10 text-center">
@@ -610,7 +654,7 @@ export function KadaProductPage() {
             </div>
 
             {/* Variant Cards */}
-            <div className="mb-6 grid grid-cols-1 gap-5 sm:grid-cols-2">
+            <div className="mb-6 grid grid-cols-1 gap-5 sm:grid-cols-2 sm:items-start sm:relative">
 
               {/* ── Silver Plated ── good but standard */}
               <div
@@ -666,6 +710,11 @@ export function KadaProductPage() {
                 </div>
               </div>
 
+              {/* OR divider badge — visible only on sm+ two-column layout */}
+              <div className="hidden sm:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 size-9 items-center justify-center rounded-full border-2 border-amber-200 bg-white shadow-md">
+                <span className="text-[10px] font-black text-amber-500">OR</span>
+              </div>
+
               {/* ── Pure Silver ── visibly more premium */}
               <div
                 role="button"
@@ -688,18 +737,19 @@ export function KadaProductPage() {
                   <span className="text-xs font-bold text-amber-300">Best Choice →</span>
                 </div>
 
-                {/* Price area — warm amber tint */}
-                <div
-                  className="flex items-start justify-between border-b border-slate-200 px-5 pb-5 pt-5"
-                  style={{ background: "linear-gradient(160deg, #f8fafc 0%, #f1f5f9 60%, #e2e8f0 100%)" }}
-                >
+                {/* Price area — brushed silver metallic texture */}
+                <div className="kada-silver-price-area flex items-start justify-between border-b border-slate-300 px-5 pb-5 pt-5">
                   <div>
                     <div className="mb-3 flex items-center gap-2">
                       <span
                         className="inline-block size-3.5 rounded-full ring-2 ring-amber-300 shadow"
                         style={{ background: "linear-gradient(135deg, #fef3c7 0%, #d97706 45%, #fbbf24 75%, #92400e 100%)" }}
                       />
-                      <span className="text-[11px] font-black uppercase tracking-widest text-amber-700">92.5% Sterling Silver</span>
+                      <span
+                        className="inline-block size-3 rounded-full"
+                        style={{ background: "linear-gradient(135deg, #e2e8f0 0%, #94a3b8 45%, #f1f5f9 75%, #64748b 100%)" }}
+                      />
+                      <span className="text-[11px] font-black uppercase tracking-widest text-slate-600">92.5% Sterling Silver</span>
                     </div>
                     <p className="font-heading text-6xl font-black leading-none text-amber-700">₹4,499</p>
                     <p className="mt-1.5 text-sm font-semibold text-slate-400 line-through">₹7,999</p>
@@ -715,12 +765,12 @@ export function KadaProductPage() {
                 </div>
 
                 {/* Body */}
-                <div className="flex flex-col flex-1 bg-white px-5 pb-5 pt-4">
+                <div className="flex flex-col flex-1 bg-slate-50 px-5 pb-5 pt-4">
                   <p className="font-heading text-xl font-black leading-tight text-stone-900">Pure Silver Kada</p>
                   <p className="mb-4 mt-1 text-xs font-bold text-amber-600">Original silver — highest astrological potency</p>
                   <div className="mb-5 flex flex-wrap gap-2">
                     {["92.5% Sterling", "Premium Weight", "Long-Lasting", "Hallmark Certified"].map((t) => (
-                      <span key={t} className="rounded-full border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs font-bold text-amber-800">{t}</span>
+                      <span key={t} className="rounded-full border border-slate-300 bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-700">{t}</span>
                     ))}
                   </div>
                   <button
@@ -824,7 +874,7 @@ export function KadaProductPage() {
         </section>
 
         {/* ══ WHAT'S IN THE BOX ══ */}
-        <section className="bg-stone-950 py-16 px-5">
+        <section className="bg-amber-950 py-16 px-5">
           <div className="mx-auto max-w-4xl">
             <div className="mb-10 text-center" data-anim>
               <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-amber-400">Unboxing</span>
@@ -833,7 +883,7 @@ export function KadaProductPage() {
             </div>
             <div className="grid grid-cols-2 gap-px bg-white/10 md:grid-cols-4" data-anim data-anim-d="1">
               {IN_THE_BOX.map((item) => (
-                <div key={item.item} className="flex flex-col items-center gap-3 bg-stone-950 px-4 py-10 text-center">
+                <div key={item.item} className="flex flex-col items-center gap-3 bg-amber-950 px-4 py-10 text-center">
                   <span className="text-5xl">{item.icon}</span>
                   <p className="text-sm font-black text-white">{item.item}</p>
                   <p className="text-xs text-stone-500 leading-snug">{item.detail}</p>
@@ -844,7 +894,7 @@ export function KadaProductPage() {
         </section>
 
         {/* ══ BENEFITS ══ */}
-        <section className="relative overflow-hidden bg-gradient-to-b from-amber-950 to-stone-950 py-24 px-5 text-white">
+        <section className="relative overflow-hidden bg-gradient-to-b from-amber-900 to-amber-950 py-24 px-5 text-white">
           <div className="pointer-events-none absolute -top-32 right-0 size-[500px] rounded-full bg-amber-500/5 blur-3xl" />
           <div className="pointer-events-none absolute bottom-0 -left-20 size-96 rounded-full bg-orange-600/5 blur-3xl" />
 
@@ -855,7 +905,7 @@ export function KadaProductPage() {
               <p className="mt-3 text-sm text-amber-300/70 md:text-base">Not just a bracelet — a Vedic remedy worn on the wrist</p>
             </div>
 
-            <div className="divide-y divide-white/8">
+            <div className="divide-y divide-white/10">
               {BENEFITS.map((b, i) => (
                 <div
                   key={b.title}
@@ -980,7 +1030,7 @@ export function KadaProductPage() {
         </section>
 
         {/* ══ TESTIMONIALS ══ */}
-        <section className="bg-stone-950 py-24 px-5 text-white">
+        <section className="bg-amber-950 py-24 px-5 text-white">
           <div className="mx-auto max-w-4xl">
             <div className="mb-14 text-center" data-anim>
               <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-amber-400">Real Stories</span>
@@ -1105,7 +1155,7 @@ export function KadaProductPage() {
         </section>
 
         {/* ══ FINAL CTA ══ */}
-        <section className="relative overflow-hidden bg-gradient-to-br from-amber-950 via-amber-900 to-stone-950 px-5 py-28 text-center text-white">
+        <section className="relative overflow-hidden bg-gradient-to-br from-amber-900 via-amber-800 to-amber-950 px-5 py-28 text-center text-white">
           <div className="pointer-events-none absolute inset-0 overflow-hidden">
             {[...Array(12)].map((_, i) => (
               <div
