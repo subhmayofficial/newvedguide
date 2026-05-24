@@ -284,6 +284,18 @@ export function KadaProductPage() {
     return () => obs.disconnect();
   }, []);
 
+  useEffect(() => {
+    const els = document.querySelectorAll('[data-anim]');
+    const obs = new IntersectionObserver(
+      (entries) => entries.forEach((e) => {
+        if (e.isIntersecting) { e.target.classList.add('anim-on'); obs.unobserve(e.target); }
+      }),
+      { threshold: 0.12 }
+    );
+    els.forEach((el) => obs.observe(el));
+    return () => obs.disconnect();
+  }, []);
+
   const router = useRouter();
 
   const scrollToOrder = () =>
@@ -352,6 +364,14 @@ export function KadaProductPage() {
         }
         .kada-ping-slow { animation: kada-ping-slow 2.5s cubic-bezier(0,0,0.2,1) infinite; }
         .kada-pulse-dot { animation: kada-pulse-dot 1.8s ease-in-out infinite; }
+        [data-anim] { opacity: 0; transform: translateY(22px); transition: opacity 0.55s ease, transform 0.55s ease; }
+        [data-anim].anim-on { opacity: 1; transform: none; }
+        [data-anim-d="1"] { transition-delay: 0.08s; }
+        [data-anim-d="2"] { transition-delay: 0.16s; }
+        [data-anim-d="3"] { transition-delay: 0.24s; }
+        [data-anim-d="4"] { transition-delay: 0.32s; }
+        [data-anim-d="5"] { transition-delay: 0.40s; }
+        [data-anim-d="6"] { transition-delay: 0.48s; }
       `}</style>
 
       <div className="min-h-screen bg-[var(--background)] pb-[5.5rem] md:pb-0">
@@ -670,8 +690,8 @@ export function KadaProductPage() {
 
                 {/* Price area — warm amber tint */}
                 <div
-                  className="flex items-start justify-between border-b border-amber-200 px-5 pb-5 pt-5"
-                  style={{ background: "linear-gradient(160deg, #fffbeb 0%, #fef3c7 60%, #fde68a 100%)" }}
+                  className="flex items-start justify-between border-b border-slate-200 px-5 pb-5 pt-5"
+                  style={{ background: "linear-gradient(160deg, #f8fafc 0%, #f1f5f9 60%, #e2e8f0 100%)" }}
                 >
                   <div>
                     <div className="mb-3 flex items-center gap-2">
@@ -682,7 +702,7 @@ export function KadaProductPage() {
                       <span className="text-[11px] font-black uppercase tracking-widest text-amber-700">92.5% Sterling Silver</span>
                     </div>
                     <p className="font-heading text-6xl font-black leading-none text-amber-700">₹4,499</p>
-                    <p className="mt-1.5 text-sm font-semibold text-amber-500 line-through">₹7,999</p>
+                    <p className="mt-1.5 text-sm font-semibold text-slate-400 line-through">₹7,999</p>
                   </div>
                   <div className="flex flex-col items-end gap-2 pt-1">
                     <span className="rounded-xl bg-amber-600 px-3 py-1.5 text-sm font-black text-white shadow">43% OFF</span>
@@ -803,74 +823,62 @@ export function KadaProductPage() {
           </div>
         </section>
 
-        {/* ════════════════════════════════════════
-            WHAT'S IN THE BOX
-        ════════════════════════════════════════ */}
-        <section className="border-t border-amber-50 bg-white py-16 px-5">
+        {/* ══ WHAT'S IN THE BOX ══ */}
+        <section className="bg-stone-950 py-16 px-5">
           <div className="mx-auto max-w-4xl">
-            <div className="mb-10 text-center">
-              <span className="text-xs font-bold uppercase tracking-widest text-amber-600">
-                Unboxing Experience
-              </span>
-              <h2 className="font-heading mt-2 text-3xl font-bold text-foreground md:text-4xl">
-                What's in the Box
-              </h2>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Every order arrives in premium packaging — nothing spared
-              </p>
+            <div className="mb-10 text-center" data-anim>
+              <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-amber-400">Unboxing</span>
+              <h2 className="font-heading mt-2 text-3xl font-black text-white md:text-4xl">What's in the Box</h2>
+              <p className="mt-2 text-sm text-stone-400">Every order arrives ready — nothing spared</p>
             </div>
-            <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+            <div className="grid grid-cols-2 gap-px bg-white/10 md:grid-cols-4" data-anim data-anim-d="1">
               {IN_THE_BOX.map((item) => (
-                <div
-                  key={item.item}
-                  className="flex flex-col items-center rounded-3xl border border-amber-100 bg-gradient-to-br from-amber-50 to-orange-50/50 p-6 text-center transition-all hover:-translate-y-1 hover:shadow-md hover:shadow-amber-100"
-                >
-                  <div className="mb-3 text-4xl">{item.icon}</div>
-                  <p className="text-sm font-bold leading-snug text-foreground">{item.item}</p>
-                  <p className="mt-1 text-xs text-muted-foreground">{item.detail}</p>
+                <div key={item.item} className="flex flex-col items-center gap-3 bg-stone-950 px-4 py-10 text-center">
+                  <span className="text-5xl">{item.icon}</span>
+                  <p className="text-sm font-black text-white">{item.item}</p>
+                  <p className="text-xs text-stone-500 leading-snug">{item.detail}</p>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        {/* ════════════════════════════════════════
-            BENEFITS
-        ════════════════════════════════════════ */}
-        <section className="relative overflow-hidden bg-gradient-to-br from-amber-950 via-amber-900 to-orange-950 py-20 px-5 text-white">
-          <div className="pointer-events-none absolute -top-20 -right-20 size-64 rounded-full bg-amber-500/10 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-20 -left-20 size-80 rounded-full bg-orange-500/10 blur-3xl" />
+        {/* ══ BENEFITS ══ */}
+        <section className="relative overflow-hidden bg-gradient-to-b from-amber-950 to-stone-950 py-24 px-5 text-white">
+          <div className="pointer-events-none absolute -top-32 right-0 size-[500px] rounded-full bg-amber-500/5 blur-3xl" />
+          <div className="pointer-events-none absolute bottom-0 -left-20 size-96 rounded-full bg-orange-600/5 blur-3xl" />
 
-          <div className="relative mx-auto max-w-5xl">
-            <div className="mb-14 text-center">
-              <span className="text-xs font-bold uppercase tracking-widest text-amber-400">
-                Astrological Benefits
-              </span>
-              <h2 className="font-heading mt-3 text-3xl font-bold md:text-4xl">
-                What This Kada Does For You
-              </h2>
-              <p className="mt-3 text-amber-300 text-sm md:text-base max-w-xl mx-auto">
-                Not just an accessory — a complete astrological remedy system
-              </p>
+          <div className="relative mx-auto max-w-3xl">
+            <div className="mb-16 text-center" data-anim>
+              <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-amber-400">Astrological Benefits</span>
+              <h2 className="font-heading mt-3 text-4xl font-black text-white md:text-5xl">What It Does For You</h2>
+              <p className="mt-3 text-sm text-amber-300/70 md:text-base">Not just a bracelet — a Vedic remedy worn on the wrist</p>
             </div>
 
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {BENEFITS.map((b) => (
+            <div className="divide-y divide-white/8">
+              {BENEFITS.map((b, i) => (
                 <div
                   key={b.title}
-                  className="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm transition-all hover:bg-white/10 hover:border-amber-400/30 hover:-translate-y-1 hover:shadow-xl hover:shadow-amber-900/50"
+                  data-anim
+                  data-anim-d={String(Math.min(i + 1, 6))}
+                  className="group flex items-start gap-5 py-7 transition-all hover:bg-white/3 -mx-4 px-4 rounded-2xl"
                 >
-                  <div className="mb-4 text-5xl">{b.icon}</div>
-                  <h3 className="font-heading mb-2 text-lg font-bold leading-snug">{b.title}</h3>
-                  <p className="text-sm leading-relaxed text-amber-200/80">{b.desc}</p>
+                  <span className="font-heading shrink-0 w-10 text-right text-4xl font-black text-white/10 group-hover:text-white/20 transition-colors">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <span className="text-4xl shrink-0 mt-0.5">{b.icon}</span>
+                  <div>
+                    <h3 className="font-heading text-xl font-black text-white">{b.title}</h3>
+                    <p className="mt-1.5 text-sm leading-relaxed text-amber-200/60">{b.desc}</p>
+                  </div>
                 </div>
               ))}
             </div>
 
-            <div className="mt-14 text-center">
+            <div className="mt-16 text-center" data-anim>
               <button
                 onClick={scrollToOrder}
-                className="inline-flex items-center gap-3 rounded-2xl bg-amber-400 px-10 py-4 text-base font-bold text-amber-950 transition-all hover:bg-amber-300 active:scale-95"
+                className="kada-glow-btn inline-flex items-center gap-3 rounded-2xl bg-amber-400 px-10 py-4 text-base font-black text-amber-950 transition-all hover:bg-amber-300 active:scale-95"
               >
                 <Zap size={18} />
                 Order Now
@@ -880,186 +888,157 @@ export function KadaProductPage() {
           </div>
         </section>
 
-        {/* ════════════════════════════════════════
-            WHO NEEDS + PLANETARY PROTECTION
-        ════════════════════════════════════════ */}
-        <section className="bg-white py-20 px-5">
-          <div className="mx-auto max-w-5xl">
-            <div className="grid grid-cols-1 gap-14 md:grid-cols-2 md:items-start">
-              <div>
-                <span className="text-xs font-bold uppercase tracking-widest text-amber-600">
-                  Is It For You?
-                </span>
-                <h2 className="font-heading mt-3 mb-8 text-3xl font-bold text-foreground md:text-4xl">
-                  This Kada Is For You If...
-                </h2>
-                <ul className="space-y-4">
-                  {WHO_NEEDS.map((item) => (
-                    <li key={item} className="flex items-start gap-3.5">
-                      <div className="mt-0.5 flex size-5 flex-shrink-0 items-center justify-center rounded-full border border-amber-200 bg-amber-50">
-                        <Check size={11} className="text-amber-600 stroke-[2.5]" />
-                      </div>
-                      <span className="text-sm leading-relaxed text-foreground">{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className="rounded-3xl bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-100 p-8">
-                <div className="mb-6 text-center">
-                  <div className="relative mx-auto mb-6 size-28 flex items-center justify-center">
-                    <div className="kada-ping-slow absolute inset-0 rounded-full border-2 border-amber-200" />
-                    <div className="absolute inset-3 rounded-full border border-amber-300/60" />
-                    <span className="text-5xl relative z-10">🪬</span>
-                  </div>
-                  <h3 className="font-heading text-2xl font-bold text-foreground">
-                    Planetary Protection
-                  </h3>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    Balances effects of these planetary doshas
-                  </p>
-                </div>
-
-                <div className="space-y-3">
-                  {[
-                    {
-                      planet: "शनि (Saturn)",
-                      label: "Shani Dosh",
-                      effect: "Obstacles, delays, karmic weight",
-                      color: "bg-blue-50 border-blue-100",
-                      badge: "text-blue-700 bg-blue-100",
-                    },
-                    {
-                      planet: "राहु (Rahu)",
-                      label: "Rahu Dosh",
-                      effect: "Confusion, sudden upheaval",
-                      color: "bg-purple-50 border-purple-100",
-                      badge: "text-purple-700 bg-purple-100",
-                    },
-                    {
-                      planet: "केतु (Ketu)",
-                      label: "Ketu Dosh",
-                      effect: "Detachment, spiritual blocks",
-                      color: "bg-orange-50 border-orange-100",
-                      badge: "text-orange-700 bg-orange-100",
-                    },
-                  ].map(({ planet, label, effect, color, badge }) => (
-                    <div
-                      key={planet}
-                      className={cn("flex items-center justify-between rounded-2xl border p-3.5", color)}
-                    >
-                      <div>
-                        <p className="font-bold text-sm text-foreground">{planet}</p>
-                        <p className="text-xs text-muted-foreground">{effect}</p>
-                      </div>
-                      <span className={cn("rounded-full px-2.5 py-1 text-[10px] font-bold", badge)}>
-                        {label}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-
-                <button
-                  onClick={scrollToOrder}
-                  className="mt-6 w-full rounded-2xl bg-amber-700 py-3.5 text-sm font-bold text-white transition-all hover:bg-amber-800"
-                >
-                  Order Now →
-                </button>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ════════════════════════════════════════
-            HOW IT WORKS
-        ════════════════════════════════════════ */}
-        <section className="bg-gradient-to-br from-amber-50/80 to-orange-50/30 py-20 px-5">
-          <div className="mx-auto max-w-4xl">
-            <div className="mb-14 text-center">
-              <span className="text-xs font-bold uppercase tracking-widest text-amber-600">
-                Simple Process
-              </span>
-              <h2 className="font-heading mt-3 text-3xl font-bold text-foreground md:text-4xl">
-                From Order to Delivery
+        {/* ══ WHO NEEDS IT ══ */}
+        <section className="bg-white py-24 px-5">
+          <div className="mx-auto max-w-2xl">
+            <div className="mb-12 text-center" data-anim>
+              <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-amber-600">Is It For You?</span>
+              <h2 className="font-heading mt-3 text-4xl font-black text-stone-900 md:text-5xl">
+                This Kada Is<br />For You If...
               </h2>
-              <p className="mt-2 text-sm text-muted-foreground">
-                3 steps — personalised, handcrafted, delivered
-              </p>
             </div>
 
-            <div className="relative grid grid-cols-1 gap-8 md:grid-cols-3">
-              <div className="absolute top-10 left-[20%] right-[20%] hidden h-0.5 bg-gradient-to-r from-amber-200 via-amber-400 to-amber-200 md:block" />
-              {STEPS.map((step) => (
-                <div key={step.num} className="relative z-10 text-center">
-                  <div className="relative mx-auto mb-6 size-20">
-                    <div className="flex size-20 items-center justify-center rounded-3xl border-2 border-amber-200 bg-white shadow-lg">
-                      <span className="text-4xl">{step.icon}</span>
-                    </div>
-                    <div className="absolute -top-2 -right-2 flex size-6 items-center justify-center rounded-full bg-amber-700 text-[10px] font-black text-white shadow">
-                      {step.num}
-                    </div>
+            <div className="space-y-2">
+              {WHO_NEEDS.map((item, i) => (
+                <div
+                  key={item}
+                  data-anim
+                  data-anim-d={String(Math.min(i + 1, 6))}
+                  className="group flex items-center gap-4 rounded-2xl border border-transparent px-5 py-4 transition-all hover:border-amber-200 hover:bg-amber-50/50"
+                >
+                  <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-amber-100 shadow-sm group-hover:bg-amber-200 transition-colors">
+                    <Check size={16} className="text-amber-700 stroke-[2.5]" />
                   </div>
-                  <h3 className="font-heading mb-2 text-lg font-bold text-foreground">
-                    {step.title}
-                  </h3>
-                  <p className="text-sm leading-relaxed text-muted-foreground">{step.desc}</p>
+                  <span className="text-base font-semibold leading-snug text-stone-800">{item}</span>
                 </div>
               ))}
             </div>
+
+            <div className="mt-10 rounded-3xl bg-gradient-to-br from-amber-700 to-amber-900 p-8 text-center text-white" data-anim>
+              <div className="relative mx-auto mb-5 size-20 flex items-center justify-center">
+                <div className="kada-ping-slow absolute inset-0 rounded-full border-2 border-amber-300/40" />
+                <div className="absolute inset-3 rounded-full border border-amber-400/30" />
+                <span className="relative z-10 text-4xl">🪬</span>
+              </div>
+              <h3 className="font-heading text-2xl font-black">Planetary Protection</h3>
+              <p className="mt-1 mb-5 text-xs text-amber-200">Counteracts the effects of these doshas</p>
+              <div className="space-y-2 text-left">
+                {[
+                  { planet: "शनि (Saturn)", label: "Shani Dosh", effect: "Obstacles, delays, karmic weight", dot: "bg-blue-400" },
+                  { planet: "राहु (Rahu)",  label: "Rahu Dosh",  effect: "Confusion, sudden upheaval",      dot: "bg-purple-400" },
+                  { planet: "केतु (Ketu)",  label: "Ketu Dosh",  effect: "Detachment, spiritual blocks",    dot: "bg-orange-400" },
+                ].map(({ planet, label, effect, dot }) => (
+                  <div key={planet} className="flex items-center justify-between rounded-2xl bg-white/10 px-4 py-3">
+                    <div className="flex items-center gap-2.5">
+                      <span className={cn("size-2 shrink-0 rounded-full", dot)} />
+                      <div>
+                        <p className="text-sm font-bold text-white">{planet}</p>
+                        <p className="text-[11px] text-amber-200/70">{effect}</p>
+                      </div>
+                    </div>
+                    <span className="rounded-full bg-white/20 px-3 py-1 text-[10px] font-black text-white">{label}</span>
+                  </div>
+                ))}
+              </div>
+              <button
+                onClick={scrollToOrder}
+                className="mt-6 w-full rounded-2xl bg-white py-3.5 text-sm font-black text-amber-800 transition-all hover:bg-amber-50"
+              >
+                Order Now →
+              </button>
+            </div>
           </div>
         </section>
 
-        {/* ════════════════════════════════════════
-            TESTIMONIALS
-        ════════════════════════════════════════ */}
-        <section className="bg-white py-20 px-5">
-          <div className="mx-auto max-w-5xl">
-            <div className="mb-12 text-center">
-              <span className="text-xs font-bold uppercase tracking-widest text-amber-600">
-                Real Reviews
-              </span>
-              <h2 className="font-heading mt-3 text-3xl font-bold text-foreground md:text-4xl">
-                What Our Customers Say
-              </h2>
-              <div className="mt-3 flex items-center justify-center gap-1.5">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} size={18} className="fill-amber-400 text-amber-400" />
+        {/* ══ HOW IT WORKS ══ */}
+        <section className="bg-stone-50 py-24 px-5">
+          <div className="mx-auto max-w-xl">
+            <div className="mb-16 text-center" data-anim>
+              <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-amber-600">Simple Process</span>
+              <h2 className="font-heading mt-3 text-4xl font-black text-stone-900 md:text-5xl">From Order<br />to Your Door</h2>
+            </div>
+
+            <div className="relative">
+              {/* Vertical line */}
+              <div className="absolute left-7 top-8 bottom-8 w-0.5 bg-gradient-to-b from-amber-400 via-amber-600 to-amber-300" />
+              <div className="space-y-0">
+                {STEPS.map((step, i) => (
+                  <div key={step.num} data-anim data-anim-d={String(i + 1)} className="relative flex gap-7 pb-12 last:pb-0">
+                    <div className="relative z-10 flex size-14 shrink-0 items-center justify-center rounded-2xl bg-amber-700 shadow-lg shadow-amber-200/60">
+                      <span className="text-2xl">{step.icon}</span>
+                    </div>
+                    <div className="pt-2">
+                      <span className="text-[11px] font-black uppercase tracking-widest text-amber-600">Step {step.num}</span>
+                      <h3 className="font-heading mt-0.5 text-2xl font-black text-stone-900">{step.title}</h3>
+                      <p className="mt-2 text-sm leading-relaxed text-stone-500">{step.desc}</p>
+                    </div>
+                  </div>
                 ))}
-                <span className="ml-2 text-sm text-muted-foreground">4.9 / 5 · 127 verified reviews</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ══ TESTIMONIALS ══ */}
+        <section className="bg-stone-950 py-24 px-5 text-white">
+          <div className="mx-auto max-w-4xl">
+            <div className="mb-14 text-center" data-anim>
+              <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-amber-400">Real Stories</span>
+              <h2 className="font-heading mt-3 text-4xl font-black text-white md:text-5xl">Results People Are Seeing</h2>
+              <div className="mt-4 flex items-center justify-center gap-1">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} size={16} className="fill-amber-400 text-amber-400" />
+                ))}
+                <span className="ml-2 text-sm text-stone-400">4.9 / 5 · 127 verified reviews</span>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-              {TESTIMONIALS.map((t) => (
-                <div
-                  key={t.name}
-                  className="relative overflow-hidden rounded-3xl border border-amber-100 bg-gradient-to-br from-amber-50 to-orange-50/50 p-6"
-                >
-                  <div className="pointer-events-none absolute right-5 top-4 font-serif text-7xl leading-none text-amber-200 select-none">
-                    "
+            {/* Featured */}
+            <div className="mb-5 rounded-3xl border border-white/10 bg-white/5 p-8 md:p-10" data-anim>
+              <div className="font-serif text-8xl leading-none text-amber-600/30 select-none">"</div>
+              <p className="mt-1 text-lg font-semibold leading-relaxed text-white md:text-xl">
+                {TESTIMONIALS[0].text}
+              </p>
+              <div className="mt-6 flex flex-wrap items-center gap-4">
+                <div className="flex size-11 items-center justify-center rounded-full bg-amber-700 text-base font-black text-white shadow">
+                  {TESTIMONIALS[0].initial}
+                </div>
+                <div>
+                  <p className="font-bold text-white">{TESTIMONIALS[0].name} · {TESTIMONIALS[0].city}</p>
+                  <div className="mt-0.5 flex gap-0.5">
+                    {[...Array(TESTIMONIALS[0].stars)].map((_, i) => (
+                      <Star key={i} size={12} className="fill-amber-400 text-amber-400" />
+                    ))}
                   </div>
-                  <div className="mb-4 flex items-center gap-2 flex-wrap">
+                </div>
+                <div className="ml-auto rounded-full border border-green-500/30 bg-green-900/40 px-4 py-1.5 text-xs font-bold text-green-400">
+                  ✓ {TESTIMONIALS[0].outcome}
+                </div>
+              </div>
+            </div>
+
+            {/* Smaller two */}
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+              {TESTIMONIALS.slice(1).map((t, i) => (
+                <div key={t.name} data-anim data-anim-d={String(i + 1)} className="rounded-3xl border border-white/10 bg-white/5 p-6">
+                  <div className="mb-4 flex items-center gap-2">
                     <div className="flex gap-0.5">
-                      {[...Array(t.stars)].map((_, i) => (
-                        <Star key={i} size={13} className="fill-amber-400 text-amber-400" />
+                      {[...Array(t.stars)].map((_, j) => (
+                        <Star key={j} size={12} className="fill-amber-400 text-amber-400" />
                       ))}
                     </div>
-                    <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-[10px] font-bold text-amber-700">
-                      {t.tag}
-                    </span>
+                    <span className="rounded-full bg-amber-900/60 px-2.5 py-0.5 text-[10px] font-bold text-amber-400">{t.tag}</span>
                   </div>
-                  <p className="mb-5 text-sm italic leading-relaxed text-foreground">"{t.text}"</p>
+                  <p className="mb-4 text-sm italic leading-relaxed text-stone-300">"{t.text}"</p>
                   <div className="flex items-center gap-3">
-                    <div className="flex size-10 items-center justify-center rounded-full bg-amber-700 text-sm font-black text-white shadow">
-                      {t.initial}
-                    </div>
+                    <div className="flex size-9 items-center justify-center rounded-full bg-amber-700 text-xs font-black text-white">{t.initial}</div>
                     <div>
-                      <p className="text-sm font-bold text-foreground">{t.name}</p>
-                      <p className="text-xs text-muted-foreground">{t.city}</p>
+                      <p className="text-sm font-bold text-white">{t.name}</p>
+                      <p className="text-xs text-stone-500">{t.city}</p>
                     </div>
                   </div>
-                  <div className="mt-4 rounded-xl border border-green-100 bg-green-50 px-3 py-2">
-                    <p className="text-xs font-semibold text-green-700">✓ {t.outcome}</p>
+                  <div className="mt-4 rounded-xl border border-green-800/40 bg-green-900/20 px-3 py-2">
+                    <p className="text-xs font-semibold text-green-400">✓ {t.outcome}</p>
                   </div>
                 </div>
               ))}
@@ -1067,69 +1046,56 @@ export function KadaProductPage() {
           </div>
         </section>
 
-        {/* ════════════════════════════════════════
-            TRUST STRIP
-        ════════════════════════════════════════ */}
-        <section className="bg-gradient-to-r from-amber-800 to-amber-700 py-14 px-5">
+        {/* ══ TRUST STRIP ══ */}
+        <section className="bg-amber-700 py-16 px-5" data-anim>
           <div className="mx-auto max-w-4xl">
-            <div className="grid grid-cols-2 gap-8 text-center text-white md:grid-cols-4">
+            <div className="grid grid-cols-2 divide-x divide-amber-600 md:grid-cols-4">
               {[
-                { icon: "⭐", stat: "4.9 / 5", label: "Average Rating" },
-                { icon: "🔒", stat: "100%", label: "Genuine Materials" },
-                { icon: "🕉️", stat: "15+", label: "Years Vedic Expertise" },
-                { icon: "📦", stat: "Free", label: "Shipping Pan-India" },
-              ].map(({ icon, stat, label }) => (
-                <div key={label} className="flex flex-col items-center">
-                  <div className="mb-2 text-4xl">{icon}</div>
-                  <div className="text-3xl font-black">{stat}</div>
-                  <div className="mt-1 text-xs text-amber-200">{label}</div>
+                { stat: "4.9/5", label: "Average Rating", sub: "127 reviews" },
+                { stat: "100%", label: "Genuine Materials", sub: "Hallmark certified" },
+                { stat: "15+",  label: "Years Vedic Expertise", sub: "Practising astrologers" },
+                { stat: "Free", label: "Shipping Pan-India",   sub: "Cash on delivery" },
+              ].map(({ stat, label, sub }) => (
+                <div key={label} className="flex flex-col items-center px-4 py-6 text-center text-white md:py-8">
+                  <div className="font-heading text-4xl font-black md:text-5xl">{stat}</div>
+                  <div className="mt-1.5 text-xs font-bold text-amber-100">{label}</div>
+                  <div className="mt-0.5 text-[10px] text-amber-300">{sub}</div>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        {/* ════════════════════════════════════════
-            FAQ
-        ════════════════════════════════════════ */}
-        <section className="bg-white py-20 px-5">
+        {/* ══ FAQ ══ */}
+        <section className="bg-white py-24 px-5">
           <div className="mx-auto max-w-2xl">
-            <div className="mb-12 text-center">
-              <span className="text-xs font-bold uppercase tracking-widest text-amber-600">
-                FAQs
-              </span>
-              <h2 className="font-heading mt-3 text-3xl font-bold text-foreground md:text-4xl">
-                Frequently Asked Questions
-              </h2>
+            <div className="mb-14 text-center" data-anim>
+              <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-amber-600">FAQs</span>
+              <h2 className="font-heading mt-3 text-4xl font-black text-stone-900 md:text-5xl">Common Questions</h2>
             </div>
 
-            <div className="space-y-3">
+            <div className="divide-y divide-stone-100">
               {FAQS.map((faq, i) => (
-                <div
-                  key={i}
-                  className={cn(
-                    "overflow-hidden rounded-2xl border transition-all",
-                    openFaq === i
-                      ? "border-amber-300 bg-amber-50 shadow-md"
-                      : "border-border bg-white hover:border-amber-200"
-                  )}
-                >
+                <div key={i} data-anim data-anim-d={String(Math.min(i + 1, 6))}>
                   <button
                     onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                    className="flex w-full items-start justify-between gap-4 p-5 text-left"
+                    className="flex w-full items-start justify-between gap-6 py-6 text-left"
                   >
-                    <span className="text-sm font-semibold leading-relaxed text-foreground">
+                    <span className={cn("text-base font-bold leading-snug transition-colors", openFaq === i ? "text-amber-700" : "text-stone-900")}>
                       {faq.q}
                     </span>
-                    {openFaq === i ? (
-                      <ChevronUp size={18} className="mt-0.5 flex-shrink-0 text-amber-500" />
-                    ) : (
-                      <ChevronDown size={18} className="mt-0.5 flex-shrink-0 text-amber-400" />
-                    )}
+                    <div className={cn(
+                      "flex size-7 shrink-0 items-center justify-center rounded-full border-2 transition-all mt-0.5",
+                      openFaq === i ? "border-amber-500 bg-amber-500 text-white" : "border-stone-200 text-stone-400"
+                    )}>
+                      {openFaq === i
+                        ? <ChevronUp size={14} className="text-white" />
+                        : <ChevronDown size={14} />}
+                    </div>
                   </button>
                   {openFaq === i && (
-                    <div className="px-5 pb-5">
-                      <p className="text-sm leading-relaxed text-muted-foreground">{faq.a}</p>
+                    <div className="pb-6">
+                      <p className="border-l-2 border-amber-400 pl-4 text-sm leading-relaxed text-stone-500">{faq.a}</p>
                     </div>
                   )}
                 </div>
@@ -1138,46 +1104,41 @@ export function KadaProductPage() {
           </div>
         </section>
 
-        {/* ════════════════════════════════════════
-            FINAL CTA
-        ════════════════════════════════════════ */}
-        <section className="relative overflow-hidden bg-gradient-to-br from-amber-950 via-amber-900 to-orange-950 px-5 py-24 text-center text-white">
+        {/* ══ FINAL CTA ══ */}
+        <section className="relative overflow-hidden bg-gradient-to-br from-amber-950 via-amber-900 to-stone-950 px-5 py-28 text-center text-white">
           <div className="pointer-events-none absolute inset-0 overflow-hidden">
-            {[...Array(10)].map((_, i) => (
+            {[...Array(12)].map((_, i) => (
               <div
                 key={i}
-                className="kada-particle bg-amber-400/20"
+                className="kada-particle bg-amber-400/15"
                 style={{
-                  width: `${5 + (i % 3) * 4}px`,
-                  height: `${5 + (i % 3) * 4}px`,
-                  left: `${(i * 21) % 91}%`,
-                  top: `${15 + (i * 15) % 65}%`,
-                  animationDelay: `${i * 0.45}s`,
-                  animationDuration: `${3.5 + (i % 3) * 0.7}s`,
+                  width: `${4 + (i % 4) * 3}px`,
+                  height: `${4 + (i % 4) * 3}px`,
+                  left: `${(i * 17) % 91}%`,
+                  top: `${10 + (i * 13) % 70}%`,
+                  animationDelay: `${i * 0.4}s`,
+                  animationDuration: `${3 + (i % 3) * 0.8}s`,
                 }}
               />
             ))}
           </div>
-
-          <div className="relative mx-auto max-w-xl">
-            <div className="mb-6 text-6xl">⚜️</div>
-            <h2 className="font-heading mb-4 text-3xl font-bold md:text-4xl">
-              Order Your Protective Kada Today
+          <div className="relative mx-auto max-w-xl" data-anim>
+            <div className="mb-6 text-7xl">⚜️</div>
+            <h2 className="font-heading mb-4 text-4xl font-black md:text-5xl">
+              Wear Your Protection.<br />Start Today.
             </h2>
-            <p className="mb-8 text-sm text-amber-200 md:text-base">
-              Starting at ₹699. Cash on Delivery. Delivered in premium packaging within 15–20 days.
+            <p className="mb-10 text-sm text-amber-300 md:text-base">
+              Starts at ₹699 · Cash on Delivery · Delivered in 15–20 days
             </p>
-            <div className="flex flex-col items-center gap-4">
-              <button
-                onClick={scrollToOrder}
-                className="kada-glow-btn inline-flex items-center gap-3 rounded-2xl bg-amber-400 px-10 py-5 text-lg font-black text-amber-950 shadow-2xl transition-all hover:bg-amber-300 active:scale-95"
-              >
-                <Sparkles size={22} />
-                Order Now — Starting ₹{basePrice.toLocaleString("en-IN")}
-                <ArrowRight size={22} />
-              </button>
-            </div>
-            <p className="mt-5 text-xs text-amber-400">
+            <button
+              onClick={scrollToOrder}
+              className="kada-glow-btn inline-flex items-center gap-3 rounded-2xl bg-amber-400 px-12 py-5 text-xl font-black text-amber-950 shadow-2xl transition-all hover:bg-amber-300 active:scale-95"
+            >
+              <Sparkles size={22} />
+              Order Now — ₹{basePrice.toLocaleString("en-IN")}
+              <ArrowRight size={22} />
+            </button>
+            <p className="mt-5 text-xs text-amber-500">
               No advance payment · Pay on delivery · Free shipping
             </p>
           </div>
