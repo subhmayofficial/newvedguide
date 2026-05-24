@@ -515,93 +515,61 @@ export function KadaProductPage() {
 
               {/* ── Right: Content ── */}
               <div className="order-2 text-center md:text-left">
-                {/* Material */}
-                <div className="mb-4">
-                  <p className="mb-2.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                    Material
-                  </p>
-                  <div className="flex gap-2.5">
-                    {(["plated", "silver"] as const).map((v) => (
-                      <button
-                        key={v}
-                        onClick={() => setVariant(v)}
-                        className={cn(
-                          "flex flex-1 flex-col rounded-2xl border-2 px-4 py-3 text-left transition-all",
-                          variant === v
-                            ? "border-amber-500 bg-amber-50 shadow-sm"
-                            : "border-stone-200 bg-white hover:border-amber-300"
-                        )}
-                      >
-                        <span className={cn(
-                          "text-sm font-black leading-none",
-                          variant === v ? "text-amber-700" : "text-foreground"
-                        )}>
-                          {v === "plated" ? "₹699" : "₹4,499"}
-                        </span>
-                        <span className="mt-1 text-[11px] leading-tight text-muted-foreground">
-                          {v === "plated" ? "Silver Plated" : "Pure Silver"}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
+                {/* Description */}
+                <p className="mb-5 text-sm leading-relaxed text-muted-foreground">
+                  A handcrafted Vedic silver kada — prepared individually based on your birth nakshatra
+                  to counteract Saturn and Rahu doshas. Worn daily, it works as a continuous
+                  astrological remedy for the mind, emotions, and energy field.
+                </p>
+
+                {/* Key benefits */}
+                <div className="mb-5 space-y-2">
+                  {[
+                    {
+                      icon: "🪐",
+                      title: "Saturn & Rahu Dosh Protection",
+                      desc: "Neutralises Shani Sade Sati and Rahu Mahadasha effects",
+                    },
+                    {
+                      icon: "🧘",
+                      title: "Mental Peace & Clarity",
+                      desc: "Reduces anxiety, overthinking, and emotional turbulence",
+                    },
+                    {
+                      icon: "💪",
+                      title: "Confidence & Emotional Stability",
+                      desc: "Builds inner balance and self-assurance over time",
+                    },
+                    {
+                      icon: "⚡",
+                      title: "Continuous Positive Energy",
+                      desc: "Silver's natural properties filter negativity around you",
+                    },
+                  ].map((b) => (
+                    <div
+                      key={b.title}
+                      className="flex items-center gap-3.5 rounded-2xl border border-amber-100 bg-gradient-to-r from-amber-50/80 to-transparent px-4 py-3 transition-all hover:border-amber-200 hover:shadow-sm"
+                    >
+                      <span className="shrink-0 text-xl">{b.icon}</span>
+                      <div className="flex-1 text-left">
+                        <p className="text-xs font-bold leading-snug text-foreground">{b.title}</p>
+                        <p className="mt-0.5 text-[11px] text-muted-foreground">{b.desc}</p>
+                      </div>
+                      <Check size={13} className="ml-auto shrink-0 text-amber-400 stroke-[2.5]" />
+                    </div>
+                  ))}
                 </div>
 
-                {/* Size */}
-                <div className="mb-4">
-                  <div className="mb-2.5 flex items-center justify-between">
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                      Size
-                    </p>
-                    <button
-                      type="button"
-                      onClick={() => setShowSizeGuide((v) => !v)}
-                      className="flex items-center gap-1 text-xs font-semibold text-amber-600 hover:text-amber-700"
-                    >
-                      <Info size={11} />
-                      Size Guide
-                    </button>
-                  </div>
-                  <div className="flex gap-2">
-                    {SIZES.map((s) => (
-                      <button
-                        key={s}
-                        onClick={() => setSize(s)}
-                        className={cn(
-                          "flex-1 rounded-xl border-2 py-2.5 text-xs font-bold transition-all",
-                          size === s
-                            ? "border-amber-500 bg-amber-500 text-white"
-                            : "border-stone-200 bg-white text-foreground hover:border-amber-300"
-                        )}
-                      >
-                        {s.split(" ")[0]}
-                      </button>
-                    ))}
-                  </div>
-                  {showSizeGuide && (
-                    <div className="mt-3 rounded-xl border border-amber-100 bg-amber-50 p-3">
-                      <p className="mb-2 text-[10px] font-bold text-amber-800">
-                        📏 Wrap a tape around your wrist to find your size
-                      </p>
-                      <div className="grid grid-cols-4 gap-1.5">
-                        {SIZE_GUIDE.map(({ size: sg, wrist }) => (
-                          <div
-                            key={sg}
-                            className={cn(
-                              "rounded-lg border px-1 py-2 text-center transition-all",
-                              size === sg
-                                ? "border-amber-400 bg-white"
-                                : "border-transparent"
-                            )}
-                          >
-                            <p className="text-[10px] font-bold text-foreground">
-                              {sg.split(" ")[0]}
-                            </p>
-                            <p className="text-[9px] text-muted-foreground">{wrist}</p>
-                          </div>
-                        ))}
-                      </div>
+                {/* Price preview */}
+                <div className="mb-3 flex items-center justify-center gap-3 md:justify-start">
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Starts at</p>
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-2xl font-black text-amber-700">₹699</span>
+                      <span className="text-sm text-muted-foreground line-through">₹1,499</span>
+                      <span className="rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-bold text-green-700">53% OFF</span>
                     </div>
-                  )}
+                  </div>
                 </div>
 
                 <div className="mb-4 h-px bg-stone-100" />
@@ -638,12 +606,10 @@ export function KadaProductPage() {
                   <button
                     type="button"
                     onClick={scrollToOrder}
-                    className="kada-glow-btn w-full rounded-2xl bg-amber-700 px-8 py-4 text-base font-bold text-white transition-all hover:bg-amber-800 active:scale-95"
+                    className="kada-glow-btn w-full rounded-2xl bg-amber-700 px-8 py-4 text-base font-bold text-white transition-all hover:bg-amber-800 active:scale-95 flex items-center justify-center gap-2"
                   >
-                    Buy Now — COD Available ✨
-                    <p className="mt-0.5 text-xs font-normal opacity-85">
-                      Cash on Delivery · Free Shipping
-                    </p>
+                    Select Size & Order Now
+                    <ArrowRight size={18} />
                   </button>
                   <a
                     href={whatsappUrl()}
@@ -832,6 +798,79 @@ export function KadaProductPage() {
               </div>
             </div>
 
+            {/* Size Selection */}
+            <div className="mb-6 rounded-3xl border border-stone-100 bg-white p-5 shadow-sm">
+              <div className="mb-3 flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-bold text-foreground">Select Your Size</p>
+                  <p className="mt-0.5 text-[11px] text-muted-foreground">
+                    Currently selected: <span className="font-semibold text-amber-700">{size}</span>
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowSizeGuide((v) => !v)}
+                  className="flex items-center gap-1.5 rounded-xl border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-700 transition-all hover:bg-amber-100"
+                >
+                  <Info size={11} />
+                  Size Guide
+                </button>
+              </div>
+
+              <div className="grid grid-cols-4 gap-2.5">
+                {SIZES.map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => setSize(s)}
+                    className={cn(
+                      "flex flex-col items-center rounded-2xl border-2 px-2 py-3.5 transition-all",
+                      size === s
+                        ? "border-amber-500 bg-amber-500 text-white shadow-lg shadow-amber-200"
+                        : "border-stone-200 bg-white text-foreground hover:border-amber-300"
+                    )}
+                  >
+                    <span className="text-sm font-black">{s.split(" ")[0]}</span>
+                    <span
+                      className={cn(
+                        "mt-1 text-[10px]",
+                        size === s ? "text-amber-100" : "text-muted-foreground"
+                      )}
+                    >
+                      {s.split("— ")[1]}
+                    </span>
+                  </button>
+                ))}
+              </div>
+
+              {showSizeGuide && (
+                <div className="mt-4 rounded-2xl border border-amber-100 bg-amber-50/80 p-4">
+                  <p className="mb-3 text-xs font-bold text-amber-800">
+                    📏 Wrap a soft tape or string around your wrist and measure
+                  </p>
+                  <div className="space-y-1.5">
+                    {SIZE_GUIDE.map(({ size: sg, wrist }) => (
+                      <button
+                        key={sg}
+                        type="button"
+                        onClick={() => setSize(sg)}
+                        className={cn(
+                          "flex w-full items-center justify-between rounded-xl border px-4 py-2.5 text-xs text-left transition-all",
+                          size === sg
+                            ? "border-amber-400 bg-white font-bold text-amber-700 shadow-sm"
+                            : "border-transparent text-muted-foreground hover:bg-white/60"
+                        )}
+                      >
+                        <span>{sg}</span>
+                        <span>Wrist: {wrist}</span>
+                        {size === sg && <Check size={12} className="text-amber-500 stroke-[3]" />}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
             {/* Siddha upsell */}
             <div
               role="checkbox"
@@ -871,15 +910,24 @@ export function KadaProductPage() {
             </div>
 
             {/* CTAs */}
-            <button
-              onClick={goToCheckout}
-              className="kada-glow-btn w-full rounded-3xl bg-amber-700 py-5 text-lg font-black text-white shadow-xl transition-all hover:bg-amber-800 active:scale-[0.98]"
-            >
-              Proceed to Checkout →
-              <p className="mt-1 text-sm font-normal opacity-85">
-                Secure · Free Shipping · COD Available
-              </p>
-            </button>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={goToCheckout}
+                className="kada-glow-btn flex flex-col items-center justify-center rounded-3xl bg-amber-700 py-4 text-base font-black text-white shadow-xl transition-all hover:bg-amber-800 active:scale-[0.98]"
+              >
+                Buy Now 🛒
+                <span className="mt-0.5 text-xs font-normal opacity-85">COD Available</span>
+              </button>
+              <button
+                type="button"
+                onClick={goToCheckout}
+                className="flex flex-col items-center justify-center rounded-3xl border-2 border-amber-500 bg-amber-50 py-4 text-base font-bold text-amber-700 transition-all hover:bg-amber-100 active:scale-[0.98]"
+              >
+                Checkout →
+                <span className="mt-0.5 text-xs font-normal text-amber-500">Secure Payment</span>
+              </button>
+            </div>
 
             <a
               href={whatsappUrl()}
