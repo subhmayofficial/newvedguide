@@ -445,14 +445,15 @@ export function KadaProductPage() {
         .kada-ping-slow { animation: kada-ping-slow 2.5s cubic-bezier(0,0,0.2,1) infinite; }
         .kada-pulse-dot { animation: kada-pulse-dot 1.8s ease-in-out infinite; }
         @keyframes kada-popup-in {
-          from { transform: translateY(16px); opacity: 0; }
-          to   { transform: translateY(0);    opacity: 1; }
+          0%   { transform: translateY(-24px) scale(0.92); opacity: 0; }
+          60%  { transform: translateY(4px)   scale(1.02); opacity: 1; }
+          100% { transform: translateY(0)     scale(1);    opacity: 1; }
         }
         @keyframes kada-popup-out {
-          from { transform: translateY(0);    opacity: 1; }
-          to   { transform: translateY(-12px); opacity: 0; }
+          from { transform: translateY(0); opacity: 1; }
+          to   { transform: translateY(-16px); opacity: 0; }
         }
-        .kada-popup-enter { animation: kada-popup-in 0.32s cubic-bezier(0.34,1.56,0.64,1) forwards; }
+        .kada-popup-enter { animation: kada-popup-in 0.44s cubic-bezier(0.34,1.56,0.64,1) forwards; }
         .kada-popup-exit  { animation: kada-popup-out 0.28s ease-in forwards; }
         [data-anim] { opacity: 0; transform: translateY(22px); transition: opacity 0.55s ease, transform 0.55s ease; }
         [data-anim].anim-on { opacity: 1; transform: none; }
@@ -774,9 +775,12 @@ export function KadaProductPage() {
                 <div className="flex flex-col flex-1 px-3 pb-3 pt-3 sm:px-5 sm:pb-5 sm:pt-4">
                   <p className="font-heading text-base font-black leading-tight text-stone-900 sm:text-xl">Daily Wear</p>
                   <p className="mb-3 mt-0.5 text-[10px] font-medium text-stone-400 leading-snug">Vedic remedy for daily wear</p>
-                  <div className="mb-3 flex flex-wrap gap-1.5">
+                  <div className="mb-3 space-y-1.5">
                     {["Lightweight", "Daily Wear", "For Beginners"].map((t) => (
-                      <span key={t} className="rounded-full border border-amber-200 bg-amber-50 px-2 py-1 text-[10px] font-bold text-amber-800">{t}</span>
+                      <div key={t} className="flex items-center gap-2">
+                        <span className="size-1.5 shrink-0 rounded-full bg-amber-400" />
+                        <span className="text-[10px] font-semibold text-stone-600">{t}</span>
+                      </div>
                     ))}
                   </div>
                   <button
@@ -852,9 +856,12 @@ export function KadaProductPage() {
                 <div className="flex flex-col flex-1 bg-slate-50 px-3 pb-3 pt-3 sm:px-5 sm:pb-5 sm:pt-4">
                   <p className="font-heading text-base font-black leading-tight text-stone-900 sm:text-xl">Pure Silver</p>
                   <p className="mb-3 mt-0.5 text-[10px] font-bold text-amber-600 leading-snug">Highest astrological potency</p>
-                  <div className="mb-3 flex flex-wrap gap-1.5">
-                    {["92.5% Sterling", "Hallmark", "Long-Lasting"].map((t) => (
-                      <span key={t} className="rounded-full border border-slate-300 bg-slate-100 px-2 py-1 text-[10px] font-bold text-slate-700">{t}</span>
+                  <div className="mb-3 space-y-1.5">
+                    {["92.5% Sterling", "Hallmark Certified", "Long-Lasting"].map((t) => (
+                      <div key={t} className="flex items-center gap-2">
+                        <span className="size-1.5 shrink-0 rounded-full bg-slate-400" />
+                        <span className="text-[10px] font-semibold text-slate-600">{t}</span>
+                      </div>
                     ))}
                   </div>
                   <button
@@ -1321,22 +1328,25 @@ export function KadaProductPage() {
             PURCHASE POPUP
         ════════════════════════════════════════ */}
         {popup && (
-          <div className="kada-popup-enter fixed bottom-24 left-4 z-[60] md:bottom-8 max-w-[260px]">
-            <div className="flex items-center gap-3 rounded-2xl border border-amber-100 bg-white px-4 py-3 shadow-2xl shadow-amber-100/60">
-              <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-amber-100 text-base font-black text-amber-700">
-                {popup.name[0]}
+          <div className="kada-popup-enter fixed top-16 right-3 z-[60] max-w-[240px]">
+            <div className="flex items-center gap-3 rounded-2xl border border-amber-100 bg-white px-3.5 py-3 shadow-2xl shadow-amber-200/50">
+              <div className="relative shrink-0">
+                <div className="flex size-9 items-center justify-center rounded-full bg-gradient-to-br from-amber-100 to-amber-200 text-sm font-black text-amber-700">
+                  {popup.name[0]}
+                </div>
+                <span className="absolute -bottom-0.5 -right-0.5 flex size-3 items-center justify-center rounded-full bg-green-500">
+                  <span className="size-1.5 rounded-full bg-white" />
+                </span>
               </div>
               <div className="min-w-0">
-                <p className="text-[11px] font-black text-stone-800 leading-tight">
-                  {popup.name} from {popup.city}
+                <p className="text-[11px] font-black text-stone-800 leading-snug">
+                  {popup.name}
+                  <span className="font-semibold text-stone-500"> from {popup.city}</span>
                 </p>
                 <p className="text-[10px] text-amber-600 font-semibold leading-tight mt-0.5">
-                  just purchased {popup.item}
+                  purchased {popup.item}
                 </p>
-                <div className="mt-1 flex items-center gap-1">
-                  <span className="size-1.5 rounded-full bg-green-500 inline-block" />
-                  <span className="text-[9px] text-stone-400">a few minutes ago</span>
-                </div>
+                <p className="text-[9px] text-stone-400 mt-0.5">just now ✓</p>
               </div>
             </div>
           </div>
