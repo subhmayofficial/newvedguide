@@ -235,6 +235,7 @@ export function KadaProductPage() {
 
   const heroRef = useRef<HTMLDivElement>(null);
   const orderRef = useRef<HTMLDivElement>(null);
+  const touchStartX = useRef<number | null>(null);
 
   const activeDesign =
     DESIGN_VARIANTS.find((d) => d.id === designId) ?? DESIGN_VARIANTS[0];
@@ -447,7 +448,19 @@ export function KadaProductPage() {
             <div className="mx-auto max-w-md">
               {/* Product Image */}
               <div className="relative mx-auto max-w-[340px]">
-                <div className="kada-float relative aspect-square w-full overflow-hidden rounded-[2.5rem] border border-amber-100 bg-white shadow-2xl">
+                <div
+                  className="kada-float relative aspect-square w-full overflow-hidden rounded-[2.5rem] border border-amber-100 bg-white shadow-2xl"
+                  onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX; }}
+                  onTouchEnd={(e) => {
+                    if (touchStartX.current === null) return;
+                    const diff = touchStartX.current - e.changedTouches[0].clientX;
+                    if (Math.abs(diff) > 40) {
+                      if (diff > 0) setActiveImage((v) => Math.min(v + 1, galleryImages.length - 1));
+                      else setActiveImage((v) => Math.max(v - 1, 0));
+                    }
+                    touchStartX.current = null;
+                  }}
+                >
                   <Image
                     key={`${designId}-${safeActiveImage}`}
                     src={galleryImages[safeActiveImage].src}
@@ -471,6 +484,24 @@ export function KadaProductPage() {
                     ))}
                   </div>
                   <p className="text-xs font-bold text-foreground">4.9</p>
+                </div>
+
+                {/* Dot indicators */}
+                <div className="mt-3 flex justify-center gap-2">
+                  {galleryImages.map((_, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => setActiveImage(i)}
+                      aria-label={`Image ${i + 1}`}
+                      className={cn(
+                        "rounded-full transition-all duration-300",
+                        safeActiveImage === i
+                          ? "w-5 h-2 bg-amber-500"
+                          : "size-2 bg-amber-200 hover:bg-amber-300"
+                      )}
+                    />
+                  ))}
                 </div>
               </div>
 
