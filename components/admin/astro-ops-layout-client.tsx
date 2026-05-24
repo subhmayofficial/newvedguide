@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { AstroOpsJoinQueueAlarm } from "@/components/admin/astro-ops-join-queue-alarm";
 import { AstroOpsSidebar } from "@/components/admin/astro-ops-sidebar";
 import { AdminThemeProvider } from "@/components/admin/admin-theme-context";
 import { Menu } from "lucide-react";
@@ -26,6 +27,7 @@ export function AstroOpsLayoutClient({ children }: { children: React.ReactNode }
           </header>
           <main className="flex-1 overflow-x-hidden overflow-y-auto p-4 md:p-8">{children}</main>
         </div>
+        <AstroOpsJoinQueueAlarm />
       </div>
     </AdminThemeProvider>
   );
