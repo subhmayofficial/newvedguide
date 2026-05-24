@@ -599,57 +599,43 @@ export function KadaProductPage() {
                 onClick={() => setVariant("plated")}
                 onKeyDown={(e) => e.key === "Enter" && setVariant("plated")}
                 className={cn(
-                  "flex flex-col rounded-3xl overflow-hidden cursor-pointer border-2 transition-all duration-200",
+                  "flex flex-col rounded-3xl overflow-hidden cursor-pointer border-2 bg-white transition-all duration-200",
                   variant === "plated"
-                    ? "border-amber-500 shadow-2xl shadow-amber-100 scale-[1.01]"
-                    : "border-stone-200 bg-white hover:border-amber-300 hover:shadow-lg"
+                    ? "border-amber-500 shadow-2xl shadow-amber-100"
+                    : "border-stone-200 hover:border-amber-300 hover:shadow-lg"
                 )}
               >
-                {/* Visual hero — warm gold */}
-                <div
-                  className="relative flex h-48 flex-col items-center justify-center overflow-hidden"
-                  style={{ background: "linear-gradient(145deg, #fef9ee 0%, #fde68a 35%, #fbbf24 65%, #f59e0b 100%)" }}
-                >
-                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/25 via-transparent to-transparent" />
-                  {/* Kada ring visual */}
-                  <div className="absolute size-36 rounded-full border-[8px] border-amber-400/30" />
-                  <div className="absolute size-24 rounded-full border-[5px] border-amber-500/25" />
-                  <div className="relative z-10 flex size-16 items-center justify-center rounded-full border-[4px] border-amber-500/40 bg-amber-200/40 shadow-inner">
-                    <span className="text-3xl">⚜️</span>
-                  </div>
-                  {/* Off badge */}
-                  <div className="absolute left-3.5 top-3.5 rounded-xl bg-green-500 px-2.5 py-1 shadow">
-                    <span className="text-xs font-black text-white">53% OFF</span>
-                  </div>
-                  {/* Price */}
-                  <div className="absolute bottom-3.5 right-4 text-right">
-                    <p className="text-3xl font-black leading-none text-amber-900">₹699</p>
-                    <p className="text-xs font-semibold text-amber-700/70 line-through">₹1,499</p>
-                  </div>
-                  {/* Selected tick */}
-                  {variant === "plated" && (
-                    <div className="absolute right-3.5 top-3.5 flex size-7 items-center justify-center rounded-full bg-amber-600 shadow-lg">
-                      <Check size={14} className="text-white stroke-[3]" />
+                {/* Price hero */}
+                <div className="relative flex items-start justify-between border-b border-stone-100 px-5 pb-5 pt-5">
+                  <div>
+                    {/* Material swatch */}
+                    <div className="mb-3 flex items-center gap-2">
+                      <span
+                        className="inline-block size-4 rounded-full shadow-sm"
+                        style={{ background: "linear-gradient(135deg, #f5d78e 0%, #c8870a 50%, #f0c040 100%)" }}
+                      />
+                      <span className="text-[11px] font-bold uppercase tracking-widest text-stone-400">Silver Plated</span>
                     </div>
-                  )}
+                    <p className="font-heading text-5xl font-black leading-none text-amber-700">₹699</p>
+                    <p className="mt-1.5 text-sm font-medium text-stone-400 line-through">₹1,499</p>
+                  </div>
+                  <div className="flex flex-col items-end gap-2 pt-1">
+                    <span className="rounded-xl bg-green-500 px-2.5 py-1 text-xs font-black text-white">53% OFF</span>
+                    {variant === "plated" && (
+                      <div className="flex size-7 items-center justify-center rounded-full bg-amber-500 shadow">
+                        <Check size={14} className="text-white stroke-[3]" />
+                      </div>
+                    )}
+                  </div>
                 </div>
 
-                {/* Card body */}
-                <div className="flex flex-col flex-1 bg-white px-5 py-4">
-                  <p className="font-heading text-2xl font-black text-stone-800 leading-tight">
-                    Silver Plated
-                  </p>
-                  <p className="mb-4 mt-0.5 text-sm font-semibold text-amber-600">
-                    Daily Wear Spiritual Kada
-                  </p>
+                {/* Body */}
+                <div className="flex flex-col flex-1 px-5 pb-5 pt-4">
+                  <p className="font-heading text-xl font-black leading-tight text-stone-900">Daily Wear Spiritual Kada</p>
+                  <p className="mb-4 mt-1 text-xs font-medium text-stone-400">Best for beginners, gifting & daily use</p>
                   <div className="mb-5 flex flex-wrap gap-2">
                     {["Lightweight", "Budget-Friendly", "Daily Wear", "Great for Gifting"].map((t) => (
-                      <span
-                        key={t}
-                        className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-bold text-amber-800"
-                      >
-                        {t}
-                      </span>
+                      <span key={t} className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-bold text-amber-800">{t}</span>
                     ))}
                   </div>
                   <button
@@ -658,7 +644,7 @@ export function KadaProductPage() {
                     className={cn(
                       "mt-auto w-full rounded-2xl py-3.5 text-sm font-black transition-all",
                       variant === "plated"
-                        ? "bg-amber-600 text-white shadow-md hover:bg-amber-700"
+                        ? "bg-amber-600 text-white hover:bg-amber-700"
                         : "border-2 border-amber-400 text-amber-700 hover:bg-amber-50"
                     )}
                   >
@@ -674,79 +660,55 @@ export function KadaProductPage() {
                 onClick={() => setVariant("silver")}
                 onKeyDown={(e) => e.key === "Enter" && setVariant("silver")}
                 className={cn(
-                  "flex flex-col rounded-3xl overflow-hidden cursor-pointer border-2 transition-all duration-200",
+                  "flex flex-col rounded-3xl overflow-hidden cursor-pointer border-2 bg-white transition-all duration-200",
                   variant === "silver"
-                    ? "border-amber-500 shadow-2xl shadow-amber-100 scale-[1.01]"
-                    : "border-stone-200 bg-white hover:border-amber-300 hover:shadow-lg"
+                    ? "border-amber-500 shadow-2xl shadow-amber-100"
+                    : "border-stone-200 hover:border-amber-300 hover:shadow-lg"
                 )}
               >
-                {/* Top badge — always visible */}
+                {/* Recommended banner */}
                 <div className="flex items-center gap-2 bg-amber-800 px-5 py-2.5">
-                  <Star size={13} className="fill-amber-300 text-amber-300 shrink-0" />
-                  <span className="text-xs font-black uppercase tracking-widest text-white">
-                    Most Recommended
-                  </span>
+                  <Star size={12} className="shrink-0 fill-amber-300 text-amber-300" />
+                  <span className="text-xs font-black uppercase tracking-widest text-white">Most Recommended</span>
                 </div>
 
-                {/* Visual hero — silver metallic */}
-                <div
-                  className="relative flex h-40 flex-col items-center justify-center overflow-hidden"
-                  style={{ background: "linear-gradient(145deg, #f1f5f9 0%, #e2e8f0 25%, #f8fafc 50%, #cbd5e1 75%, #e2e8f0 100%)" }}
-                >
-                  {/* Shimmer */}
-                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-transparent via-white/40 to-transparent" />
-                  {/* Kada ring visual — silver tones */}
-                  <div className="absolute size-36 rounded-full border-[8px] border-slate-300/50" />
-                  <div className="absolute size-24 rounded-full border-[5px] border-slate-400/35" />
-                  <div className="relative z-10 flex size-16 items-center justify-center rounded-full border-[4px] border-slate-400/50 bg-white/30 shadow-inner"
-                    style={{ boxShadow: "inset 0 2px 8px rgba(148,163,184,0.4), 0 2px 8px rgba(148,163,184,0.3)" }}
-                  >
-                    <span className="text-3xl">🥈</span>
-                  </div>
-                  {/* Off badge */}
-                  <div className="absolute left-3.5 top-3.5 rounded-xl bg-green-500 px-2.5 py-1 shadow">
-                    <span className="text-xs font-black text-white">43% OFF</span>
-                  </div>
-                  {/* Price */}
-                  <div className="absolute bottom-3.5 right-4 text-right">
-                    <p className="text-3xl font-black leading-none text-slate-800">₹4,499</p>
-                    <p className="text-xs font-semibold text-slate-500 line-through">₹7,999</p>
-                  </div>
-                  {/* Selected tick */}
-                  {variant === "silver" && (
-                    <div className="absolute right-3.5 top-3.5 flex size-7 items-center justify-center rounded-full bg-amber-700 shadow-lg">
-                      <Check size={14} className="text-white stroke-[3]" />
-                    </div>
-                  )}
-                </div>
-
-                {/* Card body */}
-                <div className="flex flex-col flex-1 bg-white px-5 py-4">
-                  <p className="font-heading text-2xl font-black text-stone-800 leading-tight">
-                    Pure Silver
-                  </p>
-                  <p className="mb-4 mt-0.5 text-sm font-semibold text-slate-500">
-                    92.5% Sterling Silver · Hallmark Certified
-                  </p>
-                  <div className="mb-5 flex flex-wrap gap-2">
-                    {["Original Silver", "Premium Weight", "Long-Lasting", "Top Spiritual Value"].map((t) => (
+                {/* Price hero */}
+                <div className="relative flex items-start justify-between border-b border-stone-100 px-5 pb-5 pt-5">
+                  <div>
+                    {/* Material swatch */}
+                    <div className="mb-3 flex items-center gap-2">
                       <span
-                        key={t}
-                        className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-bold text-slate-700"
-                      >
-                        {t}
-                      </span>
+                        className="inline-block size-4 rounded-full shadow-sm"
+                        style={{ background: "linear-gradient(135deg, #e8e8e8 0%, #9ca3af 45%, #d1d5db 80%, #f3f4f6 100%)" }}
+                      />
+                      <span className="text-[11px] font-bold uppercase tracking-widest text-stone-400">92.5% Sterling Silver</span>
+                    </div>
+                    <p className="font-heading text-5xl font-black leading-none text-stone-800">₹4,499</p>
+                    <p className="mt-1.5 text-sm font-medium text-stone-400 line-through">₹7,999</p>
+                  </div>
+                  <div className="flex flex-col items-end gap-2 pt-1">
+                    <span className="rounded-xl bg-green-500 px-2.5 py-1 text-xs font-black text-white">43% OFF</span>
+                    {variant === "silver" && (
+                      <div className="flex size-7 items-center justify-center rounded-full bg-amber-700 shadow">
+                        <Check size={14} className="text-white stroke-[3]" />
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Body */}
+                <div className="flex flex-col flex-1 px-5 pb-5 pt-4">
+                  <p className="font-heading text-xl font-black leading-tight text-stone-900">Premium Silver Kada</p>
+                  <p className="mb-4 mt-1 text-xs font-medium text-stone-400">Best for serious use, long-term wear & premium gifting</p>
+                  <div className="mb-5 flex flex-wrap gap-2">
+                    {["Original Silver", "Premium Weight", "Long-Lasting", "Hallmark Certified"].map((t) => (
+                      <span key={t} className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-700">{t}</span>
                     ))}
                   </div>
                   <button
                     type="button"
                     onClick={(e) => { e.stopPropagation(); setVariant("silver"); }}
-                    className={cn(
-                      "mt-auto w-full rounded-2xl py-3.5 text-sm font-black transition-all",
-                      variant === "silver"
-                        ? "bg-amber-700 text-white shadow-md hover:bg-amber-800"
-                        : "bg-amber-700 text-white hover:bg-amber-800"
-                    )}
+                    className="mt-auto w-full rounded-2xl bg-amber-700 py-3.5 text-sm font-black text-white transition-all hover:bg-amber-800"
                   >
                     {variant === "silver" ? "✓ Selected" : "Choose Pure Silver"}
                   </button>
