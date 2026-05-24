@@ -3,8 +3,8 @@
   "configurations": [
     {
       "name": "vedguide-dev",
-      "runtimeExecutable": "/bin/bash",
-      "runtimeArgs": ["/Users/sameerkumar/vedguide/.claude/start-dev.sh"],
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
       "port": 3000,
       "autoPort": true
     }
