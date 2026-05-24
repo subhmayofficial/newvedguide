@@ -1,0 +1,1077 @@
+"use client";
+
+import { useState, useEffect, useRef } from "react";
+import {
+  Check,
+  Star,
+  Shield,
+  Truck,
+  ChevronDown,
+  ChevronUp,
+  Package,
+  Clock,
+  ArrowRight,
+  Sparkles,
+  Zap,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+
+// ── Product Images (replace src: null with actual URLs when ready) ─────────────
+const PRODUCT_IMAGES = [
+  { id: 0, alt: "Kada — Front View", bg: "from-amber-100 via-yellow-50 to-amber-200", src: null },
+  { id: 1, alt: "Kada — Side View", bg: "from-yellow-100 via-amber-50 to-yellow-200", src: null },
+  { id: 2, alt: "Kada — Close-up Engravings", bg: "from-amber-200 via-orange-50 to-amber-100", src: null },
+  { id: 3, alt: "Kada — Worn on Wrist", bg: "from-orange-100 via-amber-50 to-orange-200", src: null },
+  { id: 4, alt: "Kada — Pure Silver Variant", bg: "from-slate-100 via-gray-50 to-slate-200", src: null },
+];
+
+// ── Data ───────────────────────────────────────────────────────────────────────
+
+const TICKER = [
+  "🕉️ Vedic Certified",
+  "💳 Cash on Delivery Available",
+  "✨ Personalized Preparation",
+  "🔒 Genuine Materials",
+  "📦 Premium Packaging",
+  "🌙 Saturn & Rahu Dosh Protection",
+  "⭐ 4.9 / 5 Rating",
+  "🛡️ Replacement Guarantee",
+];
+
+const SIZES = ['S — 2.2"', 'M — 2.4"', 'L — 2.6"', 'XL — 2.8"'];
+
+const PLATED_FEATURES = [
+  "Premium silver-plated finish",
+  "Visually identical to pure silver",
+  "Lightweight & comfortable for daily wear",
+  "Ideal entry point for astrological remedies",
+];
+
+const SILVER_FEATURES = [
+  "92.5% Sterling Silver — hallmark certified",
+  "Heavier, more premium feel on the wrist",
+  "Higher astrological potency per Vedic texts",
+  "Recommended by practising astrologers",
+];
+
+const BENEFITS = [
+  {
+    icon: "🪐",
+    title: "Saturn & Rahu Dosh Protection",
+    desc: "Balances the negative effects of Saturn and Rahu planetary periods — brings stability and a clearer sense of direction.",
+  },
+  {
+    icon: "🧘",
+    title: "Mental Peace & Calm",
+    desc: "Anxious thoughts reduce with daily wear. The mind settles — wearers consistently report feeling more grounded.",
+  },
+  {
+    icon: "⚡",
+    title: "Positive Energy Flow",
+    desc: "Silver's natural energetic properties attract positivity and act as a filter against environmental negativity.",
+  },
+  {
+    icon: "💪",
+    title: "Confidence & Clarity",
+    desc: "Clearer decision-making and a natural growth in self-confidence — visible in daily performance and interactions.",
+  },
+  {
+    icon: "❤️",
+    title: "Emotional Stability",
+    desc: "Mood swings reduce. Patience and balance come more naturally in relationships and high-pressure situations.",
+  },
+  {
+    icon: "🛡️",
+    title: "Astrological Protection",
+    desc: "During planetary transitions, this kada acts as an invisible protective layer against their adverse effects.",
+  },
+];
+
+const WHO_NEEDS = [
+  "Going through Shani Sade Sati or Rahu Mahadasha",
+  "Experiencing anxiety, overthinking, or frequent mood swings",
+  "Stuck in repeating patterns in career or relationships",
+  "Seeking confidence and clarity in major life decisions",
+  "Wanting to seriously try a Vedic astrological remedy",
+  "Looking for a premium, meaningful spiritual gift",
+];
+
+const STEPS = [
+  {
+    num: "01",
+    icon: "🛒",
+    title: "Place Your Order",
+    desc: "Choose your variant and size. Pay on delivery or online — both options available.",
+  },
+  {
+    num: "02",
+    icon: "🕉️",
+    title: "Personalised Preparation",
+    desc: "Your kada is prepared based on your birth nakshatra. Siddh option includes full Vedic rituals.",
+  },
+  {
+    num: "03",
+    icon: "📦",
+    title: "Delivered in 15–20 Days",
+    desc: "After careful handcrafted preparation, shipped in premium packaging straight to your door.",
+  },
+];
+
+const TESTIMONIALS = [
+  {
+    initial: "A",
+    name: "Amit V.",
+    city: "Delhi",
+    tag: "Saturn Dosh",
+    stars: 5,
+    text: "I was going through Sade Sati. Wore the silver kada for 3 months — clarity in business improved, decisions felt easier. A genuine shift. Doesn't feel like coincidence at all.",
+    outcome: "Business clarity in 3 months",
+  },
+  {
+    initial: "P",
+    name: "Priya S.",
+    city: "Mumbai",
+    tag: "Mental Peace",
+    stars: 5,
+    text: "Anxiety was overwhelming. Added the Siddh option. The peace I've experienced since has no comparison. Just wearing it feels calming — every single day.",
+    outcome: "Anxiety significantly reduced",
+  },
+  {
+    initial: "R",
+    name: "Rohit M.",
+    city: "Pune",
+    tag: "Rahu Dosh",
+    stars: 5,
+    text: "Started with the silver plated version to test it. Loved it so much I ordered the pure silver too. Both feel different — the pure silver one grounds you more deeply.",
+    outcome: "Ordered both variants",
+  },
+];
+
+const FAQS = [
+  {
+    q: "What is the difference between Pure Silver and Silver Plated?",
+    a: "Pure Silver is 92.5% sterling silver — heavier, more premium, and considered astrologically more potent by practising astrologers. Silver Plated looks completely identical, is lightweight, and is the perfect starting point for remedies. No one will be able to tell the difference visually.",
+  },
+  {
+    q: "Why does delivery take 15–20 days?",
+    a: "This is not a mass-produced product. Each kada is personalised based on your birth nakshatra. The Siddh option involves additional Vedic rituals performed at an auspicious muhurat. This takes time — both quality and intention are carefully ensured.",
+  },
+  {
+    q: "What exactly is the Siddh (Energised) option?",
+    a: "For ₹299 extra, your kada is energised and activated through specific Vedic mantras, Gangajal (sacred water), and performed at an auspicious muhurat — consecrated in your name. It becomes a spiritually charged remedy, not just a physical product.",
+  },
+  {
+    q: "Is Cash on Delivery available?",
+    a: "Yes, COD is available pan-India. Pay at the time of delivery. If you prefer to pay online at checkout, you get an additional ₹50 discount.",
+  },
+  {
+    q: "What if the product is defective?",
+    a: "If the product arrives defective or damaged, full replacement is guaranteed — no questions asked. Astrological results are a personal experience and may vary, but the physical quality of every product is fully guaranteed.",
+  },
+];
+
+// ── Main Component ─────────────────────────────────────────────────────────────
+
+export function KadaProductPage() {
+  const [variant, setVariant] = useState<"plated" | "silver">("plated");
+  const [size, setSize] = useState(SIZES[1]);
+  const [siddha, setSiddha] = useState(false);
+  const [activeImage, setActiveImage] = useState(0);
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [stickyVisible, setStickyVisible] = useState(false);
+
+  const heroRef = useRef<HTMLDivElement>(null);
+  const orderRef = useRef<HTMLDivElement>(null);
+
+  const basePrice = variant === "silver" ? 4499 : 699;
+  const mrp = variant === "silver" ? 7999 : 1499;
+  const discPct = variant === "silver" ? 43 : 53;
+  const savings = mrp - basePrice;
+
+  useEffect(() => {
+    const el = heroRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([e]) => setStickyVisible(!e.isIntersecting),
+      { threshold: 0 }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
+  const scrollToOrder = () =>
+    orderRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+
+  return (
+    <>
+      <style>{`
+        @keyframes kada-float {
+          0%, 100% { transform: translateY(0px) rotate(-1deg); }
+          50% { transform: translateY(-14px) rotate(1deg); }
+        }
+        @keyframes kada-shimmer-text {
+          0% { background-position: 0% center; }
+          100% { background-position: 200% center; }
+        }
+        @keyframes kada-ticker {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        @keyframes kada-glow {
+          0%, 100% { box-shadow: 0 0 0 0 rgba(180,83,9,0); }
+          50% { box-shadow: 0 0 32px 4px rgba(180,83,9,0.45); }
+        }
+        @keyframes kada-particle {
+          0% { transform: translateY(0) scale(1); opacity: 0.7; }
+          100% { transform: translateY(-80px) scale(0.1); opacity: 0; }
+        }
+        @keyframes kada-spin-slow {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        @keyframes kada-ping-slow {
+          0% { transform: scale(1); opacity: 0.8; }
+          70% { transform: scale(1.6); opacity: 0; }
+          100% { transform: scale(1); opacity: 0; }
+        }
+        .kada-float { animation: kada-float 5s ease-in-out infinite; }
+        .kada-shimmer-text {
+          background: linear-gradient(90deg, #92400e 0%, #d97706 30%, #fbbf24 50%, #d97706 70%, #92400e 100%);
+          background-size: 200% auto;
+          -webkit-background-clip: text;
+          background-clip: text;
+          -webkit-text-fill-color: transparent;
+          animation: kada-shimmer-text 4s linear infinite;
+        }
+        .kada-ticker-track {
+          display: flex;
+          width: max-content;
+          animation: kada-ticker 32s linear infinite;
+        }
+        .kada-glow-btn { animation: kada-glow 2.5s ease-in-out infinite; }
+        .kada-particle {
+          position: absolute;
+          border-radius: 50%;
+          animation: kada-particle ease-out infinite;
+        }
+        .kada-spin-slow { animation: kada-spin-slow 20s linear infinite; }
+        .kada-ping-slow { animation: kada-ping-slow 2.5s cubic-bezier(0,0,0.2,1) infinite; }
+      `}</style>
+
+      <div className="min-h-screen bg-[var(--background)]">
+
+        {/* ════════════════════════════════════════
+            HERO
+        ════════════════════════════════════════ */}
+        <section
+          ref={heroRef}
+          className="relative overflow-hidden bg-gradient-to-br from-amber-50 via-[#fff8f0] to-orange-50/40 pt-10 pb-16 md:pt-16 md:pb-24"
+        >
+          <div className="pointer-events-none absolute -top-32 -right-32 size-[500px] rounded-full border border-amber-200/30 opacity-60" />
+          <div className="pointer-events-none absolute -top-20 -right-20 size-[350px] rounded-full border border-amber-200/20 opacity-40" />
+          <div className="pointer-events-none absolute -bottom-40 -left-40 size-[600px] rounded-full border border-amber-100/40 opacity-40" />
+
+          <div className="pointer-events-none absolute inset-0 overflow-hidden">
+            {[...Array(14)].map((_, i) => (
+              <div
+                key={i}
+                className="kada-particle bg-amber-400/30"
+                style={{
+                  width: `${4 + (i % 4) * 3}px`,
+                  height: `${4 + (i % 4) * 3}px`,
+                  left: `${(i * 19) % 92}%`,
+                  top: `${15 + (i * 11) % 65}%`,
+                  animationDelay: `${i * 0.35}s`,
+                  animationDuration: `${3.5 + (i % 3) * 0.8}s`,
+                }}
+              />
+            ))}
+          </div>
+
+          <div className="relative mx-auto max-w-6xl px-5">
+            <div className="mb-5 flex justify-center md:justify-start">
+              <span className="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-100/80 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-amber-700 backdrop-blur-sm">
+                <Sparkles size={11} />
+                Vedic Astrological Remedy
+                <Sparkles size={11} />
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 items-center gap-10 md:grid-cols-2 md:gap-16">
+              {/* ── Left: Product Image ── */}
+              <div className="order-1">
+                <div className="relative mx-auto max-w-[340px] md:max-w-full">
+                  <div
+                    className={cn(
+                      "kada-float relative aspect-square w-full overflow-hidden rounded-[2.5rem] shadow-2xl bg-gradient-to-br border border-amber-100",
+                      PRODUCT_IMAGES[activeImage].bg
+                    )}
+                  >
+                    <div className="flex h-full flex-col items-center justify-center gap-4 text-amber-700/50">
+                      <div className="kada-spin-slow text-7xl" style={{ display: "inline-block" }}>
+                        ⚜️
+                      </div>
+                      <p className="px-6 text-center text-sm font-medium">
+                        {PRODUCT_IMAGES[activeImage].alt}
+                      </p>
+                      <p className="px-6 text-center text-xs opacity-60">
+                        Product photo coming soon
+                      </p>
+                    </div>
+                    <div className="absolute right-4 top-4 flex flex-col items-center rounded-2xl bg-red-500 px-3 py-2 text-white shadow-lg">
+                      <span className="text-lg font-black leading-none">{discPct}%</span>
+                      <span className="text-[10px] font-semibold uppercase tracking-wide">OFF</span>
+                    </div>
+                    <div className="pointer-events-none absolute inset-0 rounded-[2.5rem] bg-gradient-to-tr from-transparent via-white/20 to-transparent" />
+                  </div>
+
+                  {/* Thumbnails */}
+                  <div className="mt-4 flex justify-center gap-2.5">
+                    {PRODUCT_IMAGES.map((img, i) => (
+                      <button
+                        key={img.id}
+                        onClick={() => setActiveImage(i)}
+                        aria-label={img.alt}
+                        className={cn(
+                          "size-11 flex-shrink-0 overflow-hidden rounded-xl border-2 bg-gradient-to-br transition-all",
+                          img.bg,
+                          activeImage === i
+                            ? "scale-110 border-amber-500 shadow-md shadow-amber-200"
+                            : "border-transparent opacity-50 hover:opacity-80"
+                        )}
+                      />
+                    ))}
+                  </div>
+
+                  {/* Rating chip */}
+                  <div className="absolute -top-3 -right-3 hidden md:flex items-center gap-2 rounded-2xl bg-white px-4 py-2.5 shadow-xl border border-amber-100">
+                    <div className="flex">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} size={11} className="fill-amber-400 text-amber-400" />
+                      ))}
+                    </div>
+                    <p className="text-xs font-bold text-foreground">4.9 / 5</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* ── Right: Content ── */}
+              <div className="order-2 text-center md:text-left">
+                <div className="mb-3 flex items-center justify-center gap-1 md:justify-start">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} size={16} className="fill-amber-400 text-amber-400" />
+                  ))}
+                  <span className="ml-2 text-sm text-muted-foreground">4.9 · 127 reviews</span>
+                </div>
+
+                <h1 className="font-heading mb-5 text-3xl font-bold leading-[1.15] md:text-4xl lg:text-[2.8rem]">
+                  Control Your Emotions & Attract{" "}
+                  <span className="kada-shimmer-text">Positive Energy</span>{" "}
+                  with an Astrological Vedic Kada
+                </h1>
+
+                <p className="mb-7 max-w-md mx-auto md:mx-0 text-sm leading-relaxed text-muted-foreground md:text-base">
+                  This is not just an accessory —{" "}
+                  <strong className="text-foreground">it is an astrological remedy</strong>{" "}
+                  that calms the mind, protects against Saturn and Rahu doshas,
+                  and brings positive energy and confidence into daily life.
+                </p>
+
+                <div className="mb-7">
+                  <div className="flex items-baseline justify-center gap-3 md:justify-start">
+                    <span className="text-4xl font-black text-amber-700 md:text-5xl">
+                      ₹{basePrice.toLocaleString("en-IN")}
+                    </span>
+                    <span className="text-xl text-muted-foreground line-through">
+                      ₹{mrp.toLocaleString("en-IN")}
+                    </span>
+                  </div>
+                  <div className="mt-1.5 flex items-center justify-center gap-2 md:justify-start">
+                    <span className="rounded-full bg-green-100 px-3 py-0.5 text-xs font-bold text-green-700">
+                      {discPct}% OFF
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      You save ₹{savings.toLocaleString("en-IN")}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Quick variant toggles */}
+                <div className="mb-7 flex justify-center gap-3 md:justify-start">
+                  {(["plated", "silver"] as const).map((v) => {
+                    const label = v === "plated" ? "Silver Plated" : "Pure Silver";
+                    const price = v === "plated" ? "₹699" : "₹4,499";
+                    return (
+                      <button
+                        key={v}
+                        onClick={() => setVariant(v)}
+                        className={cn(
+                          "w-36 rounded-2xl border-2 px-3 py-3 text-left transition-all",
+                          variant === v
+                            ? "border-amber-500 bg-amber-50 shadow-md"
+                            : "border-border bg-white hover:border-amber-300"
+                        )}
+                      >
+                        <p className={cn("text-base font-black", variant === v ? "text-amber-700" : "text-foreground")}>
+                          {price}
+                        </p>
+                        <p className="text-[11px] text-muted-foreground">{label}</p>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <button
+                  onClick={scrollToOrder}
+                  className="kada-glow-btn mx-auto block w-full max-w-sm rounded-2xl bg-amber-700 px-8 py-4 text-base font-bold text-white transition-all hover:bg-amber-800 active:scale-95 md:mx-0"
+                >
+                  Buy Now — COD Available ✨
+                  <p className="mt-0.5 text-xs font-normal opacity-85">
+                    Cash on Delivery · Free Shipping
+                  </p>
+                </button>
+
+                <div className="mt-5 flex flex-wrap justify-center gap-2 md:justify-start">
+                  {[
+                    { Icon: Shield, text: "Secure" },
+                    { Icon: Truck, text: "COD Available" },
+                    { Icon: Package, text: "Handcrafted" },
+                    { Icon: Clock, text: "15–20 Day Delivery" },
+                  ].map(({ Icon, text }) => (
+                    <span
+                      key={text}
+                      className="inline-flex items-center gap-1.5 rounded-full border border-amber-100 bg-white/80 px-3 py-1 text-[11px] font-medium text-amber-800 shadow-sm backdrop-blur-sm"
+                    >
+                      <Icon size={11} />
+                      {text}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ════════════════════════════════════════
+            TICKER
+        ════════════════════════════════════════ */}
+        <div className="overflow-hidden bg-amber-700 py-3">
+          <div className="kada-ticker-track">
+            {[...TICKER, ...TICKER].map((text, i) => (
+              <span
+                key={i}
+                className="inline-flex items-center whitespace-nowrap px-6 text-sm font-semibold text-white"
+              >
+                {text}
+                <span className="mx-4 opacity-40">✦</span>
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* ════════════════════════════════════════
+            CHOOSE YOUR KADA
+        ════════════════════════════════════════ */}
+        <section
+          ref={orderRef}
+          className="scroll-mt-6 bg-gradient-to-br from-amber-50/60 via-white to-orange-50/20 py-16 px-5"
+        >
+          <div className="mx-auto max-w-3xl">
+            <div className="mb-10 text-center">
+              <span className="text-xs font-bold uppercase tracking-widest text-amber-600">
+                Select Your Kada
+              </span>
+              <h2 className="font-heading mt-2 text-3xl font-bold text-foreground md:text-4xl">
+                Choose Your Variant
+              </h2>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Both look identical — the difference is in material and astrological potency
+              </p>
+            </div>
+
+            {/* Variant Cards */}
+            <div className="mb-5 grid grid-cols-1 gap-4 md:grid-cols-2">
+              {/* Silver Plated */}
+              <div
+                role="button"
+                tabIndex={0}
+                onClick={() => setVariant("plated")}
+                onKeyDown={(e) => e.key === "Enter" && setVariant("plated")}
+                className={cn(
+                  "group relative flex flex-col text-left rounded-3xl border-2 overflow-hidden transition-all duration-200 cursor-pointer",
+                  variant === "plated"
+                    ? "border-amber-500 shadow-2xl shadow-amber-100"
+                    : "border-border bg-white hover:border-amber-300 hover:shadow-lg"
+                )}
+              >
+                {/* Top colour band */}
+                <div className={cn(
+                  "flex items-center justify-between px-5 py-4 transition-colors",
+                  variant === "plated" ? "bg-amber-500" : "bg-amber-50 group-hover:bg-amber-100/60"
+                )}>
+                  <span className={cn(
+                    "text-xs font-black uppercase tracking-widest",
+                    variant === "plated" ? "text-white" : "text-amber-700"
+                  )}>
+                    🔥 Most Popular
+                  </span>
+                  <div className={cn(
+                    "flex size-6 items-center justify-center rounded-full border-2 transition-all",
+                    variant === "plated"
+                      ? "border-white bg-white"
+                      : "border-amber-300 bg-white"
+                  )}>
+                    {variant === "plated" && (
+                      <Check size={13} className="text-amber-500 stroke-[3]" />
+                    )}
+                  </div>
+                </div>
+
+                {/* Card body */}
+                <div className={cn(
+                  "flex flex-col flex-1 p-5 transition-colors",
+                  variant === "plated" ? "bg-amber-50" : "bg-white"
+                )}>
+                  <h3 className="font-heading text-xl font-bold text-foreground mb-1">
+                    Silver Plated Kada
+                  </h3>
+                  <p className="text-xs text-muted-foreground mb-4 leading-relaxed">
+                    High-quality base metal with a premium silver coating. Looks and feels exactly like pure silver.
+                  </p>
+
+                  <ul className="space-y-2 mb-5">
+                    {PLATED_FEATURES.map((f) => (
+                      <li key={f} className="flex items-start gap-2 text-xs text-foreground">
+                        <Check size={13} className="mt-0.5 flex-shrink-0 text-amber-500 stroke-[2.5]" />
+                        {f}
+                      </li>
+                    ))}
+                  </ul>
+
+                  <div className="mt-auto">
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-3xl font-black text-amber-700">₹699</span>
+                      <span className="text-sm text-muted-foreground line-through">₹1,499</span>
+                      <span className="rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-bold text-green-700">
+                        53% OFF
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Pure Silver */}
+              <div
+                role="button"
+                tabIndex={0}
+                onClick={() => setVariant("silver")}
+                onKeyDown={(e) => e.key === "Enter" && setVariant("silver")}
+                className={cn(
+                  "group relative flex flex-col text-left rounded-3xl border-2 overflow-hidden transition-all duration-200 cursor-pointer",
+                  variant === "silver"
+                    ? "border-amber-500 shadow-2xl shadow-amber-100"
+                    : "border-border bg-white hover:border-amber-300 hover:shadow-lg"
+                )}
+              >
+                {/* Top colour band */}
+                <div className={cn(
+                  "flex items-center justify-between px-5 py-4 transition-colors",
+                  variant === "silver" ? "bg-amber-500" : "bg-violet-50 group-hover:bg-violet-100/60"
+                )}>
+                  <span className={cn(
+                    "text-xs font-black uppercase tracking-widest",
+                    variant === "silver" ? "text-white" : "text-violet-700"
+                  )}>
+                    ✨ Premium
+                  </span>
+                  <div className={cn(
+                    "flex size-6 items-center justify-center rounded-full border-2 transition-all",
+                    variant === "silver"
+                      ? "border-white bg-white"
+                      : "border-violet-300 bg-white"
+                  )}>
+                    {variant === "silver" && (
+                      <Check size={13} className="text-amber-500 stroke-[3]" />
+                    )}
+                  </div>
+                </div>
+
+                {/* Card body */}
+                <div className={cn(
+                  "flex flex-col flex-1 p-5 transition-colors",
+                  variant === "silver" ? "bg-amber-50" : "bg-white"
+                )}>
+                  <h3 className="font-heading text-xl font-bold text-foreground mb-1">
+                    Pure Silver Kada
+                  </h3>
+                  <p className="text-xs text-muted-foreground mb-4 leading-relaxed">
+                    100% Pure Silver (92.5% Sterling). Certified quality — the variant serious astrologers recommend.
+                  </p>
+
+                  <ul className="space-y-2 mb-5">
+                    {SILVER_FEATURES.map((f) => (
+                      <li key={f} className="flex items-start gap-2 text-xs text-foreground">
+                        <Check size={13} className="mt-0.5 flex-shrink-0 text-amber-500 stroke-[2.5]" />
+                        {f}
+                      </li>
+                    ))}
+                  </ul>
+
+                  <div className="mt-auto">
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-3xl font-black text-amber-700">₹4,499</span>
+                      <span className="text-sm text-muted-foreground line-through">₹7,999</span>
+                      <span className="rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-bold text-green-700">
+                        43% OFF
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Size selector — shown only when pure silver is selected */}
+            {variant === "silver" && (
+              <div className="mb-5 rounded-2xl border border-amber-200 bg-white px-5 py-4">
+                <p className="mb-3 text-sm font-bold text-foreground">Select Size</p>
+                <div className="flex flex-wrap gap-2">
+                  {SIZES.map((s) => (
+                    <button
+                      key={s}
+                      onClick={() => setSize(s)}
+                      className={cn(
+                        "rounded-xl border px-4 py-2 text-xs font-semibold transition-all",
+                        size === s
+                          ? "border-amber-500 bg-amber-500 text-white shadow-sm"
+                          : "border-border text-foreground hover:border-amber-300"
+                      )}
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Siddha upsell — compact */}
+            <div
+              role="checkbox"
+              aria-checked={siddha}
+              onClick={() => setSiddha((v) => !v)}
+              className="mb-6 flex cursor-pointer items-start gap-3 rounded-2xl border border-dashed border-amber-200 bg-amber-50/40 px-5 py-4 transition-all hover:border-amber-300 hover:bg-amber-50"
+            >
+              <div className={cn(
+                "mt-0.5 flex size-5 flex-shrink-0 items-center justify-center rounded border-2 transition-all",
+                siddha ? "border-amber-500 bg-amber-500" : "border-amber-300 bg-white"
+              )}>
+                {siddha && <Check size={11} className="text-white stroke-[3]" />}
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-foreground">
+                  Add Vedic Energisation — Siddh Kiya Hua{" "}
+                  <span className="font-black text-amber-700">+₹299</span>
+                </p>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  Your kada is activated through Vedic mantras, Gangajal, and an auspicious muhurat before shipping — consecrated in your name.
+                </p>
+              </div>
+            </div>
+
+            {/* CTA */}
+            <button className="kada-glow-btn w-full rounded-3xl bg-amber-700 py-5 text-lg font-black text-white shadow-xl transition-all hover:bg-amber-800 active:scale-[0.98]">
+              Order Now — Cash on Delivery
+              <p className="mt-1 text-sm font-normal opacity-85">
+                Secure Order · Free Shipping · 15–20 Day Delivery
+              </p>
+            </button>
+            <p className="mt-3 text-center text-xs text-muted-foreground">
+              💳 ₹50 off on prepaid &nbsp;|&nbsp; 🔒 100% Secure Checkout
+            </p>
+          </div>
+        </section>
+
+        {/* ════════════════════════════════════════
+            BENEFITS
+        ════════════════════════════════════════ */}
+        <section className="relative overflow-hidden bg-gradient-to-br from-amber-950 via-amber-900 to-orange-950 py-20 px-5 text-white">
+          <div className="pointer-events-none absolute -top-20 -right-20 size-64 rounded-full bg-amber-500/10 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-20 -left-20 size-80 rounded-full bg-orange-500/10 blur-3xl" />
+
+          <div className="relative mx-auto max-w-5xl">
+            <div className="mb-14 text-center">
+              <span className="text-xs font-bold uppercase tracking-widest text-amber-400">
+                Astrological Benefits
+              </span>
+              <h2 className="font-heading mt-3 text-3xl font-bold md:text-4xl">
+                What This Kada Does For You
+              </h2>
+              <p className="mt-3 text-amber-300 text-sm md:text-base max-w-xl mx-auto">
+                Not just an accessory — a complete astrological remedy system
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {BENEFITS.map((b) => (
+                <div
+                  key={b.title}
+                  className="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm transition-all hover:bg-white/10 hover:border-amber-400/30 hover:-translate-y-1 hover:shadow-xl hover:shadow-amber-900/50"
+                >
+                  <div className="mb-4 text-5xl">{b.icon}</div>
+                  <h3 className="font-heading mb-2 text-lg font-bold leading-snug">{b.title}</h3>
+                  <p className="text-sm leading-relaxed text-amber-200/80">{b.desc}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-14 text-center">
+              <button
+                onClick={scrollToOrder}
+                className="inline-flex items-center gap-3 rounded-2xl bg-amber-400 px-10 py-4 text-base font-bold text-amber-950 transition-all hover:bg-amber-300 active:scale-95"
+              >
+                <Zap size={18} />
+                Order Now
+                <ArrowRight size={18} />
+              </button>
+            </div>
+          </div>
+        </section>
+
+        {/* ════════════════════════════════════════
+            WHO NEEDS + PLANETARY PROTECTION
+        ════════════════════════════════════════ */}
+        <section className="bg-white py-20 px-5">
+          <div className="mx-auto max-w-5xl">
+            <div className="grid grid-cols-1 gap-14 md:grid-cols-2 md:items-start">
+              <div>
+                <span className="text-xs font-bold uppercase tracking-widest text-amber-600">
+                  Is It For You?
+                </span>
+                <h2 className="font-heading mt-3 mb-8 text-3xl font-bold text-foreground md:text-4xl">
+                  This Kada Is For You If...
+                </h2>
+                <ul className="space-y-4">
+                  {WHO_NEEDS.map((item) => (
+                    <li key={item} className="flex items-start gap-3.5">
+                      <div className="mt-0.5 flex size-5 flex-shrink-0 items-center justify-center rounded-full border border-amber-200 bg-amber-50">
+                        <Check size={11} className="text-amber-600 stroke-[2.5]" />
+                      </div>
+                      <span className="text-sm leading-relaxed text-foreground">{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="rounded-3xl bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-100 p-8">
+                <div className="mb-6 text-center">
+                  <div className="relative mx-auto mb-6 size-28 flex items-center justify-center">
+                    <div className="kada-ping-slow absolute inset-0 rounded-full border-2 border-amber-200" />
+                    <div className="absolute inset-3 rounded-full border border-amber-300/60" />
+                    <span className="text-5xl relative z-10">🪬</span>
+                  </div>
+                  <h3 className="font-heading text-2xl font-bold text-foreground">
+                    Planetary Protection
+                  </h3>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Balances effects of these planetary doshas
+                  </p>
+                </div>
+
+                <div className="space-y-3">
+                  {[
+                    {
+                      planet: "शनि (Saturn)",
+                      label: "Shani Dosh",
+                      effect: "Obstacles, delays, karmic weight",
+                      color: "bg-blue-50 border-blue-100",
+                      badge: "text-blue-700 bg-blue-100",
+                    },
+                    {
+                      planet: "राहु (Rahu)",
+                      label: "Rahu Dosh",
+                      effect: "Confusion, sudden upheaval",
+                      color: "bg-purple-50 border-purple-100",
+                      badge: "text-purple-700 bg-purple-100",
+                    },
+                    {
+                      planet: "केतु (Ketu)",
+                      label: "Ketu Dosh",
+                      effect: "Detachment, spiritual blocks",
+                      color: "bg-orange-50 border-orange-100",
+                      badge: "text-orange-700 bg-orange-100",
+                    },
+                  ].map(({ planet, label, effect, color, badge }) => (
+                    <div
+                      key={planet}
+                      className={cn("flex items-center justify-between rounded-2xl border p-3.5", color)}
+                    >
+                      <div>
+                        <p className="font-bold text-sm text-foreground">{planet}</p>
+                        <p className="text-xs text-muted-foreground">{effect}</p>
+                      </div>
+                      <span className={cn("rounded-full px-2.5 py-1 text-[10px] font-bold", badge)}>
+                        {label}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                <button
+                  onClick={scrollToOrder}
+                  className="mt-6 w-full rounded-2xl bg-amber-700 py-3.5 text-sm font-bold text-white transition-all hover:bg-amber-800"
+                >
+                  Order Now →
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ════════════════════════════════════════
+            HOW IT WORKS
+        ════════════════════════════════════════ */}
+        <section className="bg-gradient-to-br from-amber-50/80 to-orange-50/30 py-20 px-5">
+          <div className="mx-auto max-w-4xl">
+            <div className="mb-14 text-center">
+              <span className="text-xs font-bold uppercase tracking-widest text-amber-600">
+                Simple Process
+              </span>
+              <h2 className="font-heading mt-3 text-3xl font-bold text-foreground md:text-4xl">
+                From Order to Delivery
+              </h2>
+              <p className="mt-2 text-sm text-muted-foreground">
+                3 steps — personalised, handcrafted, delivered
+              </p>
+            </div>
+
+            <div className="relative grid grid-cols-1 gap-8 md:grid-cols-3">
+              <div className="absolute top-10 left-[20%] right-[20%] hidden h-0.5 bg-gradient-to-r from-amber-200 via-amber-400 to-amber-200 md:block" />
+              {STEPS.map((step) => (
+                <div key={step.num} className="relative z-10 text-center">
+                  <div className="relative mx-auto mb-6 size-20">
+                    <div className="flex size-20 items-center justify-center rounded-3xl border-2 border-amber-200 bg-white shadow-lg">
+                      <span className="text-4xl">{step.icon}</span>
+                    </div>
+                    <div className="absolute -top-2 -right-2 flex size-6 items-center justify-center rounded-full bg-amber-700 text-[10px] font-black text-white shadow">
+                      {step.num}
+                    </div>
+                  </div>
+                  <h3 className="font-heading mb-2 text-lg font-bold text-foreground">
+                    {step.title}
+                  </h3>
+                  <p className="text-sm leading-relaxed text-muted-foreground">{step.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ════════════════════════════════════════
+            TESTIMONIALS
+        ════════════════════════════════════════ */}
+        <section className="bg-white py-20 px-5">
+          <div className="mx-auto max-w-5xl">
+            <div className="mb-12 text-center">
+              <span className="text-xs font-bold uppercase tracking-widest text-amber-600">
+                Real Reviews
+              </span>
+              <h2 className="font-heading mt-3 text-3xl font-bold text-foreground md:text-4xl">
+                What Our Customers Say
+              </h2>
+              <div className="mt-3 flex items-center justify-center gap-1.5">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} size={18} className="fill-amber-400 text-amber-400" />
+                ))}
+                <span className="ml-2 text-sm text-muted-foreground">4.9 / 5 · 127 verified reviews</span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+              {TESTIMONIALS.map((t) => (
+                <div
+                  key={t.name}
+                  className="relative overflow-hidden rounded-3xl border border-amber-100 bg-gradient-to-br from-amber-50 to-orange-50/50 p-6"
+                >
+                  <div className="pointer-events-none absolute right-5 top-4 font-serif text-7xl leading-none text-amber-200 select-none">
+                    "
+                  </div>
+                  <div className="mb-4 flex items-center gap-2 flex-wrap">
+                    <div className="flex gap-0.5">
+                      {[...Array(t.stars)].map((_, i) => (
+                        <Star key={i} size={13} className="fill-amber-400 text-amber-400" />
+                      ))}
+                    </div>
+                    <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-[10px] font-bold text-amber-700">
+                      {t.tag}
+                    </span>
+                  </div>
+                  <p className="mb-5 text-sm italic leading-relaxed text-foreground">"{t.text}"</p>
+                  <div className="flex items-center gap-3">
+                    <div className="flex size-10 items-center justify-center rounded-full bg-amber-700 text-sm font-black text-white shadow">
+                      {t.initial}
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-foreground">{t.name}</p>
+                      <p className="text-xs text-muted-foreground">{t.city}</p>
+                    </div>
+                  </div>
+                  <div className="mt-4 rounded-xl border border-green-100 bg-green-50 px-3 py-2">
+                    <p className="text-xs font-semibold text-green-700">✓ {t.outcome}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ════════════════════════════════════════
+            TRUST STRIP
+        ════════════════════════════════════════ */}
+        <section className="bg-gradient-to-r from-amber-800 to-amber-700 py-14 px-5">
+          <div className="mx-auto max-w-4xl">
+            <div className="grid grid-cols-2 gap-8 text-center text-white md:grid-cols-4">
+              {[
+                { icon: "⭐", stat: "4.9 / 5", label: "Average Rating" },
+                { icon: "🔒", stat: "100%", label: "Genuine Materials" },
+                { icon: "🕉️", stat: "15+", label: "Years Vedic Expertise" },
+                { icon: "📦", stat: "Free", label: "Shipping Pan-India" },
+              ].map(({ icon, stat, label }) => (
+                <div key={label} className="flex flex-col items-center">
+                  <div className="mb-2 text-4xl">{icon}</div>
+                  <div className="text-3xl font-black">{stat}</div>
+                  <div className="mt-1 text-xs text-amber-200">{label}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ════════════════════════════════════════
+            FAQ
+        ════════════════════════════════════════ */}
+        <section className="bg-white py-20 px-5">
+          <div className="mx-auto max-w-2xl">
+            <div className="mb-12 text-center">
+              <span className="text-xs font-bold uppercase tracking-widest text-amber-600">
+                FAQs
+              </span>
+              <h2 className="font-heading mt-3 text-3xl font-bold text-foreground md:text-4xl">
+                Frequently Asked Questions
+              </h2>
+            </div>
+
+            <div className="space-y-3">
+              {FAQS.map((faq, i) => (
+                <div
+                  key={i}
+                  className={cn(
+                    "overflow-hidden rounded-2xl border transition-all",
+                    openFaq === i
+                      ? "border-amber-300 bg-amber-50 shadow-md"
+                      : "border-border bg-white hover:border-amber-200"
+                  )}
+                >
+                  <button
+                    onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                    className="flex w-full items-start justify-between gap-4 p-5 text-left"
+                  >
+                    <span className="text-sm font-semibold leading-relaxed text-foreground">
+                      {faq.q}
+                    </span>
+                    {openFaq === i ? (
+                      <ChevronUp size={18} className="mt-0.5 flex-shrink-0 text-amber-500" />
+                    ) : (
+                      <ChevronDown size={18} className="mt-0.5 flex-shrink-0 text-amber-400" />
+                    )}
+                  </button>
+                  {openFaq === i && (
+                    <div className="px-5 pb-5">
+                      <p className="text-sm leading-relaxed text-muted-foreground">{faq.a}</p>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ════════════════════════════════════════
+            FINAL CTA
+        ════════════════════════════════════════ */}
+        <section className="relative overflow-hidden bg-gradient-to-br from-amber-950 via-amber-900 to-orange-950 px-5 py-24 text-center text-white">
+          <div className="pointer-events-none absolute inset-0 overflow-hidden">
+            {[...Array(10)].map((_, i) => (
+              <div
+                key={i}
+                className="kada-particle bg-amber-400/20"
+                style={{
+                  width: `${5 + (i % 3) * 4}px`,
+                  height: `${5 + (i % 3) * 4}px`,
+                  left: `${(i * 21) % 91}%`,
+                  top: `${15 + (i * 15) % 65}%`,
+                  animationDelay: `${i * 0.45}s`,
+                  animationDuration: `${3.5 + (i % 3) * 0.7}s`,
+                }}
+              />
+            ))}
+          </div>
+
+          <div className="relative mx-auto max-w-xl">
+            <div className="mb-6 text-6xl">⚜️</div>
+            <h2 className="font-heading mb-4 text-3xl font-bold md:text-4xl">
+              Order Your Protective Kada Today
+            </h2>
+            <p className="mb-8 text-sm text-amber-200 md:text-base">
+              Starting at ₹699. Cash on Delivery. Delivered in premium packaging within 15–20 days.
+            </p>
+            <button
+              onClick={scrollToOrder}
+              className="kada-glow-btn inline-flex items-center gap-3 rounded-2xl bg-amber-400 px-10 py-5 text-lg font-black text-amber-950 shadow-2xl transition-all hover:bg-amber-300 active:scale-95"
+            >
+              <Sparkles size={22} />
+              Order Now — Starting ₹{basePrice.toLocaleString("en-IN")}
+              <ArrowRight size={22} />
+            </button>
+            <p className="mt-4 text-xs text-amber-400">
+              No advance payment · Pay on delivery · Free shipping
+            </p>
+          </div>
+        </section>
+
+        {/* ════════════════════════════════════════
+            STICKY BOTTOM BAR
+        ════════════════════════════════════════ */}
+        <div
+          className={cn(
+            "fixed bottom-0 left-0 right-0 z-50 border-t border-amber-100 bg-white/95 px-4 py-3 shadow-2xl backdrop-blur-md transition-all duration-300",
+            stickyVisible
+              ? "translate-y-0 opacity-100"
+              : "translate-y-full opacity-0 pointer-events-none"
+          )}
+        >
+          <div className="mx-auto flex max-w-xl items-center justify-between gap-4">
+            <div className="min-w-0">
+              <div className="flex items-baseline gap-2">
+                <span className="text-xl font-black text-amber-700">
+                  ₹{basePrice.toLocaleString("en-IN")}
+                </span>
+                <span className="text-sm text-muted-foreground line-through">
+                  ₹{mrp.toLocaleString("en-IN")}
+                </span>
+              </div>
+              <p className="text-[11px] text-amber-600 truncate">
+                {variant === "silver" ? "Pure Silver" : "Silver Plated"}{" "}
+                {siddha && "· Siddh"} · COD Available
+              </p>
+            </div>
+            <button
+              onClick={scrollToOrder}
+              className="flex-shrink-0 rounded-2xl bg-amber-700 px-7 py-3 text-sm font-black text-white shadow-lg transition-all hover:bg-amber-800 active:scale-95"
+            >
+              Buy Now 🛒
+            </button>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
