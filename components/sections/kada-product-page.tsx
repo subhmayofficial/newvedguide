@@ -26,8 +26,8 @@ const KADA_IMAGE_CDN_BASE =
 // TODO: replace with actual WhatsApp number
 const WHATSAPP_NUMBER = "919999999999";
 
-function kadaImageUrl(num: number) {
-  return `${KADA_IMAGE_CDN_BASE}/${num}.PNG`;
+function kadaImageUrl(folder: number, img: number) {
+  return `${KADA_IMAGE_CDN_BASE}/${folder}/${img}.png`;
 }
 
 function WhatsAppIcon({ size = 18 }: { size?: number }) {
@@ -49,11 +49,12 @@ type DesignId = "classic" | "traditional" | "ornate";
 const DESIGN_VARIANTS: {
   id: DesignId;
   name: string;
-  imageNums: number[];
+  folder: number;
+  imageCount: number;
 }[] = [
-  { id: "classic", name: "Classic Plain", imageNums: [1, 2, 3] },
-  { id: "traditional", name: "Traditional", imageNums: [4, 5, 6] },
-  { id: "ornate", name: "Ornate Finish", imageNums: [7, 8] },
+  { id: "classic",     name: "Classic Plain", folder: 1, imageCount: 3 },
+  { id: "traditional", name: "Traditional",   folder: 2, imageCount: 3 },
+  { id: "ornate",      name: "Ornate Finish", folder: 3, imageCount: 3 },
 ];
 
 // ── Data ───────────────────────────────────────────────────────────────────────
@@ -237,9 +238,9 @@ export function KadaProductPage() {
 
   const activeDesign =
     DESIGN_VARIANTS.find((d) => d.id === designId) ?? DESIGN_VARIANTS[0];
-  const galleryImages = activeDesign.imageNums.map((num, i) => ({
+  const galleryImages = Array.from({ length: activeDesign.imageCount }, (_, i) => ({
     id: i,
-    src: kadaImageUrl(num),
+    src: kadaImageUrl(activeDesign.folder, i + 1),
     alt: `${activeDesign.name} — photo ${i + 1}`,
   }));
   const safeActiveImage = Math.min(activeImage, galleryImages.length - 1);
@@ -512,7 +513,7 @@ export function KadaProductPage() {
                 </p>
                 <div className="grid grid-cols-3 gap-3">
                   {DESIGN_VARIANTS.map((d) => {
-                    const thumbSrc = kadaImageUrl(d.imageNums[0]);
+                    const thumbSrc = kadaImageUrl(d.folder, 1);
                     const selected = designId === d.id;
                     return (
                       <button
