@@ -228,6 +228,7 @@ export function KadaProductPage() {
   const [size, setSize] = useState(SIZES[1]);
   const [siddha, setSiddha] = useState(false);
   const [activeImage, setActiveImage] = useState(0);
+  const [slideDir, setSlideDir] = useState<"right" | "left">("right");
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [stickyVisible, setStickyVisible] = useState(false);
   const [viewersCount, setViewersCount] = useState(17);
@@ -246,13 +247,19 @@ export function KadaProductPage() {
   }));
   const safeActiveImage = Math.min(activeImage, galleryImages.length - 1);
 
-  const basePrice = variant === "silver" ? 4499 : 699;
-  const mrp = variant === "silver" ? 7999 : 1499;
+  const basePrice = variant === "silver" ? 4499 : 749;
+  const mrp = variant === "silver" ? 7999 : 1599;
   const discPct = variant === "silver" ? 43 : 53;
   const savings = mrp - basePrice;
 
+  function goToImage(idx: number) {
+    setSlideDir(idx > safeActiveImage ? "right" : "left");
+    setActiveImage(idx);
+  }
+
   function selectDesign(id: DesignId) {
     setDesignId(id);
+    setSlideDir("right");
     setActiveImage(0);
   }
 
@@ -344,6 +351,16 @@ export function KadaProductPage() {
           0%, 100% { opacity: 1; }
           50% { opacity: 0.35; }
         }
+        @keyframes kada-slide-right {
+          from { transform: translateX(105%); opacity: 0; }
+          to   { transform: translateX(0);    opacity: 1; }
+        }
+        @keyframes kada-slide-left {
+          from { transform: translateX(-105%); opacity: 0; }
+          to   { transform: translateX(0);     opacity: 1; }
+        }
+        .kada-slide-in-right { animation: kada-slide-right 0.36s cubic-bezier(0.25,0.46,0.45,0.94) forwards; }
+        .kada-slide-in-left  { animation: kada-slide-left  0.36s cubic-bezier(0.25,0.46,0.45,0.94) forwards; }
         @keyframes kada-silver-shimmer {
           0% { background-position: -200% center; }
           100% { background-position: 200% center; }
@@ -455,21 +472,25 @@ export function KadaProductPage() {
                     if (touchStartX.current === null) return;
                     const diff = touchStartX.current - e.changedTouches[0].clientX;
                     if (Math.abs(diff) > 40) {
-                      if (diff > 0) setActiveImage((v) => Math.min(v + 1, galleryImages.length - 1));
-                      else setActiveImage((v) => Math.max(v - 1, 0));
+                      if (diff > 0) goToImage(Math.min(safeActiveImage + 1, galleryImages.length - 1));
+                      else goToImage(Math.max(safeActiveImage - 1, 0));
                     }
                     touchStartX.current = null;
                   }}
                 >
-                  <Image
+                  <div
                     key={`${designId}-${safeActiveImage}`}
-                    src={galleryImages[safeActiveImage].src}
-                    alt={galleryImages[safeActiveImage].alt}
-                    fill
-                    className="object-cover transition-opacity duration-300"
-                    sizes="340px"
-                    priority={safeActiveImage === 0}
-                  />
+                    className={cn("absolute inset-0", slideDir === "right" ? "kada-slide-in-right" : "kada-slide-in-left")}
+                  >
+                    <Image
+                      src={galleryImages[safeActiveImage].src}
+                      alt={galleryImages[safeActiveImage].alt}
+                      fill
+                      className="object-cover"
+                      sizes="340px"
+                      priority={safeActiveImage === 0}
+                    />
+                  </div>
                   <div className="absolute right-4 top-4 flex flex-col items-center rounded-2xl bg-red-500 px-3 py-2 text-white shadow-lg">
                     <span className="text-lg font-black leading-none">{discPct}%</span>
                     <span className="text-[10px] font-semibold uppercase tracking-wide">OFF</span>
@@ -492,7 +513,7 @@ export function KadaProductPage() {
                     <button
                       key={i}
                       type="button"
-                      onClick={() => setActiveImage(i)}
+                      onClick={() => goToImage(i)}
                       aria-label={`Image ${i + 1}`}
                       className={cn(
                         "rounded-full transition-all duration-300",
@@ -511,7 +532,7 @@ export function KadaProductPage() {
                   <button
                     key={img.id}
                     type="button"
-                    onClick={() => setActiveImage(i)}
+                    onClick={() => goToImage(i)}
                     aria-label={img.alt}
                     aria-pressed={safeActiveImage === i}
                     className={cn(
@@ -574,7 +595,7 @@ export function KadaProductPage() {
                             {d.name}
                           </p>
                           <p className="mt-1 text-[10px] font-bold text-amber-600">
-                            ₹699 – ₹4,499
+                            From ₹749
                           </p>
                         </div>
                       </button>
@@ -594,7 +615,7 @@ export function KadaProductPage() {
 
                 {/* Price indicator */}
                 <div className="mb-4 flex items-baseline justify-center gap-3">
-                  <span className="font-heading text-4xl font-black text-amber-600">From ₹699</span>
+                  <span className="font-heading text-4xl font-black text-amber-600">From ₹749</span>
                   <span className="text-base font-medium text-stone-400 line-through">₹1,499</span>
                 </div>
 
@@ -683,7 +704,7 @@ export function KadaProductPage() {
             </div>
 
             {/* Variant Cards */}
-            <div className="mb-6 grid grid-cols-1 gap-5 sm:grid-cols-2 sm:items-start sm:relative">
+            <div className="mb-6 grid grid-cols-2 gap-3 relative items-start">
 
               {/* ── Silver Plated ── good but standard */}
               <div
@@ -699,48 +720,48 @@ export function KadaProductPage() {
                 )}
               >
                 {/* Price area */}
-                <div className="flex items-start justify-between border-b border-stone-100 px-5 pb-5 pt-5">
+                <div className="flex items-start justify-between border-b border-stone-100 px-3 pb-3 pt-3 sm:px-5 sm:pb-5 sm:pt-5">
                   <div>
-                    <p className="mb-3 text-[11px] font-bold uppercase tracking-widest text-stone-400">Silver Plated</p>
-                    <p className="font-heading text-5xl font-black leading-none text-amber-700">₹699</p>
-                    <p className="mt-1.5 text-sm font-medium text-stone-400 line-through">₹1,499</p>
+                    <p className="mb-1.5 text-[10px] font-bold uppercase tracking-wider text-stone-400">Silver Plated</p>
+                    <p className="font-heading text-3xl font-black leading-none text-amber-700 sm:text-5xl">₹749</p>
+                    <p className="mt-1 text-xs font-medium text-stone-400 line-through">₹1,599</p>
                   </div>
-                  <div className="flex flex-col items-end gap-2 pt-1">
-                    <span className="rounded-xl bg-green-500 px-2.5 py-1 text-xs font-black text-white">53% OFF</span>
+                  <div className="flex flex-col items-end gap-1.5 pt-0.5">
+                    <span className="rounded-lg bg-green-500 px-2 py-0.5 text-[10px] font-black text-white">53% OFF</span>
                     {variant === "plated" && (
-                      <div className="flex size-7 items-center justify-center rounded-full bg-amber-500 shadow">
-                        <Check size={14} className="text-white stroke-[3]" />
+                      <div className="flex size-6 items-center justify-center rounded-full bg-amber-500 shadow">
+                        <Check size={12} className="text-white stroke-[3]" />
                       </div>
                     )}
                   </div>
                 </div>
 
                 {/* Body */}
-                <div className="flex flex-col flex-1 px-5 pb-5 pt-4">
-                  <p className="font-heading text-xl font-black leading-tight text-stone-900">Daily Wear Kada</p>
-                  <p className="mb-4 mt-1 text-xs font-medium text-stone-400">Daily Vedic remedy for beginners</p>
-                  <div className="mb-5 flex flex-wrap gap-2">
-                    {["Lightweight", "Budget-Friendly", "Daily Wear", "For Beginners"].map((t) => (
-                      <span key={t} className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-bold text-amber-800">{t}</span>
+                <div className="flex flex-col flex-1 px-3 pb-3 pt-3 sm:px-5 sm:pb-5 sm:pt-4">
+                  <p className="font-heading text-base font-black leading-tight text-stone-900 sm:text-xl">Daily Wear</p>
+                  <p className="mb-3 mt-0.5 text-[10px] font-medium text-stone-400 leading-snug">Vedic remedy for daily wear</p>
+                  <div className="mb-3 flex flex-wrap gap-1.5">
+                    {["Lightweight", "Daily Wear", "For Beginners"].map((t) => (
+                      <span key={t} className="rounded-full border border-amber-200 bg-amber-50 px-2 py-1 text-[10px] font-bold text-amber-800">{t}</span>
                     ))}
                   </div>
                   <button
                     type="button"
                     onClick={(e) => { e.stopPropagation(); setVariant("plated"); }}
                     className={cn(
-                      "mt-auto w-full rounded-2xl py-3.5 text-sm font-black transition-all",
+                      "mt-auto w-full rounded-xl py-2.5 text-xs font-black transition-all sm:rounded-2xl sm:py-3.5 sm:text-sm",
                       variant === "plated"
                         ? "bg-amber-600 text-white hover:bg-amber-700"
                         : "border-2 border-amber-400 text-amber-700 hover:bg-amber-50"
                     )}
                   >
-                    {variant === "plated" ? "✓ Selected" : "Choose Silver Plated"}
+                    {variant === "plated" ? "✓ Selected" : "Select"}
                   </button>
                 </div>
               </div>
 
-              {/* OR divider badge — visible only on sm+ two-column layout */}
-              <div className="hidden sm:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 size-9 items-center justify-center rounded-full border-2 border-amber-200 bg-white shadow-md">
+              {/* OR divider badge */}
+              <div className="flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 size-8 items-center justify-center rounded-full border-2 border-amber-200 bg-white shadow-md">
                 <span className="text-[10px] font-black text-amber-500">OR</span>
               </div>
 
@@ -758,63 +779,63 @@ export function KadaProductPage() {
                 )}
               >
                 {/* Recommended banner */}
-                <div className="flex items-center justify-between bg-amber-700 px-5 py-3">
-                  <div className="flex items-center gap-2">
-                    <Star size={13} className="shrink-0 fill-amber-300 text-amber-300" />
-                    <span className="text-xs font-black uppercase tracking-widest text-white">Most Recommended</span>
+                <div className="flex items-center justify-between bg-amber-700 px-3 py-2 sm:px-5 sm:py-3">
+                  <div className="flex items-center gap-1.5">
+                    <Star size={11} className="shrink-0 fill-amber-300 text-amber-300" />
+                    <span className="text-[9px] font-black uppercase tracking-wider text-white sm:text-xs sm:tracking-widest">Most Recommended</span>
                   </div>
-                  <span className="text-xs font-bold text-amber-300">Best Choice →</span>
+                  <span className="text-[9px] font-bold text-amber-300 sm:text-xs">Best →</span>
                 </div>
 
                 {/* Price area — brushed silver metallic texture */}
-                <div className="kada-silver-price-area flex items-start justify-between border-b border-slate-300 px-5 pb-5 pt-5">
+                <div className="kada-silver-price-area flex items-start justify-between border-b border-slate-300 px-3 pb-3 pt-3 sm:px-5 sm:pb-5 sm:pt-5">
                   <div>
-                    <div className="mb-3 flex items-center gap-2">
+                    <div className="mb-1.5 flex items-center gap-1.5">
                       <span
-                        className="inline-block size-3.5 rounded-full ring-2 ring-amber-300 shadow"
+                        className="inline-block size-2.5 rounded-full ring-1 ring-amber-300 shadow"
                         style={{ background: "linear-gradient(135deg, #fef3c7 0%, #d97706 45%, #fbbf24 75%, #92400e 100%)" }}
                       />
                       <span
-                        className="inline-block size-3 rounded-full"
+                        className="inline-block size-2.5 rounded-full"
                         style={{ background: "linear-gradient(135deg, #e2e8f0 0%, #94a3b8 45%, #f1f5f9 75%, #64748b 100%)" }}
                       />
-                      <span className="text-[11px] font-black uppercase tracking-widest text-slate-600">92.5% Sterling Silver</span>
+                      <span className="text-[9px] font-black uppercase tracking-wider text-slate-600 sm:text-[11px] sm:tracking-widest">92.5% Sterling</span>
                     </div>
-                    <p className="font-heading text-6xl font-black leading-none text-amber-700">₹4,499</p>
-                    <p className="mt-1.5 text-sm font-semibold text-slate-400 line-through">₹7,999</p>
+                    <p className="font-heading text-3xl font-black leading-none text-amber-700 sm:text-6xl">₹4,499</p>
+                    <p className="mt-1 text-xs font-semibold text-slate-400 line-through">₹7,999</p>
                   </div>
-                  <div className="flex flex-col items-end gap-2 pt-1">
-                    <span className="rounded-xl bg-amber-600 px-3 py-1.5 text-sm font-black text-white shadow">43% OFF</span>
+                  <div className="flex flex-col items-end gap-1.5 pt-0.5">
+                    <span className="rounded-lg bg-amber-600 px-2 py-0.5 text-[10px] font-black text-white shadow sm:rounded-xl sm:px-3 sm:py-1.5 sm:text-sm">43% OFF</span>
                     {variant === "silver" && (
-                      <div className="flex size-7 items-center justify-center rounded-full bg-amber-600 shadow-lg">
-                        <Check size={14} className="text-white stroke-[3]" />
+                      <div className="flex size-6 items-center justify-center rounded-full bg-amber-600 shadow-lg">
+                        <Check size={12} className="text-white stroke-[3]" />
                       </div>
                     )}
                   </div>
                 </div>
 
                 {/* Body */}
-                <div className="flex flex-col flex-1 bg-slate-50 px-5 pb-5 pt-4">
-                  <p className="font-heading text-xl font-black leading-tight text-stone-900">Pure Silver Kada</p>
-                  <p className="mb-4 mt-1 text-xs font-bold text-amber-600">Original silver — highest astrological potency</p>
-                  <div className="mb-5 flex flex-wrap gap-2">
-                    {["92.5% Sterling", "Premium Weight", "Long-Lasting", "Hallmark Certified"].map((t) => (
-                      <span key={t} className="rounded-full border border-slate-300 bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-700">{t}</span>
+                <div className="flex flex-col flex-1 bg-slate-50 px-3 pb-3 pt-3 sm:px-5 sm:pb-5 sm:pt-4">
+                  <p className="font-heading text-base font-black leading-tight text-stone-900 sm:text-xl">Pure Silver</p>
+                  <p className="mb-3 mt-0.5 text-[10px] font-bold text-amber-600 leading-snug">Highest astrological potency</p>
+                  <div className="mb-3 flex flex-wrap gap-1.5">
+                    {["92.5% Sterling", "Hallmark", "Long-Lasting"].map((t) => (
+                      <span key={t} className="rounded-full border border-slate-300 bg-slate-100 px-2 py-1 text-[10px] font-bold text-slate-700">{t}</span>
                     ))}
                   </div>
                   <button
                     type="button"
                     onClick={(e) => { e.stopPropagation(); setVariant("silver"); }}
-                    className="mt-auto w-full rounded-2xl bg-amber-700 py-4 text-sm font-black text-white shadow-lg shadow-amber-200 transition-all hover:bg-amber-800"
+                    className="mt-auto w-full rounded-xl bg-amber-700 py-2.5 text-xs font-black text-white shadow-lg shadow-amber-200 transition-all hover:bg-amber-800 sm:rounded-2xl sm:py-4 sm:text-sm"
                   >
-                    {variant === "silver" ? "✓ Selected" : "Choose Pure Silver"}
+                    {variant === "silver" ? "✓ Selected" : "Select"}
                   </button>
                 </div>
               </div>
             </div>
 
             {/* Size Selection */}
-            <div className="mb-6 rounded-3xl border border-stone-100 bg-white p-5 shadow-sm">
+            <div className="mb-6 rounded-2xl border border-stone-100 bg-white p-4 shadow-sm">
               <div className="mb-3 flex items-center justify-between">
                 <div>
                   <p className="text-sm font-bold text-foreground">Select Your Size</p>
@@ -839,16 +860,16 @@ export function KadaProductPage() {
                     type="button"
                     onClick={() => setSize(s)}
                     className={cn(
-                      "flex flex-col items-center rounded-2xl border-2 px-2 py-3.5 transition-all",
+                      "flex flex-col items-center rounded-xl border-2 px-1.5 py-2 transition-all",
                       size === s
-                        ? "border-amber-500 bg-amber-500 text-white shadow-lg shadow-amber-200"
+                        ? "border-amber-500 bg-amber-500 text-white shadow-md shadow-amber-200"
                         : "border-stone-200 bg-white text-foreground hover:border-amber-300"
                     )}
                   >
-                    <span className="text-sm font-black">{s.split(" ")[0]}</span>
+                    <span className="text-xs font-black">{s.split(" ")[0]}</span>
                     <span
                       className={cn(
-                        "mt-1 text-[10px]",
+                        "mt-0.5 text-[9px]",
                         size === s ? "text-amber-100" : "text-muted-foreground"
                       )}
                     >
