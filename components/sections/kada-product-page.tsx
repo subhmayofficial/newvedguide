@@ -193,6 +193,30 @@ const TESTIMONIALS = [
   },
 ];
 
+const POPUP_NAMES = [
+  "Rahul S.", "Priya M.", "Amit K.", "Sneha R.", "Vikram P.", "Anjali T.", "Rohit G.", "Meena D.",
+  "Suresh B.", "Kavita N.", "Deepak J.", "Sunita C.", "Anil V.", "Pooja A.", "Manoj L.", "Ritu S.",
+  "Sanjay H.", "Geeta P.", "Vikas M.", "Nisha R.", "Rajesh T.", "Lakshmi K.", "Karan B.", "Smita G.",
+  "Naveen J.", "Asha C.", "Tarun V.", "Divya N.", "Mohit A.", "Rekha L.", "Saurabh H.", "Puja P.",
+  "Ankit M.", "Shruti R.", "Gaurav T.", "Neha K.", "Ritesh B.", "Pallavi G.", "Sumit J.", "Kamla C.",
+  "Rajan V.", "Swati N.", "Vivek A.", "Bharti L.", "Sachin H.", "Usha P.", "Harsh M.", "Nidhi R.",
+  "Pawan T.", "Seema K.", "Nikhil B.", "Komal G.", "Rajiv J.", "Sudha C.", "Varun V.", "Manju N.",
+  "Lokesh A.", "Preeti L.", "Devesh H.", "Rani P.", "Chirag M.", "Archana R.", "Tushar T.", "Savita K.",
+  "Hemant B.", "Lalita G.", "Yash J.", "Jyoti C.", "Ravi V.", "Bindu N.", "Shyam A.", "Mamta L.",
+  "Neeraj H.", "Pushpa P.", "Vishal M.", "Sunita R.", "Ashish T.", "Sarla K.", "Pranav B.", "Veena G.",
+  "Lalit J.", "Sushma C.", "Dileep V.", "Radha N.", "Mukesh A.", "Sharda L.", "Ajay H.", "Usha P.",
+  "Rohini M.", "Girish R.", "Vandana T.", "Chetan K.", "Sandhya B.", "Ramesh G.", "Vinita J.", "Sunil C.",
+];
+
+const POPUP_CITIES = [
+  "Delhi", "Mumbai", "Bangalore", "Chennai", "Hyderabad", "Pune", "Kolkata", "Ahmedabad",
+  "Jaipur", "Surat", "Lucknow", "Kanpur", "Nagpur", "Indore", "Bhopal", "Patna",
+  "Vadodara", "Ludhiana", "Agra", "Nashik", "Meerut", "Rajkot", "Varanasi", "Amritsar",
+  "Allahabad", "Ranchi", "Coimbatore", "Jodhpur", "Madurai", "Raipur",
+];
+
+const POPUP_ITEMS = ["Classic Plain Kada", "Traditional Kada", "Ornate Finish Kada", "Pure Silver Kada"];
+
 const FAQS = [
   {
     q: "What is the difference between Pure Silver and Silver Plated?",
@@ -237,6 +261,8 @@ export function KadaProductPage() {
   const heroRef = useRef<HTMLDivElement>(null);
   const orderRef = useRef<HTMLDivElement>(null);
   const touchStartX = useRef<number | null>(null);
+  const [popup, setPopup] = useState<{ name: string; city: string; item: string } | null>(null);
+  const popupIndexRef = useRef(Math.floor(Math.random() * POPUP_NAMES.length));
 
   const activeDesign =
     DESIGN_VARIANTS.find((d) => d.id === designId) ?? DESIGN_VARIANTS[0];
@@ -291,6 +317,24 @@ export function KadaProductPage() {
     );
     obs.observe(el);
     return () => obs.disconnect();
+  }, []);
+
+  useEffect(() => {
+    function showNext() {
+      const idx = popupIndexRef.current % POPUP_NAMES.length;
+      const cityIdx = Math.floor(Math.random() * POPUP_CITIES.length);
+      const itemIdx = Math.floor(Math.random() * POPUP_ITEMS.length);
+      setPopup({ name: POPUP_NAMES[idx], city: POPUP_CITIES[cityIdx], item: POPUP_ITEMS[itemIdx] });
+      popupIndexRef.current = (idx + 1) % POPUP_NAMES.length;
+      setTimeout(() => setPopup(null), 3500);
+    }
+    // first popup after 4s
+    const first = setTimeout(() => {
+      showNext();
+      const interval = setInterval(showNext, Math.floor(Math.random() * 2000) + 4000);
+      return () => clearInterval(interval);
+    }, 4000);
+    return () => clearTimeout(first);
   }, []);
 
   useEffect(() => {
@@ -400,6 +444,16 @@ export function KadaProductPage() {
         }
         .kada-ping-slow { animation: kada-ping-slow 2.5s cubic-bezier(0,0,0.2,1) infinite; }
         .kada-pulse-dot { animation: kada-pulse-dot 1.8s ease-in-out infinite; }
+        @keyframes kada-popup-in {
+          from { transform: translateY(16px); opacity: 0; }
+          to   { transform: translateY(0);    opacity: 1; }
+        }
+        @keyframes kada-popup-out {
+          from { transform: translateY(0);    opacity: 1; }
+          to   { transform: translateY(-12px); opacity: 0; }
+        }
+        .kada-popup-enter { animation: kada-popup-in 0.32s cubic-bezier(0.34,1.56,0.64,1) forwards; }
+        .kada-popup-exit  { animation: kada-popup-out 0.28s ease-in forwards; }
         [data-anim] { opacity: 0; transform: translateY(22px); transition: opacity 0.55s ease, transform 0.55s ease; }
         [data-anim].anim-on { opacity: 1; transform: none; }
         [data-anim-d="1"] { transition-delay: 0.08s; }
@@ -417,7 +471,7 @@ export function KadaProductPage() {
         ════════════════════════════════════════ */}
         <section
           ref={heroRef}
-          className="relative overflow-hidden bg-gradient-to-br from-amber-50 via-[#fff8f0] to-orange-50/40 pt-10 pb-16 md:pt-16 md:pb-24"
+          className="relative overflow-hidden bg-gradient-to-br from-amber-50 via-[#fff8f0] to-orange-50/40 pt-6 pb-12 md:pt-10 md:pb-20"
         >
           <div className="pointer-events-none absolute -top-32 -right-32 size-[500px] rounded-full border border-amber-200/30 opacity-60" />
           <div className="pointer-events-none absolute -top-20 -right-20 size-[350px] rounded-full border border-amber-200/20 opacity-40" />
@@ -442,20 +496,18 @@ export function KadaProductPage() {
 
           <div className="relative mx-auto max-w-6xl px-5">
             {/* Top badge row */}
-            <div className="mb-5 flex flex-wrap items-center justify-center gap-2 md:justify-start">
-              <span className="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-100/80 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-amber-700 backdrop-blur-sm">
-                <Sparkles size={11} />
+            <div className="mb-3 flex items-center justify-center gap-2">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-100/80 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-amber-700">
+                <Sparkles size={10} />
                 Vedic Astrological Remedy
-                <Sparkles size={11} />
               </span>
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-green-200 bg-green-50 px-3.5 py-1.5 text-xs font-bold text-green-700">
-                <Users size={11} />
-                5,000+ Happy Customers
+              <span className="inline-flex items-center gap-1 rounded-full border border-amber-100 bg-white/70 px-3 py-1 text-[11px] font-bold text-amber-600">
+                ⭐ 4.9 / 5 Rating
               </span>
             </div>
 
             {/* Title — sits above image on mobile, above 2-col grid on desktop */}
-            <h1 className="font-heading mb-6 text-center text-3xl font-bold leading-[1.15] md:mb-8 md:text-4xl lg:text-[2.8rem]">
+            <h1 className="font-heading mb-4 text-center text-3xl font-bold leading-[1.15] md:mb-6 md:text-4xl lg:text-[2.8rem]">
               Control Your Emotions & Attract{" "}
               <span className="kada-shimmer-text">Positive Energy</span>
               <br className="hidden sm:block" />
@@ -673,24 +725,6 @@ export function KadaProductPage() {
           className="scroll-mt-6 bg-gradient-to-br from-amber-50/60 via-white to-orange-50/20 py-16 px-5"
         >
           <div className="mx-auto max-w-3xl">
-            {/* Stock urgency */}
-            <div className="mb-8 rounded-2xl border border-orange-200 bg-orange-50 px-4 py-3.5">
-              <div className="flex items-center justify-center gap-2.5">
-                <span className="kada-pulse-dot inline-block size-2.5 shrink-0 rounded-full bg-red-500" />
-                <p className="text-sm font-black text-orange-900">
-                  ⚡ Only <span className="text-red-600">14 pieces</span> left at this price — offer ends soon
-                </p>
-              </div>
-              {/* Stock bar */}
-              <div className="mt-2.5 h-2 w-full overflow-hidden rounded-full bg-orange-200">
-                <div className="h-full w-[22%] rounded-full bg-gradient-to-r from-red-500 to-orange-400" />
-              </div>
-              <div className="mt-1 flex justify-between text-[10px] font-semibold text-orange-600">
-                <span>14 remaining</span>
-                <span>86 sold</span>
-              </div>
-            </div>
-
             <div className="mb-10 text-center">
               <span className="text-xs font-bold uppercase tracking-widest text-amber-600">
                 Select Your Kada
@@ -1282,6 +1316,31 @@ export function KadaProductPage() {
             </div>
           </div>
         </div>
+
+        {/* ════════════════════════════════════════
+            PURCHASE POPUP
+        ════════════════════════════════════════ */}
+        {popup && (
+          <div className="kada-popup-enter fixed bottom-24 left-4 z-[60] md:bottom-8 max-w-[260px]">
+            <div className="flex items-center gap-3 rounded-2xl border border-amber-100 bg-white px-4 py-3 shadow-2xl shadow-amber-100/60">
+              <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-amber-100 text-base font-black text-amber-700">
+                {popup.name[0]}
+              </div>
+              <div className="min-w-0">
+                <p className="text-[11px] font-black text-stone-800 leading-tight">
+                  {popup.name} from {popup.city}
+                </p>
+                <p className="text-[10px] text-amber-600 font-semibold leading-tight mt-0.5">
+                  just purchased {popup.item}
+                </p>
+                <div className="mt-1 flex items-center gap-1">
+                  <span className="size-1.5 rounded-full bg-green-500 inline-block" />
+                  <span className="text-[9px] text-stone-400">a few minutes ago</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </>
   );
