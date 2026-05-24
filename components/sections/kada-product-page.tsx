@@ -406,185 +406,117 @@ export function KadaProductPage() {
               with an Astrological Vedic Kada
             </h1>
 
-            <div className="grid grid-cols-1 items-center gap-10 md:grid-cols-2 md:gap-16">
-              {/* ── Left: Product Image ── */}
-              <div className="order-1">
-                <div className="relative mx-auto max-w-[340px] md:max-w-full">
-                  <div className="kada-float relative aspect-square w-full overflow-hidden rounded-[2.5rem] border border-amber-100 bg-white shadow-2xl">
-                    <Image
-                      key={`${designId}-${safeActiveImage}`}
-                      src={galleryImages[safeActiveImage].src}
-                      alt={galleryImages[safeActiveImage].alt}
-                      fill
-                      className="object-cover transition-opacity duration-300"
-                      sizes="(max-width: 768px) 340px, 480px"
-                      priority={safeActiveImage === 0}
-                    />
-                    <div className="absolute right-4 top-4 flex flex-col items-center rounded-2xl bg-red-500 px-3 py-2 text-white shadow-lg">
-                      <span className="text-lg font-black leading-none">{discPct}%</span>
-                      <span className="text-[10px] font-semibold uppercase tracking-wide">OFF</span>
-                    </div>
-                    <div className="pointer-events-none absolute inset-0 rounded-[2.5rem] bg-gradient-to-tr from-transparent via-white/20 to-transparent" />
+            <div className="mx-auto max-w-md">
+              {/* Product Image */}
+              <div className="relative mx-auto max-w-[340px]">
+                <div className="kada-float relative aspect-square w-full overflow-hidden rounded-[2.5rem] border border-amber-100 bg-white shadow-2xl">
+                  <Image
+                    key={`${designId}-${safeActiveImage}`}
+                    src={galleryImages[safeActiveImage].src}
+                    alt={galleryImages[safeActiveImage].alt}
+                    fill
+                    className="object-cover transition-opacity duration-300"
+                    sizes="340px"
+                    priority={safeActiveImage === 0}
+                  />
+                  <div className="absolute right-4 top-4 flex flex-col items-center rounded-2xl bg-red-500 px-3 py-2 text-white shadow-lg">
+                    <span className="text-lg font-black leading-none">{discPct}%</span>
+                    <span className="text-[10px] font-semibold uppercase tracking-wide">OFF</span>
                   </div>
+                  <div className="pointer-events-none absolute inset-0 rounded-[2.5rem] bg-gradient-to-tr from-transparent via-white/20 to-transparent" />
+                </div>
 
-                  {/* Thumbnails — moved above design selector */}
-                  <div className="mt-4 flex flex-wrap justify-center gap-2.5">
-                    {galleryImages.map((img, i) => (
-                      <button
-                        key={img.id}
-                        type="button"
-                        onClick={() => setActiveImage(i)}
-                        aria-label={img.alt}
-                        aria-pressed={safeActiveImage === i}
-                        className={cn(
-                          "relative size-14 shrink-0 overflow-hidden rounded-2xl border-2 bg-white transition-all",
-                          safeActiveImage === i
-                            ? "scale-105 border-amber-500 shadow-md shadow-amber-200"
-                            : "border-transparent opacity-60 hover:opacity-100"
-                        )}
-                      >
-                        <Image
-                          src={img.src}
-                          alt=""
-                          fill
-                          className="object-cover"
-                          sizes="44px"
-                        />
-                      </button>
+                {/* Rating chip */}
+                <div className="absolute -top-3 -right-3 flex items-center gap-2 rounded-2xl bg-white px-3 py-2 shadow-xl border border-amber-100">
+                  <div className="flex">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} size={10} className="fill-amber-400 text-amber-400" />
                     ))}
                   </div>
-
-                  {/* Design variants — 3-col centered grid */}
-                  <div className="mt-5">
-                    <p className="mb-3 text-center text-sm text-foreground md:text-left">
-                      <span className="text-muted-foreground">Design: </span>
-                      <span className="font-semibold">{activeDesign.name}</span>
-                    </p>
-                    <div className="grid grid-cols-3 gap-3">
-                      {DESIGN_VARIANTS.map((d) => {
-                        const thumbSrc = kadaImageUrl(d.imageNums[0]);
-                        const selected = designId === d.id;
-                        return (
-                          <button
-                            key={d.id}
-                            type="button"
-                            onClick={() => selectDesign(d.id)}
-                            aria-label={`Design ${d.name}`}
-                            aria-pressed={selected}
-                            className={cn(
-                              "overflow-hidden rounded-2xl border-2 bg-white transition-all",
-                              selected
-                                ? "border-amber-600 shadow-lg ring-2 ring-amber-600/20"
-                                : "border-stone-200 hover:border-amber-300"
-                            )}
-                          >
-                            <div className="relative aspect-square w-full bg-stone-50">
-                              <Image
-                                src={thumbSrc}
-                                alt=""
-                                fill
-                                className="object-cover"
-                                sizes="(max-width: 768px) 33vw, 160px"
-                              />
-                              {selected && (
-                                <div className="absolute inset-0 bg-amber-500/10" />
-                              )}
-                            </div>
-                            <div className="border-t border-stone-100 px-2 py-2 text-center">
-                              <p className="text-[11px] font-semibold leading-tight text-stone-700">
-                                {d.name}
-                              </p>
-                            </div>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* Rating chip */}
-                  <div className="absolute -top-3 -right-3 hidden md:flex items-center gap-2 rounded-2xl bg-white px-4 py-2.5 shadow-xl border border-amber-100">
-                    <div className="flex">
-                      {[...Array(5)].map((_, i) => (
-                        <Star key={i} size={11} className="fill-amber-400 text-amber-400" />
-                      ))}
-                    </div>
-                    <p className="text-xs font-bold text-foreground">4.9 / 5</p>
-                  </div>
+                  <p className="text-xs font-bold text-foreground">4.9</p>
                 </div>
               </div>
 
-              {/* ── Right: Content ── */}
-              <div className="order-2 text-center md:text-left">
-                {/* Description */}
-                <p className="mb-5 text-sm leading-relaxed text-muted-foreground">
-                  A handcrafted Vedic silver kada — prepared individually based on your birth nakshatra
-                  to counteract Saturn and Rahu doshas. Worn daily, it works as a continuous
-                  astrological remedy for the mind, emotions, and energy field.
+              {/* Thumbnails */}
+              <div className="mt-4 flex flex-wrap justify-center gap-2.5">
+                {galleryImages.map((img, i) => (
+                  <button
+                    key={img.id}
+                    type="button"
+                    onClick={() => setActiveImage(i)}
+                    aria-label={img.alt}
+                    aria-pressed={safeActiveImage === i}
+                    className={cn(
+                      "relative size-14 shrink-0 overflow-hidden rounded-2xl border-2 bg-white transition-all",
+                      safeActiveImage === i
+                        ? "scale-105 border-amber-500 shadow-md shadow-amber-200"
+                        : "border-transparent opacity-60 hover:opacity-100"
+                    )}
+                  >
+                    <Image src={img.src} alt="" fill className="object-cover" sizes="44px" />
+                  </button>
+                ))}
+              </div>
+
+              {/* Design variants */}
+              <div className="mt-5">
+                <p className="mb-3 text-center text-sm text-foreground">
+                  <span className="text-muted-foreground">Design: </span>
+                  <span className="font-semibold">{activeDesign.name}</span>
                 </p>
-
-                {/* Key benefits */}
-                <div className="mb-5 space-y-2">
-                  {[
-                    {
-                      icon: "🪐",
-                      title: "Saturn & Rahu Dosh Protection",
-                      desc: "Neutralises Shani Sade Sati and Rahu Mahadasha effects",
-                    },
-                    {
-                      icon: "🧘",
-                      title: "Mental Peace & Clarity",
-                      desc: "Reduces anxiety, overthinking, and emotional turbulence",
-                    },
-                    {
-                      icon: "💪",
-                      title: "Confidence & Emotional Stability",
-                      desc: "Builds inner balance and self-assurance over time",
-                    },
-                    {
-                      icon: "⚡",
-                      title: "Continuous Positive Energy",
-                      desc: "Silver's natural properties filter negativity around you",
-                    },
-                  ].map((b) => (
-                    <div
-                      key={b.title}
-                      className="flex items-center gap-3.5 rounded-2xl border border-amber-100 bg-gradient-to-r from-amber-50/80 to-transparent px-4 py-3 transition-all hover:border-amber-200 hover:shadow-sm"
-                    >
-                      <span className="shrink-0 text-xl">{b.icon}</span>
-                      <div className="flex-1 text-left">
-                        <p className="text-xs font-bold leading-snug text-foreground">{b.title}</p>
-                        <p className="mt-0.5 text-[11px] text-muted-foreground">{b.desc}</p>
-                      </div>
-                      <Check size={13} className="ml-auto shrink-0 text-amber-400 stroke-[2.5]" />
-                    </div>
-                  ))}
+                <div className="grid grid-cols-3 gap-3">
+                  {DESIGN_VARIANTS.map((d) => {
+                    const thumbSrc = kadaImageUrl(d.imageNums[0]);
+                    const selected = designId === d.id;
+                    return (
+                      <button
+                        key={d.id}
+                        type="button"
+                        onClick={() => selectDesign(d.id)}
+                        aria-label={`Design ${d.name}`}
+                        aria-pressed={selected}
+                        className={cn(
+                          "overflow-hidden rounded-2xl border-2 bg-white transition-all",
+                          selected
+                            ? "border-amber-600 shadow-lg ring-2 ring-amber-600/20"
+                            : "border-stone-200 hover:border-amber-300"
+                        )}
+                      >
+                        <div className="relative aspect-square w-full bg-stone-50">
+                          <Image
+                            src={thumbSrc}
+                            alt=""
+                            fill
+                            className="object-cover"
+                            sizes="(max-width: 768px) 33vw, 160px"
+                          />
+                          {selected && (
+                            <div className="absolute inset-0 bg-amber-500/10" />
+                          )}
+                        </div>
+                        <div className="border-t border-stone-100 px-2 py-2.5 text-center">
+                          <p className="text-[11px] font-semibold leading-tight text-stone-700">
+                            {d.name}
+                          </p>
+                          <p className="mt-1 text-[10px] font-bold text-amber-600">
+                            ₹699 – ₹4,499
+                          </p>
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
+              </div>
 
-                {/* Price preview */}
-                <div className="mb-3 flex items-center justify-center gap-3 md:justify-start">
-                  <div>
-                    <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Starts at</p>
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-2xl font-black text-amber-700">₹699</span>
-                      <span className="text-sm text-muted-foreground line-through">₹1,499</span>
-                      <span className="rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-bold text-green-700">53% OFF</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mb-4 h-px bg-stone-100" />
-
-                {/* Viewers */}
-                <div className="mb-4 flex items-center justify-center gap-2 md:justify-start">
+              {/* Price + viewers + CTA */}
+              <div className="mt-6 text-center">
+                <div className="mb-3 flex items-center justify-center gap-2.5">
                   <span className="kada-pulse-dot inline-block size-2 rounded-full bg-red-500" />
                   <span className="text-xs text-muted-foreground">
-                    <span className="font-bold text-foreground">{viewersCount} people</span>{" "}
-                    viewing this right now
+                    <span className="font-bold text-foreground">{viewersCount} people</span> viewing right now
                   </span>
                 </div>
-
-                {/* Trust chips */}
-                <div className="mb-4 flex flex-wrap justify-center gap-1.5 md:justify-start">
+                <div className="mb-4 flex flex-wrap justify-center gap-1.5">
                   {[
                     { Icon: Shield, text: "Secure" },
                     { Icon: Truck, text: "COD Available" },
@@ -600,27 +532,14 @@ export function KadaProductPage() {
                     </span>
                   ))}
                 </div>
-
-                {/* Desktop CTAs */}
-                <div className="hidden md:flex flex-col items-stretch gap-3 max-w-sm">
-                  <button
-                    type="button"
-                    onClick={scrollToOrder}
-                    className="kada-glow-btn w-full rounded-2xl bg-amber-700 px-8 py-4 text-base font-bold text-white transition-all hover:bg-amber-800 active:scale-95 flex items-center justify-center gap-2"
-                  >
-                    Select Size & Order Now
-                    <ArrowRight size={18} />
-                  </button>
-                  <a
-                    href={whatsappUrl()}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex w-full items-center justify-center gap-2.5 rounded-2xl border-2 border-green-500 bg-green-50 px-8 py-3.5 text-sm font-bold text-green-700 transition-all hover:bg-green-100 active:scale-95"
-                  >
-                    <WhatsAppIcon size={18} />
-                    Order on WhatsApp
-                  </a>
-                </div>
+                <button
+                  type="button"
+                  onClick={scrollToOrder}
+                  className="kada-glow-btn w-full rounded-2xl bg-amber-700 px-8 py-4 text-base font-bold text-white transition-all hover:bg-amber-800 active:scale-95 flex items-center justify-center gap-2"
+                >
+                  Select Size & Order Now
+                  <ArrowRight size={18} />
+                </button>
               </div>
             </div>
           </div>
