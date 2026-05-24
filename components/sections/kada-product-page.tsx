@@ -447,8 +447,6 @@ export function KadaProductPage() {
             <div className="mx-auto max-w-md">
               {/* Product Image */}
               <div className="relative mx-auto max-w-[340px]">
-                {/* Golden glow halo */}
-                <div className="pointer-events-none absolute inset-0 rounded-[2.5rem]" style={{ background: "radial-gradient(ellipse at center, rgba(251,191,36,0.18) 0%, transparent 70%)", transform: "scale(1.15)" }} />
                 <div className="kada-float relative aspect-square w-full overflow-hidden rounded-[2.5rem] border border-amber-100 bg-white shadow-2xl">
                   <Image
                     key={`${designId}-${safeActiveImage}`}
@@ -463,7 +461,6 @@ export function KadaProductPage() {
                     <span className="text-lg font-black leading-none">{discPct}%</span>
                     <span className="text-[10px] font-semibold uppercase tracking-wide">OFF</span>
                   </div>
-                  <div className="pointer-events-none absolute inset-0 rounded-[2.5rem] bg-gradient-to-tr from-transparent via-white/20 to-transparent" />
                 </div>
 
                 {/* Rating chip */}
