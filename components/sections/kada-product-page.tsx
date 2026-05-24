@@ -704,7 +704,7 @@ export function KadaProductPage() {
             </div>
 
             {/* Variant Cards */}
-            <div className="mb-6 grid grid-cols-2 gap-3 relative items-start">
+            <div className="mb-6 grid grid-cols-2 gap-3 relative items-stretch">
 
               {/* ── Silver Plated ── good but standard */}
               <div
@@ -713,7 +713,7 @@ export function KadaProductPage() {
                 onClick={() => setVariant("plated")}
                 onKeyDown={(e) => e.key === "Enter" && setVariant("plated")}
                 className={cn(
-                  "flex flex-col rounded-3xl overflow-hidden cursor-pointer border-2 bg-white transition-all duration-200",
+                  "flex flex-col h-full rounded-3xl overflow-hidden cursor-pointer border-2 bg-white transition-all duration-200",
                   variant === "plated"
                     ? "border-amber-400 shadow-xl shadow-amber-100"
                     : "border-stone-200 hover:border-amber-300 hover:shadow-lg"
@@ -772,7 +772,7 @@ export function KadaProductPage() {
                 onClick={() => setVariant("silver")}
                 onKeyDown={(e) => e.key === "Enter" && setVariant("silver")}
                 className={cn(
-                  "flex flex-col rounded-3xl overflow-hidden cursor-pointer border-2 transition-all duration-200",
+                  "flex flex-col h-full rounded-3xl overflow-hidden cursor-pointer border-2 transition-all duration-200",
                   variant === "silver"
                     ? "border-amber-500 shadow-2xl shadow-amber-200"
                     : "border-amber-300 shadow-md shadow-amber-100 hover:border-amber-500 hover:shadow-xl hover:shadow-amber-200"
