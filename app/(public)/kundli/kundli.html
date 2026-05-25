@@ -534,6 +534,38 @@ section{padding:72px 0;}
    FOOTER + STICKY
 ═══════════════════════════════════════ */
 .site-footer{background:var(--ink);color:rgba(255,255,255,.38);text-align:center;padding:34px 0 128px;font-size:.84rem;}
+/* Purchase popup */
+.purchase-popup{
+    position:fixed;top:76px;right:14px;z-index:300;
+    display:flex;align-items:center;gap:11px;
+    background:linear-gradient(135deg,#ffffff 0%,#fdf8ef 100%);
+    border:1.5px solid rgba(201,168,76,0.30);
+    border-radius:16px;padding:12px 14px 12px 12px;
+    box-shadow:0 4px 6px rgba(0,0,0,.04),0 12px 40px rgba(12,10,40,.13),0 0 0 1px rgba(255,255,255,.8) inset;
+    max-width:260px;min-width:220px;
+    transform:translateX(110%);opacity:0;
+    transition:transform .5s cubic-bezier(.34,1.45,.64,1),opacity .3s ease;
+    pointer-events:none;
+}
+.purchase-popup.pp-show{transform:translateX(0);opacity:1;}
+.pp-avatar{
+    width:38px;height:38px;border-radius:50%;flex-shrink:0;
+    background:linear-gradient(135deg,#0c0a28,#1d1950);
+    display:flex;align-items:center;justify-content:center;
+    font-size:.85rem;font-weight:800;color:#c9a84c;
+    font-family:var(--fh);letter-spacing:-.5px;
+    box-shadow:0 2px 8px rgba(12,10,40,.25);
+}
+.pp-content{flex:1;min-width:0;}
+.pp-top{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:2px;}
+.pp-label{font-size:.6rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#3db87a;background:#edfbf3;padding:2px 6px;border-radius:20px;}
+.pp-name{font-size:.8rem;font-weight:700;color:#0c0a28;font-family:var(--fh);}
+.pp-action{font-size:.75rem;color:#4a445e;font-weight:500;margin-top:1px;}
+.pp-action strong{color:#c9a84c;font-weight:700;}
+.pp-meta{display:flex;align-items:center;gap:5px;margin-top:4px;}
+.pp-city-tag{font-size:.68rem;color:#6b6480;background:#f5f0ff;padding:2px 7px;border-radius:20px;font-weight:500;}
+.pp-dot{width:5px;height:5px;border-radius:50%;background:#3db87a;flex-shrink:0;}
+.pp-time{font-size:.65rem;color:#9a94ad;}
 .sticky-bar{
     position:fixed;bottom:0;left:0;width:100%;
     background:rgba(12,10,40,.96);
@@ -634,7 +666,7 @@ section{padding:72px 0;}
         </h1>
 
         <p class="hero-sub">
-            2025 mein promotion, business growth, aur wealth — sab ka timing aapki kundli mein clear hai.
+            2026 mein promotion, business growth, aur wealth — sab ka timing aapki kundli mein clear hai.
         </p>
 
         <!-- Pills — horizontal, single row -->
@@ -789,7 +821,7 @@ section{padding:72px 0;}
 <!-- ══════════ INSIDE REPORT ══════════ -->
 <section class="dark" id="what-you-get">
     <div class="container">
-        <h2 class="sec-title">15–20 Page Report — Andar Kya?</h2>
+        <h2 class="sec-title">35–40 Page Report — Andar Kya?</h2>
         <p class="sec-sub">Manually analysed. Clear Hinglish. Aapki exact birth details se.</p>
 
         <div class="inside-grid">
@@ -1076,6 +1108,23 @@ section{padding:72px 0;}
 </footer>
 
 <!-- ══════════ STICKY BAR ══════════ -->
+<!-- Purchase notification popup -->
+<div id="purchasePopup" class="purchase-popup">
+    <div class="pp-avatar" id="ppAvatar">R</div>
+    <div class="pp-content">
+        <div class="pp-top">
+            <span class="pp-name" id="ppName">Rahul M.</span>
+            <span class="pp-label">✓ Purchased</span>
+        </div>
+        <div class="pp-action">Kundli Report liya — <strong>₹399</strong></div>
+        <div class="pp-meta">
+            <span class="pp-dot"></span>
+            <span class="pp-city-tag" id="ppCity">Mumbai</span>
+            <span class="pp-time" id="ppTime">abhi abhi</span>
+        </div>
+    </div>
+</div>
+
 <div class="sticky-bar">
     <div class="sticky-inner">
         <span class="sticky-text">⚠️ Career window — sirf ₹399</span>
@@ -1132,6 +1181,53 @@ document.addEventListener('DOMContentLoaded',function(){
             el.textContent=n;
         },4500);
     }
+
+    /* Purchase notification popup */
+    var _pNames=[
+        'Rahul M.','Priya S.','Amit K.','Neha G.','Vikram J.',
+        'Anjali R.','Suresh P.','Kavya T.','Rohit D.','Sneha B.',
+        'Arjun N.','Pooja V.','Manoj C.','Divya H.','Karan L.',
+        'Ritu A.','Deepak Y.','Shweta F.','Nikhil Z.','Meera Q.',
+        'Sanjay W.','Anita X.','Rajesh U.','Sunita I.','Vivek O.',
+        'Preeti E.','Arun O.','Nisha W.','Mohit Q.','Geeta R.',
+        'Tushar S.','Pallavi T.','Gaurav U.','Smita V.','Pranav W.',
+        'Rekha X.','Vishal Y.','Shruti Z.','Naveen A.','Jaya B.',
+        'Hemant C.','Usha D.','Sachin E.','Radha F.','Sunil G.',
+        'Lakshmi H.','Ajay I.','Swati J.','Pankaj K.','Asha L.'
+    ];
+    var _pCities=[
+        'Mumbai','Delhi','Bangalore','Hyderabad','Pune',
+        'Chennai','Kolkata','Jaipur','Ahmedabad','Surat',
+        'Lucknow','Kanpur','Nagpur','Indore','Bhopal',
+        'Patna','Vadodara','Coimbatore','Agra','Nashik',
+        'Faridabad','Meerut','Rajkot','Varanasi','Amritsar',
+        'Allahabad','Ranchi','Howrah','Gwalior','Jabalpur'
+    ];
+    var _pIdx=Math.floor(Math.random()*_pNames.length);
+    var _pUsed=[];
+    var _timeLabels=['abhi abhi','1 min pehle','2 min pehle','3 min pehle','just now','moments ago'];
+    function _nextPurchase(){
+        if(_pUsed.length>=_pNames.length)_pUsed=[];
+        var idx;
+        do{idx=Math.floor(Math.random()*_pNames.length);}while(_pUsed.indexOf(idx)>-1);
+        _pUsed.push(idx);
+        var name=_pNames[idx];
+        var city=_pCities[Math.floor(Math.random()*_pCities.length)];
+        var time=_timeLabels[Math.floor(Math.random()*_timeLabels.length)];
+        var initial=name.charAt(0).toUpperCase();
+        var popup=document.getElementById('purchasePopup');
+        if(!popup)return;
+        document.getElementById('ppName').textContent=name;
+        document.getElementById('ppCity').textContent=city;
+        document.getElementById('ppTime').textContent=time;
+        document.getElementById('ppAvatar').textContent=initial;
+        popup.classList.add('pp-show');
+        setTimeout(function(){popup.classList.remove('pp-show');},4000);
+    }
+    setTimeout(function(){
+        _nextPurchase();
+        setInterval(_nextPurchase, 4000);
+    },5000);
 
 });
 </script>
