@@ -597,31 +597,54 @@ section{padding:72px 0;}
     .reveals-grid{grid-template-columns:repeat(2,1fr);}
 }
 @media(max-width:768px){
-    section{padding:58px 0;}
+    section{padding:46px 0;}
+    .sec-title{font-size:clamp(1.4rem,5vw,2rem);}
     .stats-grid{grid-template-columns:repeat(2,1fr);}
     .stat-cell:nth-child(2){border-right:none;}
     .stat-cell:nth-child(3){border-right:1px solid var(--bdc);}
     .inside-grid{grid-template-columns:repeat(2,1fr);}
-    .testi-track{padding:0 16px;}
-    .rev{width:min(280px,calc(100vw - 52px));}
-    .stack-box{padding:30px 20px;}
+    .testi-track{padding:0 14px;}
+    .rev{width:min(290px,calc(100vw - 40px));}
+    .stack-box{padding:28px 18px;}
     .so-price{font-size:3rem;}
-    .sticky-inner{flex-direction:column;text-align:center;gap:9px;}
+    .sticky-inner{flex-direction:column;text-align:center;gap:8px;}
     .sticky-btn{width:100%;}
-    .site-footer{padding-bottom:142px;}
+    .site-footer{padding-bottom:148px;}
     .nav-trust{gap:6px;}
     .nav-chip:nth-child(3){display:none;}
-    .hero-img-wrap{max-width:280px;}
+    .hero-img-wrap{max-width:260px;}
+    .hero{padding:28px 0 0;}
+    .live-badge{margin-bottom:12px;}
+    .eyebrow{margin-bottom:14px;font-size:.7rem;}
+    .hero-h1{margin-bottom:10px;}
+    .hero-sub{margin-bottom:16px;font-size:.9rem;}
+    .hero-pills{gap:6px;margin-bottom:20px;}
+    .h-pill{padding:5px 11px;font-size:.7rem;}
+    .purchase-popup{max-width:230px;min-width:200px;top:68px;right:10px;padding:10px 12px 10px 10px;}
+    .pp-avatar{width:34px;height:34px;font-size:.78rem;}
+    .pp-name{font-size:.76rem;}
+    .pp-action{font-size:.7rem;}
 }
 @media(max-width:500px){
-    .pain-grid{grid-template-columns:1fr;max-width:340px;margin:0 auto;}
-    .inside-grid{grid-template-columns:1fr;}
-    .hero-h1{font-size:1.9rem;}
-    .hero-cta-block{padding:20px 14px 16px;}
-    .hero-img-wrap{max-width:240px;}
-    .reveals-grid{grid-template-columns:1fr;}
-    .process-grid{grid-template-columns:1fr;max-width:300px;margin:0 auto;}
+    section{padding:36px 0;}
+    .pain-grid{grid-template-columns:repeat(2,1fr);}
+    .pain-card{padding:18px 10px 16px;}
+    .pain-em{font-size:1.8rem;}
+    .pain-txt{font-size:.78rem;}
+    .inside-grid{grid-template-columns:repeat(2,1fr);}
+    .hero-h1{font-size:1.75rem;line-height:1.12;letter-spacing:-.02em;}
+    .hero-cta-block{padding:18px 12px 14px;}
+    .hero-img-wrap{max-width:220px;}
+    .reveals-grid{grid-template-columns:repeat(2,1fr);}
+    .process-grid{grid-template-columns:repeat(2,1fr);}
     .nav-chip:nth-child(2){display:none;}
+    .sec-title{font-size:1.35rem;}
+    .sec-sub{font-size:.82rem;}
+    .stat-num{font-size:1.5rem;}
+    .stat-lbl{font-size:.72rem;}
+    .purchase-popup{max-width:210px;min-width:190px;}
+    .hp-now{font-size:2.2rem;}
+    .btn-primary-lg{font-size:1rem;padding:16px 24px;}
 }
 </style>
 </head>
@@ -660,9 +683,8 @@ section{padding:72px 0;}
         <div class="eyebrow">🔮 Vedic Career &amp; Wealth Analysis</div>
 
         <h1 class="hero-h1">
-            Aapka Career, Promotion
-            <span class="glow">Aur Paisa —</span>
-            Kundli Mein Likha Hai
+            Aapka Career Aur Wealth
+            <span class="glow">Kundli Mein Likha Hai</span>
         </h1>
 
         <p class="hero-sub">
@@ -671,7 +693,7 @@ section{padding:72px 0;}
 
         <!-- Pills — horizontal, single row -->
         <div class="hero-pills">
-            <span class="h-pill">📦 1,237+ Reports</span>
+            <span class="h-pill">📦 7,842+ Reports</span>
             <span class="h-pill">🤲 Manual Reading</span>
             <span class="h-pill">⏱ 24–48 Hrs PDF</span>
         </div>
@@ -709,7 +731,7 @@ section{padding:72px 0;}
         <div class="stats-grid">
             <div class="stat-cell">
                 <div class="stat-em">🧿</div>
-                <div class="stat-num">1,237+</div>
+                <div class="stat-num">7,842+</div>
                 <div class="stat-lbl">Reports Delivered</div>
             </div>
             <div class="stat-cell">
@@ -718,9 +740,9 @@ section{padding:72px 0;}
                 <div class="stat-lbl">Average Rating</div>
             </div>
             <div class="stat-cell">
-                <div class="stat-em">💼</div>
-                <div class="stat-num">40K+</div>
-                <div class="stat-lbl">Community</div>
+                <div class="stat-em">🏙️</div>
+                <div class="stat-num">320+</div>
+                <div class="stat-lbl">Cities Served</div>
             </div>
             <div class="stat-cell">
                 <div class="stat-em">⏱</div>
@@ -961,8 +983,8 @@ section{padding:72px 0;}
                 Koi automated software nahi. <strong style="color:var(--td);">Aapki exact DOB, time &amp; place</strong> se manually — phir personally check karke bheja jaata hai.
             </p>
             <div class="auth-stats">
-                <div class="as-box"><div class="as-num">40K+</div><div class="as-lbl">Community</div></div>
-                <div class="as-box"><div class="as-num">1000+</div><div class="as-lbl">Charts Analysed</div></div>
+                <div class="as-box"><div class="as-num">7,842+</div><div class="as-lbl">Reports Done</div></div>
+                <div class="as-box"><div class="as-num">320+</div><div class="as-lbl">Cities Served</div></div>
                 <div class="as-box"><div class="as-num">100%</div><div class="as-lbl">Manual Review</div></div>
             </div>
             <div class="auth-img">
@@ -1116,7 +1138,7 @@ section{padding:72px 0;}
             <span class="pp-name" id="ppName">Rahul M.</span>
             <span class="pp-label">✓ Purchased</span>
         </div>
-        <div class="pp-action">Kundli Report liya — <strong>₹399</strong></div>
+        <div class="pp-action">Just got their Kundli Report · <strong>₹399</strong></div>
         <div class="pp-meta">
             <span class="pp-dot"></span>
             <span class="pp-city-tag" id="ppCity">Mumbai</span>
@@ -1205,7 +1227,7 @@ document.addEventListener('DOMContentLoaded',function(){
     ];
     var _pIdx=Math.floor(Math.random()*_pNames.length);
     var _pUsed=[];
-    var _timeLabels=['abhi abhi','1 min pehle','2 min pehle','3 min pehle','just now','moments ago'];
+    var _timeLabels=['just now','moments ago','2 min ago','1 min ago','a few seconds ago','just now'];
     function _nextPurchase(){
         if(_pUsed.length>=_pNames.length)_pUsed=[];
         var idx;
