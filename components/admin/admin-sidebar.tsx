@@ -33,6 +33,7 @@ const NAV_SECTIONS = [
     label: "Catalog",
     items: [
       { label: "Products", href: adminPath("/products") },
+      { label: "Kada pricing", href: adminPath("/kada-pricing") },
     ],
   },
   {

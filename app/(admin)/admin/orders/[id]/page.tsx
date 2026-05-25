@@ -53,6 +53,11 @@ export default async function OrderDetailPage({
     .order("created_at", { ascending: false });
 
   const pay = pays?.[0] ?? null;
+  const { data: physicalOrder } = await supabase
+    .from("physical_order_details")
+    .select("*")
+    .eq("order_id", id)
+    .maybeSingle();
   const { data: paymentInitiatedEvent } = await supabase
     .from("events")
     .select("metadata_json")
@@ -253,6 +258,58 @@ export default async function OrderDetailPage({
         </section>
       )}
 
+      {physicalOrder && (
+        <section className="rounded-2xl border border-border/60 bg-card p-6 shadow-sm">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <h2 className="font-heading text-lg font-semibold">Physical product details</h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Vedic Kada selection, payment mode, and shipping snapshot captured at checkout.
+              </p>
+            </div>
+            <span className="rounded-full border border-amber-300/60 bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-800 dark:border-amber-700/40 dark:bg-amber-950/30 dark:text-amber-300">
+              {physicalOrder.payment_method.toUpperCase()}
+            </span>
+          </div>
+          <dl className="mt-5 grid gap-2 sm:grid-cols-2 text-sm">
+            <Row label="Product family" value={physicalOrder.product_family} />
+            <Row label="Variant" value={physicalOrder.variant_label} />
+            <Row label="Design" value={physicalOrder.design_label} />
+            <Row label="Size" value={`${physicalOrder.size_code} · ${physicalOrder.size_label}`} />
+            <Row
+              label="Siddh energisation"
+              value={physicalOrder.siddha_energisation ? "Yes" : "No"}
+            />
+            <Row
+              label="Prepaid discount"
+              value={`₹${(Number(physicalOrder.prepaid_discount_amount) / 100).toFixed(0)}`}
+            />
+            <Row label="Estimated delivery" value={`${physicalOrder.estimated_delivery_days} days`} />
+            <Row label="Ship to" value={physicalOrder.shipping_full_name} />
+            <Row label="WhatsApp" value={`+91 ${physicalOrder.shipping_phone}`} />
+            <Row
+              label="Address"
+              value={
+                <span>
+                  {physicalOrder.shipping_address_line1}
+                  <br />
+                  {physicalOrder.shipping_city}, {physicalOrder.shipping_state} -{" "}
+                  {physicalOrder.shipping_pincode}
+                  <br />
+                  {physicalOrder.shipping_country}
+                </span>
+              }
+            />
+          </dl>
+          {physicalOrder.internal_notes ? (
+            <div className="mt-4 rounded-xl border border-border/50 bg-muted/30 p-3 text-sm">
+              <p className="text-xs uppercase tracking-wider text-muted-foreground">Internal notes</p>
+              <p className="mt-1">{physicalOrder.internal_notes}</p>
+            </div>
+          ) : null}
+        </section>
+      )}
+
       <section className="rounded-2xl border border-border/60 bg-card p-6 shadow-sm">
         <h2 className="font-heading text-lg font-semibold">Payment</h2>
         {paymentReconcileFlash && (
@@ -415,6 +472,9 @@ function formatAdminProductLabel(slug: string): string {
   if (slug === "fast-track-addon") return "FastTrack Add-on";
   if (slug === "consultation-15min") return "Consultation · 15 Min";
   if (slug === "consultation-45min") return "Consultation · 45 Min";
+  if (slug === "vedic-kada-plated") return "Vedic Kada · Silver Plated";
+  if (slug === "vedic-kada-pure-silver") return "Vedic Kada · Pure Silver";
+  if (slug === "kada-siddha-energisation") return "Siddh Energisation · Kada";
   return slug
     .split("-")
     .map((w) => w.charAt(0).toUpperCase() + w.slice(1))

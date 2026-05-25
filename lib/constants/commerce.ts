@@ -92,6 +92,9 @@ export const PRODUCT_SLUGS = {
   FAST_TRACK_ADDON: "fast-track-addon",
   CONSULTATION_15MIN: "consultation-15min",
   CONSULTATION_45MIN: "consultation-45min",
+  VEDIC_KADA_PLATED: "vedic-kada-plated",
+  VEDIC_KADA_PURE_SILVER: "vedic-kada-pure-silver",
+  KADA_SIDDHA_ADDON: "kada-siddha-energisation",
 } as const;
 
 /** Map checkout ?source= and page sources to analytics entry_path */

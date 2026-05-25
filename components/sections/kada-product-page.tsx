@@ -19,6 +19,13 @@ import {
   Info,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import {
+  FALLBACK_KADA_PRICING,
+  kadaVariantMrpPaise,
+  kadaVariantPricePaise,
+  type KadaPricing,
+  type KadaVariant,
+} from "@/lib/products/kada";
 
 const KADA_IMAGE_CDN_BASE =
   "https://primedit-cdn.b-cdn.net/Images%20Product";
@@ -246,10 +253,14 @@ const FAQS = [
 
 // ── Main Component ─────────────────────────────────────────────────────────────
 
-export function KadaProductPage() {
-  const [variant, setVariant] = useState<"plated" | "silver">("plated");
-  const [designId, setDesignId] = useState<DesignId>("classic");
-  const [size, setSize] = useState(SIZES[1]);
+export function KadaProductPage({
+  pricing = FALLBACK_KADA_PRICING,
+}: {
+  pricing?: KadaPricing;
+}) {
+  const [variant, setVariant] = useState<KadaVariant | null>(null);
+  const [designId, setDesignId] = useState<DesignId | null>(null);
+  const [size, setSize] = useState<string | null>(null);
   const [siddha, setSiddha] = useState(false);
   const [activeImage, setActiveImage] = useState(0);
   const [slideDir, setSlideDir] = useState<"right" | "left">("right");
@@ -257,6 +268,7 @@ export function KadaProductPage() {
   const [stickyVisible, setStickyVisible] = useState(false);
   const [viewersCount, setViewersCount] = useState(17);
   const [showSizeGuide, setShowSizeGuide] = useState(false);
+  const [selectionError, setSelectionError] = useState("");
 
   const heroRef = useRef<HTMLDivElement>(null);
   const orderRef = useRef<HTMLDivElement>(null);
@@ -266,6 +278,7 @@ export function KadaProductPage() {
 
   const activeDesign =
     DESIGN_VARIANTS.find((d) => d.id === designId) ?? DESIGN_VARIANTS[0];
+  const hasRequiredSelection = Boolean(variant && designId && size);
   const galleryImages = Array.from({ length: activeDesign.imageCount }, (_, i) => ({
     id: i,
     src: kadaImageUrl(activeDesign.folder, i + 1),
@@ -273,10 +286,21 @@ export function KadaProductPage() {
   }));
   const safeActiveImage = Math.min(activeImage, galleryImages.length - 1);
 
-  const basePrice = variant === "silver" ? 4499 : 749;
-  const mrp = variant === "silver" ? 7999 : 1599;
-  const discPct = variant === "silver" ? 43 : 53;
+  const displayVariant = variant ?? "plated";
+  const basePrice = Math.round(kadaVariantPricePaise(displayVariant, pricing) / 100);
+  const mrp = Math.round(kadaVariantMrpPaise(displayVariant, pricing) / 100);
+  const discPct = mrp > 0 ? Math.max(0, Math.round(((mrp - basePrice) / mrp) * 100)) : 0;
   const savings = mrp - basePrice;
+  const ctaLabel = !variant
+    ? "Select Kada type"
+    : hasRequiredSelection
+      ? "Proceed to Checkout →"
+      : "Select design and size";
+  const stickyCtaLabel = !variant
+    ? "Select type"
+    : hasRequiredSelection
+      ? "Checkout 🛒"
+      : "Select design & size";
 
   function goToImage(idx: number) {
     setSlideDir(idx > safeActiveImage ? "right" : "left");
@@ -285,15 +309,20 @@ export function KadaProductPage() {
 
   function selectDesign(id: DesignId) {
     setDesignId(id);
+    setSelectionError("");
     setSlideDir("right");
     setActiveImage(0);
   }
 
   function whatsappUrl() {
-    const variantLabel = variant === "silver" ? "Pure Silver" : "Silver Plated";
+    const variantLabel = variant === "silver" ? "Pure Silver" : variant === "plated" ? "Silver Plated" : "preferred";
     const siddhaLabel = siddha ? " with Siddh Energisation" : "";
+    const designLabel = designId
+      ? (DESIGN_VARIANTS.find((d) => d.id === designId)?.name ?? activeDesign.name)
+      : "selected design";
+    const sizeLabel = size ?? "selected size";
     const msg = encodeURIComponent(
-      `Namaste! I want to order the ${activeDesign.name} ${variantLabel} Kada (Size: ${size})${siddhaLabel}. Please help me complete my order. 🙏`
+      `Namaste! I want to order the ${designLabel} ${variantLabel} Kada (Size: ${sizeLabel})${siddhaLabel}. Please help me complete my order. 🙏`
     );
     return `https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`;
   }
@@ -355,11 +384,22 @@ export function KadaProductPage() {
     orderRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
 
   const goToCheckout = () => {
+    if (!variant) {
+      setSelectionError("Select Kada type");
+      orderRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      return;
+    }
+    if (!designId || !size) {
+      setSelectionError("Select design and size");
+      orderRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      return;
+    }
     const params = new URLSearchParams({
       variant,
       design: designId,
       size: size.split(" ")[0],
     });
+    if (siddha) params.set("siddha", "true");
     router.push(`/checkout/kada?${params.toString()}`);
   };
 
@@ -541,7 +581,8 @@ export function KadaProductPage() {
                       fill
                       className="object-cover"
                       sizes="340px"
-                      priority={safeActiveImage === 0}
+                      loading={safeActiveImage === 0 ? "eager" : "lazy"}
+                      preload={safeActiveImage === 0}
                     />
                   </div>
                   <div className="absolute right-4 top-4 flex flex-col items-center rounded-2xl bg-red-500 px-3 py-2 text-white shadow-lg">
@@ -611,7 +652,9 @@ export function KadaProductPage() {
               <div className="mt-4">
                 <p className="mb-3 text-center text-sm text-foreground">
                   <span className="text-muted-foreground">Design: </span>
-                  <span className="font-semibold">{activeDesign.name}</span>
+                  <span className={cn("font-semibold", designId ? "text-amber-700" : "text-red-500")}>
+                    {designId ? activeDesign.name : "Please choose"}
+                  </span>
                 </p>
                 <div className="grid grid-cols-3 gap-3">
                   {DESIGN_VARIANTS.map((d) => {
@@ -628,7 +671,7 @@ export function KadaProductPage() {
                           "overflow-hidden rounded-2xl border-2 bg-white transition-all",
                           selected
                             ? "border-amber-600 shadow-lg ring-2 ring-amber-600/20"
-                            : "border-stone-200 hover:border-amber-300"
+                            : "border-stone-200 opacity-90 hover:border-amber-300 hover:opacity-100"
                         )}
                       >
                         <div className="relative aspect-square w-full bg-stone-50">
@@ -648,7 +691,7 @@ export function KadaProductPage() {
                             {d.name}
                           </p>
                           <p className="mt-1 text-[10px] font-bold text-amber-600">
-                            From ₹749
+                            From ₹{basePrice.toLocaleString("en-IN")}
                           </p>
                         </div>
                       </button>
@@ -668,7 +711,7 @@ export function KadaProductPage() {
 
                 {/* Price indicator */}
                 <div className="mb-4 flex items-baseline justify-center gap-3">
-                  <span className="font-heading text-4xl font-black text-amber-600">From ₹749</span>
+                  <span className="font-heading text-4xl font-black text-amber-600">From ₹{basePrice.toLocaleString("en-IN")}</span>
                   <span className="text-base font-medium text-stone-400 line-through">₹1,499</span>
                 </div>
 
@@ -881,7 +924,10 @@ export function KadaProductPage() {
                 <div>
                   <p className="text-sm font-bold text-foreground">Select Your Size</p>
                   <p className="mt-0.5 text-[11px] text-muted-foreground">
-                    Currently selected: <span className="font-semibold text-amber-700">{size}</span>
+                    Currently selected:{" "}
+                    <span className={cn("font-semibold", size ? "text-amber-700" : "text-red-500")}>
+                      {size ?? "Select size"}
+                    </span>
                   </p>
                 </div>
                 <button
@@ -899,7 +945,10 @@ export function KadaProductPage() {
                   <button
                     key={s}
                     type="button"
-                    onClick={() => setSize(s)}
+                    onClick={() => {
+                      setSize(s);
+                      setSelectionError("");
+                    }}
                     className={cn(
                       "flex flex-col items-center rounded-xl border-2 px-1.5 py-2 transition-all",
                       size === s
@@ -930,7 +979,10 @@ export function KadaProductPage() {
                       <button
                         key={sg}
                         type="button"
-                        onClick={() => setSize(sg)}
+                        onClick={() => {
+                          setSize(sg);
+                          setSelectionError("");
+                        }}
                         className={cn(
                           "flex w-full items-center justify-between rounded-xl border px-4 py-2.5 text-xs text-left transition-all",
                           size === sg
@@ -949,12 +1001,17 @@ export function KadaProductPage() {
             </div>
 
             {/* CTA */}
+            {selectionError ? (
+              <p className="mb-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-center text-sm font-semibold text-red-700">
+                {selectionError}
+              </p>
+            ) : null}
             <button
               type="button"
               onClick={goToCheckout}
               className="kada-glow-btn w-full rounded-3xl bg-amber-700 py-5 text-lg font-black text-white shadow-xl transition-all hover:bg-amber-800 active:scale-[0.98]"
             >
-              Proceed to Checkout →
+              {ctaLabel}
               <p className="mt-1 text-sm font-normal opacity-85">Secure · Free Shipping · COD Available</p>
             </button>
 
@@ -1268,8 +1325,8 @@ export function KadaProductPage() {
             <h2 className="font-heading mb-4 text-4xl font-black md:text-5xl">
               Wear Your Protection.<br />Start Today.
             </h2>
-            <p className="mb-10 text-sm text-amber-300 md:text-base">
-              Starts at ₹699 · Cash on Delivery · Delivered in 15–20 days
+              <p className="mb-10 text-sm text-amber-300 md:text-base">
+                Starts at ₹{basePrice.toLocaleString("en-IN")} · Cash on Delivery · Delivered in 15–20 days
             </p>
             <button
               onClick={scrollToOrder}
@@ -1308,17 +1365,17 @@ export function KadaProductPage() {
                 </span>
               </div>
               <p className="truncate text-[11px] text-amber-600">
-                {activeDesign.name} ·{" "}
-                {variant === "silver" ? "Pure Silver" : "Silver Plated"} · {size}
+                {designId ? activeDesign.name : "Choose design"} ·{" "}
+                {variant ? (variant === "silver" ? "Pure Silver" : "Silver Plated") : "Choose type"} · {size ?? "Select size"}
               </p>
             </div>
             <div className="flex shrink-0 items-center gap-2">
               <button
                 type="button"
-                onClick={scrollToOrder}
+                onClick={goToCheckout}
                 className="rounded-2xl bg-amber-700 px-6 py-3 text-sm font-black text-white shadow-lg transition-all hover:bg-amber-800 active:scale-95"
               >
-                Buy Now 🛒
+                {stickyCtaLabel}
               </button>
             </div>
           </div>

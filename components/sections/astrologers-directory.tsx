@@ -71,12 +71,15 @@ function AstrologerCard({
   isStarting,
   onChat,
   waitLive,
+  preloadImage,
 }: {
   a: LiveChatAstrologer;
   isStarting: boolean;
   onChat: () => void;
   /** `null` = still loading; `0` = no queue; `>0` = estimated minutes */
   waitLive: number | null;
+  /** First visible card can become LCP after the skeleton clears. */
+  preloadImage?: boolean;
 }) {
   const [imageFailed, setImageFailed] = useState(false);
   const featured = !!a.featured;
@@ -136,6 +139,8 @@ function AstrologerCard({
                 height={160}
                 className={`rounded-full object-cover ${featured ? "size-[80px]" : "size-[72px]"}`}
                 style={{ objectPosition: "center 15%" }}
+                loading={preloadImage ? "eager" : "lazy"}
+                preload={preloadImage}
                 onError={() => setImageFailed(true)}
               />
             ) : (
@@ -688,6 +693,7 @@ export function AstrologersDirectory() {
                 isStarting={startingId === a.id}
                 onChat={() => void startChat(a)}
                 waitLive={waitEstimates === null ? null : (waitEstimates[a.id] ?? 0)}
+                preloadImage={i === 0}
               />
             </div>
           ))}

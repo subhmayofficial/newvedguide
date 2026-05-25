@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { KadaProductPage } from "@/components/sections/kada-product-page";
+import { createServiceClient } from "@/lib/supabase/server";
+import { getKadaPricing } from "@/lib/products/kada-pricing-server";
 
 export const metadata: Metadata = {
   title: "Astrological Protection Kada — VedGuide",
@@ -12,6 +14,9 @@ export const metadata: Metadata = {
   },
 };
 
-export default function KadaPage() {
-  return <KadaProductPage />;
+export const dynamic = "force-dynamic";
+
+export default async function KadaPage() {
+  const pricing = await getKadaPricing(createServiceClient());
+  return <KadaProductPage pricing={pricing} />;
 }

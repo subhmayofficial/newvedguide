@@ -114,6 +114,15 @@ type PaidOrderDeliveryRow = {
   entry_path: string | null;
   consultation_type: string | null;
   session_note: string | null;
+  paid_at?: string | null;
+  birth_details?: {
+    full_name: string | null;
+    gender: string | null;
+    report_language: string | null;
+    date_of_birth: string | null;
+    time_of_birth: string | null;
+    birth_place: string | null;
+  } | null;
   customers: {
     full_name: string | null;
     phone: string | null;
@@ -900,6 +909,139 @@ function resolveDeliveryText(productSlug: string): string {
   return "Your report delivery is in process. Typical timeline is 24-48 hours.";
 }
 
+function prettyDateTime(raw: string | null | undefined): string {
+  if (!raw) return "";
+  try {
+    return new Intl.DateTimeFormat("en-IN", {
+      dateStyle: "medium",
+      timeStyle: "short",
+      timeZone: "Asia/Kolkata",
+    }).format(new Date(raw));
+  } catch {
+    return raw;
+  }
+}
+
+function firstConfiguredEmail(...candidates: Array<string | null | undefined>): string {
+  for (const raw of candidates) {
+    const v = raw?.trim();
+    if (!v) continue;
+    const angleMatch = v.match(/<\s*([^<>\s@]+@[^<>\s@]+\.[^<>\s@]+)\s*>/);
+    if (angleMatch?.[1]) return angleMatch[1];
+    const mailtoMatch = v.match(/^mailto:([^?\s]+@[^?\s]+\.[^?\s]+)/i);
+    if (mailtoMatch?.[1]) return mailtoMatch[1];
+    const plainMatch = v.match(/^[^<>\s@]+@[^<>\s@]+\.[^<>\s@]+$/);
+    if (plainMatch) return v;
+  }
+  return "";
+}
+
+function buildOrderEmailVars(input: {
+  fullName: string;
+  email: string;
+  phone: string;
+  orderId: string;
+  orderUuid?: string | null;
+  product: string;
+  amountRupees: string;
+  supportLink: string;
+  deliveryText: string;
+  paidAt?: string | null;
+  birth?: PaidOrderDeliveryRow["birth_details"];
+}): Record<string, string> {
+  const firstName = input.fullName.trim().split(/\s+/)[0] || input.fullName;
+  const amountWithCurrency = `Rs ${input.amountRupees}`;
+  const birth = input.birth ?? null;
+  const paidAtFormatted = prettyDateTime(input.paidAt);
+  const orderDate = paidAtFormatted || prettyDateTime(new Date().toISOString());
+  const supportEmail = firstConfiguredEmail(
+    process.env.RESEND_REPLY_TO,
+    process.env.RESEND_FROM,
+    process.env.EMAIL_SUPPORT_LINK
+  );
+  const deliveryTime = input.deliveryText.match(/\d+\s*[-–]\s*\d+\s*(?:hours?|hrs?|days?)/i)?.[0] ?? input.deliveryText;
+  return {
+    name: input.fullName,
+    first_name: firstName,
+    firstName,
+    customer_name: input.fullName,
+    customerName: input.fullName,
+    "customer.name": input.fullName,
+    "customer.full_name": input.fullName,
+    full_name: input.fullName,
+    fullName: input.fullName,
+    email: input.email,
+    customer_email: input.email,
+    customerEmail: input.email,
+    "customer.email": input.email,
+    phone: input.phone,
+    customer_phone: input.phone,
+    customerPhone: input.phone,
+    "customer.phone": input.phone,
+    order_id: input.orderId,
+    orderId: input.orderId,
+    "order.id": input.orderId,
+    order_number: input.orderId,
+    orderNumber: input.orderId,
+    "order.number": input.orderId,
+    order_uuid: input.orderUuid ?? "",
+    orderUuid: input.orderUuid ?? "",
+    product: input.product,
+    product_name: input.product,
+    productName: input.product,
+    "product.name": input.product,
+    amount: input.amountRupees,
+    amount_rupees: input.amountRupees,
+    amountRupees: input.amountRupees,
+    amount_inr: amountWithCurrency,
+    amountInr: amountWithCurrency,
+    amount_paid: amountWithCurrency,
+    amountPaid: amountWithCurrency,
+    paid_amount: amountWithCurrency,
+    paidAmount: amountWithCurrency,
+    order_amount: amountWithCurrency,
+    orderAmount: amountWithCurrency,
+    payment_amount: amountWithCurrency,
+    paymentAmount: amountWithCurrency,
+    total_amount: amountWithCurrency,
+    totalAmount: amountWithCurrency,
+    price: amountWithCurrency,
+    "order.amount": amountWithCurrency,
+    support_link: input.supportLink,
+    supportLink: input.supportLink,
+    support_email: supportEmail,
+    supportEmail,
+    delivery_text: input.deliveryText,
+    deliveryText: input.deliveryText,
+    delivery_time: deliveryTime,
+    deliveryTime,
+    order_date: orderDate,
+    orderDate,
+    payment_date: paidAtFormatted,
+    paymentDate: paidAtFormatted,
+    paid_at: paidAtFormatted,
+    paidAt: paidAtFormatted,
+    order_status: "Confirmed",
+    orderStatus: "Confirmed",
+    payment_status: "Paid",
+    paymentStatus: "Paid",
+    birth_name: birth?.full_name ?? input.fullName,
+    birthName: birth?.full_name ?? input.fullName,
+    gender: birth?.gender ?? "",
+    report_language: birth?.report_language ?? "",
+    reportLanguage: birth?.report_language ?? "",
+    dob: birth?.date_of_birth ?? "",
+    date_of_birth: birth?.date_of_birth ?? "",
+    dateOfBirth: birth?.date_of_birth ?? "",
+    tob: birth?.time_of_birth ?? "",
+    time_of_birth: birth?.time_of_birth ?? "",
+    timeOfBirth: birth?.time_of_birth ?? "",
+    pob: birth?.birth_place ?? "",
+    birth_place: birth?.birth_place ?? "",
+    birthPlace: birth?.birth_place ?? "",
+  };
+}
+
 function siteOriginFromEnv(): string {
   const raw = process.env.NEXT_PUBLIC_SITE_URL?.trim();
   if (!raw) return "";
@@ -941,7 +1083,7 @@ export async function triggerPaymentSuccessDeliveries(
   const { data } = await supabase
     .from("orders")
     .select(
-      "id,order_number,product_slug,total_amount,currency,customer_id,lead_id,source,entry_path,consultation_type,session_note,customers(full_name,phone,email)"
+      "id,order_number,product_slug,total_amount,currency,customer_id,lead_id,source,entry_path,consultation_type,session_note,paid_at,birth_details(full_name,gender,report_language,date_of_birth,time_of_birth,birth_place),customers(full_name,phone,email)"
     )
     .eq("id", orderId)
     .maybeSingle();
@@ -1022,18 +1164,19 @@ export async function triggerPaymentSuccessDeliveries(
         .maybeSingle();
 
       if (templateRow?.html) {
-        const vars = {
-          name: fullName,
-          full_name: fullName,
+        const vars = buildOrderEmailVars({
+          fullName,
           email: customer?.email ?? "",
           phone: customer?.phone ?? "",
-          order_id: order.order_number,
-          order_number: order.order_number,
+          orderId: order.order_number,
+          orderUuid: order.id,
           product: productName,
-          amount: amountRupees,
-          support_link: config.email.supportLink,
-          delivery_text: resolveDeliveryText(order.product_slug),
-        };
+          amountRupees,
+          supportLink: config.email.supportLink,
+          deliveryText: resolveDeliveryText(order.product_slug),
+          paidAt: order.paid_at,
+          birth: order.birth_details ?? null,
+        });
         const subject =
           applySmtpTemplateVariables(templateRow.subject || "Order confirmation", vars).trim() ||
           `Order Confirmed (${order.order_number})`;
@@ -1104,7 +1247,7 @@ export async function triggerKundliDeliveryCompletedEmail(
 
   const { data: orderRaw } = await supabase
     .from("orders")
-    .select("id,order_number,product_slug,total_amount,customer_id,lead_id,customers(full_name,email,phone)")
+    .select("id,order_number,product_slug,total_amount,customer_id,lead_id,paid_at,birth_details(full_name,gender,report_language,date_of_birth,time_of_birth,birth_place),customers(full_name,email,phone)")
     .eq("id", input.orderId)
     .maybeSingle();
   const order = orderRaw as PaidOrderDeliveryRow | null;
@@ -1135,17 +1278,21 @@ export async function triggerKundliDeliveryCompletedEmail(
 
   const amountRupees = (Number(order.total_amount) / 100).toFixed(0);
   const vars = {
-    name: fullName,
-    full_name: fullName,
-    email,
-    phone: customer?.phone ?? "",
-    order_id: order.order_number,
-    order_number: order.order_number,
-    product: "Paid Kundli Report",
-    amount: amountRupees,
-    support_link: config.email.supportLink,
+    ...buildOrderEmailVars({
+      fullName,
+      email,
+      phone: customer?.phone ?? "",
+      orderId: order.order_number,
+      orderUuid: order.id,
+      product: "Paid Kundli Report",
+      amountRupees,
+      supportLink: config.email.supportLink,
+      deliveryText: "Your paid kundli report has been delivered.",
+      paidAt: order.paid_at,
+      birth: order.birth_details ?? null,
+    }),
     report_url: input.reportUrl,
-    delivery_text: "Your paid kundli report has been delivered.",
+    reportUrl: input.reportUrl,
   };
   const subject =
     applySmtpTemplateVariables(templateRow.subject || "Kundli report delivered", vars).trim() ||

@@ -17,6 +17,7 @@ import {
   ORDER_STATUS,
   PAYMENT_STATUS_ORDER,
 } from "@/lib/constants/commerce";
+import { isKadaProductSlug } from "@/lib/products/kada";
 import type { OrderDeliverySchedule } from "@/components/admin/order-deliver-button";
 import { Zap, ArrowUpRight } from "lucide-react";
 
@@ -43,6 +44,17 @@ type OrderRow = {
   delivery_schedule_report_url: string | null;
   customers: { full_name?: string | null; phone?: string | null } | null;
   order_items?: { product_slug: string }[] | null;
+  physical_order_details:
+    | {
+        variant_label: string | null;
+        design_label: string | null;
+        size_code: string | null;
+        payment_method: string | null;
+        shipping_city: string | null;
+        shipping_state: string | null;
+        shipping_pincode: string | null;
+      }[]
+    | null;
   admin_order_post_upsell:
     | {
         kundli_points: string | null;
@@ -84,7 +96,7 @@ export default async function AdminOrdersPage({
   let q = supabase
     .from("orders")
     .select(
-      "id,order_number,product_slug,consultation_type,total_amount,status,payment_status,fulfillment_status,fulfillment_assignee,entry_path,created_at,coupon_applied,coupon_code,delivery_scheduled_at,delivery_schedule_customer_name,delivery_schedule_report_url,customers(full_name,phone),order_items(product_slug),admin_order_post_upsell(kundli_points,status,message_1_sent_at,message_2_sent_at)",
+      "id,order_number,product_slug,consultation_type,total_amount,status,payment_status,fulfillment_status,fulfillment_assignee,entry_path,created_at,coupon_applied,coupon_code,delivery_scheduled_at,delivery_schedule_customer_name,delivery_schedule_report_url,customers(full_name,phone),order_items(product_slug),physical_order_details(variant_label,design_label,size_code,payment_method,shipping_city,shipping_state,shipping_pincode),admin_order_post_upsell(kundli_points,status,message_1_sent_at,message_2_sent_at)",
       { count: "exact" }
     )
     .order("created_at", { ascending: false })
@@ -93,10 +105,14 @@ export default async function AdminOrdersPage({
   if (sp.status)              q = q.eq("status", sp.status);
   if (sp.payment_status)      q = q.eq("payment_status", sp.payment_status);
   else if (!showAllPaymentStatuses) {
-    q = q.eq("payment_status", "paid");
+    q = q.or("payment_status.eq.paid,product_slug.in.(vedic-kada-plated,vedic-kada-pure-silver)");
   }
   if (sp.fulfillment_status)  q = q.eq("fulfillment_status", sp.fulfillment_status);
-  if (sp.product)             q = q.eq("product_slug", sp.product);
+  if (sp.product === "kada") {
+    q = q.in("product_slug", ["vedic-kada-plated", "vedic-kada-pure-silver"]);
+  } else if (sp.product) {
+    q = q.eq("product_slug", sp.product);
+  }
   if (sp.entry_path)          q = q.eq("entry_path", sp.entry_path);
   if (sp.consultation_type)   q = q.eq("consultation_type", sp.consultation_type);
 
@@ -291,6 +307,11 @@ export default async function AdminOrdersPage({
           active={sp.product === "fast-track-addon"}
         />
         <QuickChip
+          href={adminPath("/orders?product=kada")}
+          label="Kada orders"
+          active={sp.product === "kada"}
+        />
+        <QuickChip
           href={adminPath("/orders?payment_status=paid&fulfillment_status=unfulfilled")}
           label="Paid · pending fulfillment"
           active={sp.payment_status === "paid" && sp.fulfillment_status === "unfulfilled"}
@@ -352,6 +373,9 @@ export default async function AdminOrdersPage({
             <FilterSelect name="product" defaultValue={sp.product ?? ""}>
               <option value="">All</option>
               <option value="paid-kundli">Paid Kundli</option>
+              <option value="kada">All Vedic Kada</option>
+              <option value="vedic-kada-plated">Vedic Kada · Silver Plated</option>
+              <option value="vedic-kada-pure-silver">Vedic Kada · Pure Silver</option>
               <option value="consultation-15min">Consult · 15m</option>
               <option value="consultation-45min">Consult · 45m</option>
               <option value="fast-track-addon">FastTrack Add-on</option>
@@ -462,6 +486,7 @@ export default async function AdminOrdersPage({
               const defaultCustomerName = (c?.full_name ?? "").trim() || "Customer";
               const fastTrackOrder = orderHasFastTrackSla(r.product_slug, r.order_items ?? null);
               const upsell = r.admin_order_post_upsell?.[0] ?? null;
+              const physical = r.physical_order_details?.[0] ?? null;
 
               return (
                 <tr
@@ -535,6 +560,16 @@ export default async function AdminOrdersPage({
                         <div className="mt-0.5 font-mono text-[10px] text-muted-foreground/60">
                           {r.product_slug}
                         </div>
+                        {physical ? (
+                          <div className="mt-1 space-y-0.5 text-[10px] leading-snug text-muted-foreground">
+                            <p>
+                              {physical.design_label ?? "Design"} · {physical.variant_label ?? "Variant"} · Size {physical.size_code ?? "—"}
+                            </p>
+                            <p className="font-mono">
+                              {physical.payment_method?.toUpperCase() ?? "—"} · {physical.shipping_city ?? "—"} {physical.shipping_pincode ?? ""}
+                            </p>
+                          </div>
+                        ) : null}
                       </div>
                     </div>
                   </td>
@@ -828,6 +863,9 @@ function productLabel(slug: string): string {
   if (slug === "fast-track-addon")    return "FastTrack Add-on";
   if (slug === "consultation-15min")  return "Consultation · 15m";
   if (slug === "consultation-45min")  return "Consultation · 45m";
+  if (slug === "vedic-kada-plated")   return "Vedic Kada · Silver Plated";
+  if (slug === "vedic-kada-pure-silver") return "Vedic Kada · Pure Silver";
+  if (isKadaProductSlug(slug)) return "Vedic Kada";
   return slug.split("-").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
 }
 

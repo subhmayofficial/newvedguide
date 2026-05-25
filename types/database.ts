@@ -345,6 +345,60 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["order_items"]["Insert"]>;
         Relationships: [];
       };
+      physical_order_details: {
+        Row: {
+          id: string;
+          order_id: string;
+          product_family: string;
+          variant: string;
+          variant_label: string;
+          design: string;
+          design_label: string;
+          size_code: string;
+          size_label: string;
+          siddha_energisation: boolean;
+          payment_method: string;
+          prepaid_discount_amount: string;
+          shipping_full_name: string;
+          shipping_phone: string;
+          shipping_address_line1: string;
+          shipping_city: string;
+          shipping_state: string;
+          shipping_pincode: string;
+          shipping_country: string;
+          estimated_delivery_days: string;
+          internal_notes: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          order_id: string;
+          product_family?: string;
+          variant: string;
+          variant_label: string;
+          design: string;
+          design_label: string;
+          size_code: string;
+          size_label: string;
+          siddha_energisation?: boolean;
+          payment_method: string;
+          prepaid_discount_amount?: string | number;
+          shipping_full_name: string;
+          shipping_phone: string;
+          shipping_address_line1: string;
+          shipping_city: string;
+          shipping_state: string;
+          shipping_pincode: string;
+          shipping_country?: string;
+          estimated_delivery_days?: string;
+          internal_notes?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["physical_order_details"]["Insert"]>;
+        Relationships: [];
+      };
       payments: {
         Row: {
           id: string;
