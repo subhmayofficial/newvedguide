@@ -476,7 +476,7 @@ select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='htt
     var data=getFormData();
     var body={
       amountPaise:AMOUNT,
-      productSlug:'paid_kundli',
+      productSlug:'paid-kundli',
       customer:{
         fullName:data.fullName,
         phone:data.phone,
@@ -559,8 +559,7 @@ select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='htt
     .then(function(r){return r.json();})
     .then(function(res){
       if(res.success){
-        if(window.dataLayer){window.dataLayer.push({event:'purchase',value:399,currency:'INR',order_id:orderDbId});}
-        window.location.href='/thank-you/kundli?order_id='+encodeURIComponent(orderDbId);
+        fireKundliPurchaseEvent(orderDbId);
       }else{
         setLoading(false);
         showToast('Payment verification failed. Contact us on WhatsApp.',true);
@@ -570,6 +569,38 @@ select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='htt
       setLoading(false);
       showToast('Could not verify payment. Please contact support.',true);
     });
+  }
+
+  function fireKundliPurchaseEvent(orderDbId){
+    var didRedirect=false;
+    function goThankYou(){
+      if(didRedirect)return;
+      didRedirect=true;
+      window.location.href='/thank-you/kundli?order_id='+encodeURIComponent(orderDbId);
+    }
+
+    window.dataLayer=window.dataLayer||[];
+    window.dataLayer.push({
+      event:'ads_kundli_purchase',
+      value:399,
+      currency:'INR',
+      order_id:orderDbId,
+      ecommerce:{
+        transaction_id:orderDbId,
+        value:399,
+        currency:'INR',
+        items:[{
+          item_id:'paid-kundli',
+          item_name:'Personalized Kundli Report',
+          price:399,
+          quantity:1
+        }]
+      },
+      eventCallback:goThankYou,
+      eventTimeout:1200
+    });
+
+    setTimeout(goThankYou,1300);
   }
 
   /* ── Live field validation on blur ── */
