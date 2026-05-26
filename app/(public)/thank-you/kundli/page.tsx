@@ -61,6 +61,14 @@ export default function KundliThankYouPage() {
       return () => cancelAnimationFrame(raf);
     }
 
+    const orderIdFromUrl = new URLSearchParams(window.location.search).get("order_id");
+    if (orderIdFromUrl) {
+      thankYouOrderIdCache = orderIdFromUrl;
+      track.thankYouView(orderIdFromUrl);
+      const raf = requestAnimationFrame(() => setOrderId(orderIdFromUrl));
+      return () => cancelAnimationFrame(raf);
+    }
+
     router.replace("/");
   }, [router]);
 

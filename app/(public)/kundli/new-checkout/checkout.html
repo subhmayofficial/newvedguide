@@ -612,6 +612,7 @@ select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='htt
   function initiatePayment(){
     setLoading(true);
     var data=getFormData();
+    fireKundliInitiateCheckoutEvent();
     var body={
       amountPaise:payableAmount,
       productSlug:'paid-kundli',
@@ -653,6 +654,28 @@ select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='htt
     });
   }
 
+  function fireKundliInitiateCheckoutEvent(){
+    var valueRupees=Number(payableAmount||BASE_AMOUNT)/100;
+    window.dataLayer=window.dataLayer||[];
+    window.dataLayer.push({
+      event:'ads_kundli_initiate_checkout',
+      value:valueRupees,
+      currency:'INR',
+      coupon:appliedCoupon?appliedCoupon.code:undefined,
+      ecommerce:{
+        value:valueRupees,
+        currency:'INR',
+        coupon:appliedCoupon?appliedCoupon.code:undefined,
+        items:[{
+          item_id:'paid-kundli',
+          item_name:'Personalized Kundli Report',
+          price:399,
+          quantity:1
+        }]
+      }
+    });
+  }
+
   function openRazorpay(orderData,formData){
     var checkoutAmountPaise=Number(orderData.amountPaise||payableAmount);
     var checkoutCoupon=appliedCoupon?appliedCoupon.code:null;
@@ -677,7 +700,9 @@ select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='htt
         verifyPayment(response,{
           orderDbId:orderData.orderDbId,
           amountPaise:checkoutAmountPaise,
-          couponCode:checkoutCoupon
+          couponCode:checkoutCoupon,
+          razorpayOrderId:response.razorpay_order_id,
+          paymentId:response.razorpay_payment_id
         });
       }
     };
@@ -723,6 +748,16 @@ select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='htt
     function goThankYou(){
       if(didRedirect)return;
       didRedirect=true;
+      try{
+        sessionStorage.setItem('order_complete',JSON.stringify({
+          orderId:orderDbId,
+          product:'kundli_report',
+          fastTrack:false,
+          couponCode:purchase.couponCode||null,
+          razorpayOrderId:purchase.razorpayOrderId||null,
+          paymentId:purchase.paymentId||null
+        }));
+      }catch(e){}
       window.location.href='/thank-you/kundli?order_id='+encodeURIComponent(orderDbId);
     }
 
