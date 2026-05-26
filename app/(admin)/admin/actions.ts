@@ -26,7 +26,6 @@ import {
 import { fetchRazorpayOrder, fetchRazorpayOrderPayments } from "@/lib/razorpay";
 import { isValidHttpUrl } from "@/lib/services/integration-config";
 import {
-  getOrderDeliverySettings,
   saveOrderDeliverySettings,
 } from "@/lib/admin/order-delivery-settings";
 import { saveBunnyCdnSettings } from "@/lib/admin/bunny-cdn-settings";
@@ -174,8 +173,8 @@ export async function submitCouponCreateForm(formData: FormData) {
   const code = String(formData.get("code") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim();
   const discountType = String(formData.get("discountType") ?? "fixed");
-  const discountValue = Number(formData.get("discountValue") ?? 0);
-  const minOrderAmount = Number(formData.get("minOrderAmount") ?? 0);
+  const rawDiscountValue = Number(formData.get("discountValue") ?? 0);
+  const rawMinOrderAmount = Number(formData.get("minOrderAmount") ?? 0);
   const maxDiscountAmountRaw = String(formData.get("maxDiscountAmount") ?? "").trim();
   const usageLimitRaw = String(formData.get("usageLimit") ?? "").trim();
   const appliesToProductSlug = String(formData.get("appliesToProductSlug") ?? "").trim();
@@ -183,8 +182,17 @@ export async function submitCouponCreateForm(formData: FormData) {
   const validUntil = String(formData.get("validUntil") ?? "").trim();
   const isActive = String(formData.get("isActive") ?? "off") === "on";
 
-  if (!code || !discountValue || discountValue <= 0) return;
+  if (!code || !rawDiscountValue || rawDiscountValue <= 0) return;
   if (discountType !== "fixed" && discountType !== "percentage") return;
+
+  const discountValue =
+    discountType === "fixed"
+      ? Math.round(rawDiscountValue * 100)
+      : rawDiscountValue;
+  const minOrderAmount = Math.round(rawMinOrderAmount * 100);
+  const maxDiscountAmount = maxDiscountAmountRaw
+    ? Math.round(Number(maxDiscountAmountRaw) * 100)
+    : null;
 
   await createCoupon(supabase, {
     code,
@@ -192,7 +200,7 @@ export async function submitCouponCreateForm(formData: FormData) {
     discountType,
     discountValue,
     minOrderAmount,
-    maxDiscountAmount: maxDiscountAmountRaw ? Number(maxDiscountAmountRaw) : null,
+    maxDiscountAmount,
     usageLimit: usageLimitRaw ? Number(usageLimitRaw) : null,
     appliesToProductSlug: appliesToProductSlug || null,
     validFrom: validFrom || null,

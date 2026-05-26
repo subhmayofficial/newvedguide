@@ -40,21 +40,29 @@ export default async function AdminCouponsPage() {
               className="h-10 w-full rounded-lg border border-input bg-transparent px-3 text-sm"
               defaultValue="fixed"
             >
-              <option value="fixed">Fixed (paise)</option>
+              <option value="fixed">Fixed amount (Rs)</option>
               <option value="percentage">Percentage</option>
             </select>
           </div>
           <div className="space-y-2">
             <Label htmlFor="coupon-value">Discount value</Label>
-            <Input id="coupon-value" name="discountValue" type="number" min="1" required />
+            <Input
+              id="coupon-value"
+              name="discountValue"
+              type="number"
+              min="1"
+              step="0.01"
+              placeholder="50 for Rs 50, or 10 for 10%"
+              required
+            />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="coupon-min-order">Minimum order amount (paise)</Label>
-            <Input id="coupon-min-order" name="minOrderAmount" type="number" min="0" defaultValue="0" />
+            <Label htmlFor="coupon-min-order">Minimum order amount (Rs)</Label>
+            <Input id="coupon-min-order" name="minOrderAmount" type="number" min="0" step="0.01" defaultValue="0" />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="coupon-max-discount">Max discount (paise)</Label>
-            <Input id="coupon-max-discount" name="maxDiscountAmount" type="number" min="0" />
+            <Label htmlFor="coupon-max-discount">Max discount (Rs)</Label>
+            <Input id="coupon-max-discount" name="maxDiscountAmount" type="number" min="0" step="0.01" />
           </div>
           <div className="space-y-2">
             <Label htmlFor="coupon-usage-limit">Usage limit</Label>
@@ -62,7 +70,7 @@ export default async function AdminCouponsPage() {
           </div>
           <div className="space-y-2">
             <Label htmlFor="coupon-product">Product slug</Label>
-            <Input id="coupon-product" name="appliesToProductSlug" placeholder="paid-kundli" />
+            <Input id="coupon-product" name="appliesToProductSlug" defaultValue="paid-kundli" placeholder="paid-kundli" />
           </div>
           <div className="space-y-2">
             <Label htmlFor="coupon-valid-from">Valid from</Label>
