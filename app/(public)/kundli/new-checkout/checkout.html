@@ -714,6 +714,11 @@ select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='htt
     rzp.open();
   }
 
+  function getCookie(name){
+    var match=document.cookie.match(new RegExp('(?:^|; )'+name.replace(/([.$?*|{}()[\]\\/+^])/g,'\\$1')+'=([^;]*)'));
+    return match?decodeURIComponent(match[1]):'';
+  }
+
   function verifyPayment(response,purchase){
     btnText.textContent='Verifying payment…';
     fetch('/api/payments/verify',{
@@ -724,6 +729,8 @@ select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='htt
         razorpay_payment_id:response.razorpay_payment_id,
         razorpay_signature:response.razorpay_signature,
         orderDbId:purchase.orderDbId,
+        fbp:getCookie('_fbp')||undefined,
+        fbc:getCookie('_fbc')||undefined
       })
     })
     .then(function(r){return r.json();})

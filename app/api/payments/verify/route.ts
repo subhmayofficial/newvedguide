@@ -10,6 +10,14 @@ interface VerifyBody {
   razorpay_payment_id: string;
   razorpay_signature: string;
   orderDbId: string;
+  fbp?: string;
+  fbc?: string;
+}
+
+function clientIpFromRequest(request: Request): string | null {
+  const forwarded = request.headers.get("x-forwarded-for");
+  if (forwarded) return forwarded.split(",")[0]?.trim() ?? null;
+  return request.headers.get("x-real-ip")?.trim() ?? null;
 }
 
 export async function POST(request: Request) {
@@ -20,6 +28,8 @@ export async function POST(request: Request) {
       razorpay_payment_id,
       razorpay_signature,
       orderDbId,
+      fbp,
+      fbc,
     } = body;
 
     if (
@@ -90,6 +100,12 @@ export async function POST(request: Request) {
         razorpay_order_id,
         razorpay_payment_id,
         razorpay_signature,
+      },
+      metaBrowser: {
+        clientIpAddress: clientIpFromRequest(request),
+        clientUserAgent: request.headers.get("user-agent"),
+        fbp: fbp ?? null,
+        fbc: fbc ?? null,
       },
     });
 

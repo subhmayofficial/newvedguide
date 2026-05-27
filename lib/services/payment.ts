@@ -13,6 +13,10 @@ import { logEvent } from "@/lib/services/event";
 import { updateOrderStatus } from "@/lib/services/order";
 import { incrementCouponUsage } from "@/lib/services/coupon";
 import { triggerPaymentSuccessDeliveries } from "@/lib/services/integration-delivery";
+import {
+  triggerMetaKundliLpPurchase,
+  type MetaBrowserContext,
+} from "@/lib/meta/trigger-kundli-lp-purchase";
 
 export interface CreatePaymentAttemptInput {
   orderId: string;
@@ -83,6 +87,7 @@ export async function markPaymentSuccess(
     providerPaymentId: string;
     providerSignature: string;
     rawResponse?: Json;
+    metaBrowser?: MetaBrowserContext;
   }
 ): Promise<void> {
   const paidAt = new Date().toISOString();
@@ -155,6 +160,12 @@ export async function markPaymentSuccess(
   } catch (deliveryError) {
     console.error("[payment-success][delivery]", deliveryError);
   }
+
+  void triggerMetaKundliLpPurchase(supabase, input.orderId, input.metaBrowser).catch(
+    (metaError) => {
+      console.error("[payment-success][meta-capi]", metaError);
+    }
+  );
 }
 
 export async function markPaymentFailure(
