@@ -116,7 +116,7 @@ export default async function OrderDetailPage({
         <h2 className="font-heading text-lg font-semibold">Overview</h2>
         <dl className="mt-4 grid gap-2 sm:grid-cols-2 text-sm">
           <Row label="Product" value={formatAdminProductLabel(order.product_slug)} />
-          <Row label="Source" value={order.source ?? "—"} />
+          <Row label="Source URL" value={order.source ?? "—"} />
           <Row label="Total" value={`₹${(Number(order.total_amount) / 100).toFixed(2)}`} />
           <Row label="Subtotal" value={`₹${(Number(order.subtotal_amount) / 100).toFixed(2)}`} />
           <Row label="Add-ons" value={`₹${(Number(order.addon_amount) / 100).toFixed(2)}`} />
@@ -127,7 +127,7 @@ export default async function OrderDetailPage({
           <Row label="Payment" value={order.payment_status} />
           <Row label="Fulfillment" value={order.fulfillment_status} />
           <Row label="Assigned to" value={order.fulfillment_assignee ?? "—"} />
-          <Row label="Entry path" value={order.entry_path ?? "—"} />
+          <Row label="Funnel tag" value={order.entry_path ?? "—"} />
           <Row label="Created" value={formatAdminDateTime(order.created_at)} />
           <Row label="Paid at" value={formatAdminDateTime(order.paid_at)} />
           {order.delivery_scheduled_at &&

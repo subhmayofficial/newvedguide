@@ -12,11 +12,16 @@ import { orderHasFastTrackSla } from "@/lib/admin/order-sla-helpers";
 import { formatAdminDateTime } from "@/lib/admin/time";
 import { submitOrderPaymentReconcileForm } from "@/app/(admin)/admin/actions";
 import {
-  ENTRY_PATH,
   FULFILLMENT_STATUS,
   ORDER_STATUS,
   PAYMENT_STATUS_ORDER,
 } from "@/lib/constants/commerce";
+import {
+  applyOrderSourceUrlFilter,
+  isAdsOrder,
+  orderSourceUrlDisplay,
+  type OrderSourceUrlFilter,
+} from "@/lib/admin/order-source-display";
 import { isKadaProductSlug } from "@/lib/products/kada";
 import type { OrderDeliverySchedule } from "@/components/admin/order-deliver-button";
 import { Zap, ArrowUpRight } from "lucide-react";
@@ -35,6 +40,7 @@ type OrderRow = {
   payment_status: string;
   fulfillment_status: string;
   fulfillment_assignee: string | null;
+  source: string | null;
   entry_path: string | null;
   coupon_applied: boolean;
   coupon_code: string | null;
@@ -96,7 +102,7 @@ export default async function AdminOrdersPage({
   let q = supabase
     .from("orders")
     .select(
-      "id,order_number,product_slug,consultation_type,total_amount,status,payment_status,fulfillment_status,fulfillment_assignee,entry_path,created_at,coupon_applied,coupon_code,delivery_scheduled_at,delivery_schedule_customer_name,delivery_schedule_report_url,customers(full_name,phone),order_items(product_slug),physical_order_details(variant_label,design_label,size_code,payment_method,shipping_city,shipping_state,shipping_pincode),admin_order_post_upsell(kundli_points,status,message_1_sent_at,message_2_sent_at)",
+      "id,order_number,product_slug,consultation_type,total_amount,status,payment_status,fulfillment_status,fulfillment_assignee,source,entry_path,created_at,coupon_applied,coupon_code,delivery_scheduled_at,delivery_schedule_customer_name,delivery_schedule_report_url,customers(full_name,phone),order_items(product_slug),physical_order_details(variant_label,design_label,size_code,payment_method,shipping_city,shipping_state,shipping_pincode),admin_order_post_upsell(kundli_points,status,message_1_sent_at,message_2_sent_at)",
       { count: "exact" }
     )
     .order("created_at", { ascending: false })
@@ -113,7 +119,9 @@ export default async function AdminOrdersPage({
   } else if (sp.product) {
     q = q.eq("product_slug", sp.product);
   }
-  if (sp.entry_path)          q = q.eq("entry_path", sp.entry_path);
+  if (sp.source_url) {
+    q = applyOrderSourceUrlFilter(q, sp.source_url as OrderSourceUrlFilter);
+  }
   if (sp.consultation_type)   q = q.eq("consultation_type", sp.consultation_type);
 
   const { data: rowsRaw, error } = await q;
@@ -156,7 +164,7 @@ export default async function AdminOrdersPage({
       sp.payment_status ||
       sp.fulfillment_status ||
       sp.product ||
-      sp.entry_path ||
+      sp.source_url ||
       sp.consultation_type ||
       showAllPaymentStatuses
   );
@@ -383,14 +391,13 @@ export default async function AdminOrdersPage({
           </div>
 
           <div>
-            <FilterLabel>Entry path</FilterLabel>
-            <FilterSelect name="entry_path" defaultValue={sp.entry_path ?? ""}>
+            <FilterLabel>Source URL</FilterLabel>
+            <FilterSelect name="source_url" defaultValue={sp.source_url ?? ""}>
               <option value="">All</option>
-              <option value={ENTRY_PATH.KFP}>{ENTRY_PATH.KFP}</option>
-              <option value="funnel2">funnel2</option>
-              <option value={ENTRY_PATH.DIRECT_SALES}>{ENTRY_PATH.DIRECT_SALES}</option>
-              <option value={ENTRY_PATH.MANUAL}>{ENTRY_PATH.MANUAL}</option>
-              <option value="name_letter_a">name_letter_a</option>
+              <option value="ads">Ads funnel (/ads…)</option>
+              <option value="astro-path">Astro path (/astro-path…)</option>
+              <option value="kundli-lp">Kundli LP (/kundli/new-checkout)</option>
+              <option value="checkout-kundli">Standard checkout (/checkout/kundli)</option>
             </FilterSelect>
           </div>
         </div>
@@ -465,7 +472,7 @@ export default async function AdminOrdersPage({
               <th className="px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Payment</th>
               <th className="px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Fulfillment</th>
               <th className="px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Assigned</th>
-              <th className="px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Entry</th>
+              <th className="px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Source URL</th>
               <th className="px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Coupon</th>
               <th className="px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Post upsell</th>
               <th className="px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground text-right whitespace-nowrap">
@@ -487,6 +494,8 @@ export default async function AdminOrdersPage({
               const fastTrackOrder = orderHasFastTrackSla(r.product_slug, r.order_items ?? null);
               const upsell = r.admin_order_post_upsell?.[0] ?? null;
               const physical = r.physical_order_details?.[0] ?? null;
+              const sourceUrl = orderSourceUrlDisplay(r.source, r.entry_path);
+              const adsOrder = isAdsOrder(r.source, r.entry_path);
 
               return (
                 <tr
@@ -609,10 +618,17 @@ export default async function AdminOrdersPage({
                     />
                   </td>
 
-                  {/* Entry path */}
-                  <td className="px-4 py-3.5 align-top">
-                    <span className="font-mono text-[11px] text-muted-foreground">
-                      {r.entry_path ?? "—"}
+                  {/* Source URL */}
+                  <td className="px-4 py-3.5 align-top max-w-[200px]">
+                    <span
+                      className={`block font-mono text-[11px] leading-snug break-all ${
+                        adsOrder
+                          ? "font-semibold text-emerald-700 dark:text-emerald-400"
+                          : "text-muted-foreground"
+                      }`}
+                      title={adsOrder ? "Paid ads funnel" : undefined}
+                    >
+                      {sourceUrl}
                     </span>
                   </td>
 

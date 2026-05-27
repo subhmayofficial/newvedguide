@@ -361,11 +361,15 @@ type KundliCheckoutVariant = "v1" | "v2";
 type KundliCheckoutProps = {
   variant?: KundliCheckoutVariant;
   checkoutPagePath?: string;
+  defaultBackPath?: string;
+  defaultSourceFunnel?: string;
 };
 
 export function KundliCheckout({
   variant = "v1",
   checkoutPagePath,
+  defaultBackPath,
+  defaultSourceFunnel,
 }: KundliCheckoutProps = {}) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -401,8 +405,9 @@ export function KundliCheckout({
 
   const razorpayKeyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
 
-  const sourceFunnel = searchParams.get("source") ?? "direct_kundli";
+  const sourceFunnel = searchParams.get("source") ?? defaultSourceFunnel ?? "direct_kundli";
   const backToResultPath = searchParams.get("back")
+    ?? defaultBackPath
     ?? (isV2Checkout ? "/astro-path/free-kundli/result" : "/free-kundli/result");
   const utmSource = searchParams.get("utm_source") ?? undefined;
   const utmMedium = searchParams.get("utm_medium") ?? undefined;
