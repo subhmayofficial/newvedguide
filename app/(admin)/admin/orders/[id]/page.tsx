@@ -19,6 +19,10 @@ import type { Json } from "@/types/database";
 import { formatAdminDateTime } from "@/lib/admin/time";
 import { OrderSlaCountdown } from "@/components/admin/order-sla-countdown";
 import { orderHasFastTrackSla } from "@/lib/admin/order-sla-helpers";
+import {
+  isAdminTestOrderNotes,
+  isAdminTestPaymentProvider,
+} from "@/lib/admin/admin-test-order";
 
 export const dynamic = "force-dynamic";
 
@@ -104,13 +108,36 @@ export default async function OrderDetailPage({
         }
       : null;
 
+  const isAdminTest =
+    isAdminTestOrderNotes(order.notes) || isAdminTestPaymentProvider(pay?.provider ?? null);
+
   return (
     <div className="mx-auto max-w-5xl space-y-10">
       <div>
         <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Order</p>
-        <h1 className="font-heading text-3xl font-bold">{order.order_number}</h1>
+        <div className="flex flex-wrap items-center gap-2">
+          <h1 className="font-heading text-3xl font-bold">{order.order_number}</h1>
+          {isAdminTest ? (
+            <span className="rounded-md border border-amber-500/50 bg-amber-500/15 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-amber-950 dark:text-amber-100">
+              Admin test
+            </span>
+          ) : null}
+        </div>
         <p className="mt-1 font-mono text-xs text-muted-foreground">{order.id}</p>
       </div>
+
+      {isAdminTest ? (
+        <div className="rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-950 dark:text-amber-100">
+          <p className="font-semibold">Admin test order</p>
+          <p className="mt-1 text-[13px] opacity-90">
+            No Razorpay charge. Post-payment automations (WhatsApp, email, Meta CAPI if enabled) may
+            have run like a real sale.
+          </p>
+          {order.notes ? (
+            <p className="mt-2 text-[12px] font-mono opacity-80">{order.notes}</p>
+          ) : null}
+        </div>
+      ) : null}
 
       <section className="rounded-2xl border border-border/60 bg-card p-6 shadow-sm">
         <h2 className="font-heading text-lg font-semibold">Overview</h2>

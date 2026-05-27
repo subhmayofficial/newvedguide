@@ -23,6 +23,7 @@ import {
   type OrderSourceUrlFilter,
 } from "@/lib/admin/order-source-display";
 import { isKadaProductSlug } from "@/lib/products/kada";
+import { isAdminTestOrderNotes } from "@/lib/admin/admin-test-order";
 import type { OrderDeliverySchedule } from "@/components/admin/order-deliver-button";
 import { Zap, ArrowUpRight } from "lucide-react";
 
@@ -44,6 +45,7 @@ type OrderRow = {
   entry_path: string | null;
   coupon_applied: boolean;
   coupon_code: string | null;
+  notes: string | null;
   created_at: string;
   delivery_scheduled_at: string | null;
   delivery_schedule_customer_name: string | null;
@@ -102,7 +104,7 @@ export default async function AdminOrdersPage({
   let q = supabase
     .from("orders")
     .select(
-      "id,order_number,product_slug,consultation_type,total_amount,status,payment_status,fulfillment_status,fulfillment_assignee,source,entry_path,created_at,coupon_applied,coupon_code,delivery_scheduled_at,delivery_schedule_customer_name,delivery_schedule_report_url,customers(full_name,phone),order_items(product_slug),physical_order_details(variant_label,design_label,size_code,payment_method,shipping_city,shipping_state,shipping_pincode),admin_order_post_upsell(kundli_points,status,message_1_sent_at,message_2_sent_at)",
+      "id,order_number,product_slug,consultation_type,total_amount,status,payment_status,fulfillment_status,fulfillment_assignee,source,entry_path,created_at,coupon_applied,coupon_code,notes,delivery_scheduled_at,delivery_schedule_customer_name,delivery_schedule_report_url,customers(full_name,phone),order_items(product_slug),physical_order_details(variant_label,design_label,size_code,payment_method,shipping_city,shipping_state,shipping_pincode),admin_order_post_upsell(kundli_points,status,message_1_sent_at,message_2_sent_at)",
       { count: "exact" }
     )
     .order("created_at", { ascending: false })
@@ -230,6 +232,12 @@ export default async function AdminOrdersPage({
               Clear filters
             </Link>
           )}
+          <Link
+            href={adminPath("/tools")}
+            className="inline-flex h-9 items-center rounded-md border border-violet-500/40 bg-violet-500/10 px-3 text-[12px] font-semibold text-violet-950 transition-colors hover:bg-violet-500/18 dark:text-violet-100"
+          >
+            Create test order
+          </Link>
         </div>
       </div>
 
@@ -516,6 +524,11 @@ export default async function AdminOrdersPage({
                     >
                       {r.order_number}
                     </Link>
+                    {isAdminTestOrderNotes(r.notes) ? (
+                      <span className="mt-1 inline-block rounded border border-amber-500/40 bg-amber-500/10 px-1.5 py-px text-[10px] font-semibold uppercase tracking-wide text-amber-950 dark:text-amber-100">
+                        Test
+                      </span>
+                    ) : null}
                     <span className="mt-0.5 block text-[11px] text-muted-foreground whitespace-nowrap">
                       {formatAdminDateTime(r.created_at)}
                     </span>

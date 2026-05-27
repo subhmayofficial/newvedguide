@@ -88,6 +88,7 @@ export async function markPaymentSuccess(
     providerSignature: string;
     rawResponse?: Json;
     metaBrowser?: MetaBrowserContext;
+    skipMetaCapi?: boolean;
   }
 ): Promise<void> {
   const paidAt = new Date().toISOString();
@@ -161,11 +162,13 @@ export async function markPaymentSuccess(
     console.error("[payment-success][delivery]", deliveryError);
   }
 
-  void triggerMetaKundliLpPurchase(supabase, input.orderId, input.metaBrowser).catch(
-    (metaError) => {
-      console.error("[payment-success][meta-capi]", metaError);
-    }
-  );
+  if (!input.skipMetaCapi) {
+    void triggerMetaKundliLpPurchase(supabase, input.orderId, input.metaBrowser).catch(
+      (metaError) => {
+        console.error("[payment-success][meta-capi]", metaError);
+      }
+    );
+  }
 }
 
 export async function markPaymentFailure(

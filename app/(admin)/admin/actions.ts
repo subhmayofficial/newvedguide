@@ -49,6 +49,8 @@ import {
 import { executePaidKundliInteraktDelivery } from "@/lib/admin/paid-kundli-interakt-delivery";
 import { formatAdminDateTime } from "@/lib/admin/time";
 import { markPaymentSuccess } from "@/lib/services/payment";
+import { createAdminTestKundliOrder } from "@/lib/admin/admin-test-order";
+import { isAdminUser } from "@/lib/admin/admin-auth";
 import {
   applySmtpTemplateVariables,
   collectSmtpTemplateVariableKeys,
@@ -1374,5 +1376,88 @@ export async function uploadPaidKundliReportAction(
           ? msg.slice(0, 500)
           : "Unexpected error while uploading (check server logs)",
     };
+  }
+}
+
+function redirectWithAdminTestOrderResult(
+  status: "success" | "failed",
+  message: string,
+  orderId?: string
+): never {
+  const q = new URLSearchParams();
+  q.set("test_order_status", status);
+  q.set("test_order_msg", message);
+  if (orderId) q.set("test_order_id", orderId);
+  redirect(`${adminPath("/tools")}?${q.toString()}`);
+}
+
+export async function submitAdminTestKundliOrderForm(formData: FormData) {
+  const authClient = await createAuthedClient();
+  const {
+    data: { user },
+  } = await authClient.auth.getUser();
+  if (!isAdminUser(user)) {
+    redirectWithAdminTestOrderResult("failed", "Unauthorized");
+  }
+
+  const fullName = toNullable(formData.get("fullName"));
+  const phone = toNullable(formData.get("phone"));
+  if (!fullName || !phone) {
+    redirectWithAdminTestOrderResult("failed", "Name and phone are required");
+  }
+
+  const genderRaw = toNullable(formData.get("gender"))?.toLowerCase();
+  const reportLangRaw = toNullable(formData.get("reportLanguage"))?.toLowerCase();
+  if (genderRaw !== "male" && genderRaw !== "female") {
+    redirectWithAdminTestOrderResult("failed", "Gender must be male or female");
+  }
+  if (reportLangRaw !== "hindi" && reportLangRaw !== "english") {
+    redirectWithAdminTestOrderResult("failed", "Report language must be Hindi or English");
+  }
+
+  const amountRupeesRaw = toNullable(formData.get("amountRupees"));
+  let amountPaise: number | undefined;
+  if (amountRupeesRaw) {
+    const rupees = Number(amountRupeesRaw);
+    if (!Number.isFinite(rupees) || rupees < 1) {
+      redirectWithAdminTestOrderResult("failed", "Amount must be at least ₹1");
+    }
+    amountPaise = Math.round(rupees * 100);
+  }
+
+  const sourcePage = toNullable(formData.get("sourcePage")) ?? "/kundli/new-checkout";
+  const sourceFunnel = toNullable(formData.get("sourceFunnel")) ?? "kundli_direct_lp";
+  const fireMetaCapi = formData.get("fireMetaCapi") === "on";
+
+  const supabase = createServiceClient();
+
+  try {
+    const result = await createAdminTestKundliOrder(supabase, {
+      fullName,
+      phone,
+      email: toNullable(formData.get("email")),
+      gender: genderRaw,
+      reportLanguage: reportLangRaw,
+      dob: toNullable(formData.get("dob")),
+      tob: toNullable(formData.get("tob")),
+      pob: toNullable(formData.get("pob")),
+      sourcePage,
+      sourceFunnel,
+      amountPaise,
+      fireMetaCapi,
+      createdBy: user?.email ?? user?.id ?? null,
+    });
+
+    revalidatePath(adminPath("/orders"));
+    revalidatePath(`${adminPath("/orders/")}${result.orderId}`);
+    revalidatePath(adminPath("/tools"));
+    redirectWithAdminTestOrderResult(
+      "success",
+      `Test order ${result.orderNumber} created and marked paid (₹${(result.amountPaise / 100).toFixed(0)}). WhatsApp/email automations ran if enabled.`,
+      result.orderId
+    );
+  } catch (e) {
+    const msg = e instanceof Error ? e.message.slice(0, 220) : "Failed to create test order";
+    redirectWithAdminTestOrderResult("failed", msg);
   }
 }
