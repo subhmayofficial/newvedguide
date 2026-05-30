@@ -11,6 +11,7 @@ import { OrderSlaCountdown } from "@/components/admin/order-sla-countdown";
 import { orderHasFastTrackSla } from "@/lib/admin/order-sla-helpers";
 import { formatAdminDateTime } from "@/lib/admin/time";
 import { submitOrderPaymentReconcileForm } from "@/app/(admin)/admin/actions";
+import { AdminDeleteOrderForm } from "@/components/admin/admin-delete-order-form";
 import {
   FULFILLMENT_STATUS,
   ORDER_STATUS,
@@ -192,6 +193,13 @@ export default async function AdminOrdersPage({
           message: sp.payment_reconcile_msg ?? "",
         }
       : null;
+  const deleteFlash =
+    sp.delete_status === "success" || sp.delete_status === "failed"
+      ? {
+          kind: sp.delete_status as "success" | "failed",
+          message: sp.delete_msg ?? "",
+        }
+      : null;
 
   return (
     <div className="space-y-7 font-sans admin-page-enter">
@@ -289,6 +297,23 @@ export default async function AdminOrdersPage({
               Dismiss
             </Link>
           </p>
+        </div>
+      )}
+
+      {deleteFlash && (
+        <div
+          className={
+            deleteFlash.kind === "success"
+              ? "rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800 dark:border-emerald-900/40 dark:bg-emerald-950/25 dark:text-emerald-300"
+              : "rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-900/40 dark:bg-red-950/25 dark:text-red-300"
+          }
+        >
+          <p className="font-semibold">
+            {deleteFlash.kind === "success" ? "Order deleted" : "Delete failed"}
+          </p>
+          {deleteFlash.message ? (
+            <p className="mt-1 text-xs opacity-90">{deleteFlash.message}</p>
+          ) : null}
         </div>
       )}
 
@@ -703,6 +728,11 @@ export default async function AdminOrdersPage({
                       >
                         <ArrowUpRight size={14} />
                       </Link>
+                      <AdminDeleteOrderForm
+                        orderId={r.id}
+                        orderNumber={r.order_number}
+                        compact
+                      />
                     </div>
                   </td>
                 </tr>

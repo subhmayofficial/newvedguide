@@ -49,6 +49,7 @@ import {
 import { executePaidKundliInteraktDelivery } from "@/lib/admin/paid-kundli-interakt-delivery";
 import { formatAdminDateTime } from "@/lib/admin/time";
 import { markPaymentSuccess } from "@/lib/services/payment";
+import { deleteOrderByAdmin } from "@/lib/admin/delete-order";
 import { createAdminTestKundliOrder } from "@/lib/admin/admin-test-order";
 import { isAdminUser } from "@/lib/admin/admin-auth";
 import { sendMetaTestPurchaseEvent } from "@/lib/meta/send-test-purchase";
@@ -1528,5 +1529,75 @@ export async function submitAdminMetaCapiTestForm(formData: FormData) {
   } catch (e) {
     const msg = e instanceof Error ? e.message.slice(0, 220) : "CAPI test failed";
     redirectWithMetaCapiTestResult("failed", msg);
+  }
+}
+
+function redirectWithOrderDeleteResult(
+  status: "success" | "failed",
+  message: string,
+  returnTo: "orders" | "order_detail",
+  orderId?: string
+): never {
+  const q = new URLSearchParams();
+  q.set("delete_status", status);
+  q.set("delete_msg", message);
+  if (returnTo === "order_detail" && orderId) {
+    redirect(`${adminPath(`/orders/${orderId}`)}?${q.toString()}`);
+  }
+  redirect(`${adminPath("/orders")}?${q.toString()}`);
+}
+
+export async function submitDeleteOrderForm(formData: FormData) {
+  const authClient = await createAuthedClient();
+  const {
+    data: { user },
+  } = await authClient.auth.getUser();
+  if (!isAdminUser(user)) {
+    redirectWithOrderDeleteResult("failed", "Unauthorized", "orders");
+  }
+
+  const orderIdRaw = toNullable(formData.get("orderId"));
+  const confirmRaw = toNullable(formData.get("confirmOrderNumber"));
+  const returnToRaw = toNullable(formData.get("returnTo"));
+  const returnTo: "orders" | "order_detail" =
+    returnToRaw === "order_detail" ? "order_detail" : "orders";
+
+  if (!isTemplateRowId(orderIdRaw)) {
+    redirectWithOrderDeleteResult("failed", "Invalid order id", returnTo);
+  }
+  const orderId = orderIdRaw as string;
+
+  const supabase = createServiceClient();
+  const { data: order } = await supabase
+    .from("orders")
+    .select("order_number")
+    .eq("id", orderId)
+    .maybeSingle();
+
+  if (!order) {
+    redirectWithOrderDeleteResult("failed", "Order not found", returnTo, orderId);
+  }
+
+  if (confirmRaw !== order.order_number) {
+    redirectWithOrderDeleteResult(
+      "failed",
+      "Confirmation did not match order number",
+      returnTo,
+      orderId
+    );
+  }
+
+  try {
+    const result = await deleteOrderByAdmin(supabase, orderId);
+    revalidatePath(adminPath("/orders"));
+    revalidatePath(adminPath("/logs"));
+    redirectWithOrderDeleteResult(
+      "success",
+      `Deleted order ${result.orderNumber}`,
+      "orders"
+    );
+  } catch (e) {
+    const msg = e instanceof Error ? e.message.slice(0, 220) : "Delete failed";
+    redirectWithOrderDeleteResult("failed", msg, returnTo, orderId);
   }
 }

@@ -12,6 +12,7 @@ import {
   submitOrderProcessingForm,
   submitOrderPaymentReconcileForm,
 } from "@/app/(admin)/admin/actions";
+import { AdminDeleteOrderForm } from "@/components/admin/admin-delete-order-form";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { FULFILLMENT_STATUS } from "@/lib/constants/commerce";
@@ -429,6 +430,18 @@ export default async function OrderDetailPage({
             </li>
           ))}
         </ul>
+      </section>
+
+      <section className="rounded-2xl border border-red-500/25 bg-card p-6 shadow-sm">
+        <h2 className="font-heading text-lg font-semibold text-red-800 dark:text-red-300">
+          Danger zone
+        </h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Permanently remove this order from the admin panel and database.
+        </p>
+        <div className="mt-4">
+          <AdminDeleteOrderForm orderId={id} orderNumber={order.order_number} />
+        </div>
       </section>
     </div>
   );
