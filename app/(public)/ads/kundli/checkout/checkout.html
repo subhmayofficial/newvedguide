@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Complete Your Order — Personalized Kundli Report | VedGuide</title>
+<!-- GTM -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-WJHMJ92W');</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --ink:#0c0a28;--ink2:#141138;--ink3:#1d1950;
+  --gold:#c9a84c;--gold2:#f5c440;
+  --saffron:#f5a028;--saffron2:#ffba52;
+  --cream:#fdf8ef;--cream2:#f5eed9;
+  --white:#ffffff;
+  --green:#3db87a;--red:#e55a5a;
+  --fh:'Outfit',sans-serif;--fb:'Inter',sans-serif;
+  --r8:8px;--r12:12px;--r16:16px;--rF:9999px;
+  --shadow:0 4px 6px rgba(0,0,0,.04),0 12px 40px rgba(12,10,40,.12);
+}
+html{scroll-behavior:smooth;}
+body{font-family:var(--fb);background:var(--ink);color:var(--white);min-height:100vh;-webkit-font-smoothing:antialiased;}
+
+/* ── NAV ── */
+.nav{
+  position:sticky;top:0;z-index:100;
+  background:rgba(12,10,40,.96);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border-bottom:1px solid rgba(201,168,76,.18);
+  padding:12px 0;
+}
+.nav-inner{
+  max-width:1060px;margin:0 auto;padding:0 20px;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+}
+.nav-logo{
+  font-family:var(--fh);font-weight:900;font-size:1.1rem;
+  display:flex;align-items:center;gap:7px;color:var(--white);
+  text-decoration:none;letter-spacing:-.01em;
+}
+.nav-logo span{background:linear-gradient(135deg,var(--gold2),var(--saffron2));-webkit-background-clip:text;background-clip:text;color:transparent;}
+.nav-secure{display:flex;align-items:center;gap:5px;font-size:.72rem;font-weight:600;color:rgba(255,255,255,.55);}
+.nav-secure svg{opacity:.6;}
+
+/* ── LAYOUT ── */
+.page{max-width:1060px;margin:0 auto;padding:28px 20px 60px;}
+.grid{display:grid;grid-template-columns:1fr 420px;gap:28px;align-items:start;}
+
+/* ── SECTION LABELS ── */
+.section-tag{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:14px;
+}
+.section-tag::before{content:'';width:20px;height:1.5px;background:var(--gold);border-radius:2px;}
+
+/* ── FORM CARD ── */
+.form-card{
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.09);
+  border-radius:var(--r16);
+  padding:28px 24px;
+}
+.form-title{font-family:var(--fh);font-size:1.4rem;font-weight:800;color:var(--white);margin-bottom:6px;}
+.form-sub{font-size:.83rem;color:rgba(255,255,255,.5);margin-bottom:24px;line-height:1.5;}
+
+.field-group{display:flex;flex-direction:column;gap:16px;}
+.field{display:flex;flex-direction:column;gap:6px;}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+label{font-size:.75rem;font-weight:700;color:rgba(255,255,255,.75);letter-spacing:.02em;text-transform:uppercase;}
+label .req{color:var(--saffron);margin-left:2px;}
+
+input,select{
+  width:100%;height:46px;
+  background:rgba(255,255,255,.07);
+  border:1.5px solid rgba(255,255,255,.12);
+  border-radius:var(--r8);
+  color:var(--white);
+  font-family:var(--fb);font-size:.9rem;font-weight:500;
+  padding:0 14px;
+  outline:none;
+  transition:border-color .2s,background .2s,box-shadow .2s;
+  -webkit-appearance:none;appearance:none;
+}
+input::placeholder{color:rgba(255,255,255,.28);}
+input:focus,select:focus{
+  border-color:var(--gold);
+  background:rgba(201,168,76,.07);
+  box-shadow:0 0 0 3px rgba(201,168,76,.14);
+}
+input.err,select.err{border-color:var(--red)!important;}
+.err-msg{font-size:.72rem;color:var(--red);margin-top:2px;display:none;}
+.err-msg.show{display:block;}
+
+select option{background:#1d1950;color:var(--white);}
+select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23c9a84c' stroke-width='1.8' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px;}
+
+.field-hint{font-size:.7rem;color:rgba(255,255,255,.35);margin-top:3px;}
+
+/* divider */
+.form-divider{border:none;border-top:1px solid rgba(255,255,255,.08);margin:20px 0;}
+.divider-label{font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.3);text-align:center;margin:-10px 0 20px;background:var(--ink);width:fit-content;margin-left:auto;margin-right:auto;padding:0 10px;position:relative;}
+
+/* ── SUBMIT BUTTON ── */
+.submit-btn{
+  position:relative;overflow:hidden;
+  width:100%;height:56px;margin-top:24px;
+  background:linear-gradient(135deg,#ffc86a 0%,var(--saffron) 55%,#e8891e 100%);
+  border:none;border-radius:var(--r12);
+  color:var(--ink);font-family:var(--fh);font-size:1.05rem;font-weight:800;
+  cursor:pointer;letter-spacing:-.01em;
+  box-shadow:0 4px 24px rgba(245,160,40,.35),inset 0 1px 0 rgba(255,255,255,.28);
+  transition:transform .2s,box-shadow .2s;
+  animation:pring 2.4s ease-in-out infinite;
+}
+.submit-btn::after{
+  content:'';position:absolute;top:-20%;left:-120%;
+  width:60%;height:140%;
+  background:linear-gradient(110deg,transparent,rgba(255,255,255,.4),transparent);
+  transform:skewX(-20deg);
+  animation:shimmer 3.5s ease-in-out infinite;pointer-events:none;
+}
+@keyframes shimmer{0%{left:-120%}45%{left:160%}100%{left:160%}}
+@keyframes pring{0%,100%{box-shadow:0 4px 24px rgba(245,160,40,.35),0 0 0 0 rgba(245,160,40,.45)}55%{box-shadow:0 4px 24px rgba(245,160,40,.35),0 0 0 14px rgba(245,160,40,0)}}
+.submit-btn:hover{transform:translateY(-2px);box-shadow:0 8px 36px rgba(245,160,40,.50);}
+.submit-btn:disabled{opacity:.65;cursor:not-allowed;animation:none;transform:none;}
+.submit-btn-inner{display:flex;align-items:center;justify-content:center;gap:8px;}
+.spinner{width:18px;height:18px;border:2.5px solid rgba(12,10,40,.3);border-top-color:var(--ink);border-radius:50%;animation:spin .7s linear infinite;display:none;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.btn-loading .spinner{display:block;}
+.btn-loading .btn-text{opacity:.6;}
+
+.submit-lock{display:flex;align-items:center;justify-content:center;gap:5px;margin-top:10px;font-size:.72rem;color:rgba(255,255,255,.38);}
+
+/* ── ORDER SUMMARY ── */
+.summary-card{
+  background:var(--cream);
+  border-radius:var(--r16);
+  overflow:hidden;
+  position:sticky;top:80px;
+  color:var(--ink);
+}
+.summary-header{
+  background:linear-gradient(135deg,var(--ink) 0%,var(--ink3) 100%);
+  padding:20px 22px;
+  display:flex;align-items:center;gap:14px;
+}
+.summary-img{width:56px;height:56px;object-fit:contain;flex-shrink:0;filter:drop-shadow(0 4px 12px rgba(0,0,0,.5));}
+.summary-hinfo{}
+.summary-hname{font-family:var(--fh);font-weight:800;font-size:1rem;color:var(--white);line-height:1.2;margin-bottom:4px;}
+.summary-badge{display:inline-flex;align-items:center;gap:4px;font-size:.65rem;font-weight:700;background:rgba(61,184,122,.15);border:1px solid rgba(61,184,122,.3);color:var(--green);padding:2px 8px;border-radius:var(--rF);letter-spacing:.04em;text-transform:uppercase;}
+
+.summary-body{padding:18px 22px;}
+.price-row{display:flex;align-items:baseline;gap:10px;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid rgba(12,10,40,.08);}
+.price-now{font-family:var(--fh);font-size:2.4rem;font-weight:900;color:var(--ink);line-height:1;}
+.price-mrp{font-size:.9rem;text-decoration:line-through;color:rgba(12,10,40,.35);font-weight:500;}
+.price-off{font-size:.72rem;font-weight:800;background:#e8f9ef;color:#1a7a47;padding:3px 8px;border-radius:var(--rF);}
+.discount-row{display:none;align-items:center;justify-content:space-between;margin:-4px 0 16px;padding-bottom:14px;border-bottom:1px dashed rgba(12,10,40,.16);font-size:.82rem;font-weight:700;color:#1a7a47;}
+.discount-row.show{display:flex;}
+
+.coupon-box{margin-bottom:18px;padding:12px;border:1px solid rgba(12,10,40,.1);border-radius:var(--r12);background:rgba(255,255,255,.65);}
+.coupon-box label{display:block;margin-bottom:7px;color:rgba(12,10,40,.55);font-size:.68rem;}
+.coupon-row{display:flex;gap:8px;}
+.coupon-row input{height:42px;background:#fff;border-color:rgba(12,10,40,.14);color:var(--ink);text-transform:uppercase;}
+.coupon-row input::placeholder{color:rgba(12,10,40,.28);}
+.coupon-row button{height:42px;border:0;border-radius:var(--r8);padding:0 13px;font-family:var(--fh);font-size:.8rem;font-weight:800;cursor:pointer;white-space:nowrap;}
+.coupon-apply{background:var(--ink);color:#fff;}
+.coupon-remove{display:none;background:rgba(229,90,90,.1);color:#b91c1c;}
+.coupon-remove.show{display:inline-block;}
+.coupon-msg{min-height:16px;margin-top:7px;font-size:.72rem;font-weight:700;color:#1a7a47;}
+.coupon-msg.error{color:#b91c1c;}
+
+.includes-label{font-size:.68rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:rgba(12,10,40,.4);margin-bottom:10px;}
+.includes-list{list-style:none;display:flex;flex-direction:column;gap:8px;margin-bottom:18px;}
+.includes-list li{display:flex;align-items:flex-start;gap:8px;font-size:.82rem;color:rgba(12,10,40,.78);line-height:1.4;font-weight:500;}
+.inc-check{width:16px;height:16px;flex-shrink:0;margin-top:.5px;background:var(--green);border-radius:50%;display:flex;align-items:center;justify-content:center;}
+.inc-check svg{width:9px;height:9px;}
+
+.trust-row{display:flex;flex-wrap:wrap;gap:6px;padding-top:14px;border-top:1px solid rgba(12,10,40,.07);}
+.trust-chip{display:inline-flex;align-items:center;gap:4px;font-size:.68rem;font-weight:600;color:rgba(12,10,40,.55);background:rgba(12,10,40,.05);border-radius:var(--rF);padding:4px 9px;}
+
+/* ── TOAST ── */
+.toast{
+  position:fixed;top:80px;right:16px;z-index:500;
+  background:#fff;border:1.5px solid rgba(201,168,76,.25);
+  border-radius:14px;padding:12px 16px;
+  box-shadow:0 8px 32px rgba(0,0,0,.15);
+  max-width:280px;font-size:.82rem;font-weight:600;color:var(--ink);
+  transform:translateX(115%);opacity:0;
+  transition:transform .4s cubic-bezier(.34,1.45,.64,1),opacity .3s;
+}
+.toast.show{transform:translateX(0);opacity:1;}
+.toast.error{border-color:rgba(229,90,90,.4);background:#fff5f5;color:#b91c1c;}
+
+/* ── MOBILE ── */
+@media(max-width:768px){
+  .page{padding:20px 16px 80px;}
+  .grid{grid-template-columns:1fr;gap:20px;}
+  .summary-card{position:static;}
+  .field-row{grid-template-columns:1fr;}
+  .form-card{padding:22px 18px;}
+  .submit-btn{height:52px;font-size:1rem;}
+}
+@media(max-width:420px){
+  .nav-secure span{display:none;}
+  .price-now{font-size:2rem;}
+}
+</style>
+</head>
+<body>
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WJHMJ92W" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="/ads/kundli" class="nav-logo">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2.2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      <span>VedGuide</span>
+    </a>
+    <div class="nav-secure">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      <span>Secure Checkout · 256-bit SSL</span>
+    </div>
+  </div>
+</nav>
+
+<!-- TOAST -->
+<div id="toast" class="toast" role="alert" aria-live="polite"></div>
+
+<main class="page">
+  <div class="grid">
+
+    <!-- ── LEFT: FORM ── -->
+    <div>
+      <div class="section-tag">Step 1 of 1</div>
+      <div class="form-card">
+        <h1 class="form-title">Your Details</h1>
+        <p class="form-sub">Fill in your birth details accurately — this is what the astrologer uses to prepare your report.</p>
+
+        <form id="checkoutForm" novalidate>
+          <div class="field-group">
+
+            <!-- Name + Phone -->
+            <div class="field-row">
+              <div class="field">
+                <label for="fullName">Full Name <span class="req">*</span></label>
+                <input type="text" id="fullName" name="fullName" placeholder="e.g. Rahul Sharma" autocomplete="name" inputmode="text">
+                <span class="err-msg" id="err-fullName">Please enter your full name</span>
+              </div>
+              <div class="field">
+                <label for="phone">WhatsApp Number <span class="req">*</span></label>
+                <input type="tel" id="phone" name="phone" placeholder="10-digit mobile" autocomplete="tel" inputmode="numeric" maxlength="10">
+                <div class="field-hint">Your report will be sent here</div>
+                <span class="err-msg" id="err-phone">Enter a valid 10-digit number</span>
+              </div>
+            </div>
+
+            <!-- Email -->
+            <div class="field">
+              <label for="email">Email Address <span class="req">*</span></label>
+              <input type="email" id="email" name="email" placeholder="you@example.com" autocomplete="email" inputmode="email">
+              <span class="err-msg" id="err-email">Enter a valid email address</span>
+            </div>
+
+            <!-- Gender + Language -->
+            <div class="field-row">
+              <div class="field">
+                <label for="gender">Gender <span class="req">*</span></label>
+                <select id="gender" name="gender">
+                  <option value="">Select gender</option>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                </select>
+                <span class="err-msg" id="err-gender">Please select gender</span>
+              </div>
+              <div class="field">
+                <label for="reportLanguage">Report Language <span class="req">*</span></label>
+                <select id="reportLanguage" name="reportLanguage">
+                  <option value="">Select language</option>
+                  <option value="hindi">Hindi</option>
+                  <option value="english">English</option>
+                </select>
+                <span class="err-msg" id="err-reportLanguage">Please select a language</span>
+              </div>
+            </div>
+
+            <hr class="form-divider">
+            <p class="divider-label">Birth Details</p>
+
+            <!-- DOB + TOB -->
+            <div class="field-row">
+              <div class="field">
+                <label for="dob">Date of Birth <span class="req">*</span></label>
+                <input type="date" id="dob" name="dob" max="2010-12-31">
+                <span class="err-msg" id="err-dob">Please select your date of birth</span>
+              </div>
+              <div class="field">
+                <label for="tob">Time of Birth <span class="req">*</span></label>
+                <input type="time" id="tob" name="tob">
+                <div class="field-hint">As exact as possible — even approximate is fine</div>
+                <span class="err-msg" id="err-tob">Please enter your time of birth</span>
+              </div>
+            </div>
+
+            <!-- Place of Birth -->
+            <div class="field">
+              <label for="pob">Place of Birth <span class="req">*</span></label>
+              <input type="text" id="pob" name="pob" placeholder="e.g. Mumbai, Maharashtra" autocomplete="address-level2" inputmode="text">
+              <span class="err-msg" id="err-pob">Please enter your place of birth</span>
+            </div>
+
+          </div><!-- /field-group -->
+
+          <button type="submit" class="submit-btn cta-btn" id="submitBtn" data-section="checkout" data-cta="career-report">
+            <div class="submit-btn-inner">
+              <div class="spinner" id="btnSpinner"></div>
+              <span class="btn-text" id="btnText">🔮 Pay ₹399 &amp; Get My Report</span>
+            </div>
+          </button>
+          <div class="submit-lock">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            Secure payment via Razorpay · No hidden charges
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ── RIGHT: ORDER SUMMARY ── -->
+    <div>
+      <div class="section-tag">Order Summary</div>
+      <div class="summary-card">
+        <div class="summary-header">
+          <img src="/assets/premium_kundli.webp" alt="Kundli Report" class="summary-img">
+          <div class="summary-hinfo">
+            <div class="summary-hname">Personalized Kundli Report</div>
+            <div class="summary-badge">
+              <svg width="8" height="8" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+              Manual · Not Auto-Generated
+            </div>
+          </div>
+        </div>
+        <div class="summary-body">
+          <div class="price-row">
+            <span class="price-now" id="payPrice">₹399</span>
+            <span class="price-mrp">₹1,995</span>
+            <span class="price-off">80% OFF</span>
+          </div>
+          <div class="discount-row" id="discountRow">
+            <span id="discountLabel">Coupon discount</span>
+            <span id="discountAmount">-₹0</span>
+          </div>
+
+          <div class="coupon-box">
+            <label for="couponCode">Have a coupon?</label>
+            <div class="coupon-row">
+              <input type="text" id="couponCode" placeholder="Enter code" autocomplete="off" spellcheck="false">
+              <button type="button" class="coupon-apply" id="couponApplyBtn">Apply</button>
+              <button type="button" class="coupon-remove" id="couponRemoveBtn">Remove</button>
+            </div>
+            <div class="coupon-msg" id="couponMsg"></div>
+          </div>
+
+          <div class="includes-label">What's included</div>
+          <ul class="includes-list">
+            <li>
+              <span class="inc-check"><svg viewBox="0 0 10 10" fill="none"><polyline points="2,5 4,7.5 8,3" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              35–40 page detailed PDF report
+            </li>
+            <li>
+              <span class="inc-check"><svg viewBox="0 0 10 10" fill="none"><polyline points="2,5 4,7.5 8,3" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              Career timing &amp; promotion windows
+            </li>
+            <li>
+              <span class="inc-check"><svg viewBox="0 0 10 10" fill="none"><polyline points="2,5 4,7.5 8,3" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              Wealth yog &amp; dhan blockage analysis
+            </li>
+            <li>
+              <span class="inc-check"><svg viewBox="0 0 10 10" fill="none"><polyline points="2,5 4,7.5 8,3" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              Mahadasha &amp; Antardasha roadmap (7 yrs)
+            </li>
+            <li>
+              <span class="inc-check"><svg viewBox="0 0 10 10" fill="none"><polyline points="2,5 4,7.5 8,3" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              Dosha, yog &amp; practical remedies
+            </li>
+            <li>
+              <span class="inc-check"><svg viewBox="0 0 10 10" fill="none"><polyline points="2,5 4,7.5 8,3" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              WhatsApp delivery in 24–48 hours
+            </li>
+          </ul>
+
+          <div class="trust-row">
+            <span class="trust-chip">🔒 100% Secure</span>
+            <span class="trust-chip">📄 One-time payment</span>
+            <span class="trust-chip">⭐ 4.9/5 Rating</span>
+            <span class="trust-chip">🚫 No spam calls</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /grid -->
+</main>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js" async></script>
+<script>
+(function(){
+  var RZP_KEY = '__RAZORPAY_KEY_ID__';
+  var BASE_AMOUNT = 39900; // ₹399 in paise
+  var payableAmount = BASE_AMOUNT;
+  var appliedCoupon = null;
+
+  var form    = document.getElementById('checkoutForm');
+  var btn     = document.getElementById('submitBtn');
+  var btnText = document.getElementById('btnText');
+  var spinner = document.getElementById('btnSpinner');
+  var toast   = document.getElementById('toast');
+  var payPrice = document.getElementById('payPrice');
+  var discountRow = document.getElementById('discountRow');
+  var discountLabel = document.getElementById('discountLabel');
+  var discountAmount = document.getElementById('discountAmount');
+  var couponCode = document.getElementById('couponCode');
+  var couponApplyBtn = document.getElementById('couponApplyBtn');
+  var couponRemoveBtn = document.getElementById('couponRemoveBtn');
+  var couponMsg = document.getElementById('couponMsg');
+  var toastTimer;
+
+  /* ── UTM helpers ── */
+  function getUtm(key){
+    try{return new URLSearchParams(location.search).get(key)||'';}catch(e){return '';}
+  }
+  function getSessionId(){
+    try{
+      var k='_vg_sid';
+      var s=sessionStorage.getItem(k);
+      if(!s){s=Math.random().toString(36).slice(2)+Date.now().toString(36);sessionStorage.setItem(k,s);}
+      return s;
+    }catch(e){return '';}
+  }
+
+  /* ── Toast ── */
+  function showToast(msg,isErr){
+    clearTimeout(toastTimer);
+    toast.textContent=msg;
+    toast.className='toast'+(isErr?' error':'');
+    void toast.offsetWidth;
+    toast.classList.add('show');
+    toastTimer=setTimeout(function(){toast.classList.remove('show');},4500);
+  }
+
+  function formatRupees(paise){
+    var rupees=Number(paise||0)/100;
+    return '₹'+(rupees%1===0?rupees.toFixed(0):rupees.toFixed(2));
+  }
+
+  function updatePricing(){
+    if(payPrice)payPrice.textContent=formatRupees(payableAmount);
+    if(btnText)btnText.innerHTML='🔮 Pay '+formatRupees(payableAmount)+' &amp; Get My Report';
+
+    if(appliedCoupon){
+      discountRow.classList.add('show');
+      discountLabel.textContent='Coupon '+appliedCoupon.code;
+      discountAmount.textContent='-'+formatRupees(appliedCoupon.discountPaise);
+      couponCode.value=appliedCoupon.code;
+      couponRemoveBtn.classList.add('show');
+    }else{
+      discountRow.classList.remove('show');
+      discountLabel.textContent='Coupon discount';
+      discountAmount.textContent='-₹0';
+      couponRemoveBtn.classList.remove('show');
+    }
+  }
+
+  function setCouponMessage(msg,isErr){
+    couponMsg.textContent=msg||'';
+    couponMsg.className='coupon-msg'+(isErr?' error':'');
+  }
+
+  function setCouponLoading(on){
+    couponApplyBtn.disabled=on;
+    couponRemoveBtn.disabled=on;
+    couponApplyBtn.textContent=on?'Checking...':'Apply';
+  }
+
+  function clearCoupon(message){
+    appliedCoupon=null;
+    payableAmount=BASE_AMOUNT;
+    if(couponCode)couponCode.value='';
+    setCouponMessage(message||'',false);
+    updatePricing();
+  }
+
+  /* ── Field validation ── */
+  function val(id,ok){
+    var el=document.getElementById(id);
+    var em=document.getElementById('err-'+id);
+    if(!el)return;
+    if(ok){el.classList.remove('err');if(em)em.classList.remove('show');}
+    else{el.classList.add('err');if(em)em.classList.add('show');}
+  }
+
+  function validate(){
+    var ok=true;
+    var fn=document.getElementById('fullName').value.trim();
+    var ph=document.getElementById('phone').value.trim();
+    var em=document.getElementById('email').value.trim();
+    var gn=document.getElementById('gender').value;
+    var rl=document.getElementById('reportLanguage').value;
+    var dob=document.getElementById('dob').value;
+    var tob=document.getElementById('tob').value;
+    var pob=document.getElementById('pob').value.trim();
+
+    val('fullName',fn.length>=2);if(fn.length<2)ok=false;
+    val('phone',/^\d{10}$/.test(ph));if(!/^\d{10}$/.test(ph))ok=false;
+    val('email',/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em));if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em))ok=false;
+    val('gender',!!gn);if(!gn)ok=false;
+    val('reportLanguage',!!rl);if(!rl)ok=false;
+    val('dob',!!dob);if(!dob)ok=false;
+    val('tob',!!tob);if(!tob)ok=false;
+    val('pob',pob.length>=2);if(pob.length<2)ok=false;
+    return ok;
+  }
+
+  function setLoading(on){
+    btn.disabled=on;
+    if(on){btn.classList.add('btn-loading');btnText.textContent='Processing…';}
+    else{btn.classList.remove('btn-loading');updatePricing();}
+  }
+
+  /* ── Submit ── */
+  couponApplyBtn.addEventListener('click',function(){
+    applyCoupon();
+  });
+  couponRemoveBtn.addEventListener('click',function(){
+    clearCoupon('Coupon removed.');
+  });
+  couponCode.addEventListener('keydown',function(e){
+    if(e.key==='Enter'){
+      e.preventDefault();
+      applyCoupon();
+    }
+  });
+  couponCode.addEventListener('input',function(){
+    if(appliedCoupon && couponCode.value.trim().toUpperCase()!==appliedCoupon.code){
+      clearCoupon('');
+    }
+  });
+
+  form.addEventListener('submit',function(e){
+    e.preventDefault();
+    if(!validate()){showToast('Please fill all required fields correctly.',true);return;}
+    if(typeof Razorpay==='undefined'){showToast('Payment library not loaded. Please refresh.',true);return;}
+    initiatePayment();
+  });
+
+  function applyCoupon(){
+    var code=couponCode.value.trim().toUpperCase();
+    if(!code){setCouponMessage('Enter a coupon code.',true);return;}
+
+    setCouponLoading(true);
+    setCouponMessage('',false);
+    fetch('/api/coupons/validate',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        code:code,
+        amountPaise:BASE_AMOUNT,
+        productSlug:'paid-kundli'
+      })
+    })
+    .then(function(r){return r.json().then(function(j){if(!r.ok){throw new Error(j.error||'Coupon invalid.');}return j;});})
+    .then(function(res){
+      var discountPaise=Number(res.discountPaise||0);
+      var finalAmountPaise=Number(res.finalAmountPaise||BASE_AMOUNT);
+      if(!discountPaise || finalAmountPaise>=BASE_AMOUNT){throw new Error('Coupon is not valid for this order.');}
+      if(finalAmountPaise<=0){throw new Error('Coupon must leave at least ₹1 payable online.');}
+      appliedCoupon={
+        code:String(res.code||code).toUpperCase(),
+        discountPaise:discountPaise,
+        finalAmountPaise:Math.max(0,finalAmountPaise)
+      };
+      payableAmount=appliedCoupon.finalAmountPaise;
+      setCouponMessage('Coupon applied. You saved '+formatRupees(discountPaise)+'.',false);
+      updatePricing();
+    })
+    .catch(function(err){
+      clearCoupon('');
+      couponCode.value=code;
+      setCouponMessage(err.message||'Coupon could not be applied.',true);
+    })
+    .finally(function(){
+      setCouponLoading(false);
+    });
+  }
+
+  function getFormData(){
+    return {
+      fullName:document.getElementById('fullName').value.trim(),
+      phone:document.getElementById('phone').value.trim(),
+      email:document.getElementById('email').value.trim(),
+      gender:document.getElementById('gender').value,
+      reportLanguage:document.getElementById('reportLanguage').value,
+      dob:document.getElementById('dob').value,
+      tob:document.getElementById('tob').value,
+      pob:document.getElementById('pob').value.trim(),
+    };
+  }
+
+  function initiatePayment(){
+    setLoading(true);
+    var data=getFormData();
+    fireKundliInitiateCheckoutEvent();
+    var body={
+      amountPaise:payableAmount,
+      productSlug:'paid-kundli',
+      couponCode:appliedCoupon?appliedCoupon.code:undefined,
+      customer:{
+        fullName:data.fullName,
+        phone:data.phone,
+        email:data.email,
+        gender:data.gender,
+        reportLanguage:data.reportLanguage,
+        dob:data.dob,
+        tob:data.tob,
+        pob:data.pob,
+      },
+      attribution:{
+        sourcePage:'/ads/kundli/checkout',
+        sourceFunnel:'ads_kundli',
+        utmSource:getUtm('utm_source'),
+        utmMedium:getUtm('utm_medium'),
+        utmCampaign:getUtm('utm_campaign'),
+        referrer:document.referrer||'',
+        sessionId:getSessionId(),
+      }
+    };
+
+    fetch('/api/payments/create-order',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(body),
+    })
+    .then(function(r){return r.json();})
+    .then(function(res){
+      if(res.error){throw new Error(res.error);}
+      openRazorpay(res,data);
+    })
+    .catch(function(err){
+      setLoading(false);
+      showToast(err.message||'Something went wrong. Please try again.',true);
+    });
+  }
+
+  function fireKundliInitiateCheckoutEvent(){
+    var valueRupees=Number(payableAmount||BASE_AMOUNT)/100;
+    window.dataLayer=window.dataLayer||[];
+    window.dataLayer.push({
+      event:'ads_kundli_initiate_checkout',
+      value:valueRupees,
+      currency:'INR',
+      coupon:appliedCoupon?appliedCoupon.code:undefined,
+      ecommerce:{
+        value:valueRupees,
+        currency:'INR',
+        coupon:appliedCoupon?appliedCoupon.code:undefined,
+        items:[{
+          item_id:'paid-kundli',
+          item_name:'Personalized Kundli Report',
+          price:399,
+          quantity:1
+        }]
+      }
+    });
+  }
+
+  function openRazorpay(orderData,formData){
+    var checkoutAmountPaise=Number(orderData.amountPaise||payableAmount);
+    var checkoutCoupon=appliedCoupon?appliedCoupon.code:null;
+    var options={
+      key:RZP_KEY,
+      amount:checkoutAmountPaise,
+      currency:'INR',
+      name:'VedGuide',
+      description:'Personalized Kundli Report',
+      image:'/assets/premium_kundli.webp',
+      order_id:orderData.razorpayOrderId,
+      prefill:{
+        name:formData.fullName,
+        contact:formData.phone,
+        email:formData.email,
+      },
+      theme:{color:'#c9a84c'},
+      modal:{
+        ondismiss:function(){setLoading(false);}
+      },
+      handler:function(response){
+        verifyPayment(response,{
+          orderDbId:orderData.orderDbId,
+          amountPaise:checkoutAmountPaise,
+          couponCode:checkoutCoupon,
+          razorpayOrderId:response.razorpay_order_id,
+          paymentId:response.razorpay_payment_id
+        });
+      }
+    };
+    var rzp=new Razorpay(options);
+    rzp.on('payment.failed',function(resp){
+      setLoading(false);
+      showToast('Payment failed: '+(resp.error.description||'Please try again.'),true);
+    });
+    rzp.open();
+  }
+
+  function getCookie(name){
+    var match=document.cookie.match(new RegExp('(?:^|; )'+name.replace(/([.$?*|{}()[\]\\/+^])/g,'\\$1')+'=([^;]*)'));
+    return match?decodeURIComponent(match[1]):'';
+  }
+
+  function verifyPayment(response,purchase){
+    btnText.textContent='Verifying payment…';
+    fetch('/api/payments/verify',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        razorpay_order_id:response.razorpay_order_id,
+        razorpay_payment_id:response.razorpay_payment_id,
+        razorpay_signature:response.razorpay_signature,
+        orderDbId:purchase.orderDbId,
+        fbp:getCookie('_fbp')||undefined,
+        fbc:getCookie('_fbc')||undefined
+      })
+    })
+    .then(function(r){return r.json();})
+    .then(function(res){
+      if(res.success){
+        fireKundliPurchaseEvent(purchase);
+      }else{
+        setLoading(false);
+        showToast('Payment verification failed. Contact us on WhatsApp.',true);
+      }
+    })
+    .catch(function(){
+      setLoading(false);
+      showToast('Could not verify payment. Please contact support.',true);
+    });
+  }
+
+  function fireKundliPurchaseEvent(purchase){
+    var orderDbId=purchase.orderDbId;
+    var valueRupees=Number(purchase.amountPaise||BASE_AMOUNT)/100;
+    var didRedirect=false;
+    function goThankYou(){
+      if(didRedirect)return;
+      didRedirect=true;
+      try{
+        sessionStorage.setItem('order_complete',JSON.stringify({
+          orderId:orderDbId,
+          product:'kundli_report',
+          fastTrack:false,
+          couponCode:purchase.couponCode||null,
+          razorpayOrderId:purchase.razorpayOrderId||null,
+          paymentId:purchase.paymentId||null
+        }));
+      }catch(e){}
+      window.location.href='/thank-you/kundli?order_id='+encodeURIComponent(orderDbId);
+    }
+
+    window.dataLayer=window.dataLayer||[];
+    window.dataLayer.push({
+      event:'ads_kundli_purchase',
+      value:valueRupees,
+      currency:'INR',
+      order_id:orderDbId,
+      coupon:purchase.couponCode||undefined,
+      ecommerce:{
+        transaction_id:orderDbId,
+        value:valueRupees,
+        currency:'INR',
+        coupon:purchase.couponCode||undefined,
+        items:[{
+          item_id:'paid-kundli',
+          item_name:'Personalized Kundli Report',
+          price:399,
+          quantity:1
+        }]
+      },
+      eventCallback:goThankYou,
+      eventTimeout:1200
+    });
+
+    setTimeout(goThankYou,1300);
+  }
+
+  /* ── Live field validation on blur ── */
+  ['fullName','phone','email','gender','reportLanguage','dob','tob','pob'].forEach(function(id){
+    var el=document.getElementById(id);
+    if(!el)return;
+    el.addEventListener('blur',function(){
+      if(el.value.trim()||el.value){validate();}
+    });
+  });
+
+  updatePricing();
+})();
+</script>
+</body>
+</html>
