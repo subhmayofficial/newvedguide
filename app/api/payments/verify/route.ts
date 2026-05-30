@@ -11,7 +11,6 @@ interface VerifyBody {
   razorpay_signature: string;
   orderDbId: string;
   fbp?: string;
-  fbc?: string;
 }
 
 function clientIpFromRequest(request: Request): string | null {
@@ -29,7 +28,6 @@ export async function POST(request: Request) {
       razorpay_signature,
       orderDbId,
       fbp,
-      fbc,
     } = body;
 
     if (
@@ -105,7 +103,6 @@ export async function POST(request: Request) {
         clientIpAddress: clientIpFromRequest(request),
         clientUserAgent: request.headers.get("user-agent"),
         fbp: fbp ?? null,
-        fbc: fbc ?? null,
       },
     });
 

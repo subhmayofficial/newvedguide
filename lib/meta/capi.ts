@@ -1,4 +1,5 @@
 import { createHash } from "crypto";
+import type { MetaCapiCustomerFields } from "@/lib/meta/capi-customer-fields";
 
 export interface MetaCapiConfig {
   pixelId: string;
@@ -17,7 +18,8 @@ export interface MetaPurchaseContext {
   clientIpAddress?: string | null;
   clientUserAgent?: string | null;
   fbp?: string | null;
-  fbc?: string | null;
+  /** Advanced matching — hashed before send */
+  customer?: MetaCapiCustomerFields | null;
 }
 
 export function getMetaCapiConfig(): MetaCapiConfig | null {
@@ -75,10 +77,59 @@ function normalizePhone(phone: string): string | null {
   return digits;
 }
 
-export async function sendMetaPurchaseEvent(
-  config: MetaCapiConfig,
-  input: MetaPurchaseContext
-): Promise<MetaCapiSendResult> {
+function hashMetaText(value: string): string {
+  return sha256Normalized(normalizeMetaText(value));
+}
+
+function normalizeMetaText(value: string): string {
+  return value.trim().toLowerCase().replace(/[^a-z0-9\u00a0-\uffff]/g, "");
+}
+
+function normalizeMetaCity(value: string): string | null {
+  const n = normalizeMetaText(value).replace(/\s+/g, "");
+  return n || null;
+}
+
+function normalizeMetaState(value: string): string | null {
+  const n = normalizeMetaText(value);
+  return n || null;
+}
+
+function normalizeMetaZip(value: string): string | null {
+  const n = value.trim().toLowerCase().replace(/[\s-]/g, "");
+  return n || null;
+}
+
+function normalizeMetaGender(value: string): "m" | "f" | null {
+  const g = value.trim().toLowerCase();
+  if (g === "male" || g === "m") return "m";
+  if (g === "female" || g === "f") return "f";
+  return null;
+}
+
+/** Meta expects YYYYMMDD */
+function normalizeMetaDob(value: string): string | null {
+  const raw = value.trim();
+  if (/^\d{4}-\d{2}-\d{2}/.test(raw)) {
+    return raw.slice(0, 10).replace(/-/g, "");
+  }
+  if (/^\d{8}$/.test(raw)) return raw;
+  return null;
+}
+
+function applyHashedUserField(
+  userData: Record<string, string | string[]>,
+  key: string,
+  raw: string | null | undefined,
+  normalizer: (v: string) => string | null = normalizeMetaText
+): void {
+  if (!raw?.trim()) return;
+  const normalized = normalizer(raw);
+  if (!normalized) return;
+  userData[key] = [hashMetaText(normalized)];
+}
+
+function buildMetaUserData(input: MetaPurchaseContext): Record<string, string | string[]> {
   const userData: Record<string, string | string[]> = {};
 
   if (input.email) {
@@ -96,7 +147,34 @@ export async function sendMetaPurchaseEvent(
     userData.client_user_agent = input.clientUserAgent.trim();
   }
   if (input.fbp?.trim()) userData.fbp = input.fbp.trim();
-  if (input.fbc?.trim()) userData.fbc = input.fbc.trim();
+
+  const c = input.customer;
+  if (c) {
+    applyHashedUserField(userData, "fn", c.firstName);
+    applyHashedUserField(userData, "ln", c.lastName);
+    applyHashedUserField(userData, "ct", c.city, normalizeMetaCity);
+    applyHashedUserField(userData, "st", c.state, normalizeMetaState);
+    applyHashedUserField(userData, "zp", c.zip, normalizeMetaZip);
+    applyHashedUserField(userData, "country", c.country);
+
+    if (c.gender) {
+      const ge = normalizeMetaGender(c.gender);
+      if (ge) userData.ge = [hashMetaText(ge)];
+    }
+    if (c.dateOfBirth) {
+      const db = normalizeMetaDob(c.dateOfBirth);
+      if (db) userData.db = [hashMetaText(db)];
+    }
+  }
+
+  return userData;
+}
+
+export async function sendMetaPurchaseEvent(
+  config: MetaCapiConfig,
+  input: MetaPurchaseContext
+): Promise<MetaCapiSendResult> {
+  const userData = buildMetaUserData(input);
 
   const payload: Record<string, unknown> = {
     data: [

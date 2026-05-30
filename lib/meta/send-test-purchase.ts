@@ -37,5 +37,15 @@ export async function sendMetaTestPurchaseEvent(
     email: input.email ?? "test@vedguide.com",
     phone: input.phone ?? "9876543210",
     eventSourceUrl: "https://vedguide.com/ads/kundli/new-checkout",
+    customer: {
+      firstName: "Test",
+      lastName: "User",
+      gender: "male",
+      dateOfBirth: "1990-05-15",
+      city: "Mumbai",
+      state: "Maharashtra",
+      zip: "400001",
+      country: "in",
+    },
   });
 }
