@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { track } from "@/lib/analytics/events";
+import { getWhatsAppHref } from "@/lib/constants/contact";
 
 const CONSULTATION_OFFER = {
   title: "Live consultation — doubts clear karein",
@@ -73,6 +74,10 @@ export default function KundliThankYouPage() {
   }, [router]);
 
   if (!orderId) return null;
+
+  const waHref = getWhatsAppHref(
+    "Hi VedGuide, I just placed a Kundli Report order."
+  );
 
   return (
     <div className="min-h-screen spiritual-pattern">
@@ -144,7 +149,7 @@ export default function KundliThankYouPage() {
             className="bg-[#25D366] hover:bg-[#1DAE52] px-8 text-white"
             render={
               <a
-                href="https://wa.me/91XXXXXXXXXX?text=Hi%20VedGuide%2C%20I%20just%20placed%20a%20Kundli%20Report%20order."
+                href={waHref}
                 target="_blank"
                 rel="noopener noreferrer"
               />
@@ -154,7 +159,7 @@ export default function KundliThankYouPage() {
             Message us on WhatsApp
           </Button>
           <p className="mt-2 text-xs text-muted-foreground">
-            For fastest response
+            +91 8002560943 · For fastest response
           </p>
         </div>
 

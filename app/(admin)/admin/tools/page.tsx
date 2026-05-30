@@ -2,8 +2,11 @@ import Link from "next/link";
 import { createServiceClient } from "@/lib/supabase/server";
 import { adminPath } from "@/lib/admin/admin-paths";
 import { AdminTestOrderForm } from "@/components/admin/admin-test-order-form";
+import { AdminMetaCapiTestPanel } from "@/components/admin/admin-meta-capi-test-panel";
 import { PRODUCT_SLUGS } from "@/lib/constants/commerce";
 import { getProductBySlug } from "@/lib/services/product";
+import { getMetaCapiConfig } from "@/lib/meta/capi";
+import { formatAdminDateTime } from "@/lib/admin/time";
 
 export const dynamic = "force-dynamic";
 
@@ -25,6 +28,32 @@ export default async function AdminToolsPage({
           orderId: sp.test_order_id,
         }
       : null;
+
+  const metaCapiFlash =
+    sp.meta_capi_status === "success" || sp.meta_capi_status === "failed"
+      ? {
+          kind: sp.meta_capi_status as "success" | "failed",
+          message: sp.meta_capi_msg ?? "",
+          detail: sp.meta_capi_detail,
+        }
+      : null;
+
+  const metaConfig = getMetaCapiConfig();
+  const { data: metaLogsRaw } = await supabase
+    .from("integration_deliveries")
+    .select("id,status,response_status,error_message,created_at,response_body")
+    .eq("provider", "meta_capi")
+    .order("created_at", { ascending: false })
+    .limit(5);
+
+  const recentMetaLogs = (metaLogsRaw ?? []).map((row) => ({
+    id: row.id,
+    status: row.status,
+    response_status: row.response_status,
+    error_message: row.error_message,
+    created_at: formatAdminDateTime(row.created_at),
+    response_body: row.response_body,
+  }));
 
   return (
     <div className="space-y-8 font-sans admin-page-enter max-w-2xl">
@@ -60,6 +89,14 @@ export default async function AdminToolsPage({
           <AdminTestOrderForm defaultAmountRupees={defaultAmountRupees} flash={flash} />
         </div>
       </section>
+
+      <AdminMetaCapiTestPanel
+        defaultTestEventCode={process.env.META_CAPI_TEST_EVENT_CODE?.trim() || "TEST88413"}
+        configured={Boolean(metaConfig)}
+        pixelId={metaConfig?.pixelId ?? null}
+        recentLogs={recentMetaLogs}
+        flash={metaCapiFlash}
+      />
     </div>
   );
 }

@@ -78,7 +78,7 @@ function normalizePhone(phone: string): string | null {
 export async function sendMetaPurchaseEvent(
   config: MetaCapiConfig,
   input: MetaPurchaseContext
-): Promise<{ ok: boolean; error?: string }> {
+): Promise<MetaCapiSendResult> {
   const userData: Record<string, string | string[]> = {};
 
   if (input.email) {
@@ -122,7 +122,8 @@ export async function sendMetaPurchaseEvent(
     payload.test_event_code = config.testEventCode;
   }
 
-  const url = `https://graph.facebook.com/v21.0/${config.pixelId}/events?access_token=${encodeURIComponent(config.accessToken)}`;
+  const requestUrlSafe = `https://graph.facebook.com/v21.0/${config.pixelId}/events`;
+  const url = `${requestUrlSafe}?access_token=${encodeURIComponent(config.accessToken)}`;
 
   const res = await fetch(url, {
     method: "POST",
@@ -130,15 +131,53 @@ export async function sendMetaPurchaseEvent(
     body: JSON.stringify(payload),
   });
 
-  const json = (await res.json().catch(() => ({}))) as {
-    error?: { message?: string };
-    events_received?: number;
-  };
-
-  if (!res.ok) {
-    console.error("[meta-capi][purchase]", json);
-    return { ok: false, error: json.error?.message ?? `HTTP ${res.status}` };
+  const responseText = await res.text();
+  let json: { error?: { message?: string }; events_received?: number } = {};
+  try {
+    json = JSON.parse(responseText) as typeof json;
+  } catch {
+    json = {};
   }
 
-  return { ok: true };
+  if (!res.ok) {
+    console.error("[meta-capi][purchase]", {
+      orderId: input.orderId,
+      status: res.status,
+      body: json,
+    });
+    return {
+      ok: false,
+      error: json.error?.message ?? `HTTP ${res.status}`,
+      responseStatus: res.status,
+      responseBody: responseText,
+      requestUrlSafe,
+      requestBody: payload,
+    };
+  }
+
+  console.info("[meta-capi][purchase] ok", {
+    orderId: input.orderId,
+    eventsReceived: json.events_received ?? null,
+    testEventCode: config.testEventCode ?? null,
+    eventSourceUrl: input.eventSourceUrl,
+  });
+
+  return {
+    ok: true,
+    responseStatus: res.status,
+    responseBody: responseText,
+    requestUrlSafe,
+    requestBody: payload,
+    eventsReceived: json.events_received,
+  };
+}
+
+export interface MetaCapiSendResult {
+  ok: boolean;
+  error?: string;
+  responseStatus?: number;
+  responseBody?: string;
+  requestUrlSafe?: string;
+  requestBody?: Record<string, unknown>;
+  eventsReceived?: number;
 }

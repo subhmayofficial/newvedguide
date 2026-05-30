@@ -3,6 +3,6 @@
  */
 export function getWhatsAppHref(prefillMessage: string): string {
   const raw =
-    process.env.NEXT_PUBLIC_WHATSAPP_NUMBER?.replace(/\D/g, "") ?? "91XXXXXXXXXX";
+    process.env.NEXT_PUBLIC_WHATSAPP_NUMBER?.replace(/\D/g, "") ?? "918002560943";
   return `https://wa.me/${raw}?text=${encodeURIComponent(prefillMessage)}`;
 }

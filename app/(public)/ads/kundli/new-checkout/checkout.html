@@ -612,7 +612,7 @@ select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='htt
   function initiatePayment(){
     setLoading(true);
     var data=getFormData();
-    fireKundliInitiateCheckoutEvent();
+    fireKundliInitiateCheckoutEvent('payment_submit');
     var body={
       amountPaise:payableAmount,
       productSlug:'paid-kundli',
@@ -654,17 +654,21 @@ select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='htt
     });
   }
 
-  function fireKundliInitiateCheckoutEvent(){
-    var valueRupees=Number(payableAmount||BASE_AMOUNT)/100;
+  function pushAdsKundliInitiateCheckout(extra){
     window.dataLayer=window.dataLayer||[];
-    window.dataLayer.push({
+    window.dataLayer.push({ecommerce:null});
+    var valueRupees=Number(payableAmount||BASE_AMOUNT)/100;
+    var payload={
       event:'ads_kundli_initiate_checkout',
+      page_path:'/ads/kundli/new-checkout',
+      source_page:'/ads/kundli/new-checkout',
+      source_funnel:'ads_kundli',
       value:valueRupees,
       currency:'INR',
       coupon:appliedCoupon?appliedCoupon.code:undefined,
       ecommerce:{
-        value:valueRupees,
         currency:'INR',
+        value:valueRupees,
         coupon:appliedCoupon?appliedCoupon.code:undefined,
         items:[{
           item_id:'paid-kundli',
@@ -673,7 +677,40 @@ select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='htt
           quantity:1
         }]
       }
+    };
+    if(extra){
+      for(var k in extra){
+        if(Object.prototype.hasOwnProperty.call(extra,k))payload[k]=extra[k];
+      }
+    }
+    window.dataLayer.push(payload);
+  }
+
+  function fireKundliInitiateCheckoutEvent(step){
+    pushAdsKundliInitiateCheckout({checkout_step:step||'payment_submit'});
+    try{sessionStorage.setItem('ads_kundli_initiate_checkout_submit','1');}catch(e){}
+  }
+
+  function ensureInitiateCheckoutBeforePurchase(valueRupees){
+    try{
+      if(sessionStorage.getItem('ads_kundli_initiate_checkout_submit'))return;
+    }catch(e){}
+    pushAdsKundliInitiateCheckout({
+      checkout_step:'before_purchase',
+      value:valueRupees,
+      ecommerce:{
+        currency:'INR',
+        value:valueRupees,
+        coupon:undefined,
+        items:[{
+          item_id:'paid-kundli',
+          item_name:'Personalized Kundli Report',
+          price:399,
+          quantity:1
+        }]
+      }
     });
+    try{sessionStorage.setItem('ads_kundli_initiate_checkout_submit','1');}catch(e){}
   }
 
   function openRazorpay(orderData,formData){
@@ -751,6 +788,7 @@ select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='htt
   function fireKundliPurchaseEvent(purchase){
     var orderDbId=purchase.orderDbId;
     var valueRupees=Number(purchase.amountPaise||BASE_AMOUNT)/100;
+    ensureInitiateCheckoutBeforePurchase(valueRupees);
     var didRedirect=false;
     function goThankYou(){
       if(didRedirect)return;
@@ -769,8 +807,12 @@ select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='htt
     }
 
     window.dataLayer=window.dataLayer||[];
+    window.dataLayer.push({ecommerce:null});
     window.dataLayer.push({
       event:'ads_kundli_purchase',
+      page_path:'/ads/kundli/new-checkout',
+      source_page:'/ads/kundli/new-checkout',
+      source_funnel:'ads_kundli',
       value:valueRupees,
       currency:'INR',
       order_id:orderDbId,
@@ -804,6 +846,15 @@ select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='htt
   });
 
   updatePricing();
+
+  try{
+    if(!sessionStorage.getItem('ads_kundli_initiate_checkout_view')){
+      sessionStorage.setItem('ads_kundli_initiate_checkout_view','1');
+      pushAdsKundliInitiateCheckout({checkout_step:'page_view'});
+    }
+  }catch(e){
+    pushAdsKundliInitiateCheckout({checkout_step:'page_view'});
+  }
 })();
 </script>
 </body>

@@ -51,6 +51,8 @@ import { formatAdminDateTime } from "@/lib/admin/time";
 import { markPaymentSuccess } from "@/lib/services/payment";
 import { createAdminTestKundliOrder } from "@/lib/admin/admin-test-order";
 import { isAdminUser } from "@/lib/admin/admin-auth";
+import { sendMetaTestPurchaseEvent } from "@/lib/meta/send-test-purchase";
+import { logMetaCapiDelivery } from "@/lib/meta/log-capi-delivery";
 import {
   applySmtpTemplateVariables,
   collectSmtpTemplateVariableKeys,
@@ -1459,5 +1461,72 @@ export async function submitAdminTestKundliOrderForm(formData: FormData) {
   } catch (e) {
     const msg = e instanceof Error ? e.message.slice(0, 220) : "Failed to create test order";
     redirectWithAdminTestOrderResult("failed", msg);
+  }
+}
+
+function redirectWithMetaCapiTestResult(
+  status: "success" | "failed",
+  message: string,
+  detail?: string
+): never {
+  const q = new URLSearchParams();
+  q.set("meta_capi_status", status);
+  q.set("meta_capi_msg", message);
+  if (detail) q.set("meta_capi_detail", detail.slice(0, 500));
+  redirect(`${adminPath("/tools")}?${q.toString()}`);
+}
+
+export async function submitAdminMetaCapiTestForm(formData: FormData) {
+  const authClient = await createAuthedClient();
+  const {
+    data: { user },
+  } = await authClient.auth.getUser();
+  if (!isAdminUser(user)) {
+    redirectWithMetaCapiTestResult("failed", "Unauthorized");
+  }
+
+  const testEventCode = toNullable(formData.get("testEventCode")) ?? undefined;
+
+  try {
+    const result = await sendMetaTestPurchaseEvent({ testEventCode });
+
+    const supabase = createServiceClient();
+    await logMetaCapiDelivery(supabase, {
+      triggerSource: "admin_panel_test",
+      requestUrl: result.requestUrlSafe ?? "",
+      requestBody: result.requestBody ?? {},
+      responseStatus: result.responseStatus ?? 0,
+      responseBody: result.responseBody ?? "",
+      status: result.ok ? "success" : "failed",
+      errorMessage: result.error ?? null,
+      createdBy: user?.email ?? user?.id ?? null,
+    });
+
+    revalidatePath(adminPath("/tools"));
+    revalidatePath(adminPath("/integrations"));
+
+    if (result.configMissing) {
+      redirectWithMetaCapiTestResult(
+        "failed",
+        "Meta CAPI not configured. Set META_PIXEL_ID and META_CAPI_ACCESS_TOKEN."
+      );
+    }
+
+    if (!result.ok) {
+      redirectWithMetaCapiTestResult(
+        "failed",
+        result.error ?? "Meta rejected the event",
+        result.responseBody
+      );
+    }
+
+    redirectWithMetaCapiTestResult(
+      "success",
+      `Purchase accepted (events_received: ${result.eventsReceived ?? 1}). Open Meta Test events with code ${testEventCode ?? process.env.META_CAPI_TEST_EVENT_CODE ?? "your code"}.`,
+      result.responseBody
+    );
+  } catch (e) {
+    const msg = e instanceof Error ? e.message.slice(0, 220) : "CAPI test failed";
+    redirectWithMetaCapiTestResult("failed", msg);
   }
 }
