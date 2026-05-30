@@ -141,15 +141,14 @@ body{font-family:var(--fhi);background:var(--ink);color:var(--white);-webkit-fon
 .gets{background:var(--ink2);padding:40px 0;text-align:center;}
 .gets-title{font-family:var(--fhi);font-size:clamp(1.3rem,4vw,1.8rem);font-weight:800;color:var(--white);margin-bottom:6px;}
 .gets-sub{font-size:.88rem;color:rgba(255,255,255,.45);margin-bottom:24px;}
-.gets-grid{display:flex;flex-direction:column;gap:10px;}
+.gets-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
 .get-item{
-  display:flex;align-items:center;gap:12px;
+  display:flex;align-items:center;gap:10px;
   background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);
-  border-radius:var(--r12);padding:14px 16px;text-align:left;
+  border-radius:var(--r12);padding:14px 12px;
 }
-.get-em{font-size:1.4rem;flex-shrink:0;line-height:1;}
-.get-text{font-size:.88rem;font-weight:600;color:rgba(255,255,255,.82);line-height:1.4;}
-.get-text span{display:block;font-size:.75rem;font-weight:400;color:rgba(255,255,255,.38);margin-top:2px;}
+.get-em{font-size:1.5rem;flex-shrink:0;line-height:1;}
+.get-text{font-size:.84rem;font-weight:700;color:rgba(255,255,255,.85);line-height:1.3;}
 
 /* ── SOCIAL PROOF ── */
 .proof{background:var(--cream2);padding:36px 0;text-align:center;}
@@ -337,24 +336,22 @@ body{font-family:var(--fhi);background:var(--ink);color:var(--white);-webkit-fon
       Aap <span class="hl">100% Mehnat</span> kar rahe ho<br>
       par Result sirf <span class="hl">10%</span> hi mil raha hai
     </h1>
-    <p class="hook-sub">Agar aap bhi in situations se guzar rahe ho — toh aapki grah dasha iske peeche hai.</p>
-
     <div class="pain-list">
       <div class="pain-item">
         <span class="pain-icon">😤</span>
-        <span class="pain-text">Har baar selection hote-hote reh jaata hai — <em>aakhri mod par ruk jaata hai</em></span>
+        <span class="pain-text">Selection hote-hote <em>reh jaata hai</em></span>
       </div>
       <div class="pain-item">
         <span class="pain-icon">❌</span>
-        <span class="pain-text">Kisi <em>ek cheez ke karan</em> baar-baar fail ho jaate ho, samajh nahi aata kyun</span>
+        <span class="pain-text">Mehnat poori, result <em>zero</em></span>
       </div>
       <div class="pain-item">
         <span class="pain-icon">🌀</span>
-        <span class="pain-text">Career mein <em>confusion hi confusion</em> — job karun, business karun, kya karun?</span>
+        <span class="pain-text">Career mein <em>confusion hi confusion</em></span>
       </div>
       <div class="pain-item">
         <span class="pain-icon">💸</span>
-        <span class="pain-text">Paisa aata hai toh <em>kahin na kahin lag jaata hai</em> — savings hoti hi nahi</span>
+        <span class="pain-text">Paisa aata hai, <em>tik ke nahi rehta</em></span>
       </div>
     </div>
 
@@ -391,22 +388,16 @@ body{font-family:var(--fhi);background:var(--ink);color:var(--white);-webkit-fon
 
     <div class="why-card">
       <span class="why-icon">🪐</span>
-      <div class="why-title">Jab Shani Dev aapke 10th House mein baithe hon...</div>
-      <div class="why-body">
-        Aap jitni bhi mehnat karo — <strong>result milega hi nahi.</strong> Yeh sunne mein kadwa lagta hai, lekin yahi sach hai. Shani ki Saadesaati ya Dhaiya ke dauran career ruk jaata hai.
-      </div>
+      <div class="why-title">Shani 10th House mein = Career ruka hua</div>
     </div>
 
     <div class="why-card">
       <span class="why-icon">⏳</span>
-      <div class="why-title">Graho ki dasha kharab hai toh...</div>
-      <div class="why-body">
-        Har decision galat lagta hai. <strong>Timing ka andaza nahi hota</strong> — kab opportunity aayegi, kab nahi. Aur isi confusion mein aap wrong decisions lete ho.
-      </div>
+      <div class="why-title">Grah dasha kharab = Timing ka andaza nahi</div>
     </div>
 
     <div class="shani-callout">
-      <p>Iska matlab ye nahi ki aap galat ho —<br>iska matlab hai ki <strong>aapko sahi time aur sahi direction ka pata nahi hai.</strong></p>
+      <p><strong>Aap galat nahi ho —</strong> bas aapko sahi time aur direction ka pata nahi hai.</p>
     </div>
   </div>
 </section>
@@ -416,34 +407,28 @@ body{font-family:var(--fhi);background:var(--ink);color:var(--white);-webkit-fon
   <div class="container">
     <div class="solution-badge">✅ Solution</div>
     <h2 class="solution-h2">Personalized Career Kundli —<br><span>Aapki Zindagi ka Roadmap</span></h2>
-    <p class="solution-sub">Bina raasta jaane aap manzil tak pahunch hi nahi sakte. Ye kundli har mod pe aapka saath degi.</p>
-
     <div class="roadmap-card">
       <div class="rm-num">1</div>
       <div class="rm-body">
-        <div class="rm-title">Aapka job kab lagega?</div>
-        <div class="rm-sub">Exact timing — kaun sa mahina, kaun si dasha</div>
+        <div class="rm-title">Job kab lagegi?</div>
       </div>
     </div>
     <div class="roadmap-card">
       <div class="rm-num">2</div>
       <div class="rm-body">
         <div class="rm-title">Raj Yog kab aayega?</div>
-        <div class="rm-sub">Career peak kab hoga — promotion, growth sab clear</div>
       </div>
     </div>
     <div class="roadmap-card">
       <div class="rm-num">3</div>
       <div class="rm-body">
-        <div class="rm-title">Kundli mein kya dosh hai?</div>
-        <div class="rm-sub">Aur use theek karne ke practical upaay</div>
+        <div class="rm-title">Kaunsa dosh career rok raha hai?</div>
       </div>
     </div>
     <div class="roadmap-card">
       <div class="rm-num">4</div>
       <div class="rm-body">
-        <div class="rm-title">Job karun ya Business?</div>
-        <div class="rm-sub">Aapki kundli kis field mein sabse zyada growth deti hai</div>
+        <div class="rm-title">Job karun ya Business — kya sahi hai?</div>
       </div>
     </div>
 
@@ -458,32 +443,32 @@ body{font-family:var(--fhi);background:var(--ink);color:var(--white);-webkit-fon
 <section class="gets">
   <div class="container">
     <h2 class="gets-title">Report mein kya-kya milega?</h2>
-    <p class="gets-sub">35–40 page ki detailed PDF — aapki native language mein</p>
+    <p class="gets-sub">35–40 page PDF · Aapki language mein · 24-48 hrs delivery</p>
 
     <div class="gets-grid">
       <div class="get-item">
         <span class="get-em">📅</span>
-        <div class="get-text">Mahadasha &amp; Antardasha Roadmap<span>Agle 7 saal ka month-wise plan</span></div>
+        <div class="get-text">Mahadasha Roadmap</div>
       </div>
       <div class="get-item">
         <span class="get-em">💼</span>
-        <div class="get-text">Career Timing Analysis<span>Job, promotion aur growth windows</span></div>
+        <div class="get-text">Career Timing</div>
       </div>
       <div class="get-item">
         <span class="get-em">💰</span>
-        <div class="get-text">Dhan Yog &amp; Wealth Blockage<span>Paisa kab aayega, kya rok raha hai</span></div>
+        <div class="get-text">Dhan Yog</div>
       </div>
       <div class="get-item">
         <span class="get-em">🛡️</span>
-        <div class="get-text">Dosha &amp; Practical Remedies<span>Simple upaay — koi expensive ritual nahi</span></div>
+        <div class="get-text">Dosha + Remedies</div>
       </div>
       <div class="get-item">
         <span class="get-em">🌟</span>
-        <div class="get-text">Hidden Raj Yog<span>Aapki kundli mein kya strong hai</span></div>
+        <div class="get-text">Hidden Raj Yog</div>
       </div>
       <div class="get-item">
         <span class="get-em">🗣️</span>
-        <div class="get-text">Hindi ya English — aapki language mein<span>WhatsApp + Email delivery</span></div>
+        <div class="get-text">Hindi / English</div>
       </div>
     </div>
   </div>
@@ -498,7 +483,7 @@ body{font-family:var(--fhi);background:var(--ink);color:var(--white);-webkit-fon
       <div class="rev-card">
         <div class="rev-stars">★★★★★</div>
         <div class="rev-outcome">💼 Job Got</div>
-        <p class="rev-text">"Dasha ne exact bataya ki March-April mera strong period hai. Usi time apply kiya — package double ho gaya. Pehle itna confusion tha, ab clarity hai."</p>
+        <p class="rev-text">"Exact timing mili — usi time apply kiya, package double ho gaya."</p>
         <div class="rev-author">
           <div class="rev-avatar">R</div>
           <div><div class="rev-name">Rahul Mehta</div><div class="rev-loc">Bangalore · Software Engineer</div></div>
@@ -507,8 +492,8 @@ body{font-family:var(--fhi);background:var(--ink);color:var(--white);-webkit-fon
 
       <div class="rev-card">
         <div class="rev-stars">★★★★★</div>
-        <div class="rev-outcome">🏢 Business Growth</div>
-        <p class="rev-text">"Mujhe lagta tha main hi galat hun. Kundli ne bataya ki Saturn transit ki wajah se ruka hua tha. Remedy ki — 3 mahine mein business double."</p>
+        <div class="rev-outcome">🏢 Business 2x</div>
+        <p class="rev-text">"Saturn transit tha wajah. Remedy ki — 3 mahine mein business double."</p>
         <div class="rev-author">
           <div class="rev-avatar">V</div>
           <div><div class="rev-name">Vikram Joshi</div><div class="rev-loc">Ahmedabad · Business Owner</div></div>
@@ -518,7 +503,7 @@ body{font-family:var(--fhi);background:var(--ink);color:var(--white);-webkit-fon
       <div class="rev-card">
         <div class="rev-stars">★★★★★</div>
         <div class="rev-outcome">🎯 Promotion</div>
-        <p class="rev-text">"3 saal se promotion nahi mila tha. Astrologer ne exact timing di — us mahine apply kiya, first attempt mein ho gaya."</p>
+        <p class="rev-text">"3 saal baad — sahi timing pe apply kiya, first attempt mein ho gaya."</p>
         <div class="rev-author">
           <div class="rev-avatar">P</div>
           <div><div class="rev-name">Priya Sharma</div><div class="rev-loc">Delhi · IT Manager</div></div>
@@ -534,7 +519,7 @@ body{font-family:var(--fhi);background:var(--ink);color:var(--white);-webkit-fon
   <div class="container">
     <div class="final-badge">⚡ Sirf DOB chahiye</div>
     <h2 class="final-h2">Bas apna <span>Date of Birth</span> dijiye —<br>24-48 ghante mein aapki zindagi<br>aapke haathon mein hogi</h2>
-    <p class="final-sub">Der na karein. Ye aapki zindagi ka sawaal hai.</p>
+    <p class="final-sub">Der na karo. Ye aapki zindagi ka sawaal hai.</p>
 
     <div class="price-wrap">
       <span class="price-now">₹399</span>
@@ -548,7 +533,7 @@ body{font-family:var(--fhi);background:var(--ink);color:var(--white);-webkit-fon
     <div class="btn-lock">🔒 Secure checkout · One-time payment · No subscription</div>
 
     <div class="urgency-strip">
-      ⚠️ <strong>Aaj ke liye sirf kuch hi slots bache hain.</strong> Har kundli manually review hoti hai — isliye ek din mein limited orders hi liye jaate hain.
+      ⚠️ <strong>Aaj ke limited slots bache hain</strong> — manually review hoti hai har kundli
     </div>
   </div>
 </section>
