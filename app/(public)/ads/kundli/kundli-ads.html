@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>100% मेहनत, 10% रिजल्ट? — अपनी करियर कुंडली बनवाएं | VedGuide</title>
+<title>100% Mehnat, 10% Result? — Career Kundli Banwao | VedGuide</title>
 <!-- GTM -->
 <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-WJHMJ92W');</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -288,9 +288,22 @@ body{font-family:var(--fhi);background:var(--ink);color:var(--white);-webkit-fon
 .pp-city{font-size:.66rem;color:#6b6480;background:#f5f0ff;padding:2px 6px;border-radius:20px;font-weight:500;font-family:var(--fh);}
 .pp-time{font-size:.63rem;color:#9a94ad;font-family:var(--fh);}
 
+/* ── BOOK IMAGE ── */
+.book-img-wrap{
+  display:flex;justify-content:center;align-items:flex-end;
+  margin:24px auto 28px;max-width:260px;
+}
+.book-img-wrap img{
+  width:100%;height:auto;
+  filter:drop-shadow(0 -12px 40px rgba(201,168,76,.32)) drop-shadow(0 16px 36px rgba(0,0,0,.55));
+  animation:floatY 5s ease-in-out infinite;
+}
+@keyframes floatY{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+
 @media(max-width:400px){
   .hook-h1{font-size:1.55rem;}
   .purchase-popup{max-width:220px;min-width:195px;right:10px;}
+  .book-img-wrap{max-width:210px;}
 }
 </style>
 </head>
@@ -305,7 +318,7 @@ body{font-family:var(--fhi);background:var(--ink);color:var(--white);-webkit-fon
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2.2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
         <span>VedGuide</span>
       </div>
-      <div class="nav-pill">⭐ 4.9/5 · 7,842+ Reports</div>
+      <div class="nav-pill">⭐ 4.9/5 · 7,842+ Reports Delivered</div>
     </div>
   </div>
 </nav>
@@ -315,41 +328,47 @@ body{font-family:var(--fhi);background:var(--ink);color:var(--white);-webkit-fon
   <div class="container">
     <div class="live-badge">
       <span class="live-dot"></span>
-      <span id="liveCount">247</span> लोग अभी देख रहे हैं
+      <span id="liveCount">247</span> log abhi dekh rahe hain
     </div>
 
     <div class="hook-eyebrow">🔮 Vedic Career Kundli</div>
 
     <h1 class="hook-h1">
-      आप <span class="hl">100% मेहनत</span> कर रहे हैं<br>
-      पर रिजल्ट सिर्फ <span class="hl">10%</span> ही मिल रहा है
+      Aap <span class="hl">100% Mehnat</span> kar rahe ho<br>
+      par Result sirf <span class="hl">10%</span> hi mil raha hai
     </h1>
-    <p class="hook-sub">अगर आप भी नीचे दी गई किसी चीज़ से गुज़र रहे हैं — तो आपकी ग्रह दशा इसके पीछे है।</p>
+    <p class="hook-sub">Agar aap bhi in situations se guzar rahe ho — toh aapki grah dasha iske peeche hai.</p>
 
     <div class="pain-list">
       <div class="pain-item">
         <span class="pain-icon">😤</span>
-        <span class="pain-text">हर बार सिलेक्शन होते-होते रह जाता है — <em>आखिरी मोड़ पर रुक जाता है</em></span>
+        <span class="pain-text">Har baar selection hote-hote reh jaata hai — <em>aakhri mod par ruk jaata hai</em></span>
       </div>
       <div class="pain-item">
         <span class="pain-icon">❌</span>
-        <span class="pain-text">किसी <em>एक चीज़ के कारण</em> बार-बार फेल हो जाते हो, समझ नहीं आता क्यों</span>
+        <span class="pain-text">Kisi <em>ek cheez ke karan</em> baar-baar fail ho jaate ho, samajh nahi aata kyun</span>
       </div>
       <div class="pain-item">
         <span class="pain-icon">🌀</span>
-        <span class="pain-text">करियर में <em>कन्फ़्यूज़न ही कन्फ़्यूज़न</em> — जॉब करूँ, बिज़नेस करूँ, क्या करूँ?</span>
+        <span class="pain-text">Career mein <em>confusion hi confusion</em> — job karun, business karun, kya karun?</span>
       </div>
       <div class="pain-item">
         <span class="pain-icon">💸</span>
-        <span class="pain-text">पैसा आता है तो <em>कहीं न कहीं लग जाता है</em> — बचत होती ही नहीं</span>
+        <span class="pain-text">Paisa aata hai toh <em>kahin na kahin lag jaata hai</em> — savings hoti hi nahi</span>
       </div>
     </div>
 
+    <!-- BOOK IMAGE -->
+    <div class="book-img-wrap">
+      <img src="/assets/premium_kundli.webp" alt="Personalized Career Kundli Report"
+        fetchpriority="high" width="500" height="500" decoding="async" loading="eager">
+    </div>
+
     <a href="/kundli/new-checkout" class="btn-main cta-btn" data-section="hero" data-cta="career-report" onclick="trackCta('hero')">
-      🔮 अभी अपनी करियर कुंडली बनवाएं — ₹399
+      🔮 Abhi Apni Career Kundli Banwao — ₹399
     </a>
     <div class="btn-lock">
-      🔒 Secure Payment · No Spam · 24-48 घंटे में PDF
+      🔒 Secure Payment · No Spam · 24-48 hrs mein PDF
     </div>
   </div>
 </section>
@@ -368,26 +387,26 @@ body{font-family:var(--fhi);background:var(--ink);color:var(--white);-webkit-fon
 <!-- WHY SECTION -->
 <section class="why">
   <div class="container">
-    <div class="sec-badge">📖 वजह क्या है?</div>
+    <div class="sec-badge">📖 Wajah kya hai?</div>
 
     <div class="why-card">
       <span class="why-icon">🪐</span>
-      <div class="why-title">जब शनि देव आपके 10th हाउस में बैठे हों...</div>
+      <div class="why-title">Jab Shani Dev aapke 10th House mein baithe hon...</div>
       <div class="why-body">
-        आप जितनी भी मेहनत करें — <strong>रिजल्ट मिलेगा ही नहीं।</strong> ये सुनने में कड़वा लगता है, लेकिन यही सच है। शनि की साढ़ेसाती या ढैया के दौरान करियर रुक जाता है।
+        Aap jitni bhi mehnat karo — <strong>result milega hi nahi.</strong> Yeh sunne mein kadwa lagta hai, lekin yahi sach hai. Shani ki Saadesaati ya Dhaiya ke dauran career ruk jaata hai.
       </div>
     </div>
 
     <div class="why-card">
       <span class="why-icon">⏳</span>
-      <div class="why-title">ग्रहों की दशा खराब है तो...</div>
+      <div class="why-title">Graho ki dasha kharab hai toh...</div>
       <div class="why-body">
-        हर निर्णय गलत लगता है। <strong>समय का अंदाज़ा नहीं होता</strong> — कब opportunity आएगी, कब नहीं। और इसी confusion में आप wrong decisions लेते हो।
+        Har decision galat lagta hai. <strong>Timing ka andaza nahi hota</strong> — kab opportunity aayegi, kab nahi. Aur isi confusion mein aap wrong decisions lete ho.
       </div>
     </div>
 
     <div class="shani-callout">
-      <p>इसका मतलब ये नहीं कि आप गलत हो —<br>इसका मतलब है कि <strong>आपको सही समय और सही दिशा का पता नहीं है।</strong></p>
+      <p>Iska matlab ye nahi ki aap galat ho —<br>iska matlab hai ki <strong>aapko sahi time aur sahi direction ka pata nahi hai.</strong></p>
     </div>
   </div>
 </section>
@@ -395,42 +414,42 @@ body{font-family:var(--fhi);background:var(--ink);color:var(--white);-webkit-fon
 <!-- SOLUTION SECTION -->
 <section class="solution">
   <div class="container">
-    <div class="solution-badge">✅ सोल्यूशन</div>
-    <h2 class="solution-h2">पर्सनलाइज्ड करियर कुंडली —<br><span>आपकी ज़िंदगी का रोडमैप</span></h2>
-    <p class="solution-sub">बिना रास्ता जाने आप मंज़िल तक पहुँच ही नहीं सकते। ये कुंडली हर मोड़ पे आपका साथ देगी।</p>
+    <div class="solution-badge">✅ Solution</div>
+    <h2 class="solution-h2">Personalized Career Kundli —<br><span>Aapki Zindagi ka Roadmap</span></h2>
+    <p class="solution-sub">Bina raasta jaane aap manzil tak pahunch hi nahi sakte. Ye kundli har mod pe aapka saath degi.</p>
 
     <div class="roadmap-card">
       <div class="rm-num">1</div>
       <div class="rm-body">
-        <div class="rm-title">आपका जॉब कब लगेगा?</div>
-        <div class="rm-sub">Exact timing — कौन सा महीना, कौन सी dasha</div>
+        <div class="rm-title">Aapka job kab lagega?</div>
+        <div class="rm-sub">Exact timing — kaun sa mahina, kaun si dasha</div>
       </div>
     </div>
     <div class="roadmap-card">
       <div class="rm-num">2</div>
       <div class="rm-body">
-        <div class="rm-title">राज योग कब आएगा?</div>
-        <div class="rm-sub">Career peak कब होगा — promotion, growth सब clear</div>
+        <div class="rm-title">Raj Yog kab aayega?</div>
+        <div class="rm-sub">Career peak kab hoga — promotion, growth sab clear</div>
       </div>
     </div>
     <div class="roadmap-card">
       <div class="rm-num">3</div>
       <div class="rm-body">
-        <div class="rm-title">कुंडली में क्या दोष है?</div>
-        <div class="rm-sub">और उसे ठीक करने के practical उपाय</div>
+        <div class="rm-title">Kundli mein kya dosh hai?</div>
+        <div class="rm-sub">Aur use theek karne ke practical upaay</div>
       </div>
     </div>
     <div class="roadmap-card">
       <div class="rm-num">4</div>
       <div class="rm-body">
-        <div class="rm-title">जॉब करें या बिज़नेस?</div>
-        <div class="rm-sub">आपकी kundli किस field में सबसे ज़्यादा growth देती है</div>
+        <div class="rm-title">Job karun ya Business?</div>
+        <div class="rm-sub">Aapki kundli kis field mein sabse zyada growth deti hai</div>
       </div>
     </div>
 
     <br>
     <a href="/kundli/new-checkout" class="btn-main cta-btn" data-section="features" data-cta="career-report" onclick="trackCta('features')" style="color:var(--ink);">
-      🔮 मुझे यह रोडमैप चाहिए — ₹399
+      🔮 Mujhe Ye Roadmap Chahiye — ₹399
     </a>
   </div>
 </section>
@@ -438,33 +457,33 @@ body{font-family:var(--fhi);background:var(--ink);color:var(--white);-webkit-fon
 <!-- WHAT YOU GET -->
 <section class="gets">
   <div class="container">
-    <h2 class="gets-title">रिपोर्ट में क्या-क्या मिलेगा?</h2>
-    <p class="gets-sub">35–40 page की detailed PDF — आपकी native language में</p>
+    <h2 class="gets-title">Report mein kya-kya milega?</h2>
+    <p class="gets-sub">35–40 page ki detailed PDF — aapki native language mein</p>
 
     <div class="gets-grid">
       <div class="get-item">
         <span class="get-em">📅</span>
-        <div class="get-text">Mahadasha &amp; Antardasha Roadmap<span>अगले 7 साल का month-wise plan</span></div>
+        <div class="get-text">Mahadasha &amp; Antardasha Roadmap<span>Agle 7 saal ka month-wise plan</span></div>
       </div>
       <div class="get-item">
         <span class="get-em">💼</span>
-        <div class="get-text">Career Timing Analysis<span>जॉब, promotion, और growth windows</span></div>
+        <div class="get-text">Career Timing Analysis<span>Job, promotion aur growth windows</span></div>
       </div>
       <div class="get-item">
         <span class="get-em">💰</span>
-        <div class="get-text">Dhan Yog &amp; Wealth Blockage<span>पैसा कब आएगा, क्या रोक रहा है</span></div>
+        <div class="get-text">Dhan Yog &amp; Wealth Blockage<span>Paisa kab aayega, kya rok raha hai</span></div>
       </div>
       <div class="get-item">
         <span class="get-em">🛡️</span>
-        <div class="get-text">Dosha &amp; Practical Remedies<span>Simple उपाय — कोई expensive ritual नहीं</span></div>
+        <div class="get-text">Dosha &amp; Practical Remedies<span>Simple upaay — koi expensive ritual nahi</span></div>
       </div>
       <div class="get-item">
         <span class="get-em">🌟</span>
-        <div class="get-text">Hidden Raj Yog<span>आपकी kundli में क्या strong है</span></div>
+        <div class="get-text">Hidden Raj Yog<span>Aapki kundli mein kya strong hai</span></div>
       </div>
       <div class="get-item">
         <span class="get-em">🗣️</span>
-        <div class="get-text">Hindi या English — आपकी भाषा में<span>WhatsApp + Email delivery</span></div>
+        <div class="get-text">Hindi ya English — aapki language mein<span>WhatsApp + Email delivery</span></div>
       </div>
     </div>
   </div>
@@ -473,7 +492,7 @@ body{font-family:var(--fhi);background:var(--ink);color:var(--white);-webkit-fon
 <!-- SOCIAL PROOF -->
 <section class="proof">
   <div class="container">
-    <h2 class="proof-title">जो लोग बनवा चुके हैं, उनका कहना है —</h2>
+    <h2 class="proof-title">Jo log banwa chuke hain, unka kehna hai —</h2>
     <div class="reviews">
 
       <div class="rev-card">
@@ -513,9 +532,9 @@ body{font-family:var(--fhi);background:var(--ink);color:var(--white);-webkit-fon
 <!-- FINAL CTA -->
 <section class="final">
   <div class="container">
-    <div class="final-badge">⚡ सिर्फ DOB चाहिए</div>
-    <h2 class="final-h2">बस अपना <span>Date of Birth</span> दीजिए —<br>24-48 घंटों में आपकी ज़िंदगी<br>आपके हाथों में होगी</h2>
-    <p class="final-sub">देर ना करें। ये आपकी ज़िंदगी का सवाल है।</p>
+    <div class="final-badge">⚡ Sirf DOB chahiye</div>
+    <h2 class="final-h2">Bas apna <span>Date of Birth</span> dijiye —<br>24-48 ghante mein aapki zindagi<br>aapke haathon mein hogi</h2>
+    <p class="final-sub">Der na karein. Ye aapki zindagi ka sawaal hai.</p>
 
     <div class="price-wrap">
       <span class="price-now">₹399</span>
@@ -524,12 +543,12 @@ body{font-family:var(--fhi);background:var(--ink);color:var(--white);-webkit-fon
     </div>
 
     <a href="/kundli/new-checkout" class="btn-main cta-btn" data-section="pricing" data-cta="career-report" onclick="trackCta('pricing')">
-      🔮 अभी Order करें — ₹399
+      🔮 Abhi Order Karo — ₹399
     </a>
     <div class="btn-lock">🔒 Secure checkout · One-time payment · No subscription</div>
 
     <div class="urgency-strip">
-      ⚠️ <strong>आज के लिए सिर्फ कुछ ही slots बचे हैं।</strong> हर kundli manually review होती है — इसलिए एक दिन में limited orders ही लिए जाते हैं।
+      ⚠️ <strong>Aaj ke liye sirf kuch hi slots bache hain.</strong> Har kundli manually review hoti hai — isliye ek din mein limited orders hi liye jaate hain.
     </div>
   </div>
 </section>
@@ -554,9 +573,9 @@ body{font-family:var(--fhi);background:var(--ink);color:var(--white);-webkit-fon
 
 <div class="sticky-bar">
   <div class="sticky-inner">
-    <span class="sticky-text">⚠️ आज का Career window — सिर्फ ₹399</span>
+    <span class="sticky-text">⚠️ Aaj ka Career window — sirf ₹399</span>
     <a href="/kundli/new-checkout" class="sticky-btn cta-btn" data-section="sticky" data-cta="career-report" onclick="trackCta('sticky')">
-      🔮 अभी Order करें — ₹399
+      🔮 Abhi Order Karo — ₹399
     </a>
   </div>
 </div>
