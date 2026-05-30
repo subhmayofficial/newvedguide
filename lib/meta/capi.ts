@@ -32,6 +32,23 @@ export function getMetaCapiConfig(): MetaCapiConfig | null {
   };
 }
 
+/** Paid kundli checkouts that should fire Meta CAPI Purchase. */
+export function isMetaCapiKundliPurchaseOrder(
+  source: string | null | undefined,
+  entryPath: string | null | undefined
+): boolean {
+  if (isKundliNewCheckoutOrder(source, entryPath)) return true;
+
+  const page = (source ?? "").trim().toLowerCase();
+  const entry = (entryPath ?? "").trim().toLowerCase();
+  return (
+    page === "/ads/kundli/new-checkout" ||
+    page === "/ads/kundli/checkout" ||
+    entry === "ads_kundli" ||
+    page.startsWith("/ads/kundli/new-checkout")
+  );
+}
+
 /** Orders from /kundli/new-checkout (kundli_direct_lp funnel). */
 export function isKundliNewCheckoutOrder(
   source: string | null | undefined,

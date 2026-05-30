@@ -1,6 +1,8 @@
 /** Paid-ads funnel URLs — mirror astro-path under /ads for attribution separation */
 
 export const ADS_FUNNEL = {
+  kundli: "/ads/kundli",
+  kundliNewCheckout: "/ads/kundli/new-checkout",
   tools: {
     kundalDhatu: "/ads/tools/kundal-dhatu",
   },

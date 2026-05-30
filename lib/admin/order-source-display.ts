@@ -24,7 +24,13 @@ export function isAdsOrder(
   );
 }
 
-export type OrderSourceUrlFilter = "" | "ads" | "astro-path" | "kundli-lp" | "checkout-kundli";
+export type OrderSourceUrlFilter =
+  | ""
+  | "ads"
+  | "ads-kundli"
+  | "astro-path"
+  | "kundli-lp"
+  | "checkout-kundli";
 
 export function applyOrderSourceUrlFilter<T extends { or: (filter: string) => T }>(
   q: T,
@@ -33,6 +39,10 @@ export function applyOrderSourceUrlFilter<T extends { or: (filter: string) => T 
   switch (filter) {
     case "ads":
       return q.or("source.ilike./ads%,entry_path.eq.ads");
+    case "ads-kundli":
+      return q.or(
+        "source.eq./ads/kundli/new-checkout,source.eq./ads/kundli/checkout,source.eq./ads/kundli,entry_path.eq.ads_kundli,source.ilike.%ads_kundli%"
+      );
     case "astro-path":
       return q.or("source.ilike./astro-path%,entry_path.eq.funnel2");
     case "kundli-lp":

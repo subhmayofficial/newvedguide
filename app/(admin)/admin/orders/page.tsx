@@ -403,6 +403,7 @@ export default async function AdminOrdersPage({
             <FilterSelect name="source_url" defaultValue={sp.source_url ?? ""}>
               <option value="">All</option>
               <option value="ads">Ads funnel (/ads…)</option>
+              <option value="ads-kundli">Ads kundli (/ads/kundli…)</option>
               <option value="astro-path">Astro path (/astro-path…)</option>
               <option value="kundli-lp">Kundli LP (/kundli/new-checkout)</option>
               <option value="checkout-kundli">Standard checkout (/checkout/kundli)</option>

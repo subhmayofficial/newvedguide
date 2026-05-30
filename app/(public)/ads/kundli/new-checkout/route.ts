@@ -9,7 +9,7 @@ const HTML_PATH = path.join(
   "(public)",
   "ads",
   "kundli",
-  "checkout",
+  "new-checkout",
   "checkout.html"
 );
 

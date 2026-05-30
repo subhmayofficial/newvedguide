@@ -2,7 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/types/database";
 import {
   getMetaCapiConfig,
-  isKundliNewCheckoutOrder,
+  isMetaCapiKundliPurchaseOrder,
   sendMetaPurchaseEvent,
 } from "@/lib/meta/capi";
 import { PRODUCT_SLUGS } from "@/lib/constants/commerce";
@@ -38,7 +38,7 @@ export async function triggerMetaKundliLpPurchase(
 
   if (!order) return;
   if (order.product_slug !== PRODUCT_SLUGS.PAID_KUNDLI) return;
-  if (!isKundliNewCheckoutOrder(order.source, order.entry_path)) return;
+  if (!isMetaCapiKundliPurchaseOrder(order.source, order.entry_path)) return;
 
   const customer = order.customers as { phone?: string | null; email?: string | null } | null;
   const sourcePath = order.source?.trim() || "/kundli/new-checkout";

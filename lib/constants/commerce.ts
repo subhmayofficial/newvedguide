@@ -102,6 +102,7 @@ export const PRODUCT_SLUGS = {
 export function mapSourceToEntryPath(source: string | null | undefined): string {
   if (!source) return ENTRY_PATH.KFP;
   const s = source.toLowerCase();
+  if (s.includes("ads_kundli")) return "ads_kundli";
   if (s.startsWith("ads_") || s.includes("/ads/")) return ENTRY_PATH.ADS;
   if (s.includes("funnel2") || s.includes("kfp_v2")) return "funnel2";
   if (s === "kfp" || s.includes("kfp")) return ENTRY_PATH.KFP;

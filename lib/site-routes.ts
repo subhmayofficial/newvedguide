@@ -36,6 +36,8 @@ export const PUBLIC_SITEMAP_ROUTES: SiteRouteEntry[] = [
   },
   { path: "/astro-path/tools/kundal-dhatu", changeFrequency: "weekly", priority: 0.7 },
   { path: "/ads/tools/kundal-dhatu", changeFrequency: "weekly", priority: 0.7 },
+  { path: "/ads/kundli", changeFrequency: "weekly", priority: 0.85 },
+  { path: "/ads/kundli/new-checkout", changeFrequency: "weekly", priority: 0.8 },
   { path: "/ads/free-kundli", changeFrequency: "weekly", priority: 0.85 },
   { path: "/ads/free-kundli/result", changeFrequency: "weekly", priority: 0.7 },
   { path: "/ads/checkout/kundli", changeFrequency: "weekly", priority: 0.8 },
