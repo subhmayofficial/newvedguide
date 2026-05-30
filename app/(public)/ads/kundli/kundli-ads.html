@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>100% मेहनत, 10% रिजल्ट? — अपनी करियर कुंडली बनवाएं | VedGuide</title>
+<!-- GTM -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-WJHMJ92W');</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Noto+Sans+Devanagari:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --ink:#0c0a28;--ink2:#141138;--ink3:#1d1950;
+  --gold:#c9a84c;--gold2:#f5c440;--saffron:#f5a028;--saffron2:#ffba52;
+  --cream:#fdf8ef;--cream2:#f5eed9;--white:#ffffff;
+  --green:#3db87a;--red:#e55a5a;--orange:#f5a028;
+  --fh:'Outfit',sans-serif;--fhi:'Noto Sans Devanagari','Outfit',sans-serif;
+  --r8:8px;--r12:12px;--r16:16px;--r20:20px;--rF:9999px;
+  --cont:min(100%,640px);
+}
+html{scroll-behavior:smooth;}
+body{font-family:var(--fhi);background:var(--ink);color:var(--white);-webkit-font-smoothing:antialiased;overflow-x:hidden;}
+.container{width:100%;max-width:var(--cont);margin:0 auto;padding:0 18px;}
+
+/* ── NAV ── */
+.nav{
+  position:sticky;top:0;z-index:200;
+  background:rgba(12,10,40,.96);backdrop-filter:blur(14px);
+  border-bottom:1px solid rgba(201,168,76,.18);padding:11px 0;
+}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;}
+.nav-logo{font-family:var(--fh);font-weight:900;font-size:1.08rem;display:flex;align-items:center;gap:6px;color:var(--white);letter-spacing:-.01em;}
+.nav-logo span{background:linear-gradient(135deg,var(--gold2),var(--saffron2));-webkit-background-clip:text;background-clip:text;color:transparent;}
+.nav-pill{font-size:.7rem;font-weight:700;letter-spacing:.04em;background:rgba(245,196,64,.12);border:1px solid rgba(245,196,64,.28);color:var(--gold2);padding:4px 10px;border-radius:var(--rF);}
+
+/* ── LIVE BADGE ── */
+.live-badge{
+  display:inline-flex;align-items:center;gap:7px;
+  background:rgba(61,184,122,.10);border:1px solid rgba(61,184,122,.26);
+  border-radius:var(--rF);padding:5px 14px;
+  font-size:.76rem;font-weight:600;color:var(--green);margin-bottom:20px;
+  font-family:var(--fh);
+}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:ldot 1.9s ease-in-out infinite;flex-shrink:0;}
+@keyframes ldot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.75)}}
+
+/* ── HOOK SECTION ── */
+.hook{
+  background:var(--ink);
+  background-image:radial-gradient(ellipse at 10% 0%,rgba(201,168,76,.22) 0%,transparent 44%),
+    radial-gradient(ellipse at 90% 15%,rgba(245,160,40,.12) 0%,transparent 40%);
+  padding:36px 0 40px;text-align:center;
+}
+.hook-eyebrow{
+  display:inline-flex;align-items:center;gap:6px;
+  font-family:var(--fh);font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--gold);border:1px solid rgba(201,168,76,.28);background:rgba(201,168,76,.08);
+  padding:5px 14px;border-radius:var(--rF);margin-bottom:20px;
+}
+.hook-h1{
+  font-family:var(--fhi);font-size:clamp(1.7rem,5.5vw,2.6rem);
+  font-weight:800;line-height:1.18;letter-spacing:-.01em;
+  color:var(--white);margin-bottom:14px;
+}
+.hook-h1 .hl{
+  background:linear-gradient(90deg,#ffd060,var(--saffron2));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  display:inline;
+}
+.hook-sub{font-size:1rem;color:rgba(255,255,255,.62);line-height:1.65;max-width:520px;margin:0 auto 28px;}
+
+/* Pain cards */
+.pain-list{display:flex;flex-direction:column;gap:10px;margin-bottom:32px;text-align:left;}
+.pain-item{
+  display:flex;align-items:flex-start;gap:12px;
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);
+  border-radius:var(--r12);padding:14px 16px;
+}
+.pain-icon{font-size:1.3rem;flex-shrink:0;line-height:1;margin-top:1px;}
+.pain-text{font-size:.9rem;font-weight:600;color:rgba(255,255,255,.85);line-height:1.45;}
+.pain-text em{color:var(--saffron2);font-style:normal;font-weight:700;}
+
+/* ── WHY SECTION ── */
+.why{background:linear-gradient(180deg,var(--ink) 0%,var(--ink2) 100%);padding:40px 0;text-align:center;}
+.sec-badge{
+  display:inline-flex;align-items:center;gap:5px;
+  font-family:var(--fh);font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:rgba(255,255,255,.4);margin-bottom:14px;
+}
+.why-card{
+  background:rgba(229,90,90,.06);border:1px solid rgba(229,90,90,.2);
+  border-radius:var(--r16);padding:24px 20px;margin-bottom:20px;text-align:left;
+  position:relative;overflow:hidden;
+}
+.why-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,rgba(229,90,90,.6),transparent);}
+.why-icon{font-size:2.2rem;margin-bottom:12px;display:block;}
+.why-title{font-family:var(--fhi);font-size:1.1rem;font-weight:800;color:var(--white);margin-bottom:8px;line-height:1.35;}
+.why-body{font-size:.88rem;color:rgba(255,255,255,.65);line-height:1.65;}
+.why-body strong{color:rgba(255,255,255,.9);font-weight:700;}
+
+.shani-callout{
+  background:linear-gradient(135deg,rgba(201,168,76,.12),rgba(201,168,76,.04));
+  border:1px solid rgba(201,168,76,.30);
+  border-radius:var(--r16);padding:20px 18px;margin-top:16px;text-align:center;
+}
+.shani-callout p{font-size:.9rem;color:rgba(255,255,255,.75);line-height:1.65;}
+.shani-callout strong{color:var(--gold2);font-weight:700;}
+
+/* ── SOLUTION SECTION ── */
+.solution{background:var(--cream);padding:40px 0;text-align:center;}
+.solution-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  font-family:var(--fh);font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--saffron);background:rgba(245,160,40,.1);border:1px solid rgba(245,160,40,.25);
+  padding:5px 12px;border-radius:var(--rF);margin-bottom:16px;
+}
+.solution-h2{font-family:var(--fhi);font-size:clamp(1.4rem,4.5vw,2rem);font-weight:800;color:var(--ink);line-height:1.25;margin-bottom:10px;}
+.solution-h2 span{color:var(--saffron);}
+.solution-sub{font-size:.9rem;color:rgba(12,10,40,.55);line-height:1.65;margin-bottom:28px;max-width:480px;margin-left:auto;margin-right:auto;}
+
+.roadmap-card{
+  background:var(--white);border:1.5px solid rgba(12,10,40,.09);
+  border-radius:var(--r16);padding:20px 18px;margin-bottom:12px;
+  display:flex;align-items:flex-start;gap:14px;text-align:left;
+  box-shadow:0 2px 12px rgba(12,10,40,.06);
+}
+.rm-num{
+  width:34px;height:34px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,var(--saffron),var(--gold));
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--fh);font-size:.85rem;font-weight:900;color:var(--ink);
+  box-shadow:0 2px 8px rgba(245,160,40,.3);
+}
+.rm-body{}
+.rm-title{font-family:var(--fhi);font-size:.9rem;font-weight:800;color:var(--ink);margin-bottom:3px;line-height:1.3;}
+.rm-sub{font-size:.78rem;color:rgba(12,10,40,.5);line-height:1.5;}
+
+/* ── WHAT YOU GET ── */
+.gets{background:var(--ink2);padding:40px 0;text-align:center;}
+.gets-title{font-family:var(--fhi);font-size:clamp(1.3rem,4vw,1.8rem);font-weight:800;color:var(--white);margin-bottom:6px;}
+.gets-sub{font-size:.88rem;color:rgba(255,255,255,.45);margin-bottom:24px;}
+.gets-grid{display:flex;flex-direction:column;gap:10px;}
+.get-item{
+  display:flex;align-items:center;gap:12px;
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);
+  border-radius:var(--r12);padding:14px 16px;text-align:left;
+}
+.get-em{font-size:1.4rem;flex-shrink:0;line-height:1;}
+.get-text{font-size:.88rem;font-weight:600;color:rgba(255,255,255,.82);line-height:1.4;}
+.get-text span{display:block;font-size:.75rem;font-weight:400;color:rgba(255,255,255,.38);margin-top:2px;}
+
+/* ── SOCIAL PROOF ── */
+.proof{background:var(--cream2);padding:36px 0;text-align:center;}
+.proof-title{font-family:var(--fhi);font-size:1.2rem;font-weight:800;color:var(--ink);margin-bottom:20px;}
+.reviews{display:flex;flex-direction:column;gap:12px;}
+.rev-card{
+  background:var(--white);border:1px solid rgba(12,10,40,.08);
+  border-radius:var(--r12);padding:16px;text-align:left;
+  box-shadow:0 2px 8px rgba(12,10,40,.05);
+}
+.rev-stars{color:#f5a028;font-size:.85rem;margin-bottom:6px;letter-spacing:1px;}
+.rev-outcome{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:.65rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  color:#1a6a3a;background:#e8f9ef;padding:2px 7px;border-radius:var(--rF);margin-bottom:8px;
+}
+.rev-text{font-size:.83rem;color:rgba(12,10,40,.75);line-height:1.55;font-weight:500;margin-bottom:10px;}
+.rev-author{display:flex;align-items:center;gap:8px;}
+.rev-avatar{width:30px;height:30px;border-radius:50%;background:var(--ink);display:flex;align-items:center;justify-content:center;font-family:var(--fh);font-size:.8rem;font-weight:800;color:var(--gold);flex-shrink:0;}
+.rev-name{font-size:.78rem;font-weight:700;color:var(--ink);}
+.rev-loc{font-size:.7rem;color:rgba(12,10,40,.4);}
+
+/* ── FINAL CTA ── */
+.final{
+  background:var(--ink);
+  background-image:radial-gradient(ellipse at 50% 0%,rgba(201,168,76,.18) 0%,transparent 55%);
+  padding:44px 0 120px;text-align:center;
+}
+.final-badge{
+  display:inline-flex;align-items:center;gap:5px;
+  font-family:var(--fh);font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--green);background:rgba(61,184,122,.1);border:1px solid rgba(61,184,122,.25);
+  padding:5px 12px;border-radius:var(--rF);margin-bottom:16px;
+}
+.final-h2{font-family:var(--fhi);font-size:clamp(1.5rem,5vw,2.2rem);font-weight:800;color:var(--white);line-height:1.22;margin-bottom:10px;}
+.final-h2 span{background:linear-gradient(90deg,var(--gold2),var(--saffron2));-webkit-background-clip:text;background-clip:text;color:transparent;}
+.final-sub{font-size:.9rem;color:rgba(255,255,255,.55);margin-bottom:28px;line-height:1.6;}
+.price-wrap{display:flex;align-items:baseline;justify-content:center;gap:10px;margin-bottom:22px;}
+.price-now{font-family:var(--fh);font-size:3rem;font-weight:900;color:var(--white);line-height:1;}
+.price-mrp{font-size:1rem;text-decoration:line-through;color:rgba(255,255,255,.3);}
+.price-off{font-size:.75rem;font-weight:800;background:rgba(61,184,122,.15);color:var(--green);border:1px solid rgba(61,184,122,.3);padding:3px 9px;border-radius:var(--rF);}
+
+/* ── BUTTON ── */
+.btn-main{
+  position:relative;overflow:hidden;
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  width:100%;max-width:480px;
+  background:linear-gradient(135deg,#ffc86a 0%,var(--saffron) 55%,#e8891e 100%);
+  border:none;border-radius:var(--r16);
+  color:var(--ink);font-family:var(--fhi);font-size:1.1rem;font-weight:800;
+  padding:20px 28px;cursor:pointer;letter-spacing:-.01em;
+  box-shadow:0 4px 28px rgba(245,160,40,.40),inset 0 1px 0 rgba(255,255,255,.28);
+  transition:transform .2s,box-shadow .2s;
+  animation:pring 2.4s ease-in-out infinite;
+  text-decoration:none;
+}
+.btn-main::after{
+  content:'';position:absolute;top:-20%;left:-120%;
+  width:60%;height:140%;
+  background:linear-gradient(110deg,transparent,rgba(255,255,255,.4),transparent);
+  transform:skewX(-20deg);animation:shimmer 3.5s ease-in-out infinite;pointer-events:none;
+}
+@keyframes shimmer{0%{left:-120%}45%{left:160%}100%{left:160%}}
+@keyframes pring{0%,100%{box-shadow:0 4px 28px rgba(245,160,40,.40),0 0 0 0 rgba(245,160,40,.45)}55%{box-shadow:0 4px 28px rgba(245,160,40,.40),0 0 0 14px rgba(245,160,40,0)}}
+.btn-main:hover{transform:translateY(-2px);box-shadow:0 8px 40px rgba(245,160,40,.55);}
+.btn-lock{display:flex;align-items:center;justify-content:center;gap:5px;margin-top:10px;font-size:.72rem;color:rgba(255,255,255,.35);font-family:var(--fh);}
+
+.urgency-strip{
+  margin-top:24px;
+  background:rgba(229,90,90,.08);border:1px solid rgba(229,90,90,.2);
+  border-radius:var(--r12);padding:12px 16px;
+  font-size:.82rem;color:rgba(255,255,255,.7);line-height:1.5;
+  font-family:var(--fhi);
+}
+.urgency-strip strong{color:var(--saffron2);}
+
+/* ── STATS BAR ── */
+.stats-bar{background:var(--cream);padding:16px 0;}
+.stats-inner{display:grid;grid-template-columns:repeat(3,1fr);divide-x:1px solid rgba(12,10,40,.08);}
+.stat{text-align:center;padding:8px 6px;border-right:1px solid rgba(12,10,40,.08);}
+.stat:last-child{border-right:none;}
+.stat-num{font-family:var(--fh);font-size:1.35rem;font-weight:900;color:var(--ink);}
+.stat-lbl{font-size:.68rem;font-weight:600;color:rgba(12,10,40,.45);margin-top:2px;}
+
+/* ── STICKY BAR ── */
+.sticky-bar{
+  position:fixed;bottom:0;left:0;width:100%;z-index:300;
+  background:rgba(12,10,40,.97);backdrop-filter:blur(14px);
+  border-top:1px solid rgba(201,168,76,.20);
+  padding:12px 18px 14px;
+  box-shadow:0 -8px 32px rgba(0,0,0,.3);
+}
+.sticky-inner{max-width:var(--cont);margin:0 auto;display:flex;flex-direction:column;gap:6px;align-items:center;}
+.sticky-text{font-size:.75rem;font-weight:600;color:rgba(255,255,255,.5);font-family:var(--fh);}
+.sticky-btn{
+  position:relative;overflow:hidden;
+  width:100%;
+  background:linear-gradient(135deg,#ffc86a 0%,var(--saffron) 55%,#e8891e 100%);
+  border:none;border-radius:var(--r12);
+  color:var(--ink);font-family:var(--fhi);font-size:1rem;font-weight:800;
+  padding:15px 24px;cursor:pointer;
+  box-shadow:0 4px 20px rgba(245,160,40,.35);
+  animation:pring 2.4s ease-in-out infinite;
+  text-decoration:none;display:block;text-align:center;
+}
+.sticky-btn::after{
+  content:'';position:absolute;top:-20%;left:-120%;
+  width:60%;height:140%;
+  background:linear-gradient(110deg,transparent,rgba(255,255,255,.35),transparent);
+  transform:skewX(-20deg);animation:shimmer 3.5s ease-in-out infinite;pointer-events:none;
+}
+
+/* ── PURCHASE POPUP ── */
+.purchase-popup{
+  position:fixed;top:72px;right:14px;z-index:400;
+  display:flex;align-items:center;gap:11px;
+  background:linear-gradient(135deg,#ffffff,#fdf8ef);
+  border:1.5px solid rgba(201,168,76,.30);border-radius:16px;
+  padding:11px 14px 11px 12px;
+  box-shadow:0 4px 6px rgba(0,0,0,.04),0 12px 40px rgba(12,10,40,.13);
+  max-width:250px;min-width:210px;
+  transform:translateX(110%);opacity:0;
+  transition:transform .5s cubic-bezier(.34,1.45,.64,1),opacity .3s ease;
+  pointer-events:none;
+}
+.purchase-popup.pp-show{transform:translateX(0);opacity:1;}
+.pp-avatar{width:36px;height:36px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,#0c0a28,#1d1950);display:flex;align-items:center;justify-content:center;font-size:.82rem;font-weight:800;color:#c9a84c;font-family:var(--fh);box-shadow:0 2px 8px rgba(12,10,40,.25);}
+.pp-content{flex:1;min-width:0;}
+.pp-top{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:2px;}
+.pp-label{font-size:.58rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#3db87a;background:#edfbf3;padding:2px 5px;border-radius:20px;font-family:var(--fh);}
+.pp-name{font-size:.78rem;font-weight:700;color:#0c0a28;font-family:var(--fh);}
+.pp-action{font-size:.72rem;color:#4a445e;font-weight:500;margin-top:1px;font-family:var(--fh);}
+.pp-action strong{color:#c9a84c;font-weight:700;}
+.pp-meta{display:flex;align-items:center;gap:5px;margin-top:4px;}
+.pp-dot{width:5px;height:5px;border-radius:50%;background:#3db87a;flex-shrink:0;}
+.pp-city{font-size:.66rem;color:#6b6480;background:#f5f0ff;padding:2px 6px;border-radius:20px;font-weight:500;font-family:var(--fh);}
+.pp-time{font-size:.63rem;color:#9a94ad;font-family:var(--fh);}
+
+@media(max-width:400px){
+  .hook-h1{font-size:1.55rem;}
+  .purchase-popup{max-width:220px;min-width:195px;right:10px;}
+}
+</style>
+</head>
+<body>
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WJHMJ92W" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="container">
+    <div class="nav-inner">
+      <div class="nav-logo">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2.2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        <span>VedGuide</span>
+      </div>
+      <div class="nav-pill">⭐ 4.9/5 · 7,842+ Reports</div>
+    </div>
+  </div>
+</nav>
+
+<!-- HOOK SECTION -->
+<section class="hook">
+  <div class="container">
+    <div class="live-badge">
+      <span class="live-dot"></span>
+      <span id="liveCount">247</span> लोग अभी देख रहे हैं
+    </div>
+
+    <div class="hook-eyebrow">🔮 Vedic Career Kundli</div>
+
+    <h1 class="hook-h1">
+      आप <span class="hl">100% मेहनत</span> कर रहे हैं<br>
+      पर रिजल्ट सिर्फ <span class="hl">10%</span> ही मिल रहा है
+    </h1>
+    <p class="hook-sub">अगर आप भी नीचे दी गई किसी चीज़ से गुज़र रहे हैं — तो आपकी ग्रह दशा इसके पीछे है।</p>
+
+    <div class="pain-list">
+      <div class="pain-item">
+        <span class="pain-icon">😤</span>
+        <span class="pain-text">हर बार सिलेक्शन होते-होते रह जाता है — <em>आखिरी मोड़ पर रुक जाता है</em></span>
+      </div>
+      <div class="pain-item">
+        <span class="pain-icon">❌</span>
+        <span class="pain-text">किसी <em>एक चीज़ के कारण</em> बार-बार फेल हो जाते हो, समझ नहीं आता क्यों</span>
+      </div>
+      <div class="pain-item">
+        <span class="pain-icon">🌀</span>
+        <span class="pain-text">करियर में <em>कन्फ़्यूज़न ही कन्फ़्यूज़न</em> — जॉब करूँ, बिज़नेस करूँ, क्या करूँ?</span>
+      </div>
+      <div class="pain-item">
+        <span class="pain-icon">💸</span>
+        <span class="pain-text">पैसा आता है तो <em>कहीं न कहीं लग जाता है</em> — बचत होती ही नहीं</span>
+      </div>
+    </div>
+
+    <a href="/kundli/new-checkout" class="btn-main cta-btn" data-section="hero" data-cta="career-report" onclick="trackCta('hero')">
+      🔮 अभी अपनी करियर कुंडली बनवाएं — ₹399
+    </a>
+    <div class="btn-lock">
+      🔒 Secure Payment · No Spam · 24-48 घंटे में PDF
+    </div>
+  </div>
+</section>
+
+<!-- STATS BAR -->
+<div class="stats-bar">
+  <div class="container">
+    <div class="stats-inner">
+      <div class="stat"><div class="stat-num">7,842+</div><div class="stat-lbl">Reports Delivered</div></div>
+      <div class="stat"><div class="stat-num">4.9/5</div><div class="stat-lbl">Average Rating</div></div>
+      <div class="stat"><div class="stat-num">9+</div><div class="stat-lbl">Countries</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- WHY SECTION -->
+<section class="why">
+  <div class="container">
+    <div class="sec-badge">📖 वजह क्या है?</div>
+
+    <div class="why-card">
+      <span class="why-icon">🪐</span>
+      <div class="why-title">जब शनि देव आपके 10th हाउस में बैठे हों...</div>
+      <div class="why-body">
+        आप जितनी भी मेहनत करें — <strong>रिजल्ट मिलेगा ही नहीं।</strong> ये सुनने में कड़वा लगता है, लेकिन यही सच है। शनि की साढ़ेसाती या ढैया के दौरान करियर रुक जाता है।
+      </div>
+    </div>
+
+    <div class="why-card">
+      <span class="why-icon">⏳</span>
+      <div class="why-title">ग्रहों की दशा खराब है तो...</div>
+      <div class="why-body">
+        हर निर्णय गलत लगता है। <strong>समय का अंदाज़ा नहीं होता</strong> — कब opportunity आएगी, कब नहीं। और इसी confusion में आप wrong decisions लेते हो।
+      </div>
+    </div>
+
+    <div class="shani-callout">
+      <p>इसका मतलब ये नहीं कि आप गलत हो —<br>इसका मतलब है कि <strong>आपको सही समय और सही दिशा का पता नहीं है।</strong></p>
+    </div>
+  </div>
+</section>
+
+<!-- SOLUTION SECTION -->
+<section class="solution">
+  <div class="container">
+    <div class="solution-badge">✅ सोल्यूशन</div>
+    <h2 class="solution-h2">पर्सनलाइज्ड करियर कुंडली —<br><span>आपकी ज़िंदगी का रोडमैप</span></h2>
+    <p class="solution-sub">बिना रास्ता जाने आप मंज़िल तक पहुँच ही नहीं सकते। ये कुंडली हर मोड़ पे आपका साथ देगी।</p>
+
+    <div class="roadmap-card">
+      <div class="rm-num">1</div>
+      <div class="rm-body">
+        <div class="rm-title">आपका जॉब कब लगेगा?</div>
+        <div class="rm-sub">Exact timing — कौन सा महीना, कौन सी dasha</div>
+      </div>
+    </div>
+    <div class="roadmap-card">
+      <div class="rm-num">2</div>
+      <div class="rm-body">
+        <div class="rm-title">राज योग कब आएगा?</div>
+        <div class="rm-sub">Career peak कब होगा — promotion, growth सब clear</div>
+      </div>
+    </div>
+    <div class="roadmap-card">
+      <div class="rm-num">3</div>
+      <div class="rm-body">
+        <div class="rm-title">कुंडली में क्या दोष है?</div>
+        <div class="rm-sub">और उसे ठीक करने के practical उपाय</div>
+      </div>
+    </div>
+    <div class="roadmap-card">
+      <div class="rm-num">4</div>
+      <div class="rm-body">
+        <div class="rm-title">जॉब करें या बिज़नेस?</div>
+        <div class="rm-sub">आपकी kundli किस field में सबसे ज़्यादा growth देती है</div>
+      </div>
+    </div>
+
+    <br>
+    <a href="/kundli/new-checkout" class="btn-main cta-btn" data-section="features" data-cta="career-report" onclick="trackCta('features')" style="color:var(--ink);">
+      🔮 मुझे यह रोडमैप चाहिए — ₹399
+    </a>
+  </div>
+</section>
+
+<!-- WHAT YOU GET -->
+<section class="gets">
+  <div class="container">
+    <h2 class="gets-title">रिपोर्ट में क्या-क्या मिलेगा?</h2>
+    <p class="gets-sub">35–40 page की detailed PDF — आपकी native language में</p>
+
+    <div class="gets-grid">
+      <div class="get-item">
+        <span class="get-em">📅</span>
+        <div class="get-text">Mahadasha &amp; Antardasha Roadmap<span>अगले 7 साल का month-wise plan</span></div>
+      </div>
+      <div class="get-item">
+        <span class="get-em">💼</span>
+        <div class="get-text">Career Timing Analysis<span>जॉब, promotion, और growth windows</span></div>
+      </div>
+      <div class="get-item">
+        <span class="get-em">💰</span>
+        <div class="get-text">Dhan Yog &amp; Wealth Blockage<span>पैसा कब आएगा, क्या रोक रहा है</span></div>
+      </div>
+      <div class="get-item">
+        <span class="get-em">🛡️</span>
+        <div class="get-text">Dosha &amp; Practical Remedies<span>Simple उपाय — कोई expensive ritual नहीं</span></div>
+      </div>
+      <div class="get-item">
+        <span class="get-em">🌟</span>
+        <div class="get-text">Hidden Raj Yog<span>आपकी kundli में क्या strong है</span></div>
+      </div>
+      <div class="get-item">
+        <span class="get-em">🗣️</span>
+        <div class="get-text">Hindi या English — आपकी भाषा में<span>WhatsApp + Email delivery</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SOCIAL PROOF -->
+<section class="proof">
+  <div class="container">
+    <h2 class="proof-title">जो लोग बनवा चुके हैं, उनका कहना है —</h2>
+    <div class="reviews">
+
+      <div class="rev-card">
+        <div class="rev-stars">★★★★★</div>
+        <div class="rev-outcome">💼 Job Got</div>
+        <p class="rev-text">"Dasha ne exact bataya ki March-April mera strong period hai. Usi time apply kiya — package double ho gaya. Pehle itna confusion tha, ab clarity hai."</p>
+        <div class="rev-author">
+          <div class="rev-avatar">R</div>
+          <div><div class="rev-name">Rahul Mehta</div><div class="rev-loc">Bangalore · Software Engineer</div></div>
+        </div>
+      </div>
+
+      <div class="rev-card">
+        <div class="rev-stars">★★★★★</div>
+        <div class="rev-outcome">🏢 Business Growth</div>
+        <p class="rev-text">"Mujhe lagta tha main hi galat hun. Kundli ne bataya ki Saturn transit ki wajah se ruka hua tha. Remedy ki — 3 mahine mein business double."</p>
+        <div class="rev-author">
+          <div class="rev-avatar">V</div>
+          <div><div class="rev-name">Vikram Joshi</div><div class="rev-loc">Ahmedabad · Business Owner</div></div>
+        </div>
+      </div>
+
+      <div class="rev-card">
+        <div class="rev-stars">★★★★★</div>
+        <div class="rev-outcome">🎯 Promotion</div>
+        <p class="rev-text">"3 saal se promotion nahi mila tha. Astrologer ne exact timing di — us mahine apply kiya, first attempt mein ho gaya."</p>
+        <div class="rev-author">
+          <div class="rev-avatar">P</div>
+          <div><div class="rev-name">Priya Sharma</div><div class="rev-loc">Delhi · IT Manager</div></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="final">
+  <div class="container">
+    <div class="final-badge">⚡ सिर्फ DOB चाहिए</div>
+    <h2 class="final-h2">बस अपना <span>Date of Birth</span> दीजिए —<br>24-48 घंटों में आपकी ज़िंदगी<br>आपके हाथों में होगी</h2>
+    <p class="final-sub">देर ना करें। ये आपकी ज़िंदगी का सवाल है।</p>
+
+    <div class="price-wrap">
+      <span class="price-now">₹399</span>
+      <span class="price-mrp">₹1,995</span>
+      <span class="price-off">80% OFF</span>
+    </div>
+
+    <a href="/kundli/new-checkout" class="btn-main cta-btn" data-section="pricing" data-cta="career-report" onclick="trackCta('pricing')">
+      🔮 अभी Order करें — ₹399
+    </a>
+    <div class="btn-lock">🔒 Secure checkout · One-time payment · No subscription</div>
+
+    <div class="urgency-strip">
+      ⚠️ <strong>आज के लिए सिर्फ कुछ ही slots बचे हैं।</strong> हर kundli manually review होती है — इसलिए एक दिन में limited orders ही लिए जाते हैं।
+    </div>
+  </div>
+</section>
+
+<!-- STICKY BAR -->
+<!-- Purchase notification popup -->
+<div id="purchasePopup" class="purchase-popup">
+  <div class="pp-avatar" id="ppAvatar">R</div>
+  <div class="pp-content">
+    <div class="pp-top">
+      <span class="pp-name" id="ppName">Rahul M.</span>
+      <span class="pp-label">✓ Purchased</span>
+    </div>
+    <div class="pp-action">Just got their Kundli Report · <strong>₹399</strong></div>
+    <div class="pp-meta">
+      <span class="pp-dot"></span>
+      <span class="pp-city" id="ppCity">Mumbai</span>
+      <span class="pp-time" id="ppTime">just now</span>
+    </div>
+  </div>
+</div>
+
+<div class="sticky-bar">
+  <div class="sticky-inner">
+    <span class="sticky-text">⚠️ आज का Career window — सिर्फ ₹399</span>
+    <a href="/kundli/new-checkout" class="sticky-btn cta-btn" data-section="sticky" data-cta="career-report" onclick="trackCta('sticky')">
+      🔮 अभी Order करें — ₹399
+    </a>
+  </div>
+</div>
+
+<script>
+(function(){
+  /* GTM helper */
+  function trackCta(loc){
+    try{
+      window.dataLayer=window.dataLayer||[];
+      window.dataLayer.push({event:'cta_click',cta_location:loc,cta_label:'career-report',destination_url:'/kundli/new-checkout'});
+    }catch(e){}
+  }
+  window.trackCta=trackCta;
+
+  /* Live viewer counter */
+  var el=document.getElementById('liveCount');
+  if(el){
+    var n=247;
+    setInterval(function(){
+      n+=Math.floor(Math.random()*9)-4;
+      if(n<170)n=178;if(n>340)n=328;
+      el.textContent=n;
+    },4500);
+  }
+
+  /* Purchase popup */
+  var _pNames=[
+    'Rahul M.','Priya S.','Amit K.','Neha G.','Vikram J.',
+    'Anjali R.','Suresh P.','Kavya T.','Rohit D.','Sneha B.',
+    'Arjun N.','Pooja V.','Manoj C.','Divya H.','Karan L.',
+    'Ritu A.','Deepak Y.','Shweta F.','Nikhil Z.','Meera Q.',
+    'Sanjay W.','Anita X.','Rajesh U.','Sunita I.','Vivek O.',
+    'Preeti E.','Arun O.','Nisha W.','Mohit Q.','Geeta R.',
+    'Tushar S.','Pallavi T.','Gaurav U.','Smita V.','Pranav W.',
+    'Rekha X.','Vishal Y.','Shruti Z.','Naveen A.','Jaya B.',
+    'Hemant C.','Usha D.','Sachin E.','Radha F.','Sunil G.',
+    'Lakshmi H.','Ajay I.','Swati J.','Pankaj K.','Asha L.'
+  ];
+  var _pCities=[
+    'Mumbai','Delhi','Bangalore','Hyderabad','Pune',
+    'Chennai','Kolkata','Jaipur','Ahmedabad','Surat',
+    'Lucknow','Nagpur','Indore','Bhopal','Patna',
+    'Vadodara','Agra','Nashik','Ranchi','Gwalior'
+  ];
+  var _pUsed=[];
+  var _timeLabels=['just now','moments ago','2 min ago','1 min ago','a few seconds ago'];
+
+  function _nextPurchase(){
+    if(_pUsed.length>=_pNames.length)_pUsed=[];
+    var idx;
+    do{idx=Math.floor(Math.random()*_pNames.length);}while(_pUsed.indexOf(idx)>-1);
+    _pUsed.push(idx);
+    var name=_pNames[idx];
+    var city=_pCities[Math.floor(Math.random()*_pCities.length)];
+    var time=_timeLabels[Math.floor(Math.random()*_timeLabels.length)];
+    var popup=document.getElementById('purchasePopup');
+    if(!popup)return;
+    document.getElementById('ppName').textContent=name;
+    document.getElementById('ppCity').textContent=city;
+    document.getElementById('ppTime').textContent=time;
+    document.getElementById('ppAvatar').textContent=name.charAt(0).toUpperCase();
+    popup.classList.add('pp-show');
+    setTimeout(function(){popup.classList.remove('pp-show');},4000);
+  }
+  setTimeout(function(){_nextPurchase();setInterval(_nextPurchase,4500);},6000);
+
+})();
+</script>
+</body>
+</html>
