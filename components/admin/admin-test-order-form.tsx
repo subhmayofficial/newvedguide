@@ -97,7 +97,7 @@ export function AdminTestOrderForm({ defaultAmountRupees, flash }: Props) {
               <span className="text-[12px] font-medium text-muted-foreground">Source page</span>
               <input
                 name="sourcePage"
-                defaultValue="/kundli/new-checkout"
+                defaultValue="/ads/kundli/new-checkout"
                 className={inputCls}
               />
             </label>
@@ -105,7 +105,7 @@ export function AdminTestOrderForm({ defaultAmountRupees, flash }: Props) {
               <span className="text-[12px] font-medium text-muted-foreground">Source funnel</span>
               <input
                 name="sourceFunnel"
-                defaultValue="kundli_direct_lp"
+                defaultValue="ads_kundli"
                 className={inputCls}
               />
             </label>
@@ -131,8 +131,8 @@ export function AdminTestOrderForm({ defaultAmountRupees, flash }: Props) {
               className="mt-1 h-4 w-4 rounded border-border"
             />
             <span>
-              Send Meta Purchase CAPI (same as real <code className="text-xs">/kundli/new-checkout</code>{" "}
-              sale). Uncheck to skip ad reporting.
+              Send Meta Purchase CAPI (only fires for <code className="text-xs">/ads…</code>{" "}
+              checkout sources). Uncheck to skip ad reporting.
             </span>
           </label>
         </div>

@@ -46,7 +46,7 @@ export default async function AdminToolsPage({
         <ul className="mt-3 list-disc space-y-1 pl-5 text-[12px] text-muted-foreground">
           <li>Order is tagged <code className="rounded bg-muted px-1">[ADMIN TEST]</code> in notes</li>
           <li>Payment provider: <code className="rounded bg-muted px-1">admin_test</code></li>
-          <li>Default funnel: <code className="rounded bg-muted px-1">/kundli/new-checkout</code></li>
+          <li>Default funnel: <code className="rounded bg-muted px-1">/ads/kundli/new-checkout</code></li>
         </ul>
         <p className="mt-3 text-[12px] text-muted-foreground">
           View results in{" "}

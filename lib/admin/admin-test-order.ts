@@ -40,12 +40,12 @@ export interface CreateAdminTestKundliOrderInput {
   dob?: string | null;
   tob?: string | null;
   pob?: string | null;
-  /** Defaults to /kundli/new-checkout */
+  /** Defaults to /ads/kundli/new-checkout for Meta CAPI testing */
   sourcePage?: string;
-  /** Defaults to kundli_direct_lp */
+  /** Defaults to ads_kundli */
   sourceFunnel?: string;
   amountPaise?: number;
-  /** When true, runs Meta CAPI Purchase (same as real new-checkout). */
+  /** When true, runs Meta CAPI Purchase (ads funnel only). */
   fireMetaCapi?: boolean;
   createdBy?: string | null;
 }
@@ -71,8 +71,8 @@ export async function createAdminTestKundliOrder(
     throw new Error("Amount must be at least ₹1 (100 paise)");
   }
 
-  const sourcePage = input.sourcePage?.trim() || "/kundli/new-checkout";
-  const sourceFunnel = input.sourceFunnel?.trim() || "kundli_direct_lp";
+  const sourcePage = input.sourcePage?.trim() || "/ads/kundli/new-checkout";
+  const sourceFunnel = input.sourceFunnel?.trim() || "ads_kundli";
   const entryPath = mapSourceToEntryPath(sourceFunnel);
   const sessionId = `admin_test_${Date.now()}`;
 

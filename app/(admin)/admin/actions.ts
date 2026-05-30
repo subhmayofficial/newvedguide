@@ -1425,8 +1425,8 @@ export async function submitAdminTestKundliOrderForm(formData: FormData) {
     amountPaise = Math.round(rupees * 100);
   }
 
-  const sourcePage = toNullable(formData.get("sourcePage")) ?? "/kundli/new-checkout";
-  const sourceFunnel = toNullable(formData.get("sourceFunnel")) ?? "kundli_direct_lp";
+  const sourcePage = toNullable(formData.get("sourcePage")) ?? "/ads/kundli/new-checkout";
+  const sourceFunnel = toNullable(formData.get("sourceFunnel")) ?? "ads_kundli";
   const fireMetaCapi = formData.get("fireMetaCapi") === "on";
 
   const supabase = createServiceClient();
