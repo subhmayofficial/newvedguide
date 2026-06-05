@@ -19,10 +19,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const SH_IMAGE_CDN_BASE = "https://primedit-cdn.b-cdn.net/7Horses";
-
 function shImageUrl(num: number) {
-  return `${SH_IMAGE_CDN_BASE}/${num}.webp`;
+  return `/7horses/${num}.webp`;
 }
 
 // ── Data ───────────────────────────────────────────────────────────────────────
@@ -192,7 +190,7 @@ const FAQS = [
   },
 ];
 
-const GALLERY_IMAGES = [1, 2, 3].map((num) => ({
+const GALLERY_IMAGES = [1, 2, 3, 4, 5].map((num) => ({
   id: num,
   src: shImageUrl(num),
   alt: `7 Horses on Raw Pyrite Frame — photo ${num}`,
