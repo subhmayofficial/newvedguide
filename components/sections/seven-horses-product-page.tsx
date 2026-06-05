@@ -16,6 +16,10 @@ import {
   Info,
   ChevronDown,
   ChevronUp,
+  Tag,
+  CreditCard,
+  ShoppingCart,
+  Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -218,6 +222,261 @@ export function SevenHorsesProductPage() {
   const popupIndexRef = useRef(Math.floor(Math.random() * POPUP_NAMES.length));
 
   const displayPrice = siddh ? BASE_PRICE + 299 : BASE_PRICE;
+
+  // ── Bottom-sheet checkout state ────────────────────────────────────────────
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
+  const [sheetVisible, setSheetVisible] = useState(false);
+  const [checkoutStep, setCheckoutStep] = useState(1);
+  const [phone, setPhone] = useState("");
+  const [checkoutForm, setCheckoutForm] = useState({ name: "", address: "", city: "", state: "", pincode: "" });
+  const [payment, setPayment] = useState<"cod" | "prepaid">("cod");
+  const [couponCode, setCouponCode] = useState("");
+  const [couponApplied, setCouponApplied] = useState(false);
+  const [couponDiscount, setCouponDiscount] = useState(0);
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [couponError, setCouponError] = useState("");
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const [checkoutError, setCheckoutError] = useState("");
+  const [razorpayReady, setRazorpayReady] = useState(false);
+  const [razorpayOpen, setRazorpayOpen] = useState(false);
+
+  const razorpayKeyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
+  const basePrice = siddh ? 1998 : 1699;
+  const prepaidDiscount = payment === "prepaid" ? 299 : 0;
+  const displayTotal = basePrice - prepaidDiscount - couponDiscount;
+
+  function openCheckout() {
+    setCheckoutOpen(true);
+    setCheckoutStep(1);
+    setCheckoutError("");
+    setTimeout(() => setSheetVisible(true), 16);
+  }
+
+  function closeCheckout() {
+    setSheetVisible(false);
+    setTimeout(() => { setCheckoutOpen(false); setCheckoutStep(1); }, 380);
+  }
+
+  function advanceStep(nextStep: number) {
+    setSheetVisible(false);
+    setTimeout(() => {
+      setCheckoutStep(nextStep);
+      setCheckoutError("");
+      setSheetVisible(true);
+    }, 380);
+  }
+
+  // Load Razorpay script
+  useEffect(() => {
+    let cancelled = false;
+    function markReady() {
+      if (!cancelled && typeof window !== "undefined" && window.Razorpay) {
+        setRazorpayReady(true);
+      }
+    }
+    const existing = document.querySelector<HTMLScriptElement>(
+      'script[src="https://checkout.razorpay.com/v1/checkout.js"]'
+    );
+    if (existing) {
+      if (window.Razorpay) markReady();
+      else existing.addEventListener("load", markReady, { once: true });
+    } else {
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.async = true;
+      script.addEventListener("load", markReady, { once: true });
+      document.head.appendChild(script);
+    }
+    return () => { cancelled = true; };
+  }, []);
+
+  // Auto-fetch city/state from pincode
+  useEffect(() => {
+    const pin = checkoutForm.pincode;
+    if (pin.length !== 6) return;
+    let cancelled = false;
+    void (async () => {
+      try {
+        const res = await fetch(`https://api.postalpincode.in/pincode/${pin}`);
+        const data = (await res.json()) as Array<{
+          Status: string;
+          PostOffice?: Array<{ District: string; State: string }>;
+        }>;
+        if (cancelled) return;
+        if (data?.[0]?.Status === "Success" && data[0].PostOffice?.[0]) {
+          const po = data[0].PostOffice[0];
+          setCheckoutForm((f) => ({
+            ...f,
+            city: f.city || po.District,
+            state: f.state || po.State,
+          }));
+        }
+      } catch { /* ignore */ }
+    })();
+    return () => { cancelled = true; };
+  }, [checkoutForm.pincode]);
+
+  async function handleApplyCoupon() {
+    if (!couponCode.trim()) return;
+    setCouponError("");
+    setCouponLoading(true);
+    try {
+      const res = await fetch("/api/coupons/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: couponCode.trim(), amountPaise: basePrice * 100 }),
+      });
+      const json = (await res.json()) as {
+        valid?: boolean;
+        discountPaise?: number;
+        error?: string;
+        message?: string;
+      };
+      if (!res.ok || !json.valid) {
+        throw new Error(json.error ?? json.message ?? "Invalid or expired coupon.");
+      }
+      const disc = Math.round((json.discountPaise ?? 0) / 100);
+      setCouponDiscount(disc);
+      setCouponApplied(true);
+    } catch (err) {
+      setCouponError(err instanceof Error ? err.message : "Invalid coupon.");
+    } finally {
+      setCouponLoading(false);
+    }
+  }
+
+  async function handlePlaceOrder() {
+    setCheckoutError("");
+    setCheckoutLoading(true);
+    const amountPaise = displayTotal * 100;
+
+    try {
+      const res = await fetch("/api/products/7horses/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          amountPaise,
+          paymentMethod: payment,
+          product: { siddh },
+          couponCode: couponApplied ? couponCode : undefined,
+          customer: {
+            fullName: checkoutForm.name,
+            phone,
+            address: checkoutForm.address,
+            city: checkoutForm.city,
+            state: checkoutForm.state,
+            pincode: checkoutForm.pincode,
+          },
+          attribution: {
+            sourcePage: "/7horses",
+            referrer: typeof document !== "undefined" ? document.referrer || undefined : undefined,
+          },
+        }),
+      });
+
+      const json = (await res.json()) as {
+        success?: boolean;
+        error?: string;
+        orderDbId?: string;
+        orderNumber?: string;
+        razorpayOrderId?: string;
+        amountPaise?: number;
+        currency?: string;
+        paymentBypassed?: boolean;
+      };
+
+      if (!res.ok || !json.success || !json.orderDbId || !json.orderNumber) {
+        throw new Error(json.error ?? "Could not create order.");
+      }
+
+      if (payment === "cod" || json.paymentBypassed) {
+        router.push(`/thank-you/7horses?order=${json.orderNumber}`);
+        return;
+      }
+
+      // Prepaid — open Razorpay
+      const dbId = json.orderDbId;
+      const orderNumber = json.orderNumber;
+
+      if (!razorpayKeyId || razorpayKeyId.includes("your_razorpay")) {
+        throw new Error("Online payment is not configured. Please choose COD.");
+      }
+      if (!json.razorpayOrderId) {
+        throw new Error("Payment order could not be created. Please try COD.");
+      }
+      if (!razorpayReady || !window.Razorpay) {
+        throw new Error("Payment window is still loading. Please wait a moment.");
+      }
+
+      const options = {
+        key: razorpayKeyId,
+        amount: json.amountPaise ?? amountPaise,
+        currency: json.currency ?? "INR",
+        name: "VedGuide",
+        description: `7 Horses on Raw Pyrite Frame${siddh ? " (Siddh Energised)" : ""}`,
+        order_id: json.razorpayOrderId,
+        prefill: { name: checkoutForm.name, contact: phone },
+        notes: { order_id: dbId, product: "seven_horses_pyrite_frame" },
+        theme: { color: "#B45309" },
+        modal: {
+          ondismiss: () => {
+            setRazorpayOpen(false);
+            setCheckoutLoading(false);
+            void fetch("/api/payments/failure", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ orderDbId: dbId, reason: "modal_dismissed" }),
+            });
+          },
+        },
+        handler: async (response: {
+          razorpay_order_id: string;
+          razorpay_payment_id: string;
+          razorpay_signature: string;
+        }) => {
+          try {
+            setRazorpayOpen(false);
+            setCheckoutLoading(true);
+            const verifyRes = await fetch("/api/payments/verify", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                orderDbId: dbId,
+              }),
+            });
+            const v = (await verifyRes.json()) as { success?: boolean; error?: string };
+            if (!v.success) throw new Error(v.error ?? "Payment verification failed.");
+            router.push(`/thank-you/7horses?order=${orderNumber}`);
+          } catch (verifyError) {
+            setCheckoutError(verifyError instanceof Error ? verifyError.message : "Payment verification failed.");
+          } finally {
+            setCheckoutLoading(false);
+          }
+        },
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.on("payment.failed", async () => {
+        await fetch("/api/payments/failure", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ orderDbId: dbId, reason: "razorpay_failed" }),
+        });
+        setRazorpayOpen(false);
+        setCheckoutLoading(false);
+        setCheckoutError("Payment failed. Please try again or choose COD.");
+      });
+      rzp.open();
+      setRazorpayOpen(true);
+    } catch (err) {
+      setCheckoutError(err instanceof Error ? err.message : "Could not place order.");
+    } finally {
+      if (!razorpayOpen) setCheckoutLoading(false);
+    }
+  }
 
   function goToImage(idx: number) {
     setSlideDir(idx > activeImage ? "right" : "left");
@@ -563,14 +822,14 @@ export function SevenHorsesProductPage() {
           <div className="mt-4 grid grid-cols-2 gap-3">
             <button
               type="button"
-              onClick={goToCheckout}
+              onClick={openCheckout}
               className="border-2 border-amber-600 text-amber-700 bg-white font-black rounded-2xl py-4 text-sm transition-all hover:bg-amber-50 active:scale-95"
             >
               Add to Cart
             </button>
             <button
               type="button"
-              onClick={goToCheckout}
+              onClick={openCheckout}
               className="sh-glow-btn bg-amber-600 text-white font-black rounded-2xl py-4 text-sm transition-all hover:bg-amber-700 active:scale-95 flex items-center justify-center gap-1.5"
             >
               Buy Now <ArrowRight size={15} />
@@ -673,7 +932,7 @@ export function SevenHorsesProductPage() {
 
             <div className="mt-16 text-center" data-anim>
               <button
-                onClick={goToCheckout}
+                onClick={openCheckout}
                 className="sh-glow-btn inline-flex items-center gap-3 rounded-2xl bg-amber-400 px-10 py-4 text-base font-black text-amber-950 transition-all hover:bg-amber-300 active:scale-95"
               >
                 <Zap size={18} />
@@ -768,7 +1027,7 @@ export function SevenHorsesProductPage() {
                 Every order ships with detailed placement instructions — direction, height, and best practices from Vastu Shastra.
               </p>
               <button
-                onClick={goToCheckout}
+                onClick={openCheckout}
                 className="w-full rounded-2xl bg-white py-3.5 text-sm font-black text-amber-800 transition-all hover:bg-amber-50"
               >
                 Order Now →
@@ -998,13 +1257,13 @@ export function SevenHorsesProductPage() {
             </p>
             <div className="grid grid-cols-2 gap-3 max-w-sm mx-auto">
               <button
-                onClick={goToCheckout}
+                onClick={openCheckout}
                 className="border-2 border-amber-300 text-white font-black rounded-2xl py-4 text-sm transition-all hover:bg-white/10 active:scale-95"
               >
                 Add to Cart
               </button>
               <button
-                onClick={goToCheckout}
+                onClick={openCheckout}
                 className="sh-glow-btn inline-flex items-center justify-center gap-2 rounded-2xl bg-amber-400 py-4 text-sm font-black text-amber-950 shadow-2xl transition-all hover:bg-amber-300 active:scale-95"
               >
                 <Sparkles size={16} />
@@ -1046,7 +1305,7 @@ export function SevenHorsesProductPage() {
             </div>
             <button
               type="button"
-              onClick={goToCheckout}
+              onClick={openCheckout}
               className="sh-glow-btn shrink-0 rounded-2xl bg-amber-600 px-6 py-3 text-sm font-black text-white shadow-lg transition-all hover:bg-amber-700 active:scale-95 flex items-center gap-1.5"
             >
               Buy Now <ArrowRight size={14} />
@@ -1082,6 +1341,312 @@ export function SevenHorsesProductPage() {
           </div>
         )}
       </div>
+
+      {/* ════════════════════════════════════════
+          BOTTOM SHEET CHECKOUT DRAWER
+      ════════════════════════════════════════ */}
+      {checkoutOpen && (
+        <>
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
+            onClick={closeCheckout}
+          />
+
+          {/* Sheet */}
+          <div
+            className={cn(
+              "fixed bottom-0 left-0 right-0 z-50 max-h-[90vh] overflow-y-auto rounded-t-3xl bg-white shadow-2xl",
+              "transition-transform duration-[380ms] ease-[cubic-bezier(0.32,0.72,0,1)]",
+              sheetVisible ? "translate-y-0" : "translate-y-full"
+            )}
+          >
+            {/* Drag handle */}
+            <div className="flex justify-center pt-3 pb-2">
+              <div className="h-1 w-12 rounded-full bg-stone-300" />
+            </div>
+
+            {/* ── Step 1: Phone ── */}
+            {checkoutStep === 1 && (
+              <div className="px-5 pb-8 pt-2">
+                <h2 className="text-lg font-black text-foreground">Enter your mobile number</h2>
+                <p className="mt-0.5 mb-5 text-xs text-muted-foreground">We&apos;ll send order updates on WhatsApp</p>
+
+                {/* Mini order summary */}
+                <div className="mb-5 flex items-center gap-3 rounded-2xl border border-amber-100 bg-amber-50 p-3">
+                  <div className="relative size-14 shrink-0 overflow-hidden rounded-xl">
+                    <Image src="/7horses/1.webp" alt="product" fill className="object-cover" sizes="56px" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-foreground">7 Horses on Raw Pyrite Frame</p>
+                    {siddh && (
+                      <span className="inline-block rounded-full bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold text-amber-700">
+                        + Siddh Energised
+                      </span>
+                    )}
+                    <p className="text-base font-black text-amber-700">₹{siddh ? 1998 : 1699}</p>
+                  </div>
+                </div>
+
+                <div className="flex">
+                  <span className="flex items-center rounded-l-xl border border-r-0 border-stone-200 bg-stone-50 px-3 text-sm text-muted-foreground">
+                    +91
+                  </span>
+                  <input
+                    type="tel"
+                    inputMode="numeric"
+                    placeholder="10-digit number"
+                    maxLength={10}
+                    value={phone}
+                    onChange={(e) => { setPhone(e.target.value.replace(/\D/g, "")); setCheckoutError(""); }}
+                    className="flex-1 rounded-r-xl border border-stone-200 px-4 py-3 text-sm outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-100"
+                  />
+                </div>
+                {checkoutError && <p className="mt-2 text-xs font-medium text-red-600">{checkoutError}</p>}
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (phone.length !== 10) { setCheckoutError("Enter a valid 10-digit number."); return; }
+                    setCheckoutError("");
+                    advanceStep(2);
+                  }}
+                  disabled={phone.length !== 10}
+                  className={cn(
+                    "mt-5 w-full rounded-2xl py-4 text-sm font-black text-white transition-all",
+                    phone.length !== 10 ? "bg-stone-300 cursor-not-allowed" : "bg-amber-700 hover:bg-amber-800"
+                  )}
+                >
+                  Continue →
+                </button>
+                <p className="mt-3 text-center text-[10px] text-muted-foreground">🔒 Your details are safe and never shared</p>
+              </div>
+            )}
+
+            {/* ── Step 2: Address ── */}
+            {checkoutStep === 2 && (
+              <div className="px-5 pb-8 pt-2 space-y-3">
+                <div>
+                  <h2 className="text-lg font-black text-foreground">Delivery address</h2>
+                  <p className="text-xs text-muted-foreground mt-0.5 mb-4">Where should we deliver?</p>
+                </div>
+
+                <div>
+                  <label className="mb-1 block text-xs font-semibold text-foreground">Full Name *</label>
+                  <input
+                    type="text"
+                    placeholder="Your full name"
+                    value={checkoutForm.name}
+                    onChange={(e) => { setCheckoutForm((f) => ({ ...f, name: e.target.value })); setCheckoutError(""); }}
+                    className="w-full rounded-xl border border-stone-200 px-4 py-3 text-sm outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-100"
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-1 block text-xs font-semibold text-foreground">Pincode *</label>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    placeholder="6-digit pincode"
+                    maxLength={6}
+                    value={checkoutForm.pincode}
+                    onChange={(e) => { setCheckoutForm((f) => ({ ...f, pincode: e.target.value.replace(/\D/g, ""), city: "", state: "" })); setCheckoutError(""); }}
+                    className="w-full rounded-xl border border-stone-200 px-4 py-3 text-sm outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-100"
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-1 block text-xs font-semibold text-foreground">Address *</label>
+                  <textarea
+                    placeholder="House no., Street, Area, Landmark"
+                    rows={2}
+                    value={checkoutForm.address}
+                    onChange={(e) => { setCheckoutForm((f) => ({ ...f, address: e.target.value })); setCheckoutError(""); }}
+                    className="w-full resize-none rounded-xl border border-stone-200 px-4 py-3 text-sm outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-100"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="mb-1 block text-xs font-semibold text-foreground">City *</label>
+                    <input
+                      type="text"
+                      placeholder="City"
+                      value={checkoutForm.city}
+                      onChange={(e) => { setCheckoutForm((f) => ({ ...f, city: e.target.value })); setCheckoutError(""); }}
+                      className="w-full rounded-xl border border-stone-200 px-3 py-3 text-sm outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-100"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs font-semibold text-foreground">State *</label>
+                    <input
+                      type="text"
+                      placeholder="State"
+                      value={checkoutForm.state}
+                      onChange={(e) => { setCheckoutForm((f) => ({ ...f, state: e.target.value })); setCheckoutError(""); }}
+                      className="w-full rounded-xl border border-stone-200 px-3 py-3 text-sm outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-100"
+                    />
+                  </div>
+                </div>
+
+                {checkoutError && <p className="text-xs font-medium text-red-600">{checkoutError}</p>}
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (checkoutForm.name.trim().length < 2) { setCheckoutError("Enter your full name."); return; }
+                    if (checkoutForm.pincode.length !== 6) { setCheckoutError("Enter a valid 6-digit pincode."); return; }
+                    if (checkoutForm.address.trim().length < 5) { setCheckoutError("Enter your full address."); return; }
+                    if (checkoutForm.city.trim().length < 2) { setCheckoutError("Enter your city."); return; }
+                    if (checkoutForm.state.trim().length < 2) { setCheckoutError("Enter your state."); return; }
+                    setCheckoutError("");
+                    advanceStep(3);
+                  }}
+                  className="w-full rounded-2xl bg-amber-700 py-4 text-sm font-black text-white transition-all hover:bg-amber-800"
+                >
+                  Continue to Payment →
+                </button>
+              </div>
+            )}
+
+            {/* ── Step 3: Payment ── */}
+            {checkoutStep === 3 && (
+              <div className="px-5 pb-8 pt-2 space-y-4">
+                <div>
+                  <h2 className="text-lg font-black text-foreground">Choose payment method</h2>
+                  <p className="text-xs text-muted-foreground mt-0.5 mb-4">Select how you&apos;d like to pay</p>
+                </div>
+
+                {/* Coupon code */}
+                <div className="rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Tag size={14} className="text-amber-600 shrink-0" />
+                    <span className="text-sm font-bold text-foreground">Coupon Code</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="Enter coupon code"
+                      value={couponCode}
+                      onChange={(e) => {
+                        setCouponCode(e.target.value.toUpperCase());
+                        if (couponApplied) { setCouponApplied(false); setCouponDiscount(0); }
+                        setCouponError("");
+                      }}
+                      disabled={couponApplied}
+                      className={cn(
+                        "flex-1 rounded-xl border px-3 py-2.5 text-sm font-semibold uppercase tracking-wider placeholder:font-normal placeholder:normal-case placeholder:tracking-normal outline-none transition-all",
+                        couponApplied
+                          ? "border-green-300 bg-green-50 text-green-700"
+                          : "border-stone-200 bg-white focus:border-amber-400 focus:ring-2 focus:ring-amber-100"
+                      )}
+                    />
+                    <button
+                      type="button"
+                      onClick={couponApplied ? () => { setCouponCode(""); setCouponApplied(false); setCouponDiscount(0); setCouponError(""); } : () => void handleApplyCoupon()}
+                      disabled={couponLoading || (!couponApplied && couponCode.trim().length === 0)}
+                      className={cn(
+                        "shrink-0 rounded-xl px-4 py-2.5 text-sm font-black transition-all",
+                        couponApplied
+                          ? "bg-stone-100 text-stone-500 hover:bg-stone-200"
+                          : couponLoading || couponCode.trim().length === 0
+                          ? "bg-stone-200 text-stone-400 cursor-not-allowed"
+                          : "bg-amber-700 text-white hover:bg-amber-800"
+                      )}
+                    >
+                      {couponLoading ? <Loader2 size={14} className="animate-spin" /> : couponApplied ? "Remove" : "Apply"}
+                    </button>
+                  </div>
+                  {couponError && <p className="mt-1.5 text-xs font-medium text-red-600">{couponError}</p>}
+                  {couponApplied && couponDiscount > 0 && (
+                    <p className="mt-1.5 flex items-center gap-1 text-xs font-bold text-green-600">
+                      <Check size={12} strokeWidth={3} /> ₹{couponDiscount} discount applied!
+                    </p>
+                  )}
+                </div>
+
+                {/* Payment method cards */}
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setPayment("cod")}
+                    className={cn(
+                      "rounded-2xl border-2 p-4 text-left transition-all",
+                      payment === "cod" ? "border-amber-500 bg-amber-50" : "border-stone-200 bg-white hover:border-stone-300"
+                    )}
+                  >
+                    <span className="text-2xl">🚚</span>
+                    <p className="mt-2 text-xs font-bold text-foreground">Cash on Delivery</p>
+                    <p className="mt-0.5 text-base font-black text-amber-700">
+                      ₹{(basePrice - couponDiscount).toLocaleString("en-IN")}
+                    </p>
+                    <p className="text-[10px] text-muted-foreground">Pay on arrival</p>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setPayment("prepaid")}
+                    className={cn(
+                      "relative rounded-2xl border-2 p-4 text-left transition-all",
+                      payment === "prepaid" ? "border-amber-500 bg-amber-50" : "border-stone-200 bg-white hover:border-stone-300"
+                    )}
+                  >
+                    <span className="absolute right-2 top-2 rounded-full bg-green-100 px-1.5 py-0.5 text-[9px] font-black text-green-700">
+                      Save ₹299
+                    </span>
+                    <CreditCard size={22} className="text-amber-700" />
+                    <p className="mt-2 text-xs font-bold text-foreground">Pay Online</p>
+                    <p className="mt-0.5 text-base font-black text-amber-700">
+                      ₹{(basePrice - 299 - couponDiscount).toLocaleString("en-IN")}
+                    </p>
+                    <p className="text-[10px] text-muted-foreground">UPI · Cards · Net Banking</p>
+                  </button>
+                </div>
+
+                {/* Total row */}
+                <div className="flex items-center justify-between rounded-xl border border-amber-100 bg-amber-50 px-4 py-3">
+                  <span className="text-sm text-muted-foreground">Total payable</span>
+                  <span className="text-xl font-black text-amber-700">₹{displayTotal.toLocaleString("en-IN")}</span>
+                </div>
+
+                {checkoutError && <p className="text-xs font-medium text-red-600">{checkoutError}</p>}
+
+                <button
+                  type="button"
+                  onClick={() => void handlePlaceOrder()}
+                  disabled={checkoutLoading || razorpayOpen}
+                  className={cn(
+                    "w-full rounded-2xl py-4 text-base font-black text-white shadow-lg transition-all active:scale-[0.98]",
+                    checkoutLoading || razorpayOpen ? "cursor-not-allowed bg-stone-300" : "bg-amber-700 hover:bg-amber-800"
+                  )}
+                >
+                  {checkoutLoading || razorpayOpen ? (
+                    <span className="inline-flex items-center justify-center gap-2">
+                      <Loader2 size={18} className="animate-spin" />
+                      {razorpayOpen ? "Complete payment in popup..." : "Placing order..."}
+                    </span>
+                  ) : (
+                    <>
+                      Place Order →
+                      <span className="mt-0.5 block text-xs font-normal opacity-80">
+                        {payment === "cod" ? "Pay on delivery · No advance needed" : "You save ₹299 on prepaid"}
+                      </span>
+                    </>
+                  )}
+                </button>
+
+                <div className="flex flex-wrap items-center justify-center gap-3 text-[10px] text-muted-foreground">
+                  <span className="flex items-center gap-1"><Shield size={10} /> 100% Secure</span>
+                  <span>·</span>
+                  <span className="flex items-center gap-1"><Truck size={10} /> Free Delivery</span>
+                  <span>·</span>
+                  <span>7-Day Returns</span>
+                </div>
+              </div>
+            )}
+          </div>
+        </>
+      )}
     </>
   );
 }
