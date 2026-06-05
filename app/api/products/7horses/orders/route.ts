@@ -194,11 +194,11 @@ export async function POST(request: Request) {
     const { error: physicalError } = await supabase.from("physical_order_details").insert({
       order_id: order.id,
       product_family: "seven_horses_pyrite_frame",
-      variant: siddh ? "siddh" : "standard",
+      variant: siddh ? "silver" : "plated",
       variant_label: siddh ? "Siddh Energised" : "Standard",
-      design: "frame",
+      design: "classic",
       design_label: "Raw Pyrite Frame",
-      size_code: "one-size",
+      size_code: "M",
       size_label: "One Size",
       siddha_energisation: siddh,
       payment_method: paymentMethod,
@@ -391,16 +391,13 @@ export async function POST(request: Request) {
       currency: "INR",
     });
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Failed to create 7 Horses order";
-    console.error("[7horses-order]", err);
-    return NextResponse.json(
-      {
-        error:
-          process.env.NODE_ENV === "development"
-            ? message
-            : "Failed to create order",
-      },
-      { status: 500 }
-    );
+    const message =
+      err instanceof Error
+        ? err.message
+        : typeof err === "object" && err !== null && "message" in err
+          ? String((err as { message: unknown }).message)
+          : JSON.stringify(err);
+    console.error("[7horses-order] ERROR:", message, err);
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
