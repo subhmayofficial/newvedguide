@@ -19,6 +19,49 @@ type PaymentMethod = "cod" | "prepaid";
 
 const MRP = 2900;
 
+const STEPS = [
+  { n: 1, label: "Phone" },
+  { n: 2, label: "Address" },
+  { n: 3, label: "Payment" },
+] as const;
+
+function StepIndicator({ step }: { step: number }) {
+  return (
+    <div className="flex items-center justify-center px-6 py-4">
+      {STEPS.map(({ n, label }, idx) => (
+        <div key={n} className="flex items-center">
+          <div className="flex flex-col items-center gap-1">
+            <div
+              className={cn(
+                "flex size-9 items-center justify-center rounded-full text-sm font-black transition-all shadow-sm",
+                n < step
+                  ? "bg-green-500 text-white shadow-green-200"
+                  : n === step
+                    ? "bg-amber-700 text-white shadow-amber-200 ring-4 ring-amber-100"
+                    : "bg-stone-100 text-stone-400"
+              )}
+            >
+              {n < step ? <Check size={15} strokeWidth={3} /> : n}
+            </div>
+            <span className={cn(
+              "text-[10px] font-bold",
+              n === step ? "text-amber-700" : n < step ? "text-green-600" : "text-stone-400"
+            )}>
+              {label}
+            </span>
+          </div>
+          {idx < STEPS.length - 1 && (
+            <div className={cn(
+              "mb-5 h-[2px] w-14 mx-1 rounded-full transition-all",
+              n < step ? "bg-green-400" : "bg-stone-200"
+            )} />
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Order summary card
 // ---------------------------------------------------------------------------
@@ -204,7 +247,7 @@ export function SevenHorsesCheckoutPage() {
   const siddh = params.get("siddh") === "1";
   const basePrice = siddh ? 1998 : 1699;
 
-  // step: 1=phone+address, 2=payment
+  // step: 1=phone, 2=address, 3=payment
   const [step, setStep] = useState(1);
   const [phone, setPhone] = useState("");
   const [form, setForm] = useState({
@@ -319,12 +362,18 @@ export function SevenHorsesCheckoutPage() {
     setCouponError("");
   }
 
-  // ---- Step 1 → 2: validate phone + address ----
-  function handleContinueToPayment() {
+  // ---- Step 1 → 2: validate phone ----
+  function handlePhoneContinue() {
     if (phone.length !== 10) {
       setError("Enter a valid 10-digit mobile number.");
       return;
     }
+    setError("");
+    setStep(2);
+  }
+
+  // ---- Step 2 → 3: validate address ----
+  function handleAddressContinue() {
     if (form.name.trim().length < 2) {
       setError("Enter your full name.");
       return;
@@ -346,7 +395,7 @@ export function SevenHorsesCheckoutPage() {
       return;
     }
     setError("");
-    setStep(2);
+    setStep(3);
   }
 
   // ---- Step 2: Place order ----
@@ -496,7 +545,7 @@ export function SevenHorsesCheckoutPage() {
             <ChevronLeft size={20} className="text-foreground" />
           </button>
           <span className="flex-1 text-center text-sm font-bold text-foreground">
-            {step === 1 ? "Delivery Details" : "Payment"}
+            {step === 1 ? "Mobile Number" : step === 2 ? "Delivery Address" : "Payment"}
           </span>
           <span className="flex items-center gap-1 text-xs font-medium text-green-600">
             <Shield size={12} />
@@ -535,22 +584,23 @@ export function SevenHorsesCheckoutPage() {
           error={couponError}
         />
 
-        {/* ── STEP 1: Phone + Address ── */}
+        {/* Step indicator */}
+        <div className="rounded-2xl border border-stone-200 bg-white">
+          <StepIndicator step={step} />
+        </div>
+
+        {/* ── STEP 1: Phone ── */}
         {step === 1 && (
           <div className="rounded-2xl border border-stone-200 bg-white overflow-hidden">
-            <div className="border-b border-stone-100 px-4 py-3">
-              <h2 className="text-sm font-bold text-foreground">Contact & Delivery</h2>
-              <p className="text-xs text-muted-foreground mt-0.5">Where should we deliver your order?</p>
+            <div className="border-b border-stone-100 px-5 py-4">
+              <h2 className="text-base font-bold text-foreground">Enter your mobile number</h2>
+              <p className="text-xs text-muted-foreground mt-0.5">We'll send order updates on WhatsApp</p>
             </div>
-            <div className="p-4 space-y-3">
-
-              {/* Phone */}
+            <div className="p-5 space-y-4">
               <div>
-                <label className="mb-1.5 block text-xs font-semibold text-foreground">
-                  Mobile Number *
-                </label>
+                <label className="mb-1.5 block text-xs font-semibold text-foreground">Mobile Number *</label>
                 <div className="flex">
-                  <span className="flex items-center rounded-l-xl border border-r-0 border-stone-200 bg-stone-50 px-3 text-sm text-muted-foreground select-none">
+                  <span className="flex items-center rounded-l-xl border border-r-0 border-stone-200 bg-stone-50 px-3 text-sm font-medium text-muted-foreground select-none">
                     +91
                   </span>
                   <input
@@ -560,12 +610,36 @@ export function SevenHorsesCheckoutPage() {
                     maxLength={10}
                     value={phone}
                     onChange={(e) => { setPhone(e.target.value.replace(/\D/g, "")); setError(""); }}
-                    className="flex-1 rounded-r-xl border border-stone-200 px-4 py-2.5 text-sm placeholder:text-stone-400 outline-none transition-all focus:border-amber-400 focus:ring-2 focus:ring-amber-100"
+                    onKeyDown={(e) => { if (e.key === "Enter") handlePhoneContinue(); }}
+                    className="flex-1 rounded-r-xl border border-stone-200 px-4 py-3 text-sm placeholder:text-stone-400 outline-none transition-all focus:border-amber-400 focus:ring-2 focus:ring-amber-100"
                   />
                 </div>
               </div>
+              {error && <p className="text-xs font-medium text-red-600">{error}</p>}
+              <button
+                type="button"
+                onClick={handlePhoneContinue}
+                disabled={phone.length !== 10}
+                className={cn(
+                  "w-full rounded-2xl py-4 text-sm font-black text-white transition-all active:scale-[0.98]",
+                  phone.length !== 10 ? "cursor-not-allowed bg-stone-300" : "bg-amber-700 hover:bg-amber-800"
+                )}
+              >
+                Continue →
+              </button>
+              <p className="text-center text-[10px] text-muted-foreground">🔒 Your details are safe and never shared</p>
+            </div>
+          </div>
+        )}
 
-              {/* Name */}
+        {/* ── STEP 2: Address ── */}
+        {step === 2 && (
+          <div className="rounded-2xl border border-stone-200 bg-white overflow-hidden">
+            <div className="border-b border-stone-100 px-5 py-4">
+              <h2 className="text-base font-bold text-foreground">Delivery details</h2>
+              <p className="text-xs text-muted-foreground mt-0.5">Where should we deliver your order?</p>
+            </div>
+            <div className="p-5 space-y-3">
               <div>
                 <label className="mb-1.5 block text-xs font-semibold text-foreground">Full Name *</label>
                 <input
@@ -573,11 +647,9 @@ export function SevenHorsesCheckoutPage() {
                   placeholder="Your full name"
                   value={form.name}
                   onChange={(e) => { setForm((f) => ({ ...f, name: e.target.value })); setError(""); }}
-                  className="w-full rounded-xl border border-stone-200 px-4 py-2.5 text-sm placeholder:text-stone-400 outline-none transition-all focus:border-amber-400 focus:ring-2 focus:ring-amber-100"
+                  className="w-full rounded-xl border border-stone-200 px-4 py-3 text-sm placeholder:text-stone-400 outline-none transition-all focus:border-amber-400 focus:ring-2 focus:ring-amber-100"
                 />
               </div>
-
-              {/* Pincode */}
               <div>
                 <label className="mb-1.5 block text-xs font-semibold text-foreground">Pincode *</label>
                 <input
@@ -590,11 +662,9 @@ export function SevenHorsesCheckoutPage() {
                     setForm((f) => ({ ...f, pincode: e.target.value.replace(/\D/g, ""), city: "", state: "" }));
                     setError("");
                   }}
-                  className="w-full rounded-xl border border-stone-200 px-4 py-2.5 text-sm placeholder:text-stone-400 outline-none transition-all focus:border-amber-400 focus:ring-2 focus:ring-amber-100"
+                  className="w-full rounded-xl border border-stone-200 px-4 py-3 text-sm placeholder:text-stone-400 outline-none transition-all focus:border-amber-400 focus:ring-2 focus:ring-amber-100"
                 />
               </div>
-
-              {/* Address */}
               <div>
                 <label className="mb-1.5 block text-xs font-semibold text-foreground">Address *</label>
                 <textarea
@@ -602,11 +672,9 @@ export function SevenHorsesCheckoutPage() {
                   rows={2}
                   value={form.address}
                   onChange={(e) => { setForm((f) => ({ ...f, address: e.target.value })); setError(""); }}
-                  className="w-full resize-none rounded-xl border border-stone-200 px-4 py-2.5 text-sm placeholder:text-stone-400 outline-none transition-all focus:border-amber-400 focus:ring-2 focus:ring-amber-100"
+                  className="w-full resize-none rounded-xl border border-stone-200 px-4 py-3 text-sm placeholder:text-stone-400 outline-none transition-all focus:border-amber-400 focus:ring-2 focus:ring-amber-100"
                 />
               </div>
-
-              {/* City + State */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="mb-1.5 block text-xs font-semibold text-foreground">City *</label>
@@ -615,7 +683,7 @@ export function SevenHorsesCheckoutPage() {
                     placeholder="City"
                     value={form.city}
                     onChange={(e) => { setForm((f) => ({ ...f, city: e.target.value })); setError(""); }}
-                    className="w-full rounded-xl border border-stone-200 px-3 py-2.5 text-sm placeholder:text-stone-400 outline-none transition-all focus:border-amber-400 focus:ring-2 focus:ring-amber-100"
+                    className="w-full rounded-xl border border-stone-200 px-3 py-3 text-sm placeholder:text-stone-400 outline-none transition-all focus:border-amber-400 focus:ring-2 focus:ring-amber-100"
                   />
                 </div>
                 <div>
@@ -625,35 +693,29 @@ export function SevenHorsesCheckoutPage() {
                     placeholder="State"
                     value={form.state}
                     onChange={(e) => { setForm((f) => ({ ...f, state: e.target.value })); setError(""); }}
-                    className="w-full rounded-xl border border-stone-200 px-3 py-2.5 text-sm placeholder:text-stone-400 outline-none transition-all focus:border-amber-400 focus:ring-2 focus:ring-amber-100"
+                    className="w-full rounded-xl border border-stone-200 px-3 py-3 text-sm placeholder:text-stone-400 outline-none transition-all focus:border-amber-400 focus:ring-2 focus:ring-amber-100"
                   />
                 </div>
               </div>
-
               {error && <p className="text-xs font-medium text-red-600">{error}</p>}
-
               <button
                 type="button"
-                onClick={handleContinueToPayment}
+                onClick={handleAddressContinue}
                 className="w-full rounded-2xl bg-amber-700 py-4 text-sm font-black text-white transition-all hover:bg-amber-800 active:scale-[0.98]"
               >
                 Continue to Payment →
               </button>
-
-              <p className="text-center text-[10px] text-muted-foreground">
-                🔒 Your details are safe and never shared
-              </p>
             </div>
           </div>
         )}
 
-        {/* ── STEP 2: Payment ── */}
-        {step === 2 && (
+        {/* ── STEP 3: Payment ── */}
+        {step === 3 && (
           <div className="rounded-2xl border border-stone-200 bg-white overflow-hidden">
-            <div className="border-b border-stone-100 px-4 py-3">
-              <h2 className="text-sm font-bold text-foreground">Choose Payment Method</h2>
+            <div className="border-b border-stone-100 px-5 py-4">
+              <h2 className="text-base font-bold text-foreground">Choose payment method</h2>
             </div>
-            <div className="p-4">
+            <div className="p-5">
               <div className="grid grid-cols-2 gap-3">
                 {/* COD */}
                 <button
@@ -697,12 +759,10 @@ export function SevenHorsesCheckoutPage() {
                 </button>
               </div>
 
-              {/* Total row */}
+              {/* Total */}
               <div className="mt-4 flex items-center justify-between rounded-xl border border-amber-100 bg-amber-50 px-4 py-3">
                 <span className="text-sm text-muted-foreground">Total payable</span>
-                <span className="text-xl font-black text-amber-700">
-                  ₹{displayTotal.toLocaleString("en-IN")}
-                </span>
+                <span className="text-xl font-black text-amber-700">₹{displayTotal.toLocaleString("en-IN")}</span>
               </div>
 
               {error && <p className="mt-3 text-xs font-medium text-red-600">{error}</p>}
@@ -713,9 +773,7 @@ export function SevenHorsesCheckoutPage() {
                 disabled={loading || razorpayOpen}
                 className={cn(
                   "mt-3 w-full rounded-2xl py-4 text-base font-black text-white shadow-lg transition-all active:scale-[0.98]",
-                  loading || razorpayOpen
-                    ? "cursor-not-allowed bg-stone-300"
-                    : "bg-amber-700 hover:bg-amber-800"
+                  loading || razorpayOpen ? "cursor-not-allowed bg-stone-300" : "bg-amber-700 hover:bg-amber-800"
                 )}
               >
                 {loading || razorpayOpen ? (
