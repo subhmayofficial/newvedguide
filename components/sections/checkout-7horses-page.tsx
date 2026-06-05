@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams, useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ChevronLeft,
   Shield,
@@ -10,63 +10,14 @@ import {
   Loader2,
   CreditCard,
   ShoppingCart,
+  Tag,
 } from "lucide-react";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 type PaymentMethod = "cod" | "prepaid";
 
 const MRP = 2900;
-
-const STEPS = [
-  { n: 1, label: "Phone" },
-  { n: 2, label: "OTP" },
-  { n: 3, label: "Address" },
-  { n: 4, label: "Payment" },
-] as const;
-
-// ---------------------------------------------------------------------------
-// Step indicator
-// ---------------------------------------------------------------------------
-function StepIndicator({ step }: { step: number }) {
-  return (
-    <div className="flex items-center justify-center gap-0 px-4 py-4">
-      {STEPS.map(({ n, label }, idx) => (
-        <div key={n} className="flex items-center">
-          <div className="flex flex-col items-center">
-            <div
-              className={cn(
-                "flex size-8 items-center justify-center rounded-full text-sm font-bold transition-all",
-                n < step
-                  ? "bg-green-500 text-white"
-                  : n === step
-                    ? "bg-amber-700 text-white"
-                    : "bg-stone-200 text-stone-400"
-              )}
-            >
-              {n < step ? <Check size={14} strokeWidth={3} /> : n}
-            </div>
-            <span
-              className={cn(
-                "mt-1 text-[10px] font-semibold",
-                n === step ? "text-amber-700" : n < step ? "text-green-600" : "text-stone-400"
-              )}
-            >
-              {label}
-            </span>
-          </div>
-          {idx < STEPS.length - 1 && (
-            <div
-              className={cn(
-                "mb-4 h-[2px] w-8 transition-colors",
-                n < step ? "bg-green-400" : "bg-stone-200"
-              )}
-            />
-          )}
-        </div>
-      ))}
-    </div>
-  );
-}
 
 // ---------------------------------------------------------------------------
 // Order summary card
@@ -75,15 +26,17 @@ function OrderSummaryCard({
   siddh,
   basePrice,
   payment,
+  couponDiscount,
 }: {
   siddh: boolean;
   basePrice: number;
   payment: PaymentMethod;
+  couponDiscount: number;
 }) {
   const [open, setOpen] = useState(true);
-  const prepaidPrice = basePrice - 299;
-  const displayTotal = payment === "prepaid" ? prepaidPrice : basePrice;
-  const saved = MRP - basePrice;
+  const prepaidDiscount = payment === "prepaid" ? 299 : 0;
+  const displayTotal = basePrice - prepaidDiscount - couponDiscount;
+  const saved = MRP - displayTotal;
 
   return (
     <div className="rounded-2xl border border-stone-200 bg-white overflow-hidden">
@@ -101,17 +54,26 @@ function OrderSummaryCard({
       {open && (
         <div className="border-t border-stone-100 px-4 pb-4 pt-3">
           <div className="flex items-start gap-3">
-            <div className="flex size-14 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-2xl">
-              🐴
+            {/* Product image */}
+            <div className="relative size-16 shrink-0 overflow-hidden rounded-xl border border-amber-100 bg-amber-50">
+              <Image
+                src="/7horses/1.webp"
+                alt="7 Horses on Raw Pyrite Frame"
+                fill
+                className="object-cover"
+                sizes="64px"
+              />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold text-foreground">7 Horses on Raw Pyrite Frame</p>
+              <p className="text-sm font-bold text-foreground leading-snug">
+                7 Horses on Raw Pyrite Frame
+              </p>
               {siddh && (
                 <span className="mt-1 inline-block rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-700">
                   + Siddh Energised
                 </span>
               )}
-              <div className="mt-1 flex items-center gap-2">
+              <div className="mt-1.5 flex items-center gap-1.5">
                 <span className="rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-black text-green-700">
                   ₹{saved.toLocaleString("en-IN")} saved
                 </span>
@@ -126,15 +88,107 @@ function OrderSummaryCard({
               </p>
             </div>
           </div>
-          <div className="mt-3 flex items-center justify-between border-t border-stone-100 pt-2 text-xs text-stone-500">
-            <span className="flex items-center gap-1">
-              <Truck size={11} /> Free delivery · 7–10 days
-            </span>
-            <span className="flex items-center gap-1">
-              <Shield size={11} /> 100% Secure
-            </span>
+
+          {/* Price breakdown */}
+          <div className="mt-3 space-y-1.5 border-t border-stone-100 pt-3 text-xs text-stone-500">
+            <div className="flex justify-between">
+              <span>Product price</span>
+              <span className="line-through">₹{MRP.toLocaleString("en-IN")}</span>
+            </div>
+            <div className="flex justify-between text-green-600 font-semibold">
+              <span>Discount</span>
+              <span>−₹{(MRP - basePrice).toLocaleString("en-IN")}</span>
+            </div>
+            {couponDiscount > 0 && (
+              <div className="flex justify-between text-green-600 font-semibold">
+                <span>Coupon</span>
+                <span>−₹{couponDiscount.toLocaleString("en-IN")}</span>
+              </div>
+            )}
+            {payment === "prepaid" && (
+              <div className="flex justify-between text-green-600 font-semibold">
+                <span>Prepaid discount</span>
+                <span>−₹299</span>
+              </div>
+            )}
+            <div className="flex justify-between font-bold text-foreground border-t border-stone-100 pt-1.5 text-sm">
+              <span>Total</span>
+              <span className="text-amber-700">₹{displayTotal.toLocaleString("en-IN")}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="flex items-center gap-1">
+                <Truck size={10} /> Delivery
+              </span>
+              <span className="font-semibold text-green-600">FREE</span>
+            </div>
           </div>
         </div>
+      )}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Coupon card
+// ---------------------------------------------------------------------------
+function CouponCard({
+  couponCode,
+  setCouponCode,
+  onApply,
+  applied,
+  discount,
+  loading,
+  error,
+}: {
+  couponCode: string;
+  setCouponCode: (v: string) => void;
+  onApply: () => void;
+  applied: boolean;
+  discount: number;
+  loading: boolean;
+  error: string;
+}) {
+  return (
+    <div className="rounded-2xl border border-stone-200 bg-white px-4 py-3">
+      <div className="flex items-center gap-2 mb-2">
+        <Tag size={14} className="text-amber-600 shrink-0" />
+        <span className="text-sm font-bold text-foreground">Coupon Code</span>
+      </div>
+      <div className="flex gap-2">
+        <input
+          type="text"
+          placeholder="Enter coupon code"
+          value={couponCode}
+          onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+          disabled={applied}
+          className={cn(
+            "flex-1 rounded-xl border px-3 py-2.5 text-sm font-semibold uppercase tracking-wider placeholder:font-normal placeholder:normal-case placeholder:tracking-normal outline-none transition-all",
+            applied
+              ? "border-green-300 bg-green-50 text-green-700"
+              : "border-stone-200 focus:border-amber-400 focus:ring-2 focus:ring-amber-100"
+          )}
+        />
+        <button
+          type="button"
+          onClick={applied ? () => { setCouponCode(""); } : onApply}
+          disabled={loading || (!applied && couponCode.trim().length === 0)}
+          className={cn(
+            "shrink-0 rounded-xl px-4 py-2.5 text-sm font-black transition-all",
+            applied
+              ? "bg-stone-100 text-stone-500 hover:bg-stone-200"
+              : loading || couponCode.trim().length === 0
+              ? "bg-stone-200 text-stone-400 cursor-not-allowed"
+              : "bg-amber-700 text-white hover:bg-amber-800"
+          )}
+        >
+          {loading ? <Loader2 size={14} className="animate-spin" /> : applied ? "Remove" : "Apply"}
+        </button>
+      </div>
+      {error && <p className="mt-1.5 text-xs font-medium text-red-600">{error}</p>}
+      {applied && discount > 0 && (
+        <p className="mt-1.5 flex items-center gap-1 text-xs font-bold text-green-600">
+          <Check size={12} strokeWidth={3} /> ₹{discount} discount applied!
+        </p>
       )}
     </div>
   );
@@ -149,12 +203,10 @@ export function SevenHorsesCheckoutPage() {
 
   const siddh = params.get("siddh") === "1";
   const basePrice = siddh ? 1998 : 1699;
-  const prepaidPrice = basePrice - 299;
 
+  // step: 1=phone+address, 2=payment
   const [step, setStep] = useState(1);
   const [phone, setPhone] = useState("");
-  const [otp, setOtp] = useState("");
-  const [otpTimer, setOtpTimer] = useState(0);
   const [form, setForm] = useState({
     name: "",
     address: "",
@@ -163,15 +215,22 @@ export function SevenHorsesCheckoutPage() {
     pincode: "",
   });
   const [payment, setPayment] = useState<PaymentMethod>("cod");
+
+  // Coupon
+  const [couponCode, setCouponCode] = useState("");
+  const [couponApplied, setCouponApplied] = useState(false);
+  const [couponDiscount, setCouponDiscount] = useState(0);
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [couponError, setCouponError] = useState("");
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [placed, setPlaced] = useState<{ orderNumber: string; paymentMethod: PaymentMethod } | null>(null);
   const [razorpayReady, setRazorpayReady] = useState(false);
   const [razorpayOpen, setRazorpayOpen] = useState(false);
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const razorpayKeyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
-  const displayTotal = payment === "prepaid" ? prepaidPrice : basePrice;
+  const prepaidDiscount = payment === "prepaid" ? 299 : 0;
+  const displayTotal = basePrice - prepaidDiscount - couponDiscount;
 
   // Load Razorpay script
   useEffect(() => {
@@ -194,37 +253,14 @@ export function SevenHorsesCheckoutPage() {
       script.addEventListener("load", markReady, { once: true });
       document.head.appendChild(script);
     }
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, []);
-
-  // OTP countdown timer
-  useEffect(() => {
-    if (otpTimer <= 0) {
-      if (timerRef.current) clearInterval(timerRef.current);
-      return;
-    }
-    timerRef.current = setInterval(() => {
-      setOtpTimer((t) => {
-        if (t <= 1) {
-          if (timerRef.current) clearInterval(timerRef.current);
-          return 0;
-        }
-        return t - 1;
-      });
-    }, 1000);
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, [otpTimer]);
 
   // Auto-fetch city/state from pincode
   useEffect(() => {
     const pin = form.pincode;
     if (pin.length !== 6) return;
     let cancelled = false;
-
     void (async () => {
       try {
         const res = await fetch(`https://api.postalpincode.in/pincode/${pin}`);
@@ -241,94 +277,54 @@ export function SevenHorsesCheckoutPage() {
             state: f.state || po.State,
           }));
         }
-      } catch {
-        // ignore
-      }
+      } catch { /* ignore */ }
     })();
-
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, [form.pincode]);
 
-  // ---- Step 1: Send OTP ----
-  async function handleSendOtp() {
+  // ---- Apply coupon ----
+  async function handleApplyCoupon() {
+    if (!couponCode.trim()) return;
+    setCouponError("");
+    setCouponLoading(true);
+    try {
+      const res = await fetch("/api/coupons/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: couponCode.trim(), amountPaise: basePrice * 100 }),
+      });
+      const json = (await res.json()) as {
+        valid?: boolean;
+        discountPaise?: number;
+        error?: string;
+        message?: string;
+      };
+      if (!res.ok || !json.valid) {
+        throw new Error(json.error ?? json.message ?? "Invalid or expired coupon.");
+      }
+      const disc = Math.round((json.discountPaise ?? 0) / 100);
+      setCouponDiscount(disc);
+      setCouponApplied(true);
+    } catch (err) {
+      setCouponError(err instanceof Error ? err.message : "Invalid coupon.");
+    } finally {
+      setCouponLoading(false);
+    }
+  }
+
+  function handleRemoveCoupon() {
+    setCouponCode("");
+    setCouponApplied(false);
+    setCouponDiscount(0);
+    setCouponError("");
+  }
+
+  // ---- Step 1 → 2: validate phone + address ----
+  function handleContinueToPayment() {
     if (phone.length !== 10) {
       setError("Enter a valid 10-digit mobile number.");
       return;
     }
-    setError("");
-    setLoading(true);
-    try {
-      const res = await fetch("/api/auth/phone-otp/send", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone: "91" + phone }),
-      });
-      const json = (await res.json()) as { success?: boolean; error?: string };
-      if (!res.ok || !json.success) {
-        throw new Error(json.error ?? "Could not send OTP. Please try again.");
-      }
-      setOtpTimer(30);
-      setStep(2);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not send OTP.");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  // ---- Step 2: Verify OTP ----
-  async function handleVerifyOtp() {
-    if (otp.length !== 6) {
-      setError("Enter the 6-digit OTP.");
-      return;
-    }
-    setError("");
-    setLoading(true);
-    try {
-      const res = await fetch("/api/auth/phone-otp/verify", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone: "91" + phone, code: otp }),
-      });
-      const json = (await res.json()) as { success?: boolean; error?: string };
-      if (!res.ok || !json.success) {
-        throw new Error(json.error ?? "Invalid OTP. Please try again.");
-      }
-      setStep(3);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "OTP verification failed.");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  // ---- Step 2: Resend OTP ----
-  async function handleResendOtp() {
-    setError("");
-    setOtp("");
-    setLoading(true);
-    try {
-      const res = await fetch("/api/auth/phone-otp/send", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone: "91" + phone }),
-      });
-      const json = (await res.json()) as { success?: boolean; error?: string };
-      if (!res.ok || !json.success) {
-        throw new Error(json.error ?? "Could not resend OTP.");
-      }
-      setOtpTimer(30);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not resend OTP.");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  // ---- Step 3: Validate address ----
-  function handleAddressContinue() {
     if (form.name.trim().length < 2) {
       setError("Enter your full name.");
       return;
@@ -350,10 +346,10 @@ export function SevenHorsesCheckoutPage() {
       return;
     }
     setError("");
-    setStep(4);
+    setStep(2);
   }
 
-  // ---- Step 4: Place order ----
+  // ---- Step 2: Place order ----
   async function handlePlaceOrder() {
     setError("");
     setLoading(true);
@@ -367,6 +363,7 @@ export function SevenHorsesCheckoutPage() {
           amountPaise,
           paymentMethod: payment,
           product: { siddh },
+          couponCode: couponApplied ? couponCode : undefined,
           customer: {
             fullName: form.name,
             phone,
@@ -377,7 +374,7 @@ export function SevenHorsesCheckoutPage() {
           },
           attribution: {
             sourcePage: "/checkout/7horses",
-            referrer: document.referrer || undefined,
+            referrer: typeof document !== "undefined" ? document.referrer || undefined : undefined,
           },
         }),
       });
@@ -398,7 +395,6 @@ export function SevenHorsesCheckoutPage() {
       }
 
       if (payment === "cod" || json.paymentBypassed) {
-        setPlaced({ orderNumber: json.orderNumber, paymentMethod: payment });
         router.push(`/thank-you/7horses?order=${json.orderNumber}`);
         return;
       }
@@ -414,7 +410,7 @@ export function SevenHorsesCheckoutPage() {
         throw new Error("Payment order could not be created. Please try COD.");
       }
       if (!razorpayReady || !window.Razorpay) {
-        throw new Error("Payment window is still loading. Please wait a moment and try again.");
+        throw new Error("Payment window is still loading. Please wait a moment.");
       }
 
       const options = {
@@ -424,14 +420,8 @@ export function SevenHorsesCheckoutPage() {
         name: "VedGuide",
         description: `7 Horses on Raw Pyrite Frame${siddh ? " (Siddh Energised)" : ""}`,
         order_id: json.razorpayOrderId,
-        prefill: {
-          name: form.name,
-          contact: phone,
-        },
-        notes: {
-          order_id: dbId,
-          product: "seven_horses_pyrite_frame",
-        },
+        prefill: { name: form.name, contact: phone },
+        notes: { order_id: dbId, product: "seven_horses_pyrite_frame" },
         theme: { color: "#B45309" },
         modal: {
           ondismiss: () => {
@@ -462,18 +452,11 @@ export function SevenHorsesCheckoutPage() {
                 orderDbId: dbId,
               }),
             });
-            const verifyJson = (await verifyRes.json()) as { success?: boolean; error?: string };
-            if (!verifyJson.success) {
-              throw new Error(verifyJson.error ?? "Payment verification failed.");
-            }
-            setPlaced({ orderNumber, paymentMethod: payment });
+            const v = (await verifyRes.json()) as { success?: boolean; error?: string };
+            if (!v.success) throw new Error(v.error ?? "Payment verification failed.");
             router.push(`/thank-you/7horses?order=${orderNumber}`);
           } catch (verifyError) {
-            setError(
-              verifyError instanceof Error
-                ? verifyError.message
-                : "Payment verification failed."
-            );
+            setError(verifyError instanceof Error ? verifyError.message : "Payment verification failed.");
           } finally {
             setLoading(false);
           }
@@ -500,265 +483,177 @@ export function SevenHorsesCheckoutPage() {
     }
   }
 
-  // ---- Success screen ----
-  if (placed) {
-    return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-amber-50 px-5 text-center">
-        <div className="mb-6 flex size-20 items-center justify-center rounded-full bg-green-100">
-          <Check size={36} className="text-green-600 stroke-[2.5]" />
-        </div>
-        <h1 className="mb-2 text-2xl font-bold text-foreground">Order Placed! 🎉</h1>
-        <p className="mb-1 text-sm text-muted-foreground">
-          Your 7 Horses Pyrite Frame order is confirmed.
-        </p>
-        <p className="mb-1 font-mono text-xs font-semibold text-amber-800">{placed.orderNumber}</p>
-        <p className="mb-6 text-xs text-muted-foreground">
-          {placed.paymentMethod === "cod" ? "COD order saved." : "Payment received."} We&apos;ll
-          WhatsApp you tracking details on <strong>+91 {phone}</strong>.
-        </p>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-stone-50 pb-12">
+    <div className="min-h-screen bg-stone-50 pb-16">
       {/* Header */}
       <div className="sticky top-0 z-20 border-b border-stone-100 bg-white px-4 py-3 shadow-sm">
         <div className="mx-auto flex max-w-lg items-center">
           <button
             type="button"
-            onClick={() => (step > 1 ? setStep((s) => s - 1) : router.back())}
+            onClick={() => (step > 1 ? setStep(1) : router.back())}
             className="flex size-8 items-center justify-center rounded-full hover:bg-stone-100"
           >
             <ChevronLeft size={20} className="text-foreground" />
           </button>
-          <span className="flex-1 text-center text-sm font-bold text-foreground">Checkout</span>
+          <span className="flex-1 text-center text-sm font-bold text-foreground">
+            {step === 1 ? "Delivery Details" : "Payment"}
+          </span>
           <span className="flex items-center gap-1 text-xs font-medium text-green-600">
             <Shield size={12} />
-            100% Secure Payment
+            100% Secure
           </span>
         </div>
       </div>
 
       {/* Prepaid banner */}
       <div className="bg-green-600 px-4 py-2 text-center text-xs font-bold text-white">
-        🎁 ₹299 off on prepaid orders
+        🎁 ₹299 off on prepaid · Free shipping pan-India
       </div>
 
-      <div className="mx-auto max-w-lg space-y-4 px-4 pt-4">
-        {/* Order summary */}
-        <OrderSummaryCard siddh={siddh} basePrice={basePrice} payment={payment} />
+      <div className="mx-auto max-w-lg space-y-3 px-4 pt-4">
 
-        {/* Step indicator */}
-        <div className="rounded-2xl border border-stone-200 bg-white">
-          <StepIndicator step={step} />
-        </div>
+        {/* Order summary — always visible */}
+        <OrderSummaryCard
+          siddh={siddh}
+          basePrice={basePrice}
+          payment={payment}
+          couponDiscount={couponDiscount}
+        />
 
-        {/* Step content */}
-        <div className="rounded-2xl border border-stone-200 bg-white overflow-hidden">
-          {/* ---- STEP 1: Phone ---- */}
-          {step === 1 && (
-            <div className="p-5">
-              <h2 className="mb-1 text-base font-bold text-foreground">Enter your mobile number</h2>
-              <p className="mb-4 text-xs text-muted-foreground">
-                We&apos;ll send an OTP to verify your number
-              </p>
-              <div className="flex">
-                <span className="flex items-center rounded-l-xl border border-r-0 border-stone-200 bg-stone-50 px-3 text-sm text-muted-foreground">
-                  +91
-                </span>
+        {/* Coupon */}
+        <CouponCard
+          couponCode={couponCode}
+          setCouponCode={(v) => {
+            setCouponCode(v);
+            if (couponApplied) { setCouponApplied(false); setCouponDiscount(0); }
+            setCouponError("");
+          }}
+          onApply={() => void handleApplyCoupon()}
+          applied={couponApplied}
+          discount={couponDiscount}
+          loading={couponLoading}
+          error={couponError}
+        />
+
+        {/* ── STEP 1: Phone + Address ── */}
+        {step === 1 && (
+          <div className="rounded-2xl border border-stone-200 bg-white overflow-hidden">
+            <div className="border-b border-stone-100 px-4 py-3">
+              <h2 className="text-sm font-bold text-foreground">Contact & Delivery</h2>
+              <p className="text-xs text-muted-foreground mt-0.5">Where should we deliver your order?</p>
+            </div>
+            <div className="p-4 space-y-3">
+
+              {/* Phone */}
+              <div>
+                <label className="mb-1.5 block text-xs font-semibold text-foreground">
+                  Mobile Number *
+                </label>
+                <div className="flex">
+                  <span className="flex items-center rounded-l-xl border border-r-0 border-stone-200 bg-stone-50 px-3 text-sm text-muted-foreground select-none">
+                    +91
+                  </span>
+                  <input
+                    type="tel"
+                    inputMode="numeric"
+                    placeholder="10-digit mobile number"
+                    maxLength={10}
+                    value={phone}
+                    onChange={(e) => { setPhone(e.target.value.replace(/\D/g, "")); setError(""); }}
+                    className="flex-1 rounded-r-xl border border-stone-200 px-4 py-2.5 text-sm placeholder:text-stone-400 outline-none transition-all focus:border-amber-400 focus:ring-2 focus:ring-amber-100"
+                  />
+                </div>
+              </div>
+
+              {/* Name */}
+              <div>
+                <label className="mb-1.5 block text-xs font-semibold text-foreground">Full Name *</label>
                 <input
-                  type="tel"
-                  inputMode="numeric"
-                  placeholder="10-digit mobile number"
-                  maxLength={10}
-                  value={phone}
-                  onChange={(e) => {
-                    setPhone(e.target.value.replace(/\D/g, ""));
-                    setError("");
-                  }}
-                  onKeyDown={(e) => { if (e.key === "Enter") void handleSendOtp(); }}
-                  className="flex-1 rounded-r-xl border border-stone-200 px-4 py-3 text-sm placeholder:text-stone-400 outline-none transition-all focus:border-amber-400 focus:ring-2 focus:ring-amber-100"
+                  type="text"
+                  placeholder="Your full name"
+                  value={form.name}
+                  onChange={(e) => { setForm((f) => ({ ...f, name: e.target.value })); setError(""); }}
+                  className="w-full rounded-xl border border-stone-200 px-4 py-2.5 text-sm placeholder:text-stone-400 outline-none transition-all focus:border-amber-400 focus:ring-2 focus:ring-amber-100"
                 />
               </div>
-              {error && (
-                <p className="mt-2 text-xs font-medium text-red-600">{error}</p>
-              )}
+
+              {/* Pincode */}
+              <div>
+                <label className="mb-1.5 block text-xs font-semibold text-foreground">Pincode *</label>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  placeholder="6-digit pincode"
+                  maxLength={6}
+                  value={form.pincode}
+                  onChange={(e) => {
+                    setForm((f) => ({ ...f, pincode: e.target.value.replace(/\D/g, ""), city: "", state: "" }));
+                    setError("");
+                  }}
+                  className="w-full rounded-xl border border-stone-200 px-4 py-2.5 text-sm placeholder:text-stone-400 outline-none transition-all focus:border-amber-400 focus:ring-2 focus:ring-amber-100"
+                />
+              </div>
+
+              {/* Address */}
+              <div>
+                <label className="mb-1.5 block text-xs font-semibold text-foreground">Address *</label>
+                <textarea
+                  placeholder="House no., Street, Area, Landmark"
+                  rows={2}
+                  value={form.address}
+                  onChange={(e) => { setForm((f) => ({ ...f, address: e.target.value })); setError(""); }}
+                  className="w-full resize-none rounded-xl border border-stone-200 px-4 py-2.5 text-sm placeholder:text-stone-400 outline-none transition-all focus:border-amber-400 focus:ring-2 focus:ring-amber-100"
+                />
+              </div>
+
+              {/* City + State */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="mb-1.5 block text-xs font-semibold text-foreground">City *</label>
+                  <input
+                    type="text"
+                    placeholder="City"
+                    value={form.city}
+                    onChange={(e) => { setForm((f) => ({ ...f, city: e.target.value })); setError(""); }}
+                    className="w-full rounded-xl border border-stone-200 px-3 py-2.5 text-sm placeholder:text-stone-400 outline-none transition-all focus:border-amber-400 focus:ring-2 focus:ring-amber-100"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1.5 block text-xs font-semibold text-foreground">State *</label>
+                  <input
+                    type="text"
+                    placeholder="State"
+                    value={form.state}
+                    onChange={(e) => { setForm((f) => ({ ...f, state: e.target.value })); setError(""); }}
+                    className="w-full rounded-xl border border-stone-200 px-3 py-2.5 text-sm placeholder:text-stone-400 outline-none transition-all focus:border-amber-400 focus:ring-2 focus:ring-amber-100"
+                  />
+                </div>
+              </div>
+
+              {error && <p className="text-xs font-medium text-red-600">{error}</p>}
+
               <button
                 type="button"
-                onClick={() => void handleSendOtp()}
-                disabled={loading || phone.length !== 10}
-                className={cn(
-                  "mt-4 w-full rounded-2xl py-4 text-sm font-bold text-white transition-all active:scale-[0.98]",
-                  loading || phone.length !== 10
-                    ? "cursor-not-allowed bg-stone-300"
-                    : "bg-amber-700 hover:bg-amber-800"
-                )}
+                onClick={handleContinueToPayment}
+                className="w-full rounded-2xl bg-amber-700 py-4 text-sm font-black text-white transition-all hover:bg-amber-800 active:scale-[0.98]"
               >
-                {loading ? (
-                  <span className="inline-flex items-center justify-center gap-2">
-                    <Loader2 size={16} className="animate-spin" />
-                    Sending OTP...
-                  </span>
-                ) : (
-                  "Send OTP →"
-                )}
+                Continue to Payment →
               </button>
-            </div>
-          )}
 
-          {/* ---- STEP 2: OTP ---- */}
-          {step === 2 && (
-            <div className="p-5">
-              <h2 className="mb-1 text-base font-bold text-foreground">Verify your number</h2>
-              <p className="mb-4 text-xs text-muted-foreground">
-                OTP sent to +91 ···· {phone.slice(-4)}
+              <p className="text-center text-[10px] text-muted-foreground">
+                🔒 Your details are safe and never shared
               </p>
-              <input
-                type="text"
-                inputMode="numeric"
-                placeholder="Enter 6-digit OTP"
-                maxLength={6}
-                value={otp}
-                onChange={(e) => {
-                  setOtp(e.target.value.replace(/\D/g, ""));
-                  setError("");
-                }}
-                onKeyDown={(e) => { if (e.key === "Enter") void handleVerifyOtp(); }}
-                className="w-full rounded-xl border border-stone-200 px-4 py-3 text-center text-lg font-bold tracking-widest placeholder:text-stone-300 placeholder:text-sm placeholder:tracking-normal outline-none transition-all focus:border-amber-400 focus:ring-2 focus:ring-amber-100"
-              />
-              {error && (
-                <p className="mt-2 text-xs font-medium text-red-600">{error}</p>
-              )}
-              <button
-                type="button"
-                onClick={() => void handleVerifyOtp()}
-                disabled={loading || otp.length !== 6}
-                className={cn(
-                  "mt-4 w-full rounded-2xl py-4 text-sm font-bold text-white transition-all active:scale-[0.98]",
-                  loading || otp.length !== 6
-                    ? "cursor-not-allowed bg-stone-300"
-                    : "bg-amber-700 hover:bg-amber-800"
-                )}
-              >
-                {loading ? (
-                  <span className="inline-flex items-center justify-center gap-2">
-                    <Loader2 size={16} className="animate-spin" />
-                    Verifying...
-                  </span>
-                ) : (
-                  "Verify OTP →"
-                )}
-              </button>
-              <div className="mt-3 text-center">
-                {otpTimer > 0 ? (
-                  <span className="text-xs text-muted-foreground">
-                    Resend OTP in {otpTimer}s
-                  </span>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => void handleResendOtp()}
-                    disabled={loading}
-                    className="text-xs font-semibold text-amber-700 underline underline-offset-2"
-                  >
-                    Resend OTP
-                  </button>
-                )}
-              </div>
             </div>
-          )}
+          </div>
+        )}
 
-          {/* ---- STEP 3: Address ---- */}
-          {step === 3 && (
-            <div className="p-5">
-              <h2 className="mb-4 text-base font-bold text-foreground">Delivery details</h2>
-              <div className="space-y-3">
-                <div>
-                  <label className="mb-1.5 block text-xs font-semibold text-foreground">
-                    Full Name *
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Your full name"
-                    value={form.name}
-                    onChange={(e) => { setForm((f) => ({ ...f, name: e.target.value })); setError(""); }}
-                    className="w-full rounded-xl border border-stone-200 px-4 py-3 text-sm placeholder:text-stone-400 outline-none transition-all focus:border-amber-400 focus:ring-2 focus:ring-amber-100"
-                  />
-                </div>
-                <div>
-                  <label className="mb-1.5 block text-xs font-semibold text-foreground">
-                    Pincode *
-                  </label>
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    placeholder="6-digit pincode"
-                    maxLength={6}
-                    value={form.pincode}
-                    onChange={(e) => {
-                      setForm((f) => ({ ...f, pincode: e.target.value.replace(/\D/g, ""), city: "", state: "" }));
-                      setError("");
-                    }}
-                    className="w-full rounded-xl border border-stone-200 px-4 py-3 text-sm placeholder:text-stone-400 outline-none transition-all focus:border-amber-400 focus:ring-2 focus:ring-amber-100"
-                  />
-                </div>
-                <div>
-                  <label className="mb-1.5 block text-xs font-semibold text-foreground">
-                    Address Line *
-                  </label>
-                  <textarea
-                    placeholder="House no., Street, Area, Landmark"
-                    rows={2}
-                    value={form.address}
-                    onChange={(e) => { setForm((f) => ({ ...f, address: e.target.value })); setError(""); }}
-                    className="w-full resize-none rounded-xl border border-stone-200 px-4 py-3 text-sm placeholder:text-stone-400 outline-none transition-all focus:border-amber-400 focus:ring-2 focus:ring-amber-100"
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="mb-1.5 block text-xs font-semibold text-foreground">
-                      City *
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="City"
-                      value={form.city}
-                      onChange={(e) => { setForm((f) => ({ ...f, city: e.target.value })); setError(""); }}
-                      className="w-full rounded-xl border border-stone-200 px-4 py-3 text-sm placeholder:text-stone-400 outline-none transition-all focus:border-amber-400 focus:ring-2 focus:ring-amber-100"
-                    />
-                  </div>
-                  <div>
-                    <label className="mb-1.5 block text-xs font-semibold text-foreground">
-                      State *
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="State"
-                      value={form.state}
-                      onChange={(e) => { setForm((f) => ({ ...f, state: e.target.value })); setError(""); }}
-                      className="w-full rounded-xl border border-stone-200 px-4 py-3 text-sm placeholder:text-stone-400 outline-none transition-all focus:border-amber-400 focus:ring-2 focus:ring-amber-100"
-                    />
-                  </div>
-                </div>
-              </div>
-              {error && (
-                <p className="mt-3 text-xs font-medium text-red-600">{error}</p>
-              )}
-              <button
-                type="button"
-                onClick={handleAddressContinue}
-                className="mt-5 w-full rounded-2xl bg-amber-700 py-4 text-sm font-bold text-white transition-all hover:bg-amber-800 active:scale-[0.98]"
-              >
-                Continue →
-              </button>
+        {/* ── STEP 2: Payment ── */}
+        {step === 2 && (
+          <div className="rounded-2xl border border-stone-200 bg-white overflow-hidden">
+            <div className="border-b border-stone-100 px-4 py-3">
+              <h2 className="text-sm font-bold text-foreground">Choose Payment Method</h2>
             </div>
-          )}
-
-          {/* ---- STEP 4: Payment ---- */}
-          {step === 4 && (
-            <div className="p-5">
-              <h2 className="mb-4 text-base font-bold text-foreground">Choose payment method</h2>
+            <div className="p-4">
               <div className="grid grid-cols-2 gap-3">
                 {/* COD */}
                 <button
@@ -772,9 +667,9 @@ export function SevenHorsesCheckoutPage() {
                   )}
                 >
                   <span className="text-2xl">🚚</span>
-                  <p className="mt-2 text-sm font-bold text-foreground">Cash on Delivery</p>
+                  <p className="mt-2 text-xs font-bold text-foreground">Cash on Delivery</p>
                   <p className="mt-0.5 text-base font-black text-amber-700">
-                    ₹{basePrice.toLocaleString("en-IN")}
+                    ₹{(basePrice - couponDiscount).toLocaleString("en-IN")}
                   </p>
                   <p className="text-[10px] text-muted-foreground">Pay on arrival</p>
                 </button>
@@ -790,28 +685,27 @@ export function SevenHorsesCheckoutPage() {
                       : "border-stone-200 bg-white hover:border-stone-300"
                   )}
                 >
-                  <span className="absolute right-3 top-3 rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-black text-green-700">
+                  <span className="absolute right-2 top-2 rounded-full bg-green-100 px-1.5 py-0.5 text-[9px] font-black text-green-700">
                     Save ₹299
                   </span>
                   <CreditCard size={22} className="text-amber-700" />
-                  <p className="mt-2 text-sm font-bold text-foreground">Pay Online</p>
+                  <p className="mt-2 text-xs font-bold text-foreground">Pay Online</p>
                   <p className="mt-0.5 text-base font-black text-amber-700">
-                    ₹{prepaidPrice.toLocaleString("en-IN")}
+                    ₹{(basePrice - 299 - couponDiscount).toLocaleString("en-IN")}
                   </p>
                   <p className="text-[10px] text-muted-foreground">UPI · Cards · Net Banking</p>
                 </button>
               </div>
 
-              {error && (
-                <p className="mt-3 text-xs font-medium text-red-600">{error}</p>
-              )}
-
-              <div className="mt-4 rounded-xl border border-amber-100 bg-amber-50 px-4 py-3 flex items-center justify-between">
+              {/* Total row */}
+              <div className="mt-4 flex items-center justify-between rounded-xl border border-amber-100 bg-amber-50 px-4 py-3">
                 <span className="text-sm text-muted-foreground">Total payable</span>
                 <span className="text-xl font-black text-amber-700">
                   ₹{displayTotal.toLocaleString("en-IN")}
                 </span>
               </div>
+
+              {error && <p className="mt-3 text-xs font-medium text-red-600">{error}</p>}
 
               <button
                 type="button"
@@ -827,34 +721,28 @@ export function SevenHorsesCheckoutPage() {
                 {loading || razorpayOpen ? (
                   <span className="inline-flex items-center justify-center gap-2">
                     <Loader2 size={18} className="animate-spin" />
-                    {razorpayOpen ? "Complete payment..." : "Placing order..."}
+                    {razorpayOpen ? "Complete payment in popup..." : "Placing order..."}
                   </span>
                 ) : (
                   <>
                     Place Order →
                     <span className="mt-0.5 block text-xs font-normal opacity-80">
-                      {payment === "cod"
-                        ? "Pay on delivery · No advance needed"
-                        : "You save ₹299 on prepaid"}
+                      {payment === "cod" ? "Pay on delivery · No advance needed" : "You save ₹299 on prepaid"}
                     </span>
                   </>
                 )}
               </button>
 
               <div className="mt-3 flex flex-wrap items-center justify-center gap-3 text-[10px] text-muted-foreground">
-                <span className="flex items-center gap-1">
-                  <Shield size={10} /> 100% Secure
-                </span>
+                <span className="flex items-center gap-1"><Shield size={10} /> 100% Secure</span>
                 <span>·</span>
-                <span className="flex items-center gap-1">
-                  <Truck size={10} /> Free Delivery
-                </span>
+                <span className="flex items-center gap-1"><Truck size={10} /> Free Delivery</span>
                 <span>·</span>
-                <span>Replacement Guarantee</span>
+                <span>7-Day Returns</span>
               </div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );
