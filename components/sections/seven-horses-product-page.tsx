@@ -819,18 +819,11 @@ export function SevenHorsesProductPage() {
           {/* ════════════════════════════════════════
               7. CTA BUTTONS
           ════════════════════════════════════════ */}
-          <div className="mt-4 grid grid-cols-2 gap-3">
+          <div className="mt-4">
             <button
               type="button"
               onClick={openCheckout}
-              className="border-2 border-amber-600 text-amber-700 bg-white font-black rounded-2xl py-4 text-sm transition-all hover:bg-amber-50 active:scale-95"
-            >
-              Add to Cart
-            </button>
-            <button
-              type="button"
-              onClick={openCheckout}
-              className="sh-glow-btn bg-amber-600 text-white font-black rounded-2xl py-4 text-sm transition-all hover:bg-amber-700 active:scale-95 flex items-center justify-center gap-1.5"
+              className="sh-glow-btn w-full bg-amber-600 text-white font-black rounded-2xl py-4 text-sm transition-all hover:bg-amber-700 active:scale-95 flex items-center justify-center gap-1.5"
             >
               Buy Now <ArrowRight size={15} />
             </button>
@@ -1255,16 +1248,10 @@ export function SevenHorsesProductPage() {
             <p className="mb-10 text-sm text-amber-300 md:text-base">
               ₹1,699 · Cash on Delivery · Free Shipping Pan-India
             </p>
-            <div className="grid grid-cols-2 gap-3 max-w-sm mx-auto">
+            <div className="max-w-sm mx-auto">
               <button
                 onClick={openCheckout}
-                className="border-2 border-amber-300 text-white font-black rounded-2xl py-4 text-sm transition-all hover:bg-white/10 active:scale-95"
-              >
-                Add to Cart
-              </button>
-              <button
-                onClick={openCheckout}
-                className="sh-glow-btn inline-flex items-center justify-center gap-2 rounded-2xl bg-amber-400 py-4 text-sm font-black text-amber-950 shadow-2xl transition-all hover:bg-amber-300 active:scale-95"
+                className="sh-glow-btn w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-amber-400 py-4 text-sm font-black text-amber-950 shadow-2xl transition-all hover:bg-amber-300 active:scale-95"
               >
                 <Sparkles size={16} />
                 Buy Now
