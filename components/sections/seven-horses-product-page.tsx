@@ -8,12 +8,14 @@ import {
   Star,
   Shield,
   Truck,
-  ChevronDown,
-  ChevronUp,
   Package,
+  Clock,
   ArrowRight,
   Sparkles,
   Zap,
+  Info,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -32,7 +34,7 @@ const TICKER = [
   "🔒 Raw Pyrite Certified",
   "📦 Premium Packaging",
   "☀️ Career & Wealth Remedy",
-  "⭐ 4.8 / 5 Rating",
+  "⭐ 4.94 / 5 Rating",
   "🛡️ 7-Day Return Guarantee",
 ];
 
@@ -182,7 +184,7 @@ const FAQS = [
   },
   {
     q: "Is Cash on Delivery available?",
-    a: "Yes, COD is available pan-India. Prepaid orders receive priority dispatch and ₹500 store wallet cashback.",
+    a: "Yes, COD is available pan-India. Prepaid orders receive priority dispatch and ₹299 off on prepaid orders.",
   },
   {
     q: "What if the frame arrives damaged?",
@@ -197,43 +199,54 @@ const GALLERY_IMAGES = [1, 2, 3].map((num) => ({
 }));
 
 const BASE_PRICE = 1699;
-const SIDDH_PRICE = 1998;
 const MRP = 2900;
-const DISC_PCT = Math.round(((MRP - BASE_PRICE) / MRP) * 100);
+const DISC_PCT = 41;
 
 // ── Main Component ─────────────────────────────────────────────────────────────
 
 export function SevenHorsesProductPage() {
+  const router = useRouter();
+
   const [siddh, setSiddh] = useState(false);
   const [activeImage, setActiveImage] = useState(0);
   const [slideDir, setSlideDir] = useState<"right" | "left">("right");
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [stickyVisible, setStickyVisible] = useState(false);
-  const [viewersCount, setViewersCount] = useState(17);
+  const [timeLeft, setTimeLeft] = useState({ h: 20, m: 14, s: 44 });
 
   const heroRef = useRef<HTMLDivElement>(null);
-  const orderRef = useRef<HTMLDivElement>(null);
   const touchStartX = useRef<number | null>(null);
   const [popup, setPopup] = useState<{ name: string; city: string; item: string } | null>(null);
   const popupIndexRef = useRef(Math.floor(Math.random() * POPUP_NAMES.length));
 
-  const displayPrice = siddh ? SIDDH_PRICE : BASE_PRICE;
+  const displayPrice = siddh ? BASE_PRICE + 299 : BASE_PRICE;
 
   function goToImage(idx: number) {
     setSlideDir(idx > activeImage ? "right" : "left");
     setActiveImage(idx);
   }
 
+  const goToCheckout = () => {
+    const params = new URLSearchParams({ siddh: siddh ? "1" : "0" });
+    router.push(`/checkout/7horses?${params.toString()}`);
+  };
+
+  // Countdown timer
   useEffect(() => {
-    setViewersCount(Math.floor(Math.random() * 14) + 11);
     const id = setInterval(() => {
-      setViewersCount((v) =>
-        Math.max(8, Math.min(28, v + (Math.random() > 0.5 ? 1 : -1)))
-      );
-    }, 7000);
+      setTimeLeft((prev) => {
+        let { h, m, s } = prev;
+        s--;
+        if (s < 0) { s = 59; m--; }
+        if (m < 0) { m = 59; h--; }
+        if (h < 0) { h = 23; m = 59; s = 59; }
+        return { h, m, s };
+      });
+    }, 1000);
     return () => clearInterval(id);
   }, []);
 
+  // Sticky bar observer
   useEffect(() => {
     const el = heroRef.current;
     if (!el) return;
@@ -245,6 +258,7 @@ export function SevenHorsesProductPage() {
     return () => obs.disconnect();
   }, []);
 
+  // Purchase popup
   useEffect(() => {
     function showNext() {
       const idx = popupIndexRef.current % POPUP_NAMES.length;
@@ -262,36 +276,28 @@ export function SevenHorsesProductPage() {
     return () => clearTimeout(first);
   }, []);
 
+  // Scroll animation observer
   useEffect(() => {
-    const els = document.querySelectorAll('[data-anim]');
+    const els = document.querySelectorAll("[data-anim]");
     const obs = new IntersectionObserver(
-      (entries) => entries.forEach((e) => {
-        if (e.isIntersecting) { e.target.classList.add('anim-on'); obs.unobserve(e.target); }
-      }),
+      (entries) =>
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            e.target.classList.add("anim-on");
+            obs.unobserve(e.target);
+          }
+        }),
       { threshold: 0.12 }
     );
     els.forEach((el) => obs.observe(el));
     return () => obs.disconnect();
   }, []);
 
-  const router = useRouter();
-
-  const scrollToOrder = () =>
-    orderRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-
-  const goToCheckout = () => {
-    const params = new URLSearchParams();
-    if (siddh) params.set("siddh", "true");
-    router.push(`/checkout/7horses?${params.toString()}`);
-  };
+  const pad = (n: number) => String(n).padStart(2, "0");
 
   return (
     <>
       <style>{`
-        @keyframes sh-float {
-          0%, 100% { transform: translateY(0px) rotate(-1deg); }
-          50% { transform: translateY(-14px) rotate(1deg); }
-        }
         @keyframes sh-shimmer-text {
           0% { background-position: 0% center; }
           100% { background-position: 200% center; }
@@ -327,24 +333,6 @@ export function SevenHorsesProductPage() {
         }
         .sh-slide-in-right { animation: sh-slide-right 0.36s cubic-bezier(0.25,0.46,0.45,0.94) forwards; }
         .sh-slide-in-left  { animation: sh-slide-left  0.36s cubic-bezier(0.25,0.46,0.45,0.94) forwards; }
-        @keyframes sh-pyrite-shimmer {
-          0% { background-position: -200% center; }
-          100% { background-position: 200% center; }
-        }
-        .sh-pyrite-price-area {
-          background: linear-gradient(160deg, #fef3c7 0%, #fde68a 12%, #fef9c3 25%, #f59e0b 38%, #fef3c7 52%, #d97706 65%, #fef9c3 78%, #f59e0b 90%, #fef3c7 100%);
-          position: relative;
-        }
-        .sh-pyrite-price-area::after {
-          content: '';
-          position: absolute;
-          inset: 0;
-          background: linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.45) 50%, transparent 70%);
-          background-size: 200% 100%;
-          animation: sh-pyrite-shimmer 3s ease-in-out infinite;
-          pointer-events: none;
-        }
-        .sh-float { animation: sh-float 5s ease-in-out infinite; }
         .sh-shimmer-text {
           background: linear-gradient(90deg, #92400e 0%, #b45309 30%, #f59e0b 50%, #b45309 70%, #92400e 100%);
           background-size: 200% auto;
@@ -385,191 +373,235 @@ export function SevenHorsesProductPage() {
         [data-anim-d="4"] { transition-delay: 0.32s; }
         [data-anim-d="5"] { transition-delay: 0.40s; }
         [data-anim-d="6"] { transition-delay: 0.48s; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
 
-      <div className="min-h-screen bg-[var(--background)] pb-[5.5rem] md:pb-0">
+      <div className="min-h-screen bg-white pb-[5.5rem] md:pb-0">
 
         {/* ════════════════════════════════════════
-            HERO
+            1. PRODUCT IMAGE AREA
         ════════════════════════════════════════ */}
-        <section
-          ref={heroRef}
-          className="relative overflow-hidden bg-gradient-to-br from-amber-50 via-[#fff8f0] to-orange-50/40 pt-6 pb-12 md:pt-10 md:pb-20"
-        >
-          <div className="pointer-events-none absolute -top-32 -right-32 size-[500px] rounded-full border border-amber-200/30 opacity-60" />
-          <div className="pointer-events-none absolute -top-20 -right-20 size-[350px] rounded-full border border-amber-200/20 opacity-40" />
-          <div className="pointer-events-none absolute -bottom-40 -left-40 size-[600px] rounded-full border border-amber-100/40 opacity-40" />
-
-          <div className="pointer-events-none absolute inset-0 overflow-hidden">
-            {[...Array(14)].map((_, i) => (
+        <section ref={heroRef} className="bg-white pt-4 pb-0">
+          <div className="mx-auto max-w-lg px-4">
+            {/* Main image */}
+            <div
+              className="relative aspect-square w-full overflow-hidden rounded-2xl bg-stone-50"
+              onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX; }}
+              onTouchEnd={(e) => {
+                if (touchStartX.current === null) return;
+                const diff = touchStartX.current - e.changedTouches[0].clientX;
+                if (Math.abs(diff) > 40) {
+                  if (diff > 0) goToImage(Math.min(activeImage + 1, GALLERY_IMAGES.length - 1));
+                  else goToImage(Math.max(activeImage - 1, 0));
+                }
+                touchStartX.current = null;
+              }}
+            >
               <div
-                key={i}
-                className="sh-particle bg-amber-400/30"
-                style={{
-                  width: `${4 + (i % 4) * 3}px`,
-                  height: `${4 + (i % 4) * 3}px`,
-                  left: `${(i * 19) % 92}%`,
-                  top: `${15 + (i * 11) % 65}%`,
-                  animationDelay: `${i * 0.35}s`,
-                  animationDuration: `${3.5 + (i % 3) * 0.8}s`,
-                }}
-              />
-            ))}
-          </div>
-
-          <div className="relative mx-auto max-w-6xl px-5">
-            {/* Top badge row */}
-            <div className="mb-3 flex items-center justify-center gap-2">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-100/80 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-amber-700">
-                <Sparkles size={10} />
-                Vastu Aligned Remedy
-              </span>
-              <span className="inline-flex items-center gap-1 rounded-full border border-amber-100 bg-white/70 px-3 py-1 text-[11px] font-bold text-amber-600">
-                ⭐ 4.8 / 5 Rating
-              </span>
-            </div>
-
-            <h1 className="font-heading mb-4 text-center text-3xl font-bold leading-[1.15] md:mb-6 md:text-4xl lg:text-[2.8rem]">
-              Attract Career Success & Wealth with{" "}
-              <span className="sh-shimmer-text">7 Horses on Raw Pyrite</span>
-              <br className="hidden sm:block" />
-              {" "}— <strong>Surya Dev Blessed Frame</strong>
-            </h1>
-
-            <div className="mx-auto max-w-md">
-              {/* Product Image */}
-              <div className="relative mx-auto max-w-[340px]">
-                <div
-                  className="sh-float relative aspect-square w-full overflow-hidden rounded-[2.5rem] border border-amber-100 bg-white shadow-2xl"
-                  onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX; }}
-                  onTouchEnd={(e) => {
-                    if (touchStartX.current === null) return;
-                    const diff = touchStartX.current - e.changedTouches[0].clientX;
-                    if (Math.abs(diff) > 40) {
-                      if (diff > 0) goToImage(Math.min(activeImage + 1, GALLERY_IMAGES.length - 1));
-                      else goToImage(Math.max(activeImage - 1, 0));
-                    }
-                    touchStartX.current = null;
-                  }}
-                >
-                  <div
-                    key={activeImage}
-                    className={cn("absolute inset-0", slideDir === "right" ? "sh-slide-in-right" : "sh-slide-in-left")}
-                  >
-                    <Image
-                      src={GALLERY_IMAGES[activeImage].src}
-                      alt={GALLERY_IMAGES[activeImage].alt}
-                      fill
-                      className="object-cover"
-                      sizes="340px"
-                      loading={activeImage === 0 ? "eager" : "lazy"}
-                      preload={activeImage === 0}
-                    />
-                  </div>
-                  <div className="absolute right-4 top-4 flex flex-col items-center rounded-2xl bg-red-500 px-3 py-2 text-white shadow-lg">
-                    <span className="text-lg font-black leading-none">{DISC_PCT}%</span>
-                    <span className="text-[10px] font-semibold uppercase tracking-wide">OFF</span>
-                  </div>
-                </div>
-
-                {/* Rating chip */}
-                <div className="absolute -top-3 -right-3 flex items-center gap-2 rounded-2xl bg-white px-3 py-2 shadow-xl border border-amber-100">
-                  <div className="flex">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} size={10} className="fill-amber-400 text-amber-400" />
-                    ))}
-                  </div>
-                  <p className="text-xs font-bold text-foreground">4.8</p>
-                </div>
-
-                {/* Dot indicators */}
-                <div className="mt-3 flex justify-center gap-2">
-                  {GALLERY_IMAGES.map((_, i) => (
-                    <button
-                      key={i}
-                      type="button"
-                      onClick={() => goToImage(i)}
-                      aria-label={`Image ${i + 1}`}
-                      className={cn(
-                        "rounded-full transition-all duration-300",
-                        activeImage === i
-                          ? "w-5 h-2 bg-amber-500"
-                          : "size-2 bg-amber-200 hover:bg-amber-300"
-                      )}
-                    />
-                  ))}
-                </div>
+                key={activeImage}
+                className={cn(
+                  "absolute inset-0",
+                  slideDir === "right" ? "sh-slide-in-right" : "sh-slide-in-left"
+                )}
+              >
+                <Image
+                  src={GALLERY_IMAGES[activeImage].src}
+                  alt={GALLERY_IMAGES[activeImage].alt}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 512px) 100vw, 512px"
+                  priority={activeImage === 0}
+                />
               </div>
 
-              {/* Thumbnails */}
-              <div className="mt-4 flex flex-wrap justify-center gap-2.5">
-                {GALLERY_IMAGES.map((img, i) => (
+              {/* Dot indicators overlaid at bottom of image */}
+              <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-2">
+                {GALLERY_IMAGES.map((_, i) => (
                   <button
-                    key={img.id}
+                    key={i}
                     type="button"
                     onClick={() => goToImage(i)}
-                    aria-label={img.alt}
-                    aria-pressed={activeImage === i}
+                    aria-label={`Image ${i + 1}`}
                     className={cn(
-                      "relative size-14 shrink-0 overflow-hidden rounded-2xl border-2 bg-white transition-all",
+                      "rounded-full transition-all duration-300",
                       activeImage === i
-                        ? "scale-105 border-amber-500 shadow-md shadow-amber-200"
-                        : "border-transparent opacity-60 hover:opacity-100"
+                        ? "w-5 h-2 bg-amber-500"
+                        : "size-2 bg-white/70 hover:bg-white"
                     )}
-                  >
-                    <Image src={img.src} alt="" fill className="object-cover" sizes="44px" />
-                  </button>
+                  />
                 ))}
               </div>
+            </div>
 
-              {/* Price + viewers + CTA */}
-              <div className="mt-6 text-center">
-                <div className="mb-3 flex items-center justify-center gap-2.5">
-                  <span className="sh-pulse-dot inline-block size-2 rounded-full bg-red-500" />
-                  <span className="text-xs text-muted-foreground">
-                    <span className="font-bold text-foreground">{viewersCount} people</span> viewing right now
-                  </span>
-                </div>
-
-                <div className="mb-4 flex items-baseline justify-center gap-3">
-                  <span className="font-heading text-4xl font-black text-amber-700">
-                    ₹{BASE_PRICE.toLocaleString("en-IN")}
-                  </span>
-                  <span className="text-base font-medium text-stone-400 line-through">
-                    ₹{MRP.toLocaleString("en-IN")}
-                  </span>
-                </div>
-
-                <div className="mb-4 flex flex-wrap justify-center gap-2">
-                  {[
-                    { Icon: Shield, text: "Secure" },
-                    { Icon: Truck, text: "COD Available" },
-                    { Icon: Package, text: "Premium Box" },
-                  ].map(({ Icon, text }) => (
-                    <span
-                      key={text}
-                      className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3.5 py-1.5 text-[11px] font-semibold text-amber-800 shadow-sm"
-                    >
-                      <Icon size={11} />
-                      {text}
-                    </span>
-                  ))}
-                </div>
+            {/* 2. Thumbnail strip */}
+            <div className="mt-3 flex gap-2 overflow-x-auto hide-scrollbar">
+              {GALLERY_IMAGES.map((img, i) => (
                 <button
+                  key={img.id}
                   type="button"
-                  onClick={scrollToOrder}
-                  className="sh-glow-btn w-full rounded-2xl bg-amber-700 px-8 py-4 text-base font-bold text-white transition-all hover:bg-amber-800 active:scale-95 flex items-center justify-center gap-2"
+                  onClick={() => goToImage(i)}
+                  aria-label={img.alt}
+                  aria-pressed={activeImage === i}
+                  className={cn(
+                    "relative size-16 shrink-0 overflow-hidden rounded-xl border-2 bg-stone-50 transition-all",
+                    activeImage === i
+                      ? "border-amber-500 shadow-md shadow-amber-200"
+                      : "border-stone-200 opacity-60 hover:opacity-100"
+                  )}
                 >
-                  Order Now — ₹{BASE_PRICE.toLocaleString("en-IN")}
-                  <ArrowRight size={18} />
+                  <Image src={img.src} alt="" fill className="object-cover" sizes="64px" />
                 </button>
-              </div>
+              ))}
             </div>
           </div>
         </section>
 
         {/* ════════════════════════════════════════
-            TICKER
+            3. PRODUCT INFO SECTION
+        ════════════════════════════════════════ */}
+        <section className="mx-auto max-w-lg px-4 mt-4">
+          {/* Title */}
+          <h1 className="text-2xl font-black text-stone-900 leading-tight">
+            Limited Edition — 7 Horses on Raw Pyrite Frame
+          </h1>
+
+          {/* Benefit tag chips */}
+          <div className="mt-3 flex flex-wrap gap-2">
+            <span className="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-bold">
+              Attracts Money
+            </span>
+            <span className="border border-amber-500 text-amber-700 px-3 py-1 rounded-full text-xs font-bold">
+              Attracts Fame &amp; Recognition
+            </span>
+          </div>
+
+          {/* Rating row */}
+          <div className="mt-2 flex items-center gap-1.5">
+            <div className="flex">
+              {[...Array(5)].map((_, i) => (
+                <Star key={i} size={13} className="fill-amber-400 text-amber-400" />
+              ))}
+            </div>
+            <span className="text-sm font-semibold text-stone-700">4.94</span>
+            <span className="text-sm text-stone-400">· 388 reviews</span>
+          </div>
+
+          {/* ════════════════════════════════════════
+              4. PRICE CARD
+          ════════════════════════════════════════ */}
+          <div className="mt-4 border border-stone-200 rounded-2xl p-4">
+            {/* Price row */}
+            <div className="flex items-baseline gap-2 flex-wrap">
+              <span className="text-3xl font-black text-stone-900">
+                ₹{displayPrice.toLocaleString("en-IN")}
+              </span>
+              <span className="text-base text-stone-400 line-through">
+                ₹{MRP.toLocaleString("en-IN")}
+              </span>
+              <span className="bg-red-500 text-white rounded px-2 py-0.5 text-xs font-black">
+                {DISC_PCT}% OFF
+              </span>
+            </div>
+            <p className="text-xs text-stone-400 mt-1">Inclusive of all taxes</p>
+
+            <hr className="my-3 border-stone-100" />
+
+            {/* Countdown */}
+            <div className="flex items-center gap-2">
+              <Clock size={14} className="text-green-600 shrink-0" />
+              <span className="text-xs text-stone-600">Offer ends in</span>
+              <span className="text-sm font-black text-green-600 tabular-nums">
+                {pad(timeLeft.h)} hr : {pad(timeLeft.m)} min : {pad(timeLeft.s)} sec
+              </span>
+            </div>
+          </div>
+
+          {/* ════════════════════════════════════════
+              5. SIDDH ADD-ON TOGGLE
+          ════════════════════════════════════════ */}
+          <div className="mt-3 rounded-2xl border border-stone-200 p-4">
+            <label className="flex items-start gap-3 cursor-pointer">
+              <div className="relative mt-0.5">
+                <input
+                  type="checkbox"
+                  checked={siddh}
+                  onChange={(e) => setSiddh(e.target.checked)}
+                  className="sr-only"
+                />
+                <div
+                  className={cn(
+                    "w-5 h-5 rounded border-2 flex items-center justify-center transition-all",
+                    siddh
+                      ? "bg-amber-600 border-amber-600"
+                      : "border-stone-300 bg-white"
+                  )}
+                >
+                  {siddh && <Check size={12} className="text-white stroke-[3]" />}
+                </div>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-bold text-stone-900">
+                  Add Siddh Energisation{" "}
+                  <span className="text-amber-600 font-black">(+₹299)</span>
+                </p>
+                <p className="text-xs text-stone-500 mt-0.5 leading-snug">
+                  Vedic rituals performed at auspicious muhurat, energised in your name
+                </p>
+              </div>
+            </label>
+          </div>
+
+          {/* ════════════════════════════════════════
+              6. CASHBACK BANNER
+          ════════════════════════════════════════ */}
+          <div className="bg-green-600 text-white rounded-2xl p-3 mt-3 text-center text-sm font-bold">
+            🎁 ₹299 off on prepaid orders
+          </div>
+
+          {/* ════════════════════════════════════════
+              7. CTA BUTTONS
+          ════════════════════════════════════════ */}
+          <div className="mt-4 grid grid-cols-2 gap-3">
+            <button
+              type="button"
+              onClick={goToCheckout}
+              className="border-2 border-amber-600 text-amber-700 bg-white font-black rounded-2xl py-4 text-sm transition-all hover:bg-amber-50 active:scale-95"
+            >
+              Add to Cart
+            </button>
+            <button
+              type="button"
+              onClick={goToCheckout}
+              className="sh-glow-btn bg-amber-600 text-white font-black rounded-2xl py-4 text-sm transition-all hover:bg-amber-700 active:scale-95 flex items-center justify-center gap-1.5"
+            >
+              Buy Now <ArrowRight size={15} />
+            </button>
+          </div>
+
+          {/* ════════════════════════════════════════
+              8. TRUST CHIPS ROW
+          ════════════════════════════════════════ */}
+          <div className="mt-4 flex flex-wrap gap-2 justify-center pb-6">
+            {[
+              { icon: <Truck size={11} />, text: "Free Shipping" },
+              { icon: <Package size={11} />, text: "COD Available" },
+              { icon: <Shield size={11} />, text: "7-Day Returns" },
+              { icon: <Sparkles size={11} />, text: "Handcrafted" },
+            ].map(({ icon, text }) => (
+              <span
+                key={text}
+                className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-[11px] font-semibold text-amber-800"
+              >
+                {icon}
+                {text}
+              </span>
+            ))}
+          </div>
+        </section>
+
+        {/* ════════════════════════════════════════
+            9. TICKER STRIP
         ════════════════════════════════════════ */}
         <div className="overflow-hidden bg-amber-700 py-3">
           <div className="sh-ticker-track">
@@ -586,175 +618,8 @@ export function SevenHorsesProductPage() {
         </div>
 
         {/* ════════════════════════════════════════
-            ORDER SECTION — Choose Variant
+            10. WHAT'S IN THE BOX
         ════════════════════════════════════════ */}
-        <section
-          ref={orderRef}
-          className="scroll-mt-6 bg-gradient-to-br from-amber-50/60 via-white to-orange-50/20 py-16 px-5"
-        >
-          <div className="mx-auto max-w-3xl">
-            <div className="mb-10 text-center">
-              <span className="text-xs font-bold uppercase tracking-widest text-amber-600">
-                Select Your Frame
-              </span>
-              <h2 className="font-heading mt-2 text-3xl font-bold text-foreground md:text-4xl">
-                Choose Your Option
-              </h2>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Same beautiful frame — upgrade with Vedic energisation
-              </p>
-            </div>
-
-            {/* Variant Cards */}
-            <div className="mb-6 grid grid-cols-2 gap-3 relative items-stretch">
-
-              {/* ── Standard Frame ── */}
-              <div
-                role="button"
-                tabIndex={0}
-                onClick={() => setSiddh(false)}
-                onKeyDown={(e) => e.key === "Enter" && setSiddh(false)}
-                className={cn(
-                  "flex flex-col h-full rounded-3xl overflow-hidden cursor-pointer border-2 bg-white transition-all duration-200",
-                  !siddh
-                    ? "border-amber-400 shadow-xl shadow-amber-100"
-                    : "border-stone-200 hover:border-amber-300 hover:shadow-lg"
-                )}
-              >
-                {/* Price area */}
-                <div className="flex items-start justify-between border-b border-stone-100 px-3 pb-3 pt-3 sm:px-5 sm:pb-5 sm:pt-5">
-                  <div>
-                    <p className="mb-1.5 text-[10px] font-bold uppercase tracking-wider text-stone-400">Standard Frame</p>
-                    <p className="font-heading text-3xl font-black leading-none text-amber-700 sm:text-5xl">₹1,699</p>
-                    <p className="mt-1 text-xs font-medium text-stone-400 line-through">₹2,900</p>
-                  </div>
-                  <div className="flex flex-col items-end gap-1.5 pt-0.5">
-                    <span className="rounded-lg bg-green-500 px-2 py-0.5 text-[10px] font-black text-white">41% OFF</span>
-                    {!siddh && (
-                      <div className="flex size-6 items-center justify-center rounded-full bg-amber-500 shadow">
-                        <Check size={12} className="text-white stroke-[3]" />
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Body */}
-                <div className="flex flex-col flex-1 px-3 pb-3 pt-3 sm:px-5 sm:pb-5 sm:pt-4">
-                  <p className="font-heading text-base font-black leading-tight text-stone-900 sm:text-xl">Standard</p>
-                  <p className="mb-3 mt-0.5 text-[10px] font-medium text-stone-400 leading-snug">For home &amp; office décor</p>
-                  <div className="mb-3 space-y-1.5">
-                    {["Raw Pyrite Frame", "Premium Packaging", "Vastu Guide Included"].map((t) => (
-                      <div key={t} className="flex items-center gap-2">
-                        <span className="size-1.5 shrink-0 rounded-full bg-amber-400" />
-                        <span className="text-[10px] font-semibold text-stone-600">{t}</span>
-                      </div>
-                    ))}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={(e) => { e.stopPropagation(); setSiddh(false); }}
-                    className={cn(
-                      "mt-auto w-full rounded-xl py-2.5 text-xs font-black transition-all sm:rounded-2xl sm:py-3.5 sm:text-sm",
-                      !siddh
-                        ? "bg-amber-600 text-white hover:bg-amber-700"
-                        : "border-2 border-amber-400 text-amber-700 hover:bg-amber-50"
-                    )}
-                  >
-                    {!siddh ? "✓ Selected" : "Select"}
-                  </button>
-                </div>
-              </div>
-
-              {/* OR divider badge */}
-              <div className="flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 size-8 items-center justify-center rounded-full border-2 border-amber-200 bg-white shadow-md">
-                <span className="text-[10px] font-black text-amber-500">OR</span>
-              </div>
-
-              {/* ── Siddh Energised ── */}
-              <div
-                role="button"
-                tabIndex={0}
-                onClick={() => setSiddh(true)}
-                onKeyDown={(e) => e.key === "Enter" && setSiddh(true)}
-                className={cn(
-                  "flex flex-col h-full rounded-3xl overflow-hidden cursor-pointer border-2 transition-all duration-200",
-                  siddh
-                    ? "border-amber-500 shadow-2xl shadow-amber-200"
-                    : "border-amber-300 shadow-md shadow-amber-100 hover:border-amber-500 hover:shadow-xl hover:shadow-amber-200"
-                )}
-              >
-                {/* Recommended banner */}
-                <div className="flex items-center justify-between bg-amber-700 px-3 py-2 sm:px-5 sm:py-3">
-                  <div className="flex items-center gap-1.5">
-                    <Star size={11} className="shrink-0 fill-amber-300 text-amber-300" />
-                    <span className="text-[9px] font-black uppercase tracking-wider text-white sm:text-xs sm:tracking-widest">Vedic Energised</span>
-                  </div>
-                  <span className="text-[9px] font-bold text-amber-300 sm:text-xs">+₹299 →</span>
-                </div>
-
-                {/* Price area — pyrite golden shimmer */}
-                <div className="sh-pyrite-price-area flex items-start justify-between border-b border-amber-300 px-3 pb-3 pt-3 sm:px-5 sm:pb-5 sm:pt-5">
-                  <div>
-                    <div className="mb-1.5 flex items-center gap-1.5">
-                      <span
-                        className="inline-block size-2.5 rounded-full ring-1 ring-amber-400 shadow"
-                        style={{ background: "linear-gradient(135deg, #fef3c7 0%, #d97706 45%, #fbbf24 75%, #92400e 100%)" }}
-                      />
-                      <span className="text-[9px] font-black uppercase tracking-wider text-amber-800 sm:text-[11px] sm:tracking-widest">Siddh Energised</span>
-                    </div>
-                    <p className="font-heading text-3xl font-black leading-none text-amber-800 sm:text-5xl">₹1,998</p>
-                    <p className="mt-1 text-xs font-semibold text-amber-600 line-through">₹2,900</p>
-                  </div>
-                  <div className="flex flex-col items-end gap-1.5 pt-0.5">
-                    <span className="rounded-lg bg-amber-600 px-2 py-0.5 text-[10px] font-black text-white shadow sm:rounded-xl sm:px-3 sm:py-1.5 sm:text-sm">31% OFF</span>
-                    {siddh && (
-                      <div className="flex size-6 items-center justify-center rounded-full bg-amber-600 shadow-lg">
-                        <Check size={12} className="text-white stroke-[3]" />
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Body */}
-                <div className="flex flex-col flex-1 bg-amber-50 px-3 pb-3 pt-3 sm:px-5 sm:pb-5 sm:pt-4">
-                  <p className="font-heading text-base font-black leading-tight text-stone-900 sm:text-xl">Siddh Energised</p>
-                  <p className="mb-3 mt-0.5 text-[10px] font-bold text-amber-700 leading-snug">Activated with Vedic rituals</p>
-                  <div className="mb-3 space-y-1.5">
-                    {["Vedic Mantra Chanting", "Gangajal Ritual", "Consecrated in Your Name"].map((t) => (
-                      <div key={t} className="flex items-center gap-2">
-                        <span className="size-1.5 shrink-0 rounded-full bg-amber-500" />
-                        <span className="text-[10px] font-semibold text-amber-800">{t}</span>
-                      </div>
-                    ))}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={(e) => { e.stopPropagation(); setSiddh(true); }}
-                    className="mt-auto w-full rounded-xl bg-amber-700 py-2.5 text-xs font-black text-white shadow-lg shadow-amber-200 transition-all hover:bg-amber-800 sm:rounded-2xl sm:py-4 sm:text-sm"
-                  >
-                    {siddh ? "✓ Selected" : "Select"}
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* CTA */}
-            <button
-              type="button"
-              onClick={goToCheckout}
-              className="sh-glow-btn w-full rounded-3xl bg-amber-700 py-5 text-lg font-black text-white shadow-xl transition-all hover:bg-amber-800 active:scale-[0.98]"
-            >
-              Proceed to Checkout — ₹{displayPrice.toLocaleString("en-IN")}
-              <p className="mt-1 text-sm font-normal opacity-85">Secure · Free Shipping · COD Available</p>
-            </button>
-
-            <p className="mt-3 text-center text-xs text-muted-foreground">
-              💳 Prepaid gets priority dispatch &nbsp;|&nbsp; 🔒 100% Secure Checkout
-            </p>
-          </div>
-        </section>
-
-        {/* ══ WHAT'S IN THE BOX ══ */}
         <section className="bg-amber-950 py-16 px-5">
           <div className="mx-auto max-w-4xl">
             <div className="mb-10 text-center" data-anim>
@@ -774,7 +639,9 @@ export function SevenHorsesProductPage() {
           </div>
         </section>
 
-        {/* ══ BENEFITS ══ */}
+        {/* ════════════════════════════════════════
+            11. BENEFITS
+        ════════════════════════════════════════ */}
         <section className="relative overflow-hidden bg-gradient-to-b from-amber-900 to-amber-950 py-24 px-5 text-white">
           <div className="pointer-events-none absolute -top-32 right-0 size-[500px] rounded-full bg-amber-500/5 blur-3xl" />
           <div className="pointer-events-none absolute bottom-0 -left-20 size-96 rounded-full bg-orange-600/5 blur-3xl" />
@@ -792,7 +659,7 @@ export function SevenHorsesProductPage() {
                   key={b.title}
                   data-anim
                   data-anim-d={String(Math.min(i + 1, 6))}
-                  className="group flex items-start gap-5 py-7 transition-all hover:bg-white/3 -mx-4 px-4 rounded-2xl"
+                  className="group flex items-start gap-5 py-7 transition-all hover:bg-white/[0.03] -mx-4 px-4 rounded-2xl"
                 >
                   <span className="font-heading shrink-0 w-10 text-right text-4xl font-black text-white/10 group-hover:text-white/20 transition-colors">
                     {String(i + 1).padStart(2, "0")}
@@ -808,7 +675,7 @@ export function SevenHorsesProductPage() {
 
             <div className="mt-16 text-center" data-anim>
               <button
-                onClick={scrollToOrder}
+                onClick={goToCheckout}
                 className="sh-glow-btn inline-flex items-center gap-3 rounded-2xl bg-amber-400 px-10 py-4 text-base font-black text-amber-950 transition-all hover:bg-amber-300 active:scale-95"
               >
                 <Zap size={18} />
@@ -819,13 +686,15 @@ export function SevenHorsesProductPage() {
           </div>
         </section>
 
-        {/* ══ MYTHOLOGY — The 7 Horse Names ══ */}
+        {/* ════════════════════════════════════════
+            12. MYTHOLOGY — 7 Horse Names
+        ════════════════════════════════════════ */}
         <section className="bg-amber-950 py-24 px-5">
           <div className="mx-auto max-w-3xl">
             <div className="mb-14 text-center" data-anim>
               <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-amber-400">Vedic Mythology</span>
               <h2 className="font-heading mt-3 text-4xl font-black text-white md:text-5xl">
-                The 7 Names of Surya&apos;s Horses
+                The Seven Divine Horses of Surya Dev
               </h2>
               <p className="mt-3 text-sm text-amber-300/70 md:text-base">
                 Each horse carries a divine quality — together they pull the Sun God&apos;s chariot across the sky
@@ -842,7 +711,7 @@ export function SevenHorsesProductPage() {
                     {i + 1}
                   </div>
                   <div className="min-w-0">
-                    <div className="flex items-baseline gap-2">
+                    <div className="flex items-baseline gap-2 flex-wrap">
                       <p className="font-heading text-lg font-black text-amber-300">{horse.name}</p>
                       <p className="text-sm font-semibold text-stone-400">({horse.eng})</p>
                     </div>
@@ -861,7 +730,9 @@ export function SevenHorsesProductPage() {
           </div>
         </section>
 
-        {/* ══ VASTU PLACEMENT ══ */}
+        {/* ════════════════════════════════════════
+            13. VASTU PLACEMENT
+        ════════════════════════════════════════ */}
         <section className="bg-white py-24 px-5">
           <div className="mx-auto max-w-2xl">
             <div className="mb-12 text-center" data-anim>
@@ -872,7 +743,7 @@ export function SevenHorsesProductPage() {
               <p className="mt-3 text-sm text-stone-500">Correct placement maximises the Vastu benefit</p>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-2" data-anim data-anim-d="1">
+            <div className="grid grid-cols-2 gap-4" data-anim data-anim-d="1">
               {[
                 { icon: "🧭", label: "Direction", value: "East or Northeast Wall", note: "Never place facing main entrance" },
                 { icon: "📅", label: "Best Day to Install", value: "Sunday", note: "Aligns with Surya Dev's energy" },
@@ -899,7 +770,7 @@ export function SevenHorsesProductPage() {
                 Every order ships with detailed placement instructions — direction, height, and best practices from Vastu Shastra.
               </p>
               <button
-                onClick={scrollToOrder}
+                onClick={goToCheckout}
                 className="w-full rounded-2xl bg-white py-3.5 text-sm font-black text-amber-800 transition-all hover:bg-amber-50"
               >
                 Order Now →
@@ -908,8 +779,10 @@ export function SevenHorsesProductPage() {
           </div>
         </section>
 
-        {/* ══ WHO NEEDS IT ══ */}
-        <section className="bg-stone-50 py-24 px-5">
+        {/* ════════════════════════════════════════
+            14. WHO NEEDS IT
+        ════════════════════════════════════════ */}
+        <section className="bg-white py-24 px-5">
           <div className="mx-auto max-w-2xl">
             <div className="mb-12 text-center" data-anim>
               <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-amber-600">Is It For You?</span>
@@ -936,8 +809,10 @@ export function SevenHorsesProductPage() {
           </div>
         </section>
 
-        {/* ══ HOW IT WORKS ══ */}
-        <section className="bg-white py-24 px-5">
+        {/* ════════════════════════════════════════
+            15. HOW IT WORKS
+        ════════════════════════════════════════ */}
+        <section className="bg-stone-50 py-24 px-5">
           <div className="mx-auto max-w-xl">
             <div className="mb-16 text-center" data-anim>
               <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-amber-600">Simple Process</span>
@@ -945,7 +820,6 @@ export function SevenHorsesProductPage() {
             </div>
 
             <div className="relative">
-              {/* Vertical line */}
               <div className="absolute left-7 top-8 bottom-8 w-0.5 bg-gradient-to-b from-amber-400 via-amber-600 to-amber-300" />
               <div className="space-y-0">
                 {STEPS.map((step, i) => (
@@ -965,7 +839,9 @@ export function SevenHorsesProductPage() {
           </div>
         </section>
 
-        {/* ══ TESTIMONIALS ══ */}
+        {/* ════════════════════════════════════════
+            16. TESTIMONIALS
+        ════════════════════════════════════════ */}
         <section className="bg-amber-950 py-24 px-5 text-white">
           <div className="mx-auto max-w-4xl">
             <div className="mb-14 text-center" data-anim>
@@ -975,7 +851,7 @@ export function SevenHorsesProductPage() {
                 {[...Array(5)].map((_, i) => (
                   <Star key={i} size={16} className="fill-amber-400 text-amber-400" />
                 ))}
-                <span className="ml-2 text-sm text-stone-400">4.8 / 5 · 388 verified reviews</span>
+                <span className="ml-2 text-sm text-stone-400">4.94 / 5 · 388 verified reviews</span>
               </div>
             </div>
 
@@ -1032,12 +908,14 @@ export function SevenHorsesProductPage() {
           </div>
         </section>
 
-        {/* ══ TRUST STRIP ══ */}
+        {/* ════════════════════════════════════════
+            17. TRUST STRIP
+        ════════════════════════════════════════ */}
         <section className="bg-amber-700 py-16 px-5" data-anim>
           <div className="mx-auto max-w-4xl">
             <div className="grid grid-cols-2 divide-x divide-amber-600 md:grid-cols-4">
               {[
-                { stat: "4.8/5", label: "Average Rating", sub: "388 reviews" },
+                { stat: "4.94/5", label: "Average Rating", sub: "388 reviews" },
                 { stat: "100%", label: "Raw Pyrite", sub: "Authenticated" },
                 { stat: "7-Day", label: "Return Guarantee", sub: "Hassle-free" },
                 { stat: "Free", label: "Shipping Pan-India", sub: "COD available" },
@@ -1052,7 +930,9 @@ export function SevenHorsesProductPage() {
           </div>
         </section>
 
-        {/* ══ FAQ ══ */}
+        {/* ════════════════════════════════════════
+            18. FAQ
+        ════════════════════════════════════════ */}
         <section className="bg-white py-24 px-5">
           <div className="mx-auto max-w-2xl">
             <div className="mb-14 text-center" data-anim>
@@ -1090,7 +970,9 @@ export function SevenHorsesProductPage() {
           </div>
         </section>
 
-        {/* ══ FINAL CTA ══ */}
+        {/* ════════════════════════════════════════
+            19. FINAL CTA
+        ════════════════════════════════════════ */}
         <section className="relative overflow-hidden bg-gradient-to-br from-amber-900 via-amber-800 to-amber-950 px-5 py-28 text-center text-white">
           <div className="pointer-events-none absolute inset-0 overflow-hidden">
             {[...Array(12)].map((_, i) => (
@@ -1116,14 +998,21 @@ export function SevenHorsesProductPage() {
             <p className="mb-10 text-sm text-amber-300 md:text-base">
               ₹1,699 · Cash on Delivery · Free Shipping Pan-India
             </p>
-            <button
-              onClick={scrollToOrder}
-              className="sh-glow-btn inline-flex items-center gap-3 rounded-2xl bg-amber-400 px-12 py-5 text-xl font-black text-amber-950 shadow-2xl transition-all hover:bg-amber-300 active:scale-95"
-            >
-              <Sparkles size={22} />
-              Order Now — ₹{BASE_PRICE.toLocaleString("en-IN")}
-              <ArrowRight size={22} />
-            </button>
+            <div className="grid grid-cols-2 gap-3 max-w-sm mx-auto">
+              <button
+                onClick={goToCheckout}
+                className="border-2 border-amber-300 text-white font-black rounded-2xl py-4 text-sm transition-all hover:bg-white/10 active:scale-95"
+              >
+                Add to Cart
+              </button>
+              <button
+                onClick={goToCheckout}
+                className="sh-glow-btn inline-flex items-center justify-center gap-2 rounded-2xl bg-amber-400 py-4 text-sm font-black text-amber-950 shadow-2xl transition-all hover:bg-amber-300 active:scale-95"
+              >
+                <Sparkles size={16} />
+                Buy Now
+              </button>
+            </div>
             <p className="mt-5 text-xs text-amber-500">
               No advance payment · Pay on delivery · Free shipping
             </p>
@@ -1131,7 +1020,7 @@ export function SevenHorsesProductPage() {
         </section>
 
         {/* ════════════════════════════════════════
-            STICKY BOTTOM BAR
+            20. STICKY BOTTOM BAR
         ════════════════════════════════════════ */}
         <div
           className={cn(
@@ -1145,31 +1034,30 @@ export function SevenHorsesProductPage() {
           <div className="mx-auto flex max-w-xl items-center justify-between gap-3">
             <div className="min-w-0">
               <div className="flex items-baseline gap-2">
-                <span className="text-xl font-black text-amber-700">
+                <span className="text-xl font-black text-stone-900">
                   ₹{displayPrice.toLocaleString("en-IN")}
                 </span>
-                <span className="text-sm text-muted-foreground line-through">
+                <span className="text-sm text-stone-400 line-through">
                   ₹{MRP.toLocaleString("en-IN")}
                 </span>
+                <span className="text-xs font-black text-red-500">{DISC_PCT}% OFF</span>
               </div>
               <p className="truncate text-[11px] text-amber-600">
-                {siddh ? "Siddh Energised Frame" : "Standard Frame"} · 7 Horses Raw Pyrite
+                {siddh ? "Siddh Energised" : "Standard"} · 7 Horses Raw Pyrite
               </p>
             </div>
-            <div className="flex shrink-0 items-center gap-2">
-              <button
-                type="button"
-                onClick={goToCheckout}
-                className="rounded-2xl bg-amber-700 px-6 py-3 text-sm font-black text-white shadow-lg transition-all hover:bg-amber-800 active:scale-95"
-              >
-                Checkout 🛒
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={goToCheckout}
+              className="sh-glow-btn shrink-0 rounded-2xl bg-amber-600 px-6 py-3 text-sm font-black text-white shadow-lg transition-all hover:bg-amber-700 active:scale-95 flex items-center gap-1.5"
+            >
+              Buy Now <ArrowRight size={14} />
+            </button>
           </div>
         </div>
 
         {/* ════════════════════════════════════════
-            PURCHASE POPUP
+            21. PURCHASE POPUP
         ════════════════════════════════════════ */}
         {popup && (
           <div className="sh-popup-enter fixed top-16 right-3 z-[60] max-w-[240px]">
