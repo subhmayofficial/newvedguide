@@ -114,10 +114,12 @@ export default async function AdminOrdersPage({
   if (sp.status)              q = q.eq("status", sp.status);
   if (sp.payment_status)      q = q.eq("payment_status", sp.payment_status);
   else if (!showAllPaymentStatuses) {
-    q = q.or("payment_status.eq.paid,product_slug.in.(vedic-kada-plated,vedic-kada-pure-silver)");
+    q = q.or("payment_status.eq.paid,product_slug.in.(vedic-kada-plated,vedic-kada-pure-silver,seven-horses-pyrite-frame,seven-horses-pyrite-frame-siddh)");
   }
   if (sp.fulfillment_status)  q = q.eq("fulfillment_status", sp.fulfillment_status);
-  if (sp.product === "kada") {
+  if (sp.product === "7horses") {
+    q = q.in("product_slug", ["seven-horses-pyrite-frame", "seven-horses-pyrite-frame-siddh"]);
+  } else if (sp.product === "kada") {
     q = q.in("product_slug", ["vedic-kada-plated", "vedic-kada-pure-silver"]);
   } else if (sp.product) {
     q = q.eq("product_slug", sp.product);
@@ -926,6 +928,8 @@ function productLabel(slug: string): string {
   if (slug === "vedic-kada-plated")   return "Vedic Kada · Silver Plated";
   if (slug === "vedic-kada-pure-silver") return "Vedic Kada · Pure Silver";
   if (isKadaProductSlug(slug)) return "Vedic Kada";
+  if (slug === "seven-horses-pyrite-frame") return "7 Horses Frame";
+  if (slug === "seven-horses-pyrite-frame-siddh") return "7 Horses Frame · Siddh";
   return slug.split("-").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
 }
 

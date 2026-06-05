@@ -390,7 +390,7 @@ export function SevenHorsesProductPage() {
       }
 
       if (payment === "cod" || json.paymentBypassed) {
-        router.push(`/thank-you/7horses?order=${json.orderNumber}`);
+        router.push(`/thank-you/7horses?order=${json.orderNumber}&payment=${payment}`);
         return;
       }
 
@@ -449,7 +449,7 @@ export function SevenHorsesProductPage() {
             });
             const v = (await verifyRes.json()) as { success?: boolean; error?: string };
             if (!v.success) throw new Error(v.error ?? "Payment verification failed.");
-            router.push(`/thank-you/7horses?order=${orderNumber}`);
+            router.push(`/thank-you/7horses?order=${orderNumber}&payment=prepaid`);
           } catch (verifyError) {
             setCheckoutError(verifyError instanceof Error ? verifyError.message : "Payment verification failed.");
           } finally {
