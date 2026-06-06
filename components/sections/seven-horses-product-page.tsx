@@ -637,13 +637,15 @@ export function SevenHorsesProductPage() {
       <div className="min-h-screen bg-white pb-[5.5rem] md:pb-0">
 
         {/* ════════════════════════════════════════
-            1. PRODUCT IMAGE AREA
+            1. PRODUCT IMAGE AREA + INFO (2-col on desktop)
         ════════════════════════════════════════ */}
         <section ref={heroRef} className="bg-white pt-4 pb-0">
-          <div className="mx-auto max-w-lg px-4">
+          <div className="mx-auto max-w-6xl md:px-8 lg:px-12">
+          <div className="md:grid md:grid-cols-2 md:gap-12 md:items-start md:pt-8">
+          <div className="px-4 md:px-0">
             {/* Main image */}
             <div
-              className="relative aspect-square w-full overflow-hidden rounded-2xl bg-stone-50"
+              className="relative aspect-square w-full overflow-hidden rounded-2xl bg-stone-50 md:rounded-3xl"
               onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX; }}
               onTouchEnd={(e) => {
                 if (touchStartX.current === null) return;
@@ -692,7 +694,7 @@ export function SevenHorsesProductPage() {
             </div>
 
             {/* 2. Thumbnail strip */}
-            <div className="mt-3 flex gap-2 overflow-x-auto hide-scrollbar">
+            <div className="mt-3 flex gap-2 overflow-x-auto hide-scrollbar px-4 md:px-0">
               {GALLERY_IMAGES.map((img, i) => (
                 <button
                   key={img.id}
@@ -711,15 +713,12 @@ export function SevenHorsesProductPage() {
                 </button>
               ))}
             </div>
-          </div>
-        </section>
+          </div>{/* end left column (px-4 wrapper) */}
 
-        {/* ════════════════════════════════════════
-            3. PRODUCT INFO SECTION
-        ════════════════════════════════════════ */}
-        <section className="mx-auto max-w-lg px-4 mt-4">
+          {/* RIGHT COLUMN: product info */}
+          <div className="mx-auto max-w-lg px-4 mt-4 md:max-w-none md:px-0 md:mt-0 md:sticky md:top-6">
           {/* Title */}
-          <h1 className="text-2xl font-black text-stone-900 leading-tight">
+          <h1 className="text-2xl font-black text-stone-900 leading-tight md:text-3xl lg:text-4xl">
             Limited Edition — 7 Horses on Raw Pyrite Frame
           </h1>
 
@@ -750,7 +749,7 @@ export function SevenHorsesProductPage() {
           <div className="mt-4 border border-stone-200 rounded-2xl p-4">
             {/* Price row */}
             <div className="flex items-baseline gap-2 flex-wrap">
-              <span className="text-3xl font-black text-stone-900">
+              <span className="text-3xl font-black text-stone-900 md:text-4xl">
                 ₹{displayPrice.toLocaleString("en-IN")}
               </span>
               <span className="text-base text-stone-400 line-through">
@@ -848,6 +847,9 @@ export function SevenHorsesProductPage() {
               </span>
             ))}
           </div>
+          </div>{/* end right column */}
+          </div>{/* end md:grid */}
+          </div>{/* end max-w-6xl */}
         </section>
 
         {/* ════════════════════════════════════════
@@ -870,7 +872,7 @@ export function SevenHorsesProductPage() {
         {/* ════════════════════════════════════════
             10. WHAT'S IN THE BOX
         ════════════════════════════════════════ */}
-        <section className="bg-amber-950 py-16 px-5">
+        <section className="bg-amber-950 py-16 px-5 md:py-24 md:px-8">
           <div className="mx-auto max-w-4xl">
             <div className="mb-10 text-center" data-anim>
               <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-amber-400">Unboxing</span>
@@ -892,11 +894,11 @@ export function SevenHorsesProductPage() {
         {/* ════════════════════════════════════════
             11. BENEFITS
         ════════════════════════════════════════ */}
-        <section className="relative overflow-hidden bg-gradient-to-b from-amber-900 to-amber-950 py-24 px-5 text-white">
+        <section className="relative overflow-hidden bg-gradient-to-b from-amber-900 to-amber-950 py-24 px-5 text-white md:px-8">
           <div className="pointer-events-none absolute -top-32 right-0 size-[500px] rounded-full bg-amber-500/5 blur-3xl" />
           <div className="pointer-events-none absolute bottom-0 -left-20 size-96 rounded-full bg-orange-600/5 blur-3xl" />
 
-          <div className="relative mx-auto max-w-3xl">
+          <div className="relative mx-auto max-w-3xl md:max-w-4xl">
             <div className="mb-16 text-center" data-anim>
               <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-amber-400">Astrological Benefits</span>
               <h2 className="font-heading mt-3 text-4xl font-black text-white md:text-5xl">What It Does For You</h2>
@@ -939,8 +941,8 @@ export function SevenHorsesProductPage() {
         {/* ════════════════════════════════════════
             12. MYTHOLOGY — 7 Horse Names
         ════════════════════════════════════════ */}
-        <section className="bg-amber-950 py-24 px-5">
-          <div className="mx-auto max-w-3xl">
+        <section className="bg-amber-950 py-24 px-5 md:px-8">
+          <div className="mx-auto max-w-3xl md:max-w-5xl">
             <div className="mb-14 text-center" data-anim>
               <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-amber-400">Vedic Mythology</span>
               <h2 className="font-heading mt-3 text-4xl font-black text-white md:text-5xl">
@@ -951,7 +953,7 @@ export function SevenHorsesProductPage() {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2" data-anim data-anim-d="1">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-4" data-anim data-anim-d="1">
               {HORSE_NAMES.map((horse, i) => (
                 <div
                   key={horse.eng}
@@ -983,8 +985,8 @@ export function SevenHorsesProductPage() {
         {/* ════════════════════════════════════════
             13. VASTU PLACEMENT
         ════════════════════════════════════════ */}
-        <section className="bg-white py-24 px-5">
-          <div className="mx-auto max-w-2xl">
+        <section className="bg-white py-24 px-5 md:px-8">
+          <div className="mx-auto max-w-2xl md:max-w-4xl">
             <div className="mb-12 text-center" data-anim>
               <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-amber-600">Placement Guide</span>
               <h2 className="font-heading mt-3 text-4xl font-black text-stone-900 md:text-5xl">
@@ -993,7 +995,7 @@ export function SevenHorsesProductPage() {
               <p className="mt-3 text-sm text-stone-500">Correct placement maximises the Vastu benefit</p>
             </div>
 
-            <div className="grid grid-cols-2 gap-4" data-anim data-anim-d="1">
+            <div className="grid grid-cols-2 gap-4 lg:grid-cols-4" data-anim data-anim-d="1">
               {[
                 { icon: "🧭", label: "Direction", value: "East or Northeast Wall", note: "Never place facing main entrance" },
                 { icon: "📅", label: "Best Day to Install", value: "Sunday", note: "Aligns with Surya Dev's energy" },
@@ -1032,8 +1034,8 @@ export function SevenHorsesProductPage() {
         {/* ════════════════════════════════════════
             14. WHO NEEDS IT
         ════════════════════════════════════════ */}
-        <section className="bg-white py-24 px-5">
-          <div className="mx-auto max-w-2xl">
+        <section className="bg-white py-24 px-5 md:px-8">
+          <div className="mx-auto max-w-2xl md:max-w-4xl">
             <div className="mb-12 text-center" data-anim>
               <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-amber-600">Is It For You?</span>
               <h2 className="font-heading mt-3 text-4xl font-black text-stone-900 md:text-5xl">
@@ -1041,7 +1043,7 @@ export function SevenHorsesProductPage() {
               </h2>
             </div>
 
-            <div className="space-y-2">
+            <div className="md:grid md:grid-cols-2 md:gap-x-8 md:gap-y-0">
               {WHO_NEEDS.map((item, i) => (
                 <div
                   key={item}
@@ -1055,15 +1057,15 @@ export function SevenHorsesProductPage() {
                   <span className="text-base font-semibold leading-snug text-stone-800">{item}</span>
                 </div>
               ))}
-            </div>
+            </div>{/* end md:grid */}
           </div>
         </section>
 
         {/* ════════════════════════════════════════
             15. HOW IT WORKS
         ════════════════════════════════════════ */}
-        <section className="bg-stone-50 py-24 px-5">
-          <div className="mx-auto max-w-xl">
+        <section className="bg-stone-50 py-24 px-5 md:px-8">
+          <div className="mx-auto max-w-xl md:max-w-2xl">
             <div className="mb-16 text-center" data-anim>
               <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-amber-600">Simple Process</span>
               <h2 className="font-heading mt-3 text-4xl font-black text-stone-900 md:text-5xl">From Order<br />to Your Wall</h2>
@@ -1183,8 +1185,8 @@ export function SevenHorsesProductPage() {
         {/* ════════════════════════════════════════
             18. FAQ
         ════════════════════════════════════════ */}
-        <section className="bg-white py-24 px-5">
-          <div className="mx-auto max-w-2xl">
+        <section className="bg-white py-24 px-5 md:px-8">
+          <div className="mx-auto max-w-2xl md:max-w-3xl">
             <div className="mb-14 text-center" data-anim>
               <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-amber-600">FAQs</span>
               <h2 className="font-heading mt-3 text-4xl font-black text-stone-900 md:text-5xl">Common Questions</h2>
@@ -1242,7 +1244,7 @@ export function SevenHorsesProductPage() {
           </div>
           <div className="relative mx-auto max-w-xl" data-anim>
             <div className="mb-6 text-7xl">🐴</div>
-            <h2 className="font-heading mb-4 text-4xl font-black md:text-5xl">
+            <h2 className="font-heading mb-4 text-4xl font-black md:text-6xl">
               Transform Your Space.<br />Attract Success Today.
             </h2>
             <p className="mb-10 text-sm text-amber-300 md:text-base">
@@ -1251,7 +1253,7 @@ export function SevenHorsesProductPage() {
             <div className="max-w-sm mx-auto">
               <button
                 onClick={openCheckout}
-                className="sh-glow-btn w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-amber-400 py-4 text-sm font-black text-amber-950 shadow-2xl transition-all hover:bg-amber-300 active:scale-95"
+                className="sh-glow-btn w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-amber-400 py-4 text-sm font-black text-amber-950 shadow-2xl transition-all hover:bg-amber-300 active:scale-95 md:px-16 md:py-6 md:text-xl"
               >
                 <Sparkles size={16} />
                 Buy Now
@@ -1269,10 +1271,8 @@ export function SevenHorsesProductPage() {
         <div
           className={cn(
             "fixed bottom-0 left-0 right-0 z-50 border-t border-amber-100 bg-white/95 px-4 py-3 shadow-2xl backdrop-blur-md transition-all duration-300",
-            "translate-y-0 opacity-100 pointer-events-auto md:pointer-events-none",
-            stickyVisible
-              ? "md:translate-y-0 md:opacity-100 md:pointer-events-auto"
-              : "md:translate-y-full md:opacity-0"
+            "translate-y-0 opacity-100 pointer-events-auto md:hidden",
+            stickyVisible ? "" : "translate-y-full opacity-0 pointer-events-none"
           )}
         >
           <div className="mx-auto flex max-w-xl items-center justify-between gap-3">
@@ -1343,9 +1343,17 @@ export function SevenHorsesProductPage() {
           {/* Sheet */}
           <div
             className={cn(
-              "fixed bottom-0 left-0 right-0 z-50 max-h-[90vh] overflow-y-auto rounded-t-3xl bg-white shadow-2xl",
-              "transition-transform duration-[380ms] ease-[cubic-bezier(0.32,0.72,0,1)]",
-              sheetVisible ? "translate-y-0" : "translate-y-full"
+              // Base + mobile
+              "fixed z-50 bg-white shadow-2xl overflow-y-auto",
+              "bottom-0 left-0 right-0 max-h-[90vh] rounded-t-3xl",
+              "transition-all duration-[380ms] ease-[cubic-bezier(0.32,0.72,0,1)]",
+              // Desktop override
+              "md:bottom-auto md:top-1/2 md:left-1/2 md:right-auto",
+              "md:w-[480px] md:max-h-[85vh] md:rounded-3xl",
+              // Animation state
+              sheetVisible
+                ? "translate-y-0 md:-translate-x-1/2 md:-translate-y-1/2 md:opacity-100"
+                : "translate-y-full md:-translate-x-1/2 md:-translate-y-[40%] md:opacity-0"
             )}
           >
             {/* Drag handle */}
