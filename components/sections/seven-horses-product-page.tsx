@@ -178,7 +178,7 @@ const FAQS = [
   },
   {
     q: "What is the Siddh Energised option?",
-    a: "For ₹299 extra, your frame is energised through specific Vedic mantras and Gangajal ritual performed at an auspicious muhurat. It is consecrated in your name, making it a spiritually activated remedy beyond a decorative frame.",
+    a: "For ₹251 extra, your frame is energised through specific Vedic mantras and Gangajal ritual performed at an auspicious muhurat. It is consecrated in your name, making it a spiritually activated remedy beyond a decorative frame.",
   },
   {
     q: "Is the pyrite raw or polished?",
@@ -186,7 +186,7 @@ const FAQS = [
   },
   {
     q: "Is Cash on Delivery available?",
-    a: "Yes, COD is available pan-India. Prepaid orders receive priority dispatch and ₹299 off on prepaid orders.",
+    a: "Yes, COD is available pan-India at ₹999. Prepaid orders receive priority dispatch and are priced at ₹899 — save ₹100 on online payment.",
   },
   {
     q: "What if the frame arrives damaged?",
@@ -200,9 +200,11 @@ const GALLERY_IMAGES = [1, 2, 3, 4, 5].map((num) => ({
   alt: `7 Horses on Raw Pyrite Frame — photo ${num}`,
 }));
 
-const BASE_PRICE = 1699;
-const MRP = 2900;
-const DISC_PCT = 41;
+const BASE_PRICE = 999;   // COD price
+const PREPAID_PRICE = 899; // Online price
+const SIDDH_EXTRA = 251;  // Siddh add-on
+const MRP = 2200;          // Crossed-out MRP (Summer Sale)
+const DISC_PCT = 55;       // ~55% off MRP
 
 const MINI_TESTIMONIALS = [
   { initial: "S", name: "Shaurya J.", city: "Delhi", stars: 5, text: "Material is solid. Ghar mein lagaya toh dekhne mein bhi accha lagta hai. Mindset better hua aur business growth bhi hui hai honestly." },
@@ -231,8 +233,8 @@ function OfferCard({ onBuyNow }: { onBuyNow: () => void }) {
           <div className="flex items-start gap-3">
             <span className="text-2xl shrink-0">🎁</span>
             <div>
-              <p className="text-sm font-black text-stone-900">₹299 off on Prepaid</p>
-              <p className="text-xs text-stone-600 mt-0.5">Pay online at checkout and save ₹299 instantly — no coupon code needed.</p>
+              <p className="text-sm font-black text-stone-900">₹100 off on Prepaid — Pay only ₹{PREPAID_PRICE}</p>
+              <p className="text-xs text-stone-600 mt-0.5">Pay online at checkout and get it for ₹{PREPAID_PRICE} — no coupon needed.</p>
             </div>
           </div>
           <div className="flex items-start gap-3">
@@ -314,7 +316,7 @@ export function SevenHorsesProductPage() {
   const [popup, setPopup] = useState<{ name: string; city: string; item: string } | null>(null);
   const popupIndexRef = useRef(Math.floor(Math.random() * POPUP_NAMES.length));
 
-  const displayPrice = siddh ? BASE_PRICE + 299 : BASE_PRICE;
+  const displayPrice = siddh ? BASE_PRICE + SIDDH_EXTRA : BASE_PRICE;
 
   // ── Bottom-sheet checkout state ────────────────────────────────────────────
   const [checkoutOpen, setCheckoutOpen] = useState(false);
@@ -334,8 +336,8 @@ export function SevenHorsesProductPage() {
   const [razorpayOpen, setRazorpayOpen] = useState(false);
 
   const razorpayKeyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
-  const basePrice = siddh ? 1998 : 1699;
-  const prepaidDiscount = payment === "prepaid" ? 299 : 0;
+  const basePrice = siddh ? BASE_PRICE + SIDDH_EXTRA : BASE_PRICE; // COD price
+  const prepaidDiscount = payment === "prepaid" ? BASE_PRICE - PREPAID_PRICE : 0; // ₹100 off
   const displayTotal = basePrice - prepaidDiscount - couponDiscount;
 
   function openCheckout() {
@@ -835,25 +837,34 @@ export function SevenHorsesProductPage() {
           </div>
 
           {/* ── PRICE CARD ── */}
-          <div className="mt-4 border border-stone-200 rounded-2xl p-4">
-            <div className="flex items-baseline gap-2 flex-wrap">
-              <span className="text-3xl font-black text-stone-900 md:text-4xl">
-                ₹{displayPrice.toLocaleString("en-IN")}
-              </span>
-              <span className="text-base text-stone-400 line-through">
-                MRP ₹{MRP.toLocaleString("en-IN")}
-              </span>
-              <span className="bg-stone-900 text-white rounded-lg px-2.5 py-1 text-xs font-black">
-                {DISC_PCT}% + Extra 26% OFF
-              </span>
+          <div className="mt-4 border-2 border-amber-200 rounded-2xl overflow-hidden">
+            {/* Summer Sale banner */}
+            <div className="flex items-center gap-2 bg-gradient-to-r from-amber-500 to-orange-500 px-4 py-2">
+              <span className="text-sm">☀️</span>
+              <span className="text-xs font-black text-white uppercase tracking-wider">Summer Sale — Limited Time Offer</span>
             </div>
-            <p className="text-xs text-stone-400 mt-1">Inclusive of all taxes</p>
-            <div className="mt-3 flex items-center gap-2 rounded-xl bg-green-50 border border-green-100 px-3 py-2">
-              <Clock size={13} className="text-green-600 shrink-0" />
-              <span className="text-xs text-stone-500">Offer ends in</span>
-              <span className="text-sm font-black text-green-600 tabular-nums">
-                {pad(timeLeft.h)} hr : {pad(timeLeft.m)} min : {pad(timeLeft.s)} sec
-              </span>
+            <div className="p-4">
+              <div className="flex items-baseline gap-2 flex-wrap">
+                <span className="text-3xl font-black text-stone-900 md:text-4xl">
+                  ₹{displayPrice.toLocaleString("en-IN")}
+                </span>
+                <span className="text-base text-stone-400 line-through">
+                  ₹{MRP.toLocaleString("en-IN")}
+                </span>
+                <span className="bg-stone-900 text-white rounded-lg px-2.5 py-1 text-xs font-black">
+                  {DISC_PCT}% OFF
+                </span>
+              </div>
+              <div className="mt-1 flex items-center gap-2 flex-wrap">
+                <p className="text-xs text-stone-400">Inclusive of all taxes · Free delivery included</p>
+              </div>
+              <div className="mt-3 flex items-center gap-2 rounded-xl bg-green-50 border border-green-100 px-3 py-2">
+                <Clock size={13} className="text-green-600 shrink-0" />
+                <span className="text-xs text-stone-500">Offer ends in</span>
+                <span className="text-sm font-black text-green-600 tabular-nums">
+                  {pad(timeLeft.h)} hr : {pad(timeLeft.m)} min : {pad(timeLeft.s)} sec
+                </span>
+              </div>
             </div>
           </div>
 
@@ -889,7 +900,7 @@ export function SevenHorsesProductPage() {
                 </p>
               </div>
               <div className="shrink-0 text-right">
-                <p className="text-sm font-black text-amber-600">+₹299</p>
+                <p className="text-sm font-black text-amber-600">+₹{SIDDH_EXTRA}</p>
                 <Info size={14} className="text-stone-400 mt-1 ml-auto" />
               </div>
             </label>
@@ -906,8 +917,8 @@ export function SevenHorsesProductPage() {
 
           {/* ── CASHBACK BANNER ── */}
           <div className="mt-3 flex items-center justify-between gap-3 rounded-2xl bg-green-600 px-4 py-3">
-            <p className="text-sm font-bold text-white">🎁 ₹299 Cashback on all prepaid orders</p>
-            <span className="shrink-0 rounded-full bg-white px-3 py-1 text-xs font-black text-green-700">Save ₹299</span>
+            <p className="text-sm font-bold text-white">🎁 Pay online & save ₹100 — only ₹{PREPAID_PRICE}</p>
+            <span className="shrink-0 rounded-full bg-white px-3 py-1 text-xs font-black text-green-700">Save ₹100</span>
           </div>
 
           {/* ── CTA ── */}
@@ -916,7 +927,7 @@ export function SevenHorsesProductPage() {
               <div className="flex items-baseline gap-2">
                 <span className="text-xl font-black text-stone-900">₹{displayPrice.toLocaleString("en-IN")}</span>
                 <span className="text-sm text-stone-400 line-through">₹{MRP.toLocaleString("en-IN")}</span>
-                <span className="text-xs font-black text-green-600">{DISC_PCT}% + Extra 26% OFF</span>
+                <span className="text-xs font-black text-green-600">{DISC_PCT}% OFF — Summer Sale</span>
               </div>
             </div>
             <button
@@ -1473,7 +1484,7 @@ export function SevenHorsesProductPage() {
                         + Siddh Energised
                       </span>
                     )}
-                    <p className="text-base font-black text-amber-700">₹{siddh ? 1998 : 1699}</p>
+                    <p className="text-base font-black text-amber-700">₹{displayPrice.toLocaleString("en-IN")}</p>
                   </div>
                 </div>
 
@@ -1681,12 +1692,12 @@ export function SevenHorsesProductPage() {
                     )}
                   >
                     <span className="absolute right-2 top-2 rounded-full bg-green-100 px-1.5 py-0.5 text-[9px] font-black text-green-700">
-                      Save ₹299
+                      Save ₹100
                     </span>
                     <CreditCard size={22} className="text-amber-700" />
                     <p className="mt-2 text-xs font-bold text-foreground">Pay Online</p>
                     <p className="mt-0.5 text-base font-black text-amber-700">
-                      ₹{(basePrice - 299 - couponDiscount).toLocaleString("en-IN")}
+                      ₹{(basePrice - (BASE_PRICE - PREPAID_PRICE) - couponDiscount).toLocaleString("en-IN")}
                     </p>
                     <p className="text-[10px] text-muted-foreground">UPI · Cards · Net Banking</p>
                   </button>
@@ -1718,7 +1729,7 @@ export function SevenHorsesProductPage() {
                     <>
                       Place Order →
                       <span className="mt-0.5 block text-xs font-normal opacity-80">
-                        {payment === "cod" ? "Pay on delivery · No advance needed" : "You save ₹299 on prepaid"}
+                        {payment === "cod" ? "Pay on delivery · No advance needed" : `You save ₹100 — only ₹${PREPAID_PRICE}`}
                       </span>
                     </>
                   )}

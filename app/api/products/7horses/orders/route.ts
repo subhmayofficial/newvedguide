@@ -23,7 +23,9 @@ import type { Json } from "@/types/database";
 
 const SEVEN_HORSES_SLUG_STANDARD = "seven-horses-pyrite-frame";
 const SEVEN_HORSES_SLUG_SIDDH = "seven-horses-pyrite-frame-siddh";
-const SEVEN_HORSES_PREPAID_DISCOUNT_PAISE = 29_900;
+const SEVEN_HORSES_COD_PRICE_PAISE = 99_900;       // ₹999
+const SEVEN_HORSES_PREPAID_DISCOUNT_PAISE = 10_000; // ₹100 off → prepaid ₹899
+const SEVEN_HORSES_SIDDH_EXTRA_PAISE = 25_100;      // +₹251
 
 type OrderBody = {
   amountPaise: number;
@@ -98,8 +100,9 @@ export async function POST(request: Request) {
     }
 
     const discountPaise = paymentMethod === "prepaid" ? SEVEN_HORSES_PREPAID_DISCOUNT_PAISE : 0;
+    const siddhExtraPaise = siddh ? SEVEN_HORSES_SIDDH_EXTRA_PAISE : 0;
 
-    // If product not in DB, use amountPaise directly (no server-side price verification)
+    // If product not in DB, validate against known prices
     let expectedTotal: number;
     let productSlugForOrder: string;
     let productNameForOrder: string;
@@ -109,7 +112,7 @@ export async function POST(request: Request) {
       productSlugForOrder = mainProduct.slug;
       productNameForOrder = mainProduct.name;
       productPricePaise = Number(mainProduct.price);
-      expectedTotal = productPricePaise - discountPaise;
+      expectedTotal = productPricePaise + siddhExtraPaise - discountPaise;
 
       if (body.amountPaise !== expectedTotal) {
         return NextResponse.json(
@@ -118,13 +121,22 @@ export async function POST(request: Request) {
         );
       }
     } else {
-      // Product not yet in DB — trust client amount (review logs if this fires)
+      // Product not yet in DB — validate against hardcoded known prices
+      const knownCodTotal = SEVEN_HORSES_COD_PRICE_PAISE + siddhExtraPaise;
+      const knownPrepaidTotal = knownCodTotal - SEVEN_HORSES_PREPAID_DISCOUNT_PAISE;
+      const knownTotal = paymentMethod === "prepaid" ? knownPrepaidTotal : knownCodTotal;
+      if (body.amountPaise !== knownTotal) {
+        return NextResponse.json(
+          { error: "Amount mismatch", expected: knownTotal, got: body.amountPaise },
+          { status: 400 }
+        );
+      }
       productSlugForOrder = primarySlug;
       productNameForOrder = siddh
         ? "7 Horses on Raw Pyrite Frame (Siddh Energised)"
         : "7 Horses on Raw Pyrite Frame";
-      productPricePaise = body.amountPaise + discountPaise;
-      expectedTotal = body.amountPaise;
+      productPricePaise = SEVEN_HORSES_COD_PRICE_PAISE + siddhExtraPaise;
+      expectedTotal = knownTotal;
     }
 
     const customer = body.customer;
