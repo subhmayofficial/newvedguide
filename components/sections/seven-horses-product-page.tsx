@@ -729,7 +729,7 @@ export function SevenHorsesProductPage() {
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
 
-      <div className="min-h-screen bg-white pb-[5.5rem] md:pb-0">
+      <div className="min-h-screen bg-white pb-[5.5rem]">
 
         {/* ════════════════════════════════════════
             1. PRODUCT IMAGE AREA + INFO (2-col on desktop)
@@ -1376,32 +1376,46 @@ export function SevenHorsesProductPage() {
         <div
           className={cn(
             "fixed bottom-0 left-0 right-0 z-50 border-t border-amber-100 bg-white/95 px-4 py-3 shadow-2xl backdrop-blur-md transition-all duration-300",
-            "translate-y-0 opacity-100 pointer-events-auto md:hidden",
-            stickyVisible ? "" : "translate-y-full opacity-0 pointer-events-none"
+            stickyVisible
+              ? "translate-y-0 opacity-100 pointer-events-auto"
+              : "translate-y-full opacity-0 pointer-events-none"
           )}
         >
-          <div className="mx-auto flex max-w-xl items-center justify-between gap-3">
-            <div className="min-w-0">
-              <div className="flex items-baseline gap-2">
-                <span className="text-xl font-black text-stone-900">
-                  ₹{displayPrice.toLocaleString("en-IN")}
-                </span>
-                <span className="text-sm text-stone-400 line-through">
-                  ₹{MRP.toLocaleString("en-IN")}
-                </span>
-                <span className="text-xs font-black text-red-500">{DISC_PCT}% OFF</span>
+          <div className="mx-auto flex max-w-5xl items-center justify-between gap-4">
+            {/* Left — product info */}
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="relative hidden sm:block size-10 shrink-0 overflow-hidden rounded-xl border border-amber-100">
+                <Image src="/7horses/1.webp" alt="product" fill className="object-cover" sizes="40px" />
               </div>
-              <p className="truncate text-[11px] text-amber-600">
-                {siddh ? "Siddh Energised" : "Standard"} · 7 Horses Raw Pyrite
-              </p>
+              <div className="min-w-0">
+                <p className="truncate text-xs font-bold text-stone-700 hidden sm:block">7 Horses on Raw Pyrite Frame</p>
+                <div className="flex items-baseline gap-1.5 flex-wrap">
+                  <span className="text-lg font-black text-stone-900">
+                    ₹{displayPrice.toLocaleString("en-IN")}
+                  </span>
+                  <span className="text-xs text-stone-400 line-through">₹{MRP.toLocaleString("en-IN")}</span>
+                  <span className="rounded-full bg-red-500 px-2 py-0.5 text-[10px] font-black text-white">{DISC_PCT}% OFF</span>
+                </div>
+                <p className="text-[10px] text-amber-600 font-semibold">
+                  ☀️ Summer Sale · {siddh ? "Siddh Energised" : "Standard"} · Free Delivery
+                </p>
+              </div>
             </div>
-            <button
-              type="button"
-              onClick={openCheckout}
-              className="sh-glow-btn shrink-0 rounded-2xl bg-amber-600 px-6 py-3 text-sm font-black text-white shadow-lg transition-all hover:bg-amber-700 active:scale-95 flex items-center gap-1.5"
-            >
-              Buy Now <ArrowRight size={14} />
-            </button>
+
+            {/* Right — dual CTAs */}
+            <div className="flex shrink-0 items-center gap-2">
+              <div className="hidden md:flex flex-col items-end mr-2">
+                <span className="text-[10px] text-stone-400">Prepaid price</span>
+                <span className="text-sm font-black text-green-600">₹{(displayPrice - (BASE_PRICE - PREPAID_PRICE)).toLocaleString("en-IN")} <span className="text-[10px] font-normal">online</span></span>
+              </div>
+              <button
+                type="button"
+                onClick={openCheckout}
+                className="sh-glow-btn rounded-2xl bg-amber-600 px-5 py-3 text-sm font-black text-white shadow-lg transition-all hover:bg-amber-700 active:scale-95 flex items-center gap-1.5"
+              >
+                Buy Now <ArrowRight size={14} />
+              </button>
+            </div>
           </div>
         </div>
 
