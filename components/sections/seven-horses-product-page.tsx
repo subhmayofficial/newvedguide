@@ -204,6 +204,99 @@ const BASE_PRICE = 1699;
 const MRP = 2900;
 const DISC_PCT = 41;
 
+const MINI_TESTIMONIALS = [
+  { initial: "S", name: "Shaurya J.", city: "Delhi", stars: 5, text: "Material is solid. Ghar mein lagaya toh dekhne mein bhi accha lagta hai. Mindset better hua aur business growth bhi hui hai honestly." },
+  { initial: "R", name: "Rajesh J.", city: "Lucknow", stars: 5, text: "Two pending deals closed within a month of installing this in my office facing northeast. The energy shift is real." },
+  { initial: "B", name: "Bhavna M.", city: "Pune", stars: 5, text: "Raw pyrite quality is exceptional — heavy and authentic. Financial opportunities have noticeably increased since installation." },
+];
+
+// ── OfferCard ──────────────────────────────────────────────────────────────────
+function OfferCard({ onBuyNow }: { onBuyNow: () => void }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="mt-3 rounded-2xl border-2 border-amber-200 bg-amber-50 overflow-hidden">
+      <div className="flex items-center gap-3 px-4 py-3">
+        <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-amber-700 text-white text-xs font-black">%</span>
+        <span className="flex-1 text-sm font-bold text-stone-800">Vedic Special Offer</span>
+        <button
+          type="button"
+          onClick={() => setOpen((o) => !o)}
+          className="flex items-center gap-1 rounded-full bg-amber-600 px-3 py-1 text-xs font-black text-white"
+        >
+          {open ? "Hide" : "View Offer"} {open ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+        </button>
+      </div>
+      {open && (
+        <div className="border-t border-amber-200 bg-amber-100/60 px-4 py-4 space-y-3">
+          <div className="flex items-start gap-3">
+            <span className="text-2xl shrink-0">🎁</span>
+            <div>
+              <p className="text-sm font-black text-stone-900">₹299 off on Prepaid</p>
+              <p className="text-xs text-stone-600 mt-0.5">Pay online at checkout and save ₹299 instantly — no coupon code needed.</p>
+            </div>
+          </div>
+          <div className="flex items-start gap-3">
+            <span className="text-2xl shrink-0">🔶</span>
+            <div>
+              <p className="text-sm font-black text-stone-900">Free Shipping Pan-India</p>
+              <p className="text-xs text-stone-600 mt-0.5">No shipping charge on any order. Delivered in a rigid protective box.</p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={onBuyNow}
+            className="w-full rounded-xl bg-amber-600 py-3 text-sm font-black text-white transition-all hover:bg-amber-700"
+          >
+            Claim Offer — Buy Now →
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── MiniTestimonials ───────────────────────────────────────────────────────────
+function MiniTestimonials() {
+  const [idx, setIdx] = useState(0);
+  const t = MINI_TESTIMONIALS[idx];
+  return (
+    <div className="mt-3 rounded-2xl border border-stone-200 bg-white overflow-hidden">
+      <div className="px-4 pt-4 pb-3">
+        <div className="flex items-center gap-2 mb-2">
+          <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-amber-100 text-sm font-black text-amber-700">{t.initial}</div>
+          <div>
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs font-black text-stone-800">{t.name}</span>
+              <span className="rounded-full bg-green-100 px-2 py-0.5 text-[9px] font-bold text-green-700">✓ Verified</span>
+            </div>
+            <div className="flex gap-0.5 mt-0.5">
+              {[...Array(t.stars)].map((_, i) => <Star key={i} size={10} className="fill-amber-400 text-amber-400" />)}
+            </div>
+          </div>
+          <span className="ml-auto text-[10px] text-stone-400">{t.city}</span>
+        </div>
+        <p className="text-xs text-stone-600 leading-relaxed line-clamp-3">"{t.text}"</p>
+      </div>
+      <div className="flex items-center justify-between border-t border-stone-100 px-4 py-2">
+        <button type="button" onClick={() => setIdx((i) => (i - 1 + MINI_TESTIMONIALS.length) % MINI_TESTIMONIALS.length)}
+          className="flex size-7 items-center justify-center rounded-full border border-stone-200 text-stone-500 hover:bg-stone-50">
+          <ChevronDown size={13} className="rotate-90" />
+        </button>
+        <div className="flex gap-1.5">
+          {MINI_TESTIMONIALS.map((_, i) => (
+            <button key={i} type="button" onClick={() => setIdx(i)}
+              className={cn("rounded-full transition-all", i === idx ? "w-5 h-2 bg-amber-500" : "size-2 bg-stone-300")} />
+          ))}
+        </div>
+        <button type="button" onClick={() => setIdx((i) => (i + 1) % MINI_TESTIMONIALS.length)}
+          className="flex size-7 items-center justify-center rounded-full border border-stone-200 text-stone-500 hover:bg-stone-50">
+          <ChevronDown size={13} className="-rotate-90" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ── Main Component ─────────────────────────────────────────────────────────────
 
 export function SevenHorsesProductPage() {
@@ -724,113 +817,118 @@ export function SevenHorsesProductPage() {
 
           {/* Benefit tag chips */}
           <div className="mt-3 flex flex-wrap gap-2">
-            <span className="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-bold">
-              Attracts Money
-            </span>
-            <span className="border border-amber-500 text-amber-700 px-3 py-1 rounded-full text-xs font-bold">
-              Attracts Fame &amp; Recognition
-            </span>
+            <span className="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-bold">💰 Attracts Money</span>
+            <span className="bg-amber-600 text-white px-3 py-1 rounded-full text-xs font-bold">☀️ Surya Dev Blessed</span>
+            <span className="border border-amber-400 text-amber-700 px-3 py-1 rounded-full text-xs font-bold">🏆 Accelerates Career</span>
+            <span className="border border-stone-300 text-stone-600 px-3 py-1 rounded-full text-xs font-bold">✨ Attracts Fame &amp; Recognition</span>
           </div>
 
           {/* Rating row */}
-          <div className="mt-2 flex items-center gap-1.5">
+          <div className="mt-2.5 flex items-center gap-1.5">
             <div className="flex">
               {[...Array(5)].map((_, i) => (
                 <Star key={i} size={13} className="fill-amber-400 text-amber-400" />
               ))}
             </div>
-            <span className="text-sm font-semibold text-stone-700">4.94</span>
-            <span className="text-sm text-stone-400">· 388 reviews</span>
+            <span className="text-sm font-bold text-stone-700">4.94</span>
+            <span className="text-sm text-stone-400">· 388 verified reviews</span>
           </div>
 
-          {/* ════════════════════════════════════════
-              4. PRICE CARD
-          ════════════════════════════════════════ */}
+          {/* ── PRICE CARD ── */}
           <div className="mt-4 border border-stone-200 rounded-2xl p-4">
-            {/* Price row */}
             <div className="flex items-baseline gap-2 flex-wrap">
               <span className="text-3xl font-black text-stone-900 md:text-4xl">
                 ₹{displayPrice.toLocaleString("en-IN")}
               </span>
               <span className="text-base text-stone-400 line-through">
-                ₹{MRP.toLocaleString("en-IN")}
+                MRP ₹{MRP.toLocaleString("en-IN")}
               </span>
-              <span className="bg-red-500 text-white rounded px-2 py-0.5 text-xs font-black">
-                {DISC_PCT}% OFF
+              <span className="bg-stone-900 text-white rounded-lg px-2.5 py-1 text-xs font-black">
+                {DISC_PCT}% + Extra 26% OFF
               </span>
             </div>
             <p className="text-xs text-stone-400 mt-1">Inclusive of all taxes</p>
-
-            <hr className="my-3 border-stone-100" />
-
-            {/* Countdown */}
-            <div className="flex items-center gap-2">
-              <Clock size={14} className="text-green-600 shrink-0" />
-              <span className="text-xs text-stone-600">Offer ends in</span>
+            <div className="mt-3 flex items-center gap-2 rounded-xl bg-green-50 border border-green-100 px-3 py-2">
+              <Clock size={13} className="text-green-600 shrink-0" />
+              <span className="text-xs text-stone-500">Offer ends in</span>
               <span className="text-sm font-black text-green-600 tabular-nums">
                 {pad(timeLeft.h)} hr : {pad(timeLeft.m)} min : {pad(timeLeft.s)} sec
               </span>
             </div>
           </div>
 
-          {/* ════════════════════════════════════════
-              5. SIDDH ADD-ON TOGGLE
-          ════════════════════════════════════════ */}
-          <div className="mt-3 rounded-2xl border border-stone-200 p-4">
-            <label className="flex items-start gap-3 cursor-pointer">
-              <div className="relative mt-0.5">
-                <input
-                  type="checkbox"
-                  checked={siddh}
-                  onChange={(e) => setSiddh(e.target.checked)}
-                  className="sr-only"
-                />
-                <div
-                  className={cn(
-                    "w-5 h-5 rounded border-2 flex items-center justify-center transition-all",
-                    siddh
-                      ? "bg-amber-600 border-amber-600"
-                      : "border-stone-300 bg-white"
-                  )}
-                >
+          {/* ── SPECIAL OFFER CARD ── */}
+          <OfferCard onBuyNow={openCheckout} />
+
+          {/* ── SIDDH UPGRADE ── */}
+          <div className="mt-3">
+            <p className="text-xs font-black text-stone-500 uppercase tracking-wider mb-2">
+              ⚡ Upgrade to 10× More Powerful Siddh Version
+            </p>
+            <label
+              className={cn(
+                "flex items-start gap-3 cursor-pointer rounded-2xl border-2 p-4 transition-all",
+                siddh ? "border-amber-500 bg-amber-50" : "border-stone-200 bg-white hover:border-amber-300"
+              )}
+            >
+              <div className="relative mt-0.5 shrink-0">
+                <input type="checkbox" checked={siddh} onChange={(e) => setSiddh(e.target.checked)} className="sr-only" />
+                <div className={cn("w-5 h-5 rounded border-2 flex items-center justify-center transition-all",
+                  siddh ? "bg-amber-600 border-amber-600" : "border-stone-300 bg-white"
+                )}>
                   {siddh && <Check size={12} className="text-white stroke-[3]" />}
                 </div>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-bold text-stone-900">
-                  Add Siddh Energisation{" "}
-                  <span className="text-amber-600 font-black">(+₹299)</span>
+                <p className="text-sm font-black text-stone-900">
+                  Get Siddh Energised Frame{" "}
+                  <span className="text-amber-600">(Pran Pratishtha)</span>
                 </p>
                 <p className="text-xs text-stone-500 mt-0.5 leading-snug">
-                  Vedic rituals performed at auspicious muhurat, energised in your name
+                  Vedic mantras + Gangajal ritual at auspicious muhurat — energised in your name
                 </p>
+              </div>
+              <div className="shrink-0 text-right">
+                <p className="text-sm font-black text-amber-600">+₹299</p>
+                <Info size={14} className="text-stone-400 mt-1 ml-auto" />
               </div>
             </label>
           </div>
 
-          {/* ════════════════════════════════════════
-              6. CASHBACK BANNER
-          ════════════════════════════════════════ */}
-          <div className="bg-green-600 text-white rounded-2xl p-3 mt-3 text-center text-sm font-bold">
-            🎁 ₹299 off on prepaid orders
+          {/* ── INLINE MINI TESTIMONIALS ── */}
+          <MiniTestimonials />
+
+          {/* ── STOCK URGENCY ── */}
+          <div className="mt-3 flex items-center justify-center gap-2 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
+            <span className="sh-pulse-dot inline-block size-2 rounded-full bg-red-500 shrink-0" />
+            <p className="text-sm font-black text-amber-900">⏰ Only <span className="text-red-600">27 units</span> left at this price ⏰</p>
           </div>
 
-          {/* ════════════════════════════════════════
-              7. CTA BUTTONS
-          ════════════════════════════════════════ */}
+          {/* ── CASHBACK BANNER ── */}
+          <div className="mt-3 flex items-center justify-between gap-3 rounded-2xl bg-green-600 px-4 py-3">
+            <p className="text-sm font-bold text-white">🎁 ₹299 Cashback on all prepaid orders</p>
+            <span className="shrink-0 rounded-full bg-white px-3 py-1 text-xs font-black text-green-700">Save ₹299</span>
+          </div>
+
+          {/* ── CTA ── */}
           <div className="mt-4">
+            <div className="flex items-center justify-between mb-2 px-1">
+              <div className="flex items-baseline gap-2">
+                <span className="text-xl font-black text-stone-900">₹{displayPrice.toLocaleString("en-IN")}</span>
+                <span className="text-sm text-stone-400 line-through">₹{MRP.toLocaleString("en-IN")}</span>
+                <span className="text-xs font-black text-green-600">{DISC_PCT}% + Extra 26% OFF</span>
+              </div>
+            </div>
             <button
               type="button"
               onClick={openCheckout}
-              className="sh-glow-btn w-full bg-amber-600 text-white font-black rounded-2xl py-4 text-sm transition-all hover:bg-amber-700 active:scale-95 flex items-center justify-center gap-1.5"
+              className="sh-glow-btn w-full bg-amber-600 text-white font-black rounded-2xl py-4 text-base transition-all hover:bg-amber-700 active:scale-95 flex items-center justify-center gap-2"
             >
-              Buy Now <ArrowRight size={15} />
+              Buy Now <ArrowRight size={16} />
             </button>
           </div>
 
-          {/* ════════════════════════════════════════
-              8. TRUST CHIPS ROW
-          ════════════════════════════════════════ */}
+          {/* ── TRUST CHIPS ── */}
           <div className="mt-4 flex flex-wrap gap-2 justify-center pb-6">
             {[
               { icon: <Truck size={11} />, text: "Free Shipping" },
@@ -838,12 +936,8 @@ export function SevenHorsesProductPage() {
               { icon: <Shield size={11} />, text: "7-Day Returns" },
               { icon: <Sparkles size={11} />, text: "Handcrafted" },
             ].map(({ icon, text }) => (
-              <span
-                key={text}
-                className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-[11px] font-semibold text-amber-800"
-              >
-                {icon}
-                {text}
+              <span key={text} className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-[11px] font-semibold text-amber-800">
+                {icon}{text}
               </span>
             ))}
           </div>
