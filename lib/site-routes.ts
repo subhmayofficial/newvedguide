@@ -41,6 +41,7 @@ export const PUBLIC_SITEMAP_ROUTES: SiteRouteEntry[] = [
   { path: "/ads/free-kundli", changeFrequency: "weekly", priority: 0.85 },
   { path: "/ads/free-kundli/result", changeFrequency: "weekly", priority: 0.7 },
   { path: "/ads/checkout/kundli", changeFrequency: "weekly", priority: 0.8 },
+  { path: "/mahamantra", changeFrequency: "weekly", priority: 0.75 },
   { path: "/about", changeFrequency: "monthly", priority: 0.6 },
   { path: "/faq", changeFrequency: "monthly", priority: 0.6 },
   { path: "/support", changeFrequency: "monthly", priority: 0.55 },
