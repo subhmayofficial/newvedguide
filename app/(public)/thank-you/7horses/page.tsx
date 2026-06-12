@@ -22,7 +22,7 @@ function ThankYouContent() {
   const paymentMethod = params.get("payment") ?? "cod";
 
   const waHref = getWhatsAppHref(
-    `Hi VedGuide, maine 7 Horses Pyrite Frame order place kiya hai. Order number: ${orderNumber}`
+    `Hi VedGuide, maine 7 Horses on Frame order place kiya hai. Order number: ${orderNumber}`
   );
 
   return (
@@ -65,7 +65,7 @@ function ThankYouContent() {
               <div className="relative size-16 shrink-0 overflow-hidden rounded-2xl border border-amber-100">
                 <Image
                   src="/7horses/1.webp"
-                  alt="7 Horses on Raw Pyrite Frame"
+                  alt="7 Horses on Frame"
                   fill
                   className="object-cover"
                   sizes="64px"
@@ -73,9 +73,9 @@ function ThankYouContent() {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="font-black text-stone-900 leading-snug">
-                  7 Horses on Raw Pyrite Frame
+                  7 Horses on Frame
                 </p>
-                <p className="mt-0.5 text-xs text-stone-500">13 × 10.5 inch · Raw Pyrite</p>
+                <p className="mt-0.5 text-xs text-stone-500">13 × 10.5 inch · 100% Anti-Scratchable</p>
                 <div className="mt-1 flex">
                   {[...Array(5)].map((_, i) => (
                     <Star key={i} size={10} className="fill-amber-400 text-amber-400" />

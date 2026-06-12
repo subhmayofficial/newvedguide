@@ -101,7 +101,7 @@ function OrderSummaryCard({
             <div className="relative size-16 shrink-0 overflow-hidden rounded-xl border border-amber-100 bg-amber-50">
               <Image
                 src="/7horses/1.webp"
-                alt="7 Horses on Raw Pyrite Frame"
+                alt="7 Horses on Frame"
                 fill
                 className="object-cover"
                 sizes="64px"
@@ -109,7 +109,7 @@ function OrderSummaryCard({
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-bold text-foreground leading-snug">
-                7 Horses on Raw Pyrite Frame
+                7 Horses on Frame
               </p>
               {siddh && (
                 <span className="mt-1 inline-block rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-700">
@@ -467,7 +467,7 @@ export function SevenHorsesCheckoutPage() {
         amount: json.amountPaise ?? amountPaise,
         currency: json.currency ?? "INR",
         name: "VedGuide",
-        description: `7 Horses on Raw Pyrite Frame${siddh ? " (Siddh Energised)" : ""}`,
+        description: `7 Horses on Frame${siddh ? " (Siddh Energised)" : ""}`,
         order_id: json.razorpayOrderId,
         prefill: { name: form.name, contact: phone },
         notes: { order_id: dbId, product: "seven_horses_pyrite_frame" },

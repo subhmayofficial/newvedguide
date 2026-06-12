@@ -29,11 +29,13 @@ function shImageUrl(num: number) {
 
 // ── Data ───────────────────────────────────────────────────────────────────────
 
+const PRODUCT_NAME = "7 Horses on Frame";
+
 const TICKER = [
   "🐴 Surya Dev Blessed",
   "💳 Cash on Delivery",
   "✨ Vastu Aligned",
-  "🔒 Raw Pyrite Certified",
+  "🛡️ 100% Anti-Scratchable",
   "📦 Premium Packaging",
   "☀️ Career & Wealth Remedy",
   "⭐ 4.94 / 5 Rating",
@@ -41,9 +43,9 @@ const TICKER = [
 ];
 
 const IN_THE_BOX = [
-  { icon: "🖼️", item: "7 Horses Raw Pyrite Frame", detail: "13 × 10.5 inch, handcrafted" },
+  { icon: "🖼️", item: "7 Horses on Frame", detail: "13 × 10.5 inch, handcrafted" },
+  { icon: "🛡️", item: "Anti-Scratch Surface", detail: "100% scratch-resistant premium finish" },
   { icon: "📦", item: "Protective Gift Box", detail: "Rigid black kappa box with foam" },
-  { icon: "📜", item: "Authenticity Certificate", detail: "Raw pyrite quality verified" },
   { icon: "📝", item: "Vastu Placement Guide", detail: "Direction & installation instructions" },
 ];
 
@@ -54,24 +56,29 @@ const BENEFITS = [
     desc: "Seven horses represent the chariot of the Sun God — installing this frame channels Surya Dev's energy directly into your space.",
   },
   {
+    icon: "🛡️",
+    title: "100% Anti-Scratchable",
+    desc: "Premium scratch-resistant surface keeps the frame looking new for years — safe to wipe, dust, and display in high-traffic home or office spaces.",
+  },
+  {
     icon: "💼",
     title: "Career Growth & Recognition",
-    desc: "Raw pyrite combined with seven horses creates a powerful momentum for professional advancement and visibility in your field.",
+    desc: "In Vedic astrology, seven horses symbolise momentum and visibility — this frame is designed as a career and success remedy for your workspace.",
   },
   {
     icon: "💰",
     title: "Wealth Attraction",
-    desc: "Pyrite is known as the 'stone of luck' — its natural properties attract money, opportunities, and financial abundance into your environment.",
+    desc: "The seven horses radiate prosperity energy in Vastu — attracting money flow, opportunities, and financial abundance into your environment.",
   },
   {
     icon: "🪐",
     title: "Saturn's Positive Influence",
-    desc: "Raw pyrite strengthens Saturn's beneficial aspects — bringing discipline, structure, and consistent long-term growth.",
+    desc: "Correct placement supports Saturn's beneficial aspects — bringing discipline, structure, and consistent long-term growth.",
   },
   {
     icon: "⚡",
     title: "Business Momentum",
-    desc: "Stuck deals start moving. Pending matters resolve. Wearers consistently report a shift in business energy within weeks of installation.",
+    desc: "Stuck deals start moving. Pending matters resolve. Customers consistently report a shift in business energy within weeks of installation.",
   },
   {
     icon: "🏆",
@@ -137,7 +144,7 @@ const TESTIMONIALS = [
     city: "Pune",
     tag: "Wealth Attraction",
     stars: 5,
-    text: "The raw pyrite quality is exceptional — heavy and authentic. I've noticed more financial opportunities coming my way since installation. Premium packaging too.",
+    text: "Solid build and the surface still looks brand new after weeks on my office wall. I've noticed more financial opportunities since installation. Premium packaging too.",
     outcome: "Visible financial improvement",
   },
   {
@@ -181,8 +188,8 @@ const FAQS = [
     a: "For ₹251 extra, your frame is energised through specific Vedic mantras and Gangajal ritual performed at an auspicious muhurat. It is consecrated in your name, making it a spiritually activated remedy beyond a decorative frame.",
   },
   {
-    q: "Is the pyrite raw or polished?",
-    a: "The frame uses raw, unpolished pyrite — which Vedic texts consider more potent for attracting wealth energy. Raw pyrite retains its natural crystal structure and energetic properties better than polished stone.",
+    q: "Is the frame anti-scratchable?",
+    a: "Yes — the surface is 100% anti-scratchable with a premium protective finish. Daily dusting and gentle wiping won't leave marks, so it stays display-ready in home or office.",
   },
   {
     q: "Is Cash on Delivery available?",
@@ -197,7 +204,7 @@ const FAQS = [
 const GALLERY_IMAGES = [1, 2, 3, 4, 5].map((num) => ({
   id: num,
   src: shImageUrl(num),
-  alt: `7 Horses on Raw Pyrite Frame — photo ${num}`,
+  alt: `${PRODUCT_NAME} — photo ${num}`,
 }));
 
 const BASE_PRICE = 999;   // COD price
@@ -209,7 +216,7 @@ const DISC_PCT = 55;       // ~55% off MRP
 const MINI_TESTIMONIALS = [
   { initial: "S", name: "Shaurya J.", city: "Delhi", stars: 5, text: "Material is solid. Ghar mein lagaya toh dekhne mein bhi accha lagta hai. Mindset better hua aur business growth bhi hui hai honestly." },
   { initial: "R", name: "Rajesh J.", city: "Lucknow", stars: 5, text: "Two pending deals closed within a month of installing this in my office facing northeast. The energy shift is real." },
-  { initial: "B", name: "Bhavna M.", city: "Pune", stars: 5, text: "Raw pyrite quality is exceptional — heavy and authentic. Financial opportunities have noticeably increased since installation." },
+  { initial: "B", name: "Bhavna M.", city: "Pune", stars: 5, text: "Frame quality is excellent — anti-scratch surface still looks new. Financial opportunities have noticeably increased since installation." },
 ];
 
 // ── OfferCard ──────────────────────────────────────────────────────────────────
@@ -508,7 +515,7 @@ export function SevenHorsesProductPage() {
         amount: json.amountPaise ?? amountPaise,
         currency: json.currency ?? "INR",
         name: "VedGuide",
-        description: `7 Horses on Raw Pyrite Frame${siddh ? " (Siddh Energised)" : ""}`,
+        description: `${PRODUCT_NAME}${siddh ? " (Siddh Energised)" : ""}`,
         order_id: json.razorpayOrderId,
         prefill: { name: checkoutForm.name, contact: phone },
         notes: { order_id: dbId, product: "seven_horses_pyrite_frame" },
@@ -814,13 +821,14 @@ export function SevenHorsesProductPage() {
           <div className="mx-auto max-w-lg px-4 mt-4 md:max-w-none md:px-0 md:mt-0 md:sticky md:top-6">
           {/* Title */}
           <h1 className="text-2xl font-black text-stone-900 leading-tight md:text-3xl lg:text-4xl">
-            Limited Edition — 7 Horses on Raw Pyrite Frame
+            Limited Edition — {PRODUCT_NAME}
           </h1>
 
           {/* Benefit tag chips */}
           <div className="mt-3 flex flex-wrap gap-2">
             <span className="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-bold">💰 Attracts Money</span>
             <span className="bg-amber-600 text-white px-3 py-1 rounded-full text-xs font-bold">☀️ Surya Dev Blessed</span>
+            <span className="bg-stone-800 text-white px-3 py-1 rounded-full text-xs font-bold">🛡️ 100% Anti-Scratchable</span>
             <span className="border border-amber-400 text-amber-700 px-3 py-1 rounded-full text-xs font-bold">🏆 Accelerates Career</span>
             <span className="border border-stone-300 text-stone-600 px-3 py-1 rounded-full text-xs font-bold">✨ Attracts Fame &amp; Recognition</span>
           </div>
@@ -945,6 +953,7 @@ export function SevenHorsesProductPage() {
               { icon: <Truck size={11} />, text: "Free Shipping" },
               { icon: <Package size={11} />, text: "COD Available" },
               { icon: <Shield size={11} />, text: "7-Day Returns" },
+              { icon: <Shield size={11} />, text: "Anti-Scratchable" },
               { icon: <Sparkles size={11} />, text: "Handcrafted" },
             ].map(({ icon, text }) => (
               <span key={text} className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-[11px] font-semibold text-amber-800">
@@ -1273,7 +1282,7 @@ export function SevenHorsesProductPage() {
             <div className="grid grid-cols-2 divide-x divide-amber-600 md:grid-cols-4">
               {[
                 { stat: "4.94/5", label: "Average Rating", sub: "388 reviews" },
-                { stat: "100%", label: "Raw Pyrite", sub: "Authenticated" },
+                { stat: "100%", label: "Anti-Scratchable", sub: "Premium finish" },
                 { stat: "7-Day", label: "Return Guarantee", sub: "Hassle-free" },
                 { stat: "Free", label: "Shipping Pan-India", sub: "COD available" },
               ].map(({ stat, label, sub }) => (
@@ -1388,7 +1397,7 @@ export function SevenHorsesProductPage() {
                 <Image src="/7horses/1.webp" alt="product" fill className="object-cover" sizes="40px" />
               </div>
               <div className="min-w-0">
-                <p className="truncate text-xs font-bold text-stone-700 hidden sm:block">7 Horses on Raw Pyrite Frame</p>
+                <p className="truncate text-xs font-bold text-stone-700 hidden sm:block">{PRODUCT_NAME}</p>
                 <div className="flex items-baseline gap-1.5 flex-wrap">
                   <span className="text-lg font-black text-stone-900">
                     ₹{displayPrice.toLocaleString("en-IN")}
@@ -1492,7 +1501,7 @@ export function SevenHorsesProductPage() {
                     <Image src="/7horses/1.webp" alt="product" fill className="object-cover" sizes="56px" />
                   </div>
                   <div>
-                    <p className="text-xs font-bold text-foreground">7 Horses on Raw Pyrite Frame</p>
+                    <p className="text-xs font-bold text-foreground">{PRODUCT_NAME}</p>
                     {siddh && (
                       <span className="inline-block rounded-full bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold text-amber-700">
                         + Siddh Energised

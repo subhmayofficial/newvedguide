@@ -133,8 +133,8 @@ export async function POST(request: Request) {
       }
       productSlugForOrder = primarySlug;
       productNameForOrder = siddh
-        ? "7 Horses on Raw Pyrite Frame (Siddh Energised)"
-        : "7 Horses on Raw Pyrite Frame";
+        ? "7 Horses on Frame (Siddh Energised)"
+        : "7 Horses on Frame";
       productPricePaise = SEVEN_HORSES_COD_PRICE_PAISE + siddhExtraPaise;
       expectedTotal = knownTotal;
     }
@@ -209,7 +209,7 @@ export async function POST(request: Request) {
       variant: siddh ? "silver" : "plated",
       variant_label: siddh ? "Siddh Energised" : "Standard",
       design: "classic",
-      design_label: "Raw Pyrite Frame",
+      design_label: "7 Horses on Frame",
       size_code: "M",
       size_label: "One Size",
       siddha_energisation: siddh,
