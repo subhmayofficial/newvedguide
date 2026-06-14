@@ -320,7 +320,6 @@ export function SevenHorsesProductPage() {
   const [activeImage, setActiveImage] = useState(0);
   const [slideDir, setSlideDir] = useState<"right" | "left">("right");
   const [openFaq, setOpenFaq] = useState<number | null>(null);
-  const [stickyVisible, setStickyVisible] = useState(false);
   const [timeLeft, setTimeLeft] = useState({ h: 20, m: 14, s: 44 });
 
   const heroRef = useRef<HTMLDivElement>(null);
@@ -610,18 +609,6 @@ export function SevenHorsesProductPage() {
     return () => clearInterval(id);
   }, []);
 
-  // Sticky bar observer
-  useEffect(() => {
-    const el = heroRef.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(
-      ([e]) => setStickyVisible(!e.isIntersecting),
-      { threshold: 0 }
-    );
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, []);
-
   // Purchase popup
   useEffect(() => {
     function showNext() {
@@ -741,7 +728,7 @@ export function SevenHorsesProductPage() {
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
 
-      <div className="min-h-screen bg-white pb-[5.5rem]">
+      <div className="min-h-screen bg-white pb-24">
 
         {/* ════════════════════════════════════════
             1. PRODUCT IMAGE AREA + INFO (2-col on desktop)
@@ -1385,51 +1372,33 @@ export function SevenHorsesProductPage() {
         </section>
 
         {/* ════════════════════════════════════════
-            20. STICKY BOTTOM BAR
+            20. STICKY BOTTOM BAR — always visible
         ════════════════════════════════════════ */}
-        <div
-          className={cn(
-            "fixed bottom-0 left-0 right-0 z-50 border-t border-amber-100 bg-white/95 px-4 py-3 shadow-2xl backdrop-blur-md transition-all duration-300",
-            stickyVisible
-              ? "translate-y-0 opacity-100 pointer-events-auto"
-              : "translate-y-full opacity-0 pointer-events-none"
-          )}
-        >
-          <div className="mx-auto flex max-w-5xl items-center justify-between gap-4">
-            {/* Left — product info */}
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="relative hidden sm:block size-10 shrink-0 overflow-hidden rounded-xl border border-amber-100">
-                <Image src="/7horses/1.webp" alt="product" fill className="object-cover" sizes="40px" />
-              </div>
-              <div className="min-w-0">
-                <p className="truncate text-xs font-bold text-stone-700 hidden sm:block">{PRODUCT_NAME}</p>
-                <div className="flex items-baseline gap-1.5 flex-wrap">
-                  <span className="text-lg font-black text-stone-900">
-                    ₹{displayPrice.toLocaleString("en-IN")}
-                  </span>
-                  <span className="text-xs text-stone-400 line-through">₹{MRP.toLocaleString("en-IN")}</span>
-                  <span className="rounded-full bg-red-500 px-2 py-0.5 text-[10px] font-black text-white">{DISC_PCT}% OFF</span>
-                </div>
-                <p className="text-[10px] text-amber-600 font-semibold">
-                  ☀️ Summer Sale · {siddh ? "Siddh Energised" : "Standard"} · Free Delivery
-                </p>
-              </div>
+        <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-amber-100 bg-white/95 px-3 py-2.5 shadow-[0_-8px_30px_rgba(0,0,0,0.12)] backdrop-blur-md pb-[max(0.625rem,env(safe-area-inset-bottom))]">
+          <div className="mx-auto flex max-w-5xl items-center gap-2.5 sm:gap-4">
+            <div className="relative size-11 shrink-0 overflow-hidden rounded-xl border border-amber-100 sm:size-12">
+              <Image src="/7horses/1.webp" alt="product" fill className="object-cover" sizes="48px" />
             </div>
-
-            {/* Right — dual CTAs */}
-            <div className="flex shrink-0 items-center gap-2">
-              <div className="hidden md:flex flex-col items-end mr-2">
-                <span className="text-[10px] text-stone-400">Prepaid price</span>
-                <span className="text-sm font-black text-green-600">₹{(displayPrice - SEVEN_HORSES_PREPAID_DISCOUNT).toLocaleString("en-IN")} <span className="text-[10px] font-normal">online</span></span>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-[11px] font-bold text-stone-700 sm:text-xs">{PRODUCT_NAME}</p>
+              <div className="flex items-baseline gap-1.5 flex-wrap">
+                <span className="text-base font-black text-stone-900 sm:text-lg">
+                  ₹{displayPrice.toLocaleString("en-IN")}
+                </span>
+                <span className="text-[10px] text-stone-400 line-through sm:text-xs">₹{MRP.toLocaleString("en-IN")}</span>
+                <span className="rounded-full bg-red-500 px-1.5 py-0.5 text-[9px] font-black text-white sm:text-[10px]">{DISC_PCT}% OFF</span>
               </div>
-              <button
-                type="button"
-                onClick={openCheckout}
-                className="sh-glow-btn rounded-2xl bg-amber-600 px-5 py-3 text-sm font-black text-white shadow-lg transition-all hover:bg-amber-700 active:scale-95 flex items-center gap-1.5"
-              >
-                Buy Now <ArrowRight size={14} />
-              </button>
+              <p className="text-[10px] font-semibold text-green-600">
+                Online ₹{(displayPrice - SEVEN_HORSES_PREPAID_DISCOUNT).toLocaleString("en-IN")} · Free delivery
+              </p>
             </div>
+            <button
+              type="button"
+              onClick={openCheckout}
+              className="sh-glow-btn shrink-0 rounded-2xl bg-amber-600 px-5 py-3 text-sm font-black text-white shadow-lg transition-all hover:bg-amber-700 active:scale-95 flex items-center gap-1.5 sm:px-6"
+            >
+              Buy Now <ArrowRight size={14} />
+            </button>
           </div>
         </div>
 
