@@ -14,10 +14,15 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
+import {
+  SEVEN_HORSES_MRP,
+  SEVEN_HORSES_PREPAID_DISCOUNT,
+  sevenHorsesCodPrice,
+} from "@/lib/constants/seven-horses-pricing";
 
 type PaymentMethod = "cod" | "prepaid";
 
-const MRP = 2900;
+const MRP = SEVEN_HORSES_MRP;
 
 const STEPS = [
   { n: 1, label: "Phone" },
@@ -77,7 +82,7 @@ function OrderSummaryCard({
   couponDiscount: number;
 }) {
   const [open, setOpen] = useState(true);
-  const prepaidDiscount = payment === "prepaid" ? 299 : 0;
+  const prepaidDiscount = payment === "prepaid" ? SEVEN_HORSES_PREPAID_DISCOUNT : 0;
   const displayTotal = basePrice - prepaidDiscount - couponDiscount;
   const saved = MRP - displayTotal;
 
@@ -151,7 +156,7 @@ function OrderSummaryCard({
             {payment === "prepaid" && (
               <div className="flex justify-between text-green-600 font-semibold">
                 <span>Prepaid discount</span>
-                <span>−₹299</span>
+                <span>−₹{SEVEN_HORSES_PREPAID_DISCOUNT}</span>
               </div>
             )}
             <div className="flex justify-between font-bold text-foreground border-t border-stone-100 pt-1.5 text-sm">
@@ -245,7 +250,7 @@ export function SevenHorsesCheckoutPage() {
   const router = useRouter();
 
   const siddh = params.get("siddh") === "1";
-  const basePrice = siddh ? 1998 : 1699;
+  const basePrice = sevenHorsesCodPrice(siddh);
 
   // step: 1=phone, 2=address, 3=payment
   const [step, setStep] = useState(1);
@@ -272,7 +277,7 @@ export function SevenHorsesCheckoutPage() {
   const [razorpayOpen, setRazorpayOpen] = useState(false);
 
   const razorpayKeyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
-  const prepaidDiscount = payment === "prepaid" ? 299 : 0;
+  const prepaidDiscount = payment === "prepaid" ? SEVEN_HORSES_PREPAID_DISCOUNT : 0;
   const displayTotal = basePrice - prepaidDiscount - couponDiscount;
 
   // Load Razorpay script
@@ -556,7 +561,7 @@ export function SevenHorsesCheckoutPage() {
 
       {/* Prepaid banner */}
       <div className="bg-green-600 px-4 py-2 text-center text-xs font-bold text-white">
-        🎁 ₹299 off on prepaid · Free shipping pan-India
+        🎁 ₹{SEVEN_HORSES_PREPAID_DISCOUNT} off on prepaid · Free shipping pan-India
       </div>
 
       <div className="mx-auto max-w-lg space-y-3 px-4 pt-4">
@@ -748,12 +753,12 @@ export function SevenHorsesCheckoutPage() {
                   )}
                 >
                   <span className="absolute right-2 top-2 rounded-full bg-green-100 px-1.5 py-0.5 text-[9px] font-black text-green-700">
-                    Save ₹299
+                    Save ₹{SEVEN_HORSES_PREPAID_DISCOUNT}
                   </span>
                   <CreditCard size={22} className="text-amber-700" />
                   <p className="mt-2 text-xs font-bold text-foreground">Pay Online</p>
                   <p className="mt-0.5 text-base font-black text-amber-700">
-                    ₹{(basePrice - 299 - couponDiscount).toLocaleString("en-IN")}
+                    ₹{(basePrice - SEVEN_HORSES_PREPAID_DISCOUNT - couponDiscount).toLocaleString("en-IN")}
                   </p>
                   <p className="text-[10px] text-muted-foreground">UPI · Cards · Net Banking</p>
                 </button>
@@ -785,7 +790,7 @@ export function SevenHorsesCheckoutPage() {
                   <>
                     Place Order →
                     <span className="mt-0.5 block text-xs font-normal opacity-80">
-                      {payment === "cod" ? "Pay on delivery · No advance needed" : "You save ₹299 on prepaid"}
+                      {payment === "cod" ? "Pay on delivery · No advance needed" : `You save ₹${SEVEN_HORSES_PREPAID_DISCOUNT} on prepaid`}
                     </span>
                   </>
                 )}

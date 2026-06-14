@@ -22,6 +22,15 @@ import {
   Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import {
+  SEVEN_HORSES_COD_PRICE as BASE_PRICE,
+  SEVEN_HORSES_PREPAID_PRICE as PREPAID_PRICE,
+  SEVEN_HORSES_SIDDH_EXTRA as SIDDH_EXTRA,
+  SEVEN_HORSES_MRP as MRP,
+  SEVEN_HORSES_PREPAID_DISCOUNT,
+  sevenHorsesDiscountPct,
+  sevenHorsesPrepaidPrice,
+} from "@/lib/constants/seven-horses-pricing";
 
 function shImageUrl(num: number) {
   return `/7horses/${num}.webp`;
@@ -193,7 +202,7 @@ const FAQS = [
   },
   {
     q: "Is Cash on Delivery available?",
-    a: "Yes, COD is available pan-India at ₹999. Prepaid orders receive priority dispatch and are priced at ₹899 — save ₹100 on online payment.",
+    a: `Yes, COD is available pan-India at ₹${BASE_PRICE}. Prepaid orders receive priority dispatch and are priced at ₹${PREPAID_PRICE} — save ₹${SEVEN_HORSES_PREPAID_DISCOUNT} on online payment.`,
   },
   {
     q: "What if the frame arrives damaged?",
@@ -207,11 +216,7 @@ const GALLERY_IMAGES = [1, 2, 3, 4, 5].map((num) => ({
   alt: `${PRODUCT_NAME} — photo ${num}`,
 }));
 
-const BASE_PRICE = 999;   // COD price
-const PREPAID_PRICE = 899; // Online price
-const SIDDH_EXTRA = 251;  // Siddh add-on
-const MRP = 2200;          // Crossed-out MRP (Summer Sale)
-const DISC_PCT = 55;       // ~55% off MRP
+const DISC_PCT = sevenHorsesDiscountPct();
 
 const MINI_TESTIMONIALS = [
   { initial: "S", name: "Shaurya J.", city: "Delhi", stars: 5, text: "Material is solid. Ghar mein lagaya toh dekhne mein bhi accha lagta hai. Mindset better hua aur business growth bhi hui hai honestly." },
@@ -240,7 +245,7 @@ function OfferCard({ onBuyNow }: { onBuyNow: () => void }) {
           <div className="flex items-start gap-3">
             <span className="text-2xl shrink-0">🎁</span>
             <div>
-              <p className="text-sm font-black text-stone-900">₹100 off on Prepaid — Pay only ₹{PREPAID_PRICE}</p>
+              <p className="text-sm font-black text-stone-900">₹{SEVEN_HORSES_PREPAID_DISCOUNT} off on Prepaid — Pay only ₹{PREPAID_PRICE}</p>
               <p className="text-xs text-stone-600 mt-0.5">Pay online at checkout and get it for ₹{PREPAID_PRICE} — no coupon needed.</p>
             </div>
           </div>
@@ -344,7 +349,7 @@ export function SevenHorsesProductPage() {
 
   const razorpayKeyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
   const basePrice = siddh ? BASE_PRICE + SIDDH_EXTRA : BASE_PRICE; // COD price
-  const prepaidDiscount = payment === "prepaid" ? BASE_PRICE - PREPAID_PRICE : 0; // ₹100 off
+  const prepaidDiscount = payment === "prepaid" ? SEVEN_HORSES_PREPAID_DISCOUNT : 0; // ₹100 off
   const displayTotal = basePrice - prepaidDiscount - couponDiscount;
 
   function openCheckout() {
@@ -925,8 +930,8 @@ export function SevenHorsesProductPage() {
 
           {/* ── CASHBACK BANNER ── */}
           <div className="mt-3 flex items-center justify-between gap-3 rounded-2xl bg-green-600 px-4 py-3">
-            <p className="text-sm font-bold text-white">🎁 Pay online & save ₹100 — only ₹{PREPAID_PRICE}</p>
-            <span className="shrink-0 rounded-full bg-white px-3 py-1 text-xs font-black text-green-700">Save ₹100</span>
+            <p className="text-sm font-bold text-white">🎁 Pay online & save ₹{SEVEN_HORSES_PREPAID_DISCOUNT} — only ₹{PREPAID_PRICE}</p>
+            <span className="shrink-0 rounded-full bg-white px-3 py-1 text-xs font-black text-green-700">Save ₹{SEVEN_HORSES_PREPAID_DISCOUNT}</span>
           </div>
 
           {/* ── CTA ── */}
@@ -1362,7 +1367,7 @@ export function SevenHorsesProductPage() {
               Transform Your Space.<br />Attract Success Today.
             </h2>
             <p className="mb-10 text-sm text-amber-300 md:text-base">
-              ₹1,699 · Cash on Delivery · Free Shipping Pan-India
+              ₹{BASE_PRICE.toLocaleString("en-IN")} · Cash on Delivery · Free Shipping Pan-India
             </p>
             <div className="max-w-sm mx-auto">
               <button
@@ -1415,7 +1420,7 @@ export function SevenHorsesProductPage() {
             <div className="flex shrink-0 items-center gap-2">
               <div className="hidden md:flex flex-col items-end mr-2">
                 <span className="text-[10px] text-stone-400">Prepaid price</span>
-                <span className="text-sm font-black text-green-600">₹{(displayPrice - (BASE_PRICE - PREPAID_PRICE)).toLocaleString("en-IN")} <span className="text-[10px] font-normal">online</span></span>
+                <span className="text-sm font-black text-green-600">₹{(displayPrice - SEVEN_HORSES_PREPAID_DISCOUNT).toLocaleString("en-IN")} <span className="text-[10px] font-normal">online</span></span>
               </div>
               <button
                 type="button"
@@ -1715,12 +1720,12 @@ export function SevenHorsesProductPage() {
                     )}
                   >
                     <span className="absolute right-2 top-2 rounded-full bg-green-100 px-1.5 py-0.5 text-[9px] font-black text-green-700">
-                      Save ₹100
+                      Save ₹{SEVEN_HORSES_PREPAID_DISCOUNT}
                     </span>
                     <CreditCard size={22} className="text-amber-700" />
                     <p className="mt-2 text-xs font-bold text-foreground">Pay Online</p>
                     <p className="mt-0.5 text-base font-black text-amber-700">
-                      ₹{(basePrice - (BASE_PRICE - PREPAID_PRICE) - couponDiscount).toLocaleString("en-IN")}
+                      ₹{(basePrice - SEVEN_HORSES_PREPAID_DISCOUNT - couponDiscount).toLocaleString("en-IN")}
                     </p>
                     <p className="text-[10px] text-muted-foreground">UPI · Cards · Net Banking</p>
                   </button>
@@ -1752,7 +1757,7 @@ export function SevenHorsesProductPage() {
                     <>
                       Place Order →
                       <span className="mt-0.5 block text-xs font-normal opacity-80">
-                        {payment === "cod" ? "Pay on delivery · No advance needed" : `You save ₹100 — only ₹${PREPAID_PRICE}`}
+                        {payment === "cod" ? "Pay on delivery · No advance needed" : `You save ₹${SEVEN_HORSES_PREPAID_DISCOUNT} — only ₹${sevenHorsesPrepaidPrice(siddh)}`}
                       </span>
                     </>
                   )}

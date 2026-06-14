@@ -19,13 +19,15 @@ import {
 } from "@/lib/services/payment";
 import { logEvent } from "@/lib/services/event";
 import { getProductBySlug } from "@/lib/services/product";
+import {
+  SEVEN_HORSES_COD_PRICE_PAISE,
+  SEVEN_HORSES_PREPAID_DISCOUNT_PAISE,
+  SEVEN_HORSES_SIDDH_EXTRA_PAISE,
+} from "@/lib/constants/seven-horses-pricing";
 import type { Json } from "@/types/database";
 
 const SEVEN_HORSES_SLUG_STANDARD = "seven-horses-pyrite-frame";
 const SEVEN_HORSES_SLUG_SIDDH = "seven-horses-pyrite-frame-siddh";
-const SEVEN_HORSES_COD_PRICE_PAISE = 99_900;       // ₹999
-const SEVEN_HORSES_PREPAID_DISCOUNT_PAISE = 10_000; // ₹100 off → prepaid ₹899
-const SEVEN_HORSES_SIDDH_EXTRA_PAISE = 25_100;      // +₹251
 
 type OrderBody = {
   amountPaise: number;
