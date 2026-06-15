@@ -64,7 +64,7 @@ function ThankYouContent() {
             <div className="flex items-center gap-4">
               <div className="relative size-16 shrink-0 overflow-hidden rounded-2xl border border-amber-100">
                 <Image
-                  src="/7horses/1.webp"
+                  src="/7horses/new1.webp"
                   alt="7 Horses on Frame"
                   fill
                   className="object-cover"

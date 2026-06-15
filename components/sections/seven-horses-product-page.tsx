@@ -32,8 +32,10 @@ import {
   sevenHorsesPrepaidPrice,
 } from "@/lib/constants/seven-horses-pricing";
 
+const SEVEN_HORSES_HERO_IMAGE = "/7horses/new1.webp";
+
 function shImageUrl(num: number) {
-  return `/7horses/${num}.webp`;
+  return `/7horses/new${num}.webp`;
 }
 
 // ── Data ───────────────────────────────────────────────────────────────────────
@@ -1377,7 +1379,7 @@ export function SevenHorsesProductPage() {
         <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-amber-100 bg-white/95 px-3 py-2.5 shadow-[0_-8px_30px_rgba(0,0,0,0.12)] backdrop-blur-md pb-[max(0.625rem,env(safe-area-inset-bottom))]">
           <div className="mx-auto flex max-w-5xl items-center gap-2.5 sm:gap-4">
             <div className="relative size-11 shrink-0 overflow-hidden rounded-xl border border-amber-100 sm:size-12">
-              <Image src="/7horses/1.webp" alt="product" fill className="object-cover" sizes="48px" />
+              <Image src={SEVEN_HORSES_HERO_IMAGE} alt="product" fill className="object-cover" sizes="48px" />
             </div>
             <div className="min-w-0 flex-1">
               <p className="truncate text-[11px] font-bold text-stone-700 sm:text-xs">{PRODUCT_NAME}</p>
@@ -1472,7 +1474,7 @@ export function SevenHorsesProductPage() {
                 {/* Mini order summary */}
                 <div className="mb-5 flex items-center gap-3 rounded-2xl border border-amber-100 bg-amber-50 p-3">
                   <div className="relative size-14 shrink-0 overflow-hidden rounded-xl">
-                    <Image src="/7horses/1.webp" alt="product" fill className="object-cover" sizes="56px" />
+                    <Image src={SEVEN_HORSES_HERO_IMAGE} alt="product" fill className="object-cover" sizes="56px" />
                   </div>
                   <div>
                     <p className="text-xs font-bold text-foreground">{PRODUCT_NAME}</p>

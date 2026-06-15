@@ -105,7 +105,7 @@ function OrderSummaryCard({
             {/* Product image */}
             <div className="relative size-16 shrink-0 overflow-hidden rounded-xl border border-amber-100 bg-amber-50">
               <Image
-                src="/7horses/1.webp"
+                src="/7horses/new1.webp"
                 alt="7 Horses on Frame"
                 fill
                 className="object-cover"
