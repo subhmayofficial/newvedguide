@@ -26,6 +26,7 @@ export const PUBLIC_SITEMAP_ROUTES: SiteRouteEntry[] = [
   { path: "/premium-kundli-review", changeFrequency: "weekly", priority: 0.75 },
   { path: "/tools", changeFrequency: "weekly", priority: 0.8 },
   { path: "/tools/kundal-dhatu", changeFrequency: "weekly", priority: 0.75 },
+  { path: "/tools/ringdhatu", changeFrequency: "weekly", priority: 0.75 },
   { path: "/tools/muhurat", changeFrequency: "weekly", priority: 0.75 },
   { path: "/tools/numerology", changeFrequency: "weekly", priority: 0.75 },
   { path: "/tools/name-letter/a", changeFrequency: "weekly", priority: 0.7 },

@@ -31,6 +31,14 @@ export const TOOLS: ToolDefinition[] = [
     emoji: "📿",
   },
   {
+    slug: "ringdhatu",
+    title: "Ring dhatu check",
+    blurb: "Apni Rashi select karein — kaunsa dhatu ka ring / kada pehanna chahiye, quick answer.",
+    href: "/tools/ringdhatu",
+    status: "live",
+    emoji: "💍",
+  },
+  {
     slug: "name-letter-insight",
     title: "Name-letter insights",
     blurb: "Naam ke first letter se personality aur relationship pattern ka quick astrology-style insight.",
