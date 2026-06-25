@@ -3,17 +3,29 @@
 import Link from "next/link";
 import { useEffect, useState, type MouseEvent } from "react";
 import {
-  ArrowRight, Check, Star, Shield, Lock, Zap,
-  MessageCircle, Sparkles, Target, Heart,
-  TrendingUp, Clock, ChevronDown, Globe,
+  ArrowRight, Check, Star, Shield, Lock,
+  MessageCircle, ChevronDown, Globe, Sparkles,
+  Target, Clock, TrendingUp, Zap, Heart, type LucideIcon,
 } from "lucide-react";
 import { track } from "@/lib/analytics/events";
+import {
+  DEFAULT_CONSULTATION_VARIANT,
+  type ConsultationVariant,
+  type ConsultationIconName,
+} from "@/lib/consultation-variants";
+
+const ICONS: Record<ConsultationIconName, LucideIcon> = {
+  target: Target,
+  clock: Clock,
+  sparkles: Sparkles,
+  trendingUp: TrendingUp,
+  zap: Zap,
+  heart: Heart,
+};
 
 // ─── Assets ───────────────────────────────────────────────────────────────────
 
 const ASTRO_IMG = "https://primedit-cdn.b-cdn.net/ashutoshji.jpg";
-
-// ─── Data ─────────────────────────────────────────────────────────────────────
 
 const TICKER = [
   "Vedic Jyotish", "Kundli Analysis", "Career Guidance",
@@ -21,93 +33,24 @@ const TICKER = [
   "Personalized Remedies", "Private & Confidential",
 ];
 
-const PAINS = [
-  "Mehnat karte ho — phir bhi kuch ruka hua lagta hai",
-  "Career mein clarity nahi — agla step kaunsa hai?",
-  "Rishton mein same problems baar baar aati hain",
-  "Bade decisions mein darr — sahi time hai ya nahi?",
-  "Paisa aata hai, rukta nahi — flow nahi ban raha",
-];
-
-const BEFORE_AFTER = [
-  { before: "Direction clear nahi", after: "Exact next step pata hai" },
-  { before: "Same mistakes baar baar", after: "Pattern samajh — cycle khatam" },
-  { before: "Decision mein darr lagta hai", after: "Timing ke saath — confident" },
-  { before: "Kab badlega, pata nahi", after: "Exact window clear hai" },
-];
-
-const WHAT_YOU_GET = [
-  { icon: Target, title: "Exact pattern identify hoga", desc: "Career, rishte, paisa — kahan energy stuck hai, exactly." },
-  { icon: Clock, title: "Timing clear", desc: "Kab badlega — months ya years mein, specific number." },
-  { icon: Sparkles, title: "Planetary period analysis", desc: "Abhi kaunsa period chal raha hai, life pe practical impact." },
-  { icon: TrendingUp, title: "Actionable next steps", desc: "Sirf suno nahi — exact karo kya karna hai." },
-  { icon: Zap, title: "Simple, effective remedies", desc: "Jo follow ho sake — overload bilkul nahi." },
-  { icon: Heart, title: "Aapke sawaalon ke jawab", desc: "Jo poochna hai — seedha, honest jawab milega." },
-];
-
-const TESTIMONIALS = [
-  {
-    initial: "R",
-    name: "Rahul K.",
-    city: "Bangalore, 31",
-    tag: "Career",
-    stars: 5,
-    text: "3 companies mein reject hua. Ashutosh ji ne bataya — agle 6 mahine struggle ka time hai, phir exact kya karna hai. Woh hua. 7 mahine mein solid role mil gaya.",
-    outcome: "Job offer in 7 months",
-  },
-  {
-    initial: "M",
-    name: "Meera S.",
-    city: "Pune, 28",
-    tag: "Relationship",
-    stars: 5,
-    text: "Shaadi ke 2 saal baad bhi bahut tension tha. Session mein samjha — planetary period ka effect hai. Remedies follow ki. 1.5 saal ho gaye — ghar peaceful hai.",
-    outcome: "Relationship stable",
-  },
-  {
-    initial: "V",
-    name: "Vikram T.",
-    city: "Mumbai, 34",
-    tag: "Business",
-    stars: 5,
-    text: "Business start karna tha, darr lag raha tha. Ashutosh ji ne exact window batai chart mein. Usi time pe start kiya. Pehle saal 30 lakh revenue. Timing ne kaam kiya.",
-    outcome: "₹30L first year revenue",
-  },
-];
-
-const FAQS = [
-  {
-    q: "Kya main believe nahi karta — phir bhi session karna chahiye?",
-    a: "Zaroor. Hamare zyaada clients pehle skeptical the. Ek baar aao, suno — phir decide karo khud. Ek useful insight bhi kaam aa jaaye toh ₹1,499 worth hai.",
-  },
-  {
-    q: "15-minute session mein kya cover hoga — waqt bahut kam lagta hai?",
-    a: "Ek focused sawal, ek deep answer. Career ya rishte ya paisa — kisi ek area pe specifically jaate hain. Vague nahi hoga.",
-  },
-  {
-    q: "Kya exact birth time hona zaroori hai?",
-    a: "Helpful hai, mandatory nahi. Approximate time bhi theek hai. Session mein bata dena — hum ussi ke saath kaam karte hain.",
-  },
-  {
-    q: "Kya reading scary ya negative hogi?",
-    a: "Kabhi nahi. Hamare sessions fear nahi dete — clarity dete hain. Kya favor mein hai, kya navigate karna hai — practical guidance milti hai.",
-  },
-];
-
-const CHECKOUT_HREF = {
-  "15": "/checkout/consultation?pkg=15",
-  "45": "/checkout/consultation?pkg=45",
-} as const;
-
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export function ConsultationLanding() {
+export function ConsultationLanding({
+  variant = DEFAULT_CONSULTATION_VARIANT,
+}: {
+  variant?: ConsultationVariant;
+}) {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const tickerItems = [...TICKER, ...TICKER];
 
+  const checkoutHref = {
+    "15": `/checkout/consultation?pkg=15&variant=${variant.slug}`,
+    "45": `/checkout/consultation?pkg=45&variant=${variant.slug}`,
+  } as const;
+
   useEffect(() => {
-    track.consultationPageViewed("consultation_landing");
-  }, []);
+    track.consultationPageViewed(`consultation_landing_${variant.slug}`);
+  }, [variant.slug]);
 
   function handleComparePackagesClick(e: MouseEvent<HTMLAnchorElement>) {
     e.preventDefault();
@@ -224,23 +167,20 @@ export function ConsultationLanding() {
                 Live Consultation
               </span>
               <span className="hidden text-[10px] font-bold uppercase tracking-widest text-gold-light/90 sm:inline">
-                Personal Consultation · AstroGuru Ashutosh
+                {variant.badge}
               </span>
             </div>
 
             {/* Headline */}
             <h1 className="font-heading text-[1.6rem] font-bold leading-[1.1] tracking-tight text-white sm:text-[2.1rem] lg:text-[3.5rem]">
-              <span className="vg-gold-text">Direct Chat or Call</span>
+              <span className="vg-gold-text">{variant.headlineTop}</span>
               <br />
-              with AstroGuru Ashutosh
+              {variant.headlineBottom}
             </h1>
 
             {/* Sub */}
             <p className="mt-3 max-w-none text-[12px] leading-relaxed text-white/72 sm:mt-4 sm:text-[13px] lg:mt-5 lg:max-w-[360px] lg:text-[15px]">
-              Aapki kundli mein ek pattern chhupa hai.{" "}
-              <span className="font-semibold text-white/90">
-                Ek session — exact jawab milega: kya, kyun, aur kab badlega.
-              </span>
+              {variant.sub}
             </p>
 
             {/* Avatar stack social proof */}
@@ -293,7 +233,7 @@ export function ConsultationLanding() {
             </div>
             <div className="flex flex-col gap-2.5 sm:flex-row sm:justify-center">
               <Link
-                href={CHECKOUT_HREF["15"]}
+                href={checkoutHref["15"]}
                 onClick={() => track.consultationProductSelected("15min")}
                 className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-gold px-6 py-3.5 text-[14px] font-bold text-[oklch(0.14_0.04_50)] shadow-[0_8px_24px_-8px_rgba(217,119,6,0.65)] transition-all hover:bg-gold-light active:scale-[0.97] sm:w-auto"
               >
@@ -343,12 +283,12 @@ export function ConsultationLanding() {
 
       {/* ═══ 4. PAIN ═══════════════════════════════════════════════════════════ */}
       <section className="mx-auto max-w-2xl px-4 py-16 sm:py-20">
-        <p className="text-center text-[11px] font-bold uppercase tracking-widest text-brand">Pehchante ho?</p>
+        <p className="text-center text-[11px] font-bold uppercase tracking-widest text-brand">{variant.painsLabel}</p>
         <h2 className="mt-2 text-center font-heading text-3xl font-bold sm:text-4xl">
-          Kya Yeh Aapke Saath Hota Hai?
+          {variant.painsTitle}
         </h2>
         <ul className="mt-10 space-y-3">
-          {PAINS.map((pain) => (
+          {variant.pains.map((pain) => (
             <li
               key={pain}
               className="flex items-start gap-3 rounded-2xl border border-red-200/70 bg-red-50/60 px-5 py-4 shadow-sm"
@@ -361,13 +301,10 @@ export function ConsultationLanding() {
 
         <div className="mt-10 rounded-2xl border-2 border-brand/30 bg-gradient-to-br from-gold-light/80 to-brand-light/30 p-6 text-center shadow-md">
           <p className="font-heading text-xl font-bold text-foreground sm:text-2xl">
-            Yeh sirf aapki galti nahi.
+            {variant.painsCalloutTitle}
           </p>
           <p className="mt-2 text-[15px] leading-relaxed text-muted-foreground">
-            Yeh aapki kundli ka pattern hai — jo in sab ko influence kar raha hai.{" "}
-            <span className="font-semibold text-foreground">
-              Ek session mein pattern clear. Exact kya, kyun, aur kab badlega.
-            </span>
+            {variant.painsCalloutBody}
           </p>
           <a
             href="#packages"
@@ -408,7 +345,7 @@ export function ConsultationLanding() {
       <section className="mx-auto max-w-3xl px-4 py-16 sm:py-20">
         <p className="text-center text-[11px] font-bold uppercase tracking-widest text-brand">Transformation</p>
         <h2 className="mt-2 text-center font-heading text-3xl font-bold sm:text-4xl">
-          Ek Session Ke Baad
+          {variant.beforeAfterTitle}
         </h2>
 
         {/* Column labels */}
@@ -419,7 +356,7 @@ export function ConsultationLanding() {
         </div>
 
         <div className="space-y-2.5">
-          {BEFORE_AFTER.map((item) => (
+          {variant.beforeAfter.map((item) => (
             <div
               key={item.before}
               className="grid grid-cols-[1fr_2.5rem_1fr] items-center gap-2"
@@ -457,13 +394,15 @@ export function ConsultationLanding() {
         <div className="mx-auto max-w-5xl px-4">
           <p className="text-center text-[11px] font-bold uppercase tracking-widest text-brand">Session Mein</p>
           <h2 className="mt-2 text-center font-heading text-3xl font-bold sm:text-4xl">
-            Sirf Aap Par — Poora Focus
+            {variant.whatYouGetTitle}
           </h2>
           <p className="mx-auto mt-3 max-w-xl text-center text-sm text-muted-foreground">
-            Koi script nahi. Koi generic advice nahi. Aapki chart, aapki situation.
+            {variant.whatYouGetSub}
           </p>
           <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {WHAT_YOU_GET.map(({ icon: Icon, title, desc }) => (
+            {variant.whatYouGet.map(({ icon, title, desc }) => {
+              const Icon = ICONS[icon];
+              return (
               <li
                 key={title}
                 className="flex gap-4 rounded-2xl bg-card p-5 shadow-sm ring-1 ring-border/60"
@@ -476,7 +415,8 @@ export function ConsultationLanding() {
                   <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{desc}</p>
                 </div>
               </li>
-            ))}
+              );
+            })}
           </ul>
         </div>
       </section>
@@ -485,12 +425,12 @@ export function ConsultationLanding() {
       <section className="mx-auto max-w-5xl px-4 py-16 sm:py-20">
         <p className="text-center text-[11px] font-bold uppercase tracking-widest text-brand">Real Stories</p>
         <h2 className="mt-2 text-center font-heading text-3xl font-bold sm:text-4xl">
-          Unki Zindagi Badli — Ek Session Mein
+          {variant.testimonialsTitle}
         </h2>
 
         {/* Mobile: swipe. Desktop: grid */}
         <div className="mt-10 flex gap-4 overflow-x-auto pb-2 scrollbar-hide sm:grid sm:grid-cols-3 sm:overflow-visible sm:pb-0">
-          {TESTIMONIALS.map((t) => (
+          {variant.testimonials.map((t) => (
             <div
               key={t.name}
               className="flex shrink-0 w-[82vw] flex-col rounded-2xl border border-border/60 bg-card p-6 shadow-sm sm:w-auto"
@@ -611,7 +551,7 @@ export function ConsultationLanding() {
                 ))}
               </div>
               <Link
-                href={CHECKOUT_HREF["45"]}
+                href={checkoutHref["45"]}
                 onClick={() => track.consultationProductSelected("45min")}
                 className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-brand py-3.5 text-sm font-bold text-white shadow-sm transition-all hover:bg-brand-hover active:scale-[0.97]"
               >
@@ -633,7 +573,7 @@ export function ConsultationLanding() {
                 ))}
               </div>
               <Link
-                href={CHECKOUT_HREF["15"]}
+                href={checkoutHref["15"]}
                 onClick={() => track.consultationProductSelected("15min")}
                 className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-foreground py-3.5 text-sm font-bold text-background shadow-sm transition-all hover:bg-foreground/90 active:scale-[0.97]"
               >
@@ -699,7 +639,7 @@ export function ConsultationLanding() {
 
         <div className="mt-6 text-center">
           <Link
-            href={CHECKOUT_HREF["15"]}
+            href={checkoutHref["15"]}
             onClick={() => track.consultationProductSelected("15min")}
             className="inline-flex items-center gap-2 rounded-xl bg-brand px-6 py-3.5 text-sm font-bold text-white shadow-sm transition-all hover:bg-brand-hover active:scale-[0.97]"
           >
@@ -716,7 +656,7 @@ export function ConsultationLanding() {
             Honest Answers
           </h2>
           <div className="mt-10 space-y-3">
-            {FAQS.map((faq, i) => (
+            {variant.faqs.map((faq, i) => (
               <div
                 key={i}
                 className="overflow-hidden rounded-2xl border border-border/80 bg-card shadow-sm"
@@ -759,25 +699,24 @@ export function ConsultationLanding() {
           </div>
 
           <h2 className="font-heading text-3xl font-bold leading-tight sm:text-4xl">
-            Ek Session.
+            {variant.finalCtaTop}
             <br />
-            <span className="vg-gold-text">Saalon Ki Clarity.</span>
+            <span className="vg-gold-text">{variant.finalCtaBottom}</span>
           </h2>
           <p className="mx-auto mt-5 max-w-sm text-[15px] leading-relaxed text-white/70">
-            Bas janm ki details chahiye — baaki sab hum karte hain.
-            15 min se shuru karein — bilkul aapki chart ke saath.
+            {variant.finalCtaSub}
           </p>
 
           <div className="mt-8 flex flex-col items-center gap-3">
             <Link
-              href={CHECKOUT_HREF["15"]}
+              href={checkoutHref["15"]}
               onClick={() => track.consultationProductSelected("15min")}
               className="inline-flex w-full max-w-[300px] items-center justify-center gap-2 rounded-2xl bg-gold px-8 py-4 text-[15px] font-bold text-[oklch(0.14_0.04_50)] shadow-[0_8px_32px_-8px_rgba(217,119,6,0.6)] transition-all hover:bg-gold-light active:scale-[0.97]"
             >
               15 Min Session Book Karein <ArrowRight className="size-4" />
             </Link>
             <Link
-              href={CHECKOUT_HREF["45"]}
+              href={checkoutHref["45"]}
               onClick={() => track.consultationProductSelected("45min")}
               className="inline-flex w-full max-w-[300px] items-center justify-center gap-2 rounded-2xl border border-gold/45 bg-white/10 px-8 py-4 text-[15px] font-bold text-gold-light transition-all hover:bg-white/15 active:scale-[0.97]"
             >

@@ -13,6 +13,9 @@ const NAV_LINKS = [
   { label: "About", href: "/about" },
 ];
 
+// Focused landing pages — nav links removed so visitors don't leak away before converting.
+const FOCUSED_PATHS = ["/consultation/relationship"];
+
 function linkId(href: string, prefix: string): string {
   const slug =
     href === "/free-kundli"
@@ -32,6 +35,7 @@ export function SiteHeader() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
   const toggleRef = useRef<HTMLButtonElement>(null);
+  const isFocused = FOCUSED_PATHS.includes(pathname ?? "");
 
   useEffect(() => {
     setMobileOpen(false);
@@ -69,76 +73,82 @@ export function SiteHeader() {
           </span>
         </Link>
 
-        <nav className="hidden items-center gap-6 md:flex">
-          {NAV_LINKS.map((link) => (
+        {!isFocused && (
+          <nav className="hidden items-center gap-6 md:flex">
+            {NAV_LINKS.map((link) => (
+              <Link
+                key={link.href}
+                id={linkId(link.href, "site-header")}
+                href={link.href}
+                className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+              >
+                {link.label}
+              </Link>
+            ))}
+          </nav>
+        )}
+
+        {!isFocused && (
+          <div className="hidden md:flex">
             <Link
-              key={link.href}
-              id={linkId(link.href, "site-header")}
-              href={link.href}
-              className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+              id="site-header-free-kundli-cta"
+              href="/free-kundli"
+              className="inline-flex h-7 items-center justify-center rounded-[12px] bg-brand px-2.5 text-[0.8rem] font-medium text-white transition-colors hover:bg-brand-hover"
             >
-              {link.label}
+              Get Free Kundli
             </Link>
-          ))}
-        </nav>
+          </div>
+        )}
 
-        <div className="hidden md:flex">
-          <Link
-            id="site-header-free-kundli-cta"
-            href="/free-kundli"
-            className="inline-flex h-7 items-center justify-center rounded-[12px] bg-brand px-2.5 text-[0.8rem] font-medium text-white transition-colors hover:bg-brand-hover"
-          >
-            Get Free Kundli
-          </Link>
-        </div>
-
-        <div className="relative md:hidden">
-          <button
-            ref={toggleRef}
-            id="site-header-mobile-menu-toggle"
-            type="button"
-            className="flex cursor-pointer list-none items-center rounded-md p-1.5 text-foreground hover:bg-muted/80"
-            aria-label={mobileOpen ? "Close menu" : "Open menu"}
-            aria-expanded={mobileOpen}
-            aria-controls="site-header-mobile-panel"
-            onClick={() => setMobileOpen((o) => !o)}
-          >
-            {mobileOpen ? <X size={22} /> : <Menu size={22} />}
-          </button>
-
-          {mobileOpen ? (
-            <div
-              ref={panelRef}
-              id="site-header-mobile-panel"
-              role="dialog"
-              aria-modal="true"
-              aria-label="Main navigation"
-              className="absolute right-0 top-[calc(100%+0.45rem)] z-50 w-[min(92vw,22rem)] rounded-2xl border border-border/60 bg-background p-4 shadow-lg"
+        {!isFocused && (
+          <div className="relative md:hidden">
+            <button
+              ref={toggleRef}
+              id="site-header-mobile-menu-toggle"
+              type="button"
+              className="flex cursor-pointer list-none items-center rounded-md p-1.5 text-foreground hover:bg-muted/80"
+              aria-label={mobileOpen ? "Close menu" : "Open menu"}
+              aria-expanded={mobileOpen}
+              aria-controls="site-header-mobile-panel"
+              onClick={() => setMobileOpen((o) => !o)}
             >
-              <nav className="flex flex-col gap-4">
-                {NAV_LINKS.map((link) => (
+              {mobileOpen ? <X size={22} /> : <Menu size={22} />}
+            </button>
+
+            {mobileOpen ? (
+              <div
+                ref={panelRef}
+                id="site-header-mobile-panel"
+                role="dialog"
+                aria-modal="true"
+                aria-label="Main navigation"
+                className="absolute right-0 top-[calc(100%+0.45rem)] z-50 w-[min(92vw,22rem)] rounded-2xl border border-border/60 bg-background p-4 shadow-lg"
+              >
+                <nav className="flex flex-col gap-4">
+                  {NAV_LINKS.map((link) => (
+                    <Link
+                      key={link.href}
+                      id={linkId(link.href, "site-header-mobile")}
+                      href={link.href}
+                      className="text-base font-medium text-foreground"
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      {link.label}
+                    </Link>
+                  ))}
                   <Link
-                    key={link.href}
-                    id={linkId(link.href, "site-header-mobile")}
-                    href={link.href}
-                    className="text-base font-medium text-foreground"
+                    id="site-header-mobile-free-kundli-cta"
+                    href="/free-kundli"
+                    className="mt-1 inline-flex w-full items-center justify-center rounded-lg bg-brand px-3 py-2.5 text-sm font-semibold text-white hover:bg-brand-hover"
                     onClick={() => setMobileOpen(false)}
                   >
-                    {link.label}
+                    Get Free Kundli
                   </Link>
-                ))}
-                <Link
-                  id="site-header-mobile-free-kundli-cta"
-                  href="/free-kundli"
-                  className="mt-1 inline-flex w-full items-center justify-center rounded-lg bg-brand px-3 py-2.5 text-sm font-semibold text-white hover:bg-brand-hover"
-                  onClick={() => setMobileOpen(false)}
-                >
-                  Get Free Kundli
-                </Link>
-              </nav>
-            </div>
-          ) : null}
-        </div>
+                </nav>
+              </div>
+            ) : null}
+          </div>
+        )}
       </div>
     </header>
   );
