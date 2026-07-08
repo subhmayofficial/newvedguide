@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useState, type MouseEvent } from "react";
 import {
   ArrowRight, Heart, Clock, Sparkles, Target, Zap, TrendingUp,
-  Star, Shield, Lock, MessageCircle, ChevronDown, Check, Quote, Play,
+  Star, Shield, Lock, MessageCircle, ChevronDown, Check, Quote,
 } from "lucide-react";
 import { track } from "@/lib/analytics/events";
 import { getWhatsAppHref } from "@/lib/constants/contact";
@@ -14,8 +14,8 @@ import { getWhatsAppHref } from "@/lib/constants/contact";
 const ASTRO_IMG = "https://primedit-cdn.b-cdn.net/ashutoshji.jpg";
 
 const CHECKOUT_HREF = {
-  "15": "/checkout/consultation?pkg=15&variant=relationship",
-  "45": "/checkout/consultation?pkg=45&variant=relationship",
+  "15": "/consultation/relationship/checkout?pkg=15",
+  "45": "/consultation/relationship/checkout?pkg=45",
 } as const;
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
@@ -154,23 +154,17 @@ export function ConsultationRelationshipLanding() {
               </span>
             </p>
 
-            {/* Video placeholder — 16:9 */}
+            {/* Video — 16:9 */}
             <div className="mx-auto mt-7 w-full max-w-xl">
-              <button
-                type="button"
-                className="group relative flex aspect-video w-full items-center justify-center overflow-hidden rounded-2xl border border-rose-300/25 bg-gradient-to-br from-rose-950/60 via-[oklch(0.3_0.08_14)] to-fuchsia-950/40 shadow-[0_12px_40px_-12px_rgba(225,29,72,0.4)]"
-              >
-                <div
-                  className="pointer-events-none absolute inset-0 opacity-[0.12]"
-                  style={{ backgroundImage: "radial-gradient(circle at 2px 2px, oklch(0.9 0.05 15) 1px, transparent 0)", backgroundSize: "28px 28px" }}
+              <div className="relative aspect-video w-full overflow-hidden rounded-2xl shadow-[0_12px_40px_-12px_rgba(225,29,72,0.4)]">
+                <iframe
+                  src="https://iframe.mediadelivery.net/embed/550381/463afdd2-9da6-4c78-ad59-11e4ad750c92?autoplay=false&preload=true"
+                  className="absolute inset-0 h-full w-full"
+                  allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture"
+                  allowFullScreen
+                  loading="lazy"
                 />
-                <span className="relative z-[1] flex size-14 items-center justify-center rounded-full bg-white/15 backdrop-blur-sm transition-transform group-hover:scale-110 group-active:scale-95 sm:size-16">
-                  <Play className="size-6 fill-white text-white sm:size-7" />
-                </span>
-                <span className="absolute bottom-3 left-3 rounded-md bg-black/30 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-rose-100/80">
-                  Video coming soon
-                </span>
-              </button>
+              </div>
             </div>
 
             <div className="mt-7 flex flex-col gap-2.5 sm:flex-row sm:justify-center">
@@ -192,7 +186,7 @@ export function ConsultationRelationshipLanding() {
             </div>
 
             <p className="mt-3 text-[11px] font-medium text-rose-100/70">
-              Sessions starting <span className="font-bold text-rose-200">₹1,499</span> · Razorpay se secure payment
+              Sessions starting <span className="font-bold text-rose-200">₹499</span> · Razorpay se secure payment
             </p>
 
             <div className="mt-5 flex flex-wrap items-center justify-center gap-4 text-[11px] text-rose-100/70">
@@ -446,39 +440,25 @@ export function ConsultationRelationshipLanding() {
             Seedha AstroGuru ke saath — koi assistant, koi script nahi.
           </p>
 
-          <div className="mt-10 grid gap-5 sm:grid-cols-2">
-            <div className="relative flex flex-col rounded-3xl border-2 border-rose-500 bg-gradient-to-b from-rose-100/70 to-white p-6 shadow-lg shadow-rose-200/60 sm:p-8">
-              <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full bg-rose-600 px-4 py-1 text-[11px] font-bold uppercase tracking-wide text-white">
-                Most Popular
-              </span>
-              <p className="text-sm font-semibold text-rose-600">Complete session</p>
-              <p className="mt-1 font-heading text-5xl font-bold text-rose-950">45 Min</p>
-              <p className="mt-1 text-3xl font-bold tracking-tight text-rose-950">₹4,999</p>
-              <p className="mt-3 text-sm text-rose-950/55">Poora relationship reading — compatibility, timing, doshas, remedies.</p>
-              <div className="mt-4 rounded-xl bg-rose-100/60 px-4 py-3 text-xs space-y-1">
-                <p className="font-bold text-rose-600 text-[11px] uppercase tracking-wide mb-2">Kya milega:</p>
-                {["Full kundli + compatibility analysis", "Marriage/relationship timing", "Dosh check + remedies", "Session recording"].map((f) => (
-                  <div key={f} className="flex items-center gap-2 text-rose-950/85">
-                    <Check className="size-3.5 shrink-0 text-rose-600" strokeWidth={3} /> {f}
-                  </div>
-                ))}
+          <div className="mt-10 mx-auto max-w-md">
+            <div className="relative flex flex-col rounded-3xl border-2 border-rose-500 bg-gradient-to-b from-rose-100/70 to-white p-8 shadow-lg shadow-rose-200/60">
+              <div className="mb-5 flex items-end justify-between gap-4">
+                <div>
+                  <p className="text-sm font-semibold text-rose-600">Relationship Session</p>
+                  <p className="mt-0.5 font-heading text-5xl font-bold text-rose-950">15 Min</p>
+                </div>
+                <div className="text-right">
+                  <p className="font-heading text-4xl font-black text-rose-600">₹499</p>
+                  <p className="text-[11px] text-rose-950/45">one-time</p>
+                </div>
               </div>
-              <Link
-                href={CHECKOUT_HREF["45"]}
-                onClick={() => track.consultationProductSelected("45min")}
-                className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-rose-600 py-3.5 text-sm font-bold text-white shadow-sm transition-all hover:bg-rose-700 active:scale-[0.97]"
-              >
-                Book 45 Min Session <ArrowRight className="size-4" />
-              </Link>
-            </div>
-
-            <div className="flex flex-col rounded-3xl border-2 border-rose-200 bg-white p-6 shadow-sm sm:p-8">
-              <p className="text-sm font-semibold text-rose-600">Quick focus</p>
-              <p className="mt-1 font-heading text-5xl font-bold text-rose-950">15 Min</p>
-              <p className="mt-1 text-3xl font-bold tracking-tight text-rose-950">₹1,499</p>
-              <p className="mt-3 text-sm text-rose-950/55">Ek specific sawal apne rishte ke baare mein — clear answer.</p>
-              <div className="mt-4 space-y-2">
-                {["Personalized kundli reading", "One specific question — clear answer", "Focused remedy guidance"].map((f) => (
+              <div className="space-y-2.5 rounded-xl bg-rose-50/70 px-4 py-4">
+                {[
+                  "Personalized kundli reading",
+                  "One specific question — clear answer",
+                  "Compatibility check ya timing",
+                  "Focused remedy guidance",
+                ].map((f) => (
                   <div key={f} className="flex items-center gap-2 text-sm text-rose-950/85">
                     <Check className="size-3.5 shrink-0 text-rose-600" strokeWidth={3} /> {f}
                   </div>
@@ -487,11 +467,11 @@ export function ConsultationRelationshipLanding() {
               <Link
                 href={CHECKOUT_HREF["15"]}
                 onClick={() => track.consultationProductSelected("15min")}
-                className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-rose-950 py-3.5 text-sm font-bold text-white shadow-sm transition-all hover:bg-rose-900 active:scale-[0.97]"
+                className="mt-6 flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-rose-500 to-fuchsia-500 py-4 text-[15px] font-bold text-white shadow-[0_8px_24px_-8px_rgba(225,29,72,0.5)] transition-all hover:brightness-110 active:scale-[0.97]"
               >
-                Book 15 Min Session <ArrowRight className="size-4" />
+                Book Session — ₹499 <ArrowRight className="size-4" />
               </Link>
-              <p className="mt-3 text-center text-[11px] text-rose-950/50">
+              <p className="mt-3 text-center text-[11px] text-rose-950/45">
                 Ek dinner se bhi kam — ek decision ke liye
               </p>
             </div>
@@ -640,7 +620,7 @@ export function ConsultationRelationshipLanding() {
           </div>
           <div className="min-w-0 flex-1">
             <p className="truncate text-[11px] font-bold text-rose-950 sm:text-xs">Relationship Consultation</p>
-            <p className="text-[10px] font-semibold text-rose-600 sm:text-xs">Starting ₹1,499 · Razorpay secured</p>
+            <p className="text-[10px] font-semibold text-rose-600 sm:text-xs">Starting ₹499 · Razorpay secured</p>
           </div>
           <a
             href="#packages"

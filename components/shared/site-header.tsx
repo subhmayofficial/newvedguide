@@ -14,7 +14,7 @@ const NAV_LINKS = [
 ];
 
 // Focused landing pages — nav links removed so visitors don't leak away before converting.
-const FOCUSED_PATHS = ["/consultation/relationship"];
+const FOCUSED_PATHS = ["/consultation/relationship", "/consultation/relationship/checkout"];
 
 function linkId(href: string, prefix: string): string {
   const slug =
