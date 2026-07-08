@@ -17,7 +17,7 @@ import { EVENT_GROUP } from "@/lib/constants/commerce";
 import type { Json } from "@/types/database";
 
 const CONSULTATION_PACKAGES = {
-  "15min": { paise: 149900, title: "15 Min Consultation", slug: "consultation-15min" },
+  "15min": { paise: 49900, title: "15 Min Consultation", slug: "consultation-15min" },
   "45min": { paise: 499900, title: "45 Min Consultation", slug: "consultation-45min" },
 } as const;
 
